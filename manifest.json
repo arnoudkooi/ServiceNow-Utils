@@ -1,0 +1,57 @@
+{
+    "name": "ServiceNow Utils",
+    "short_name": "ServiceNow Utils",
+    "description": "Makes working with ServiceNow, just a bit easier. (Personal work, not affiliated to ServiceNow)",
+    "author": "arnoudkooi.com",
+    "version": "1.6.1",
+    "permissions": [
+        "activeTab",
+        "https://*.service-now.com/*",
+        "declarativeContent",
+        "storage",
+        "nativeMessaging",
+        "contextMenus",
+        "management"
+    ],
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "commands": {
+        "togglePop": {
+        "suggested_key": {
+            "default": "Ctrl+Shift+T",
+            "mac": "Command+Shift+T"
+        },
+        "description": "Toggle Pop In Pop Out"
+      }
+    },
+    "background": {
+        "scripts": [
+            "js/jquery.js",
+            "js/snrest.js",
+            "background.js"
+        ],
+        "persistent": true
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://*.service-now.com/*"
+            ],
+            "js": [
+                "js/jquery.js",
+                "myscript.js"
+            ],
+            "all_frames": true
+        }
+    ],
+    "page_action": {
+        "default_title": "ServiceNow Utils",
+        "default_popup": "popup.html"
+    },
+    "web_accessible_resources": ["inject.js"],
+    "manifest_version": 2
+}

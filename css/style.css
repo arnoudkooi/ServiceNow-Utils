@@ -1,0 +1,108 @@
+
+        html{
+            width:798px;
+            min-height: 400px;   
+            margin: 2px;
+            padding: 2px;      
+                
+        }
+        
+        
+        body {
+
+            background: white;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            width:794px;
+            min-height: 400px;
+            overflow-x: hidden;
+        }
+        
+        div#content {
+            width: 100%;
+            padding: 2px;
+            margin: 2px;
+            min-height: 220px;
+        }
+        
+        table.dataTable tbody th,
+        table.dataTable tbody td {
+            padding: 2px 2px;
+        }
+        
+        .dataTables_filter {
+            display: none;
+        }
+        
+        .dataTables_info {
+            font-size: 8pt;
+        }
+        
+        .nav-tabs.compact > li > a {
+            font-size: 0.9em;
+            padding: 6px 7px;
+            margin-right: 4px;
+            line-height: 20px;
+        }
+        
+        .tab-pane{
+            margin-top:10px;
+        }
+
+
+        span.waiting {
+            display: none;
+        }
+        
+        a.iscurrent{
+            color:red;
+        }
+       
+        
+        a {
+            color: #278efc;
+        }
+        
+        .btn-primary {
+    color: #fff;
+    background-color: #278efc;
+    border-color: #0368d4;
+}
+
+.btn-primary:hover, .btn-primary.hover {
+    background-color: #278efc;
+    box-shadow: 0 6px 18px -9px #000000;
+    transition: box-shadow 0.2s;
+}
+
+        th { font-size: 10pt; }
+        td { font-size: 9pt; }
+        td i { font-size: 14pt; }
+        
+        @media screen and (max-width: 640px) {
+            .dataTables_wrapper .dataTables_length,
+            .dataTables_wrapper .dataTables_filter {
+                float: left;
+                text-align: left;
+            }
+        }
+        a.not-active {
+   pointer-events: none;
+   cursor: default;
+}
+
+table.dataTable tbody td {
+  vertical-align: top !important;
+}
+
+.dataTables_scrollBody {
+        max-height: 250px !important;
+
+}
+.btns{
+    clear: both;
+}
+
+a.dt-button {
+    padding: 0.2em 0.5em;
+    font-size: 8pt;
+}

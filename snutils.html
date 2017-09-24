@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>ServiceNow Utils by arnoudkooi.com</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/datatables.css">
+    <link rel="stylesheet" href="/css/buttons.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/datatables.js"></script>
+    <script src="/js/buttons.js"></script>
+    <script src="/js/moment.js"></script>
+    <script src="/js/functions.js"></script>
+    <script src="/js/jszip.js"></script>
+    <script src="/popup.js"></script>
+    <script src="/snutils.js"></script>
+<style>
+body, html {
+
+    width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+    <div id="content">
+        <form>
+            <div class="tab-content">
+
+
+                <div class="" id="tabdataexplore">
+
+                    <div class="input-group">
+                        <input type="search" id="tbxtables" name="tbxtables" class="form-control sync" placeholder="Search tables...">
+                        <span class="input-group-btn">
+                        <button id='btnrefreshtables' class="btn btn-default" title="Force refresh of the ServiceNow tables (API Call)" type="button">Refresh</button>
+                     </span>
+                    </div>
+                    <table id="tbls" class="display table-condensed" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Table</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+
+                </div>
+
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

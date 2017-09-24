@@ -1,0 +1,121 @@
+//attach event listener from popup
+chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.method == "getSelection")
+        sendResponse({ selectedText: getSelection() });
+    else if (request.method == "getVars")
+        sendResponse({ myVars: getVars(request.myVars), url: location.origin, frameHref: getFrameHref() });
+    else if (request.method == "getLocation")
+        sendResponse({ url: location.origin, frameHref: getFrameHref() });
+    else if (request.method == "runFunction")
+        runFunction(request.myVars);
+    else
+        sendResponse({ url: location.origin });
+});
+
+
+var s = document.createElement('script');
+s.src = chrome.extension.getURL('inject.js');
+s.onload = function() {
+    this.remove();
+};
+(document.head || document.documentElement).appendChild(s);
+
+
+
+
+//get the href of the contentframe gsft_main
+function getFrameHref() {
+    var frameHref = '';
+    try {
+        frameHref = document.getElementById("gsft_main").contentWindow.location.href ;
+        // if (frameHref)
+        //     frameHref = location.origin + frameHref;
+    } catch (error) {
+        frameHref = document.location.href;
+    }
+    return frameHref;
+}
+
+//get the selected text, user gas selected with mouse.
+function getSelection() {
+
+    if (("" + document.activeElement.name).indexOf('label') > -1 ||
+        ("" + document.activeElement.name).indexOf('name') > -1)
+        return '';
+
+    var result = '' + self.document.getSelection().toString();
+    for (var i = 0; !result && i < self.frames.length; i++) {
+        try {
+            result = self.frames[i].document.getSelection().toString();
+        } catch (error) {
+            //skip same origin error
+        }
+    }
+    return '' + result;
+}
+
+//initialize g_list variable 
+function setGList() {
+
+    var doc;
+    if ($('#gsft_main').length)
+        doc = $('#gsft_main')[0].contentWindow.document;
+    else
+        doc = document;
+    
+    var scriptContent = "try{ var g_list = GlideList2.get(jQuery('#sys_target').val()); } catch(err){console.log(err);}";
+    var script = doc.createElement('script');
+    script.appendChild(doc.createTextNode(scriptContent));
+    doc.body.appendChild(script);
+
+}
+
+function runFunction(f) {
+    var doc;
+    if (jQuery('#gsft_main').length)
+        doc = jQuery('#gsft_main')[0].contentWindow.document;
+    else
+        doc = document;
+    
+    var script = doc.createElement('script');
+    script.appendChild(doc.createTextNode(f));
+    doc.body.appendChild(script);
+
+}
+
+//try to return the window variables, defined in the comma separated varstring string
+function getVars(varstring) {
+
+    if (varstring.indexOf('g_list') > -1)
+        setGList();
+    
+
+    var doc;
+    if ($('#gsft_main').length)
+        doc = $('#gsft_main')[0].contentWindow.document;
+    else
+        doc = document;
+
+    var ret = {};
+    var variables = varstring.replace(/ /g, "").split(",");
+    var scriptContent = "";
+    for (var i = 0; i < variables.length; i++) {
+        var currVariable = variables[i];
+        scriptContent += "try{ if (typeof " + currVariable + " !== 'undefined') jQuery('body').attr('tmp_" + currVariable.replace(/\./g, "") + "', " + currVariable + "); } catch(err){console.log(err);}\n"
+    }
+    
+
+    var script = doc.createElement('script');
+    script.id = 'tmpScript';
+    script.appendChild(doc.createTextNode(scriptContent));
+    doc.body.appendChild(script);
+
+    for (var i = 0; i < variables.length; i++) {
+        var currVariable = variables[i];
+        ret[currVariable.replace(/\./g, "")] = $(doc.body).attr("tmp_" + currVariable.replace(/\./g, ""));
+        $(doc.body).removeAttr("tmp_" + currVariable.replace(/\./g, ""));
+    }
+
+    $(doc.body).find("#tmpScript").remove();
+    return ret;
+}
