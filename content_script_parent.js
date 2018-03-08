@@ -6,35 +6,10 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
         sendResponse({ myVars: getVars(request.myVars), url: location.origin, frameHref: getFrameHref() });
     else if (request.method == "getLocation")
         sendResponse({ url: location.origin, frameHref: getFrameHref() });
-    else if (request.method == "runFunction")
-        runFunction(request.myVars);
-    else
-        sendResponse({ url: location.origin });
+    //else
+        //sendResponse({ url: location.origin });
 });
 
-
-var s = document.createElement('script');
-s.src = chrome.extension.getURL('inject.js');
-s.onload = function() {
-    this.remove();
-};
-(document.head || document.documentElement).appendChild(s);
-
-
-
-
-//get the href of the contentframe gsft_main
-function getFrameHref() {
-    var frameHref = '';
-    try {
-        frameHref = document.getElementById("gsft_main").contentWindow.location.href ;
-        // if (frameHref)
-        //     frameHref = location.origin + frameHref;
-    } catch (error) {
-        frameHref = document.location.href;
-    }
-    return frameHref;
-}
 
 //get the selected text, user gas selected with mouse.
 function getSelection() {
@@ -45,14 +20,31 @@ function getSelection() {
 
     var result = '' + self.document.getSelection().toString();
     for (var i = 0; !result && i < self.frames.length; i++) {
+       
         try {
             result = self.frames[i].document.getSelection().toString();
         } catch (error) {
-            //skip same origin error
+            console.log(error);
         }
     }
     return '' + result;
 }
+
+//get the href of the contentframe gsft_main
+function getFrameHref() {
+    var frameHref = '';
+
+    if (jQuery('#gsft_main').length)
+        frameHref = document.getElementById("gsft_main").contentWindow.location.href ;
+    else if (jQuery('div.tab-pane.active').length == 1){
+        frameHref = jQuery('iframe.activetab')[0].contentWindow.location.href;
+    }
+    else
+        frameHref = document.location.href;
+
+    return frameHref;
+}
+
 
 //initialize g_list variable 
 function setGList() {
@@ -70,38 +62,42 @@ function setGList() {
 
 }
 
-function runFunction(f) {
-    var doc;
-    if (jQuery('#gsft_main').length)
-        doc = jQuery('#gsft_main')[0].contentWindow.document;
-    else
-        doc = document;
-    
-    var script = doc.createElement('script');
-    script.appendChild(doc.createTextNode(f));
-    doc.body.appendChild(script);
 
-}
 
 //try to return the window variables, defined in the comma separated varstring string
 function getVars(varstring) {
+
+   // if(window.frameElement && window.frameElement.nodeName == "IFRAME")
+   //     return; //dont run in iframes
 
     if (varstring.indexOf('g_list') > -1)
         setGList();
     
 
+
+
     var doc;
-    if ($('#gsft_main').length)
-        doc = $('#gsft_main')[0].contentWindow.document;
+    var ret = {};
+    if (jQuery('#gsft_main').length)
+        doc = jQuery('#gsft_main')[0].contentWindow.document;
+    else if (jQuery('div.tab-pane.active').length == 1){
+
+        ret.g_ck = jQuery('input#sysparm_ck').val();
+        ret.arnoud = 'kooi';
+        jQuery('iframe').removeClass('activetab');
+        jQuery('div.tab-pane.active iframe').addClass('activetab');
+        doc = jQuery('iframe.activetab')[0].contentWindow.document;
+
+    }
     else
         doc = document;
 
-    var ret = {};
+    
     var variables = varstring.replace(/ /g, "").split(",");
     var scriptContent = "";
     for (var i = 0; i < variables.length; i++) {
         var currVariable = variables[i];
-        scriptContent += "try{ if (typeof " + currVariable + " !== 'undefined') jQuery('body').attr('tmp_" + currVariable.replace(/\./g, "") + "', " + currVariable + "); } catch(err){console.log(err);}\n"
+        scriptContent += "try{ if (typeof window." + currVariable + " !== 'undefined') jQuery('body').attr('tmp_" + currVariable.replace(/\./g, "") + "', window." + currVariable + "); } catch(err){console.log(err);}\n"
     }
     
 

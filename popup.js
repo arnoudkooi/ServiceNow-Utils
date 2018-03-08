@@ -165,6 +165,10 @@ function prepareJsonScriptFields() {
 //add object to storage and refresh datatable
 function setScriptFields(jsn) {
     dtScriptFields = jsn;
+    dtScriptFields.push( //requested to add this field
+        {"internal_type.name" : "script", 
+         "name" : "catalog_script_client", 
+         "element" : "script"});
     setToChromeStorage("scriptfields", jsn);
 }
 
@@ -464,7 +468,6 @@ function setDataTableUpdateSets(nme) {
         return false;
     }
 
-    console.log(nme)
     $('#btnnewupdateset').attr('href', url + '/nav_to.do?uri=%2Fsys_update_set.do%3Fsys_id%3D')
     $('#btnopenupdatesets').attr('href', url + '/nav_to.do?uri=%2Fsys_update_set_list.do?sysparm_query=state%3Din%20progress');
 

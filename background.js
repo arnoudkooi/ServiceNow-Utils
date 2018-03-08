@@ -13,7 +13,7 @@ chrome.runtime.onInstalled.addListener(function () {
             {
                 conditions: [
                     new chrome.declarativeContent.PageStateMatcher({
-                        pageUrl: { urlContains: '.service-now.com' },
+                        //pageUrl: { urlContains: '.service-now.com' },
                     })
                 ],
                 actions: [new chrome.declarativeContent.ShowPageAction()]
@@ -30,6 +30,57 @@ chrome.contextMenus.create({"id" : "openscript", "title": "Open Script Include: 
 chrome.contextMenus.create({"id" : "opentablelist", "title": "Open Table list: %s", contexts:["selection"], "onclick" : openTableList });
 chrome.contextMenus.create({"id" : "popinout", "title": "PopIn / PopOut","onclick" : togglePop});
 chrome.contextMenus.create({"id" : "shownames", "title": "Show technical names","onclick" : addTechnicalNames});
+chrome.contextMenus.create({"id" : "tools", "title": "Tools" });
+chrome.contextMenus.create({"id" : "canceltransaction", "parentId" : "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick" : function(e,f) { openUrl(e,f,'/cancel_my_transactions.do');} });
+chrome.contextMenus.create({"id" : "tesst", "parentId" : "tools", "title": "Dunmmy", "contexts": ["all"], "onclick" : function(info, tab) { openUrl('/cancel_my_transactions.do')} });
+chrome.contextMenus.create({"id" : "snippets", "contexts": ["editable"], "title": "Snippets"});
+
+
+var snippets = {
+    "snippet1" : ["snippets", "GlideAggregate Count", `var count = new GlideAggregate('incident');
+    count.addAggregate('COUNT');
+    count.query();
+    var incidents = 0;
+    if(count.next()) 
+       incidents = count.getAggregate('COUNT');`],
+    "snippet2" : ["snippets", "GlideAggregate Count by", `var count = new GlideAggregate('incident');
+    count.addQuery('active','true');
+    count.addAggregate('COUNT','category');
+    count.query();
+    while(count.next()){
+      var category = count.category;
+      var categoryCount = count.getAggregate('COUNT','category');
+      gs.log("The are currently "+ categoryCount +" incidents with a category of "+ category);
+    }`],
+    "snippet3" : ["snippets", "GlideAggregate Aggregates", `var count = new GlideAggregate('incident');
+    count.addAggregate('MIN','sys_mod_count');
+    count.addAggregate('MAX','sys_mod_count');
+    count.addAggregate('AVG','sys_mod_count');
+    count.groupBy('category');
+    count.query();
+    while(count.next()){
+      var min = count.getAggregate('MIN','sys_mod_count');
+      var max = count.getAggregate('MAX','sys_mod_count');
+      var avg = count.getAggregate('AVG','sys_mod_count');
+      var category = count.category.getDisplayValue();
+      gs.log(category +" Update counts: MIN = "+ min +" MAX = "+ max +" AVG = "+ avg);
+    }`]
+
+    };
+
+for (var snip in snippets){
+    chrome.contextMenus.create({"id" : snip, "parentId" : snippets[snip][0], "contexts": ["editable"], "title": snippets[snip][1], "onclick" : insertSnippet });
+}
+
+function insertSnippet(e,f) {
+    
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {"snippet": "// Below snippet inserted via SN Utils Chrome Extension\n" + snippets[e.menuItemId][2]});
+    });
+}
+
+
+
 
 chrome.contextMenus.onClicked.addListener(function(clickData, tab) {
   if (clickData.menuItemId == "popinout") 
@@ -48,8 +99,14 @@ function addTechnicalNames(){
 
 }
 
+
+function openUrl(e,f,u) { 
+    var tokens = e.pageUrl.split('/').slice(0,3);
+    var url = tokens.join('/') + u;
+    chrome.tabs.create({ "url": url });
+}
+
 function openSearch(e) { 
-console.log(e);
     var tokens = e.pageUrl.split('/').slice(0,3),
     URL = tokens.join('/');
 
@@ -245,6 +302,7 @@ function getExploreData() {
         var tableName = response.myVars.g_formtableName;
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
 
+
         if (!(tableName && sysId))
         {
              popup.setDataExplore([]);
@@ -259,8 +317,16 @@ function getExploreData() {
             var myurl = url + '/api/now/table/' + tableName + '?sysparm_display_value=all&sysparm_limit=1' + query;
             loadXMLDoc(g_ck, myurl, null, function (jsn) {
 
+                var dataExplore = [];
+                var propObj = {};
+                propObj.name = "#TABLE / SYS_ID";  
+                propObj.meta =  {"label" : "#TABLE / SYS_ID", "type" : "TABLE" };
+                propObj.display_value = "<a href='/"+ tableName +".do?sys_id=" + sysId +"' target='_blank'>" + tableName + " / " + sysId + "</a>";
+                propObj.value = tableName + " / " + sysId ;
+                dataExplore.push(propObj);
+
                 var rows = jsn.result[0];
-                var dataExplore = []
+                
                 for (var key in rows) {
                     var propObj = {}
                     if (!rows.hasOwnProperty(key)) continue; 
@@ -273,7 +339,6 @@ function getExploreData() {
                         display_value = "<a href='"+ href +"' target='_blank'>" + display_value + "</a>";
                     }
 
-
                     propObj.name = key;   
                     propObj.meta =  metaData.result.columns[key];            
                     propObj.display_value = display_value;
@@ -282,6 +347,9 @@ function getExploreData() {
 
                     dataExplore.push(propObj);
                 }
+
+
+
                 popup.setDataExplore(dataExplore);
             });
         });
@@ -290,7 +358,7 @@ function getExploreData() {
 }
 
 function getScriptFields() {
-    var myurl = url + '/api/now/table/sys_dictionary?sysparm_display_value=true&sysparm_fields=name,element,internal_type.name&sysparm_query=internal_type.labelLIKEhtml^ORinternal_type.labelLIKEscript^ORinternal_type.labelLIKExml';
+    var myurl = url + '/api/now/table/sys_dictionary?sysparm_display_value=true&sysparm_fields=name,element,internal_type.name&sysparm_query=internal_type.labelLIKEhtml^ORinternal_type.labelLIKEscript^ORinternal_type.labelLIKExml^ORinternal_type.labelLIKEcss';
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
         popup.setScriptFields(jsn.result);
     });
@@ -321,25 +389,6 @@ function setUpdateSet(data) {
     });
 }
 
-//Query dev14825 instance for message, display it on about tab in popup
-function getInfoMessage(mytab) {
-    try {
-        var myurl = 'https://dev14825.service-now.com/getmessage.do';
-        $.ajax({
-            url: myurl,
-            headers: {
-                'Cache-Control': 'no-cache'
-            }
-        }).done(function (rspns) {
-            popup.setInfoMessage(rspns);
-        }).fail(function (jqXHR, textStatus) {
-            popup.setInfoMessage(textStatus);
-        });
-
-    } catch (err) {
-        popup.setInfoMessage("No info available");
-    }
-}
 
 //Function to query Servicenow API
 function loadXMLDoc(token, url, post, callback) {

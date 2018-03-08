@@ -47,12 +47,13 @@ function doubleClickToShowField() {
     }
 }
 
-var qry =''
+var qry = ''
 function clickToList() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("click", function (event) {
-            if ((event.ctrlKey || event.metaKey)){
-                var tpe ='';
+
+            if ((event.ctrlKey || event.metaKey)) {
+                var tpe = '';
                 var tbl = g_form.getTableName();
                 var elm = 'sys_id';
                 var val = g_form.getUniqueValue();
@@ -63,46 +64,71 @@ function clickToList() {
                     tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
                     val = g_form.getValue(elm);
                 }
-  
-                if (tpe == 'glide_list' && elm != 'sys_id'){
-                    operator = 'LIKE'; 
-                }
-                else if(val.length != 32 && val.length >20){
-                    val = val.substring(0,32);
+
+                if (tpe == 'glide_list' && elm != 'sys_id') {
                     operator = 'LIKE';
                 }
-                else if (val.length == 0){
-                    val='';
+                else if (val.length != 32 && val.length > 20) {
+                    val = val.substring(0, 32);
+                    operator = 'LIKE';
+                }
+                else if (val.length == 0) {
+                    val = '';
                     operator = 'ISEMPTY';
                 }
-                
-                var idx = qry.indexOf(elm+operator);
+
+                var idx = qry.indexOf(elm + operator);
                 if (idx > -1)
-                    qry = qry.replace(elm + operator + val + '^','');
-                else 
+                    qry = qry.replace(elm + operator + val + '^', '');
+                else
                     qry += elm + operator + val + '^';
 
-                var listurl = '/' + tbl +'_list.do?sysparm_query=' + qry;
+                var listurl = '/' + tbl + '_list.do?sysparm_query=' + qry;
                 g_form.clearMessages();
-                if (elm == 'sys_id' && qry.length <= 45){
+                if (elm == 'sys_id' && qry.length <= 45) {
                     qry = '';
-                    window.open(listurl,tbl);
+                    if ($j(event.target).hasClass('form-group')) {
+                        window.open(listurl, tbl);
+                    }
                 }
                 else if (qry)
-                    g_form.addInfoMessage('Filter <a href="javascript:delQry()">delete</a> :<a href="' +listurl +'" target="'+ tbl +'">' + listurl + '</a>');
+                    g_form.addInfoMessage('Filter <a href="javascript:delQry()">delete</a> :<a href="' + listurl + '" target="' + tbl + '">' + listurl + '</a>');
 
             }
         }, true);
     }
 }
 
-function delQry(){
-    qry='';
+function delQry() {
+    qry = '';
     g_form.clearMessages();
 }
 
 
+function loadScript(url) {
+    return new Promise(function (resolve, reject) {
+        var script = document.createElement("script");
+        script.onload = resolve;
+        script.onerror = reject;
+        script.src = url;
+        document.getElementsByTagName("head")[0].appendChild(script);
+    });
+}
+
+function loadjQuery() {
+    if (window.jQuery) {
+        // already loaded and ready to go
+        return Promise.resolve();
+    } else {
+        return loadScript('//code.jquery.com/jquery-latest.min.js');
+    }
+}
+
+
 function addTechnicalNames() {
+
+    if (typeof jQuery == 'undefined') return; //not in studio
+
     if (typeof g_form != 'undefined') {
         jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
 
@@ -122,11 +148,11 @@ function useCtrlS() {
     if (typeof g_form != 'undefined') {
         mySysId = g_form.getUniqueValue();
         document.addEventListener("keydown", function (event) {
-            if ((event.ctrlKey || event.metaKey) && event.keyCode == 83) {
+            if ((event.ctrlKey || event.metaKey) && event.keyCode == 83) { //cmd-s
                 event.preventDefault();
                 var doInsertStay = false;
                 if (event.shiftKey) {
-                    doInsertStay = jQuery('#sysverb_insert_and_stay').length;
+                    doInsertStay = document.querySelectorAll('#sysverb_insert_and_stay').length;
                     if (!doInsertStay) {
                         g_form.addWarningMessage("Insert and Stay not available for this record (SN Utils Exentsion)");
                         return false;
@@ -136,16 +162,21 @@ function useCtrlS() {
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             }
+            else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
+                event.preventDefault();
+                var action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
+                gsftSubmit(null, g_form.getFormElement(), action);
+                return false;
+            }
         }, false);
     };
 }
 
-
-
-
 function bindPaste() {
-    if (typeof g_form != 'undefined') {
 
+    if (typeof jQuery == 'undefined') return; //not in studio
+
+    if (typeof g_form != 'undefined') {
 
         jQuery('#header_add_attachment').after('<button id="header_paste_image" title="Paste screenshot as attachment" class="btn btn-icon glyphicon glyphicon-paste navbar-btn" aria-label="Paste Image as Attachments" data-original-title="Paste Image as Attachments" onclick="tryPaste()"></button>');
 
@@ -168,6 +199,7 @@ function bindPaste() {
                 fr.readAsDataURL(fileInfo);
             }
         });
+
     };
 }
 
@@ -177,7 +209,6 @@ function tryPaste() {
         g_form.addInfoMessage("Please hit cmd-v or ctrl-v if you want to paste a copied screenshot as attachment to this record. (SN Utils Exentsion)");
     }
 }
-
 
 function getBlob(encoded) {
     encoded = encoded.replace(/^data:image\/(png|jpeg);base64,/, "");
@@ -201,6 +232,8 @@ function getBlob(encoded) {
 }
 
 function saveImage(imgData, fileInfo) {
+
+    if (typeof jQuery == 'undefined') return; //not in studio
 
     var URL = "/api/now/attachment/file?table_name=" +
         g_form.getTableName() + "&table_sys_id=" + g_form.getUniqueValue() + "&file_name=" + fileInfo.name
@@ -230,10 +263,7 @@ function saveImage(imgData, fileInfo) {
         }
     });
 
-
 };
-
-
 
 
 function getListV3Fields() {
@@ -265,7 +295,6 @@ function getListV3Fields() {
 
     }
 }
-
 
 function loadIframe(url) {
     var $iframe = $('#' + iframeName);

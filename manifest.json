@@ -2,8 +2,8 @@
     "name": "ServiceNow Utils",
     "short_name": "ServiceNow Utils",
     "description": "Makes working with ServiceNow, just a bit easier. (Personal work, not affiliated to ServiceNow)",
-    "author": "arnoudkooi.com",
-    "version": "1.6.1",
+    "author": "Arnoud Kooi / arnoudkooi.com",
+    "version": "1.9",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -42,8 +42,16 @@
                 "https://*.service-now.com/*"
             ],
             "js": [
+                "content_script_parent.js"
+            ]
+        },
+        {
+            "matches": [
+                "https://*.service-now.com/*"
+            ],
+            "js": [
                 "js/jquery.js",
-                "myscript.js"
+                "content_script_all_frames.js"
             ],
             "all_frames": true
         }
