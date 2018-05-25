@@ -4,32 +4,42 @@ var mySysId = '';
 
 
 if (typeof jQuery != "undefined") {
-    jQuery('update-set-picker')
-        .find('.icon-document-multiple')
-        .first()
-        .css('color', 'red')
-        .wrap("<a name='openupdateset' href='#' ></a>");
 
-
-    jQuery("[name='openupdateset']").on('click', function (e) {
-        var ussysid = jQuery("[name='update_set_picker_select']").val().replace('string:', '');
-        var url = '/sys_update_set.do?sys_id=' + ussysid;
-
-        if (e.shiftKey || e.ctrlKey || e.metaKey)
-            jQuery("<a>").attr("href", url).attr("target", "_blank")[0].click();
-        else
-            jQuery('#gsft_main').attr('src', url);
-    });
+    makeUpdateSetIconClickable();
 
     jQuery(function () {
         if (typeof angular != "undefined")
             setTimeout(getListV3Fields, 2000);
+        else
+            doubleClickToSetQueryListV2();
+
 
         doubleClickToShowField();
         clickToList();
-        useCtrlS();
+        setShortCuts();
         bindPaste();
     });
+}
+
+function makeUpdateSetIconClickable() {
+    if (!jQuery("a.icon-document-multiple[href*='sys_update_set']").length) { //starting Jakarta this is oob
+        jQuery('update-set-picker')
+            .find('.icon-document-multiple')
+            .first()
+            .css('color', 'red')
+            .wrap("<a name='openupdateset' href='#' ></a>");
+
+
+        jQuery("[name='openupdateset']").on('click', function (e) {
+            var ussysid = jQuery("[name='update_set_picker_select']").val().replace('string:', '');
+            var url = '/sys_update_set.do?sys_id=' + ussysid;
+
+            if (e.shiftKey || e.ctrlKey || e.metaKey)
+                jQuery("<a>").attr("href", url).attr("target", "_blank")[0].click();
+            else
+                jQuery('#gsft_main').attr('src', url);
+        });
+    }
 }
 
 
@@ -45,6 +55,17 @@ function doubleClickToShowField() {
             }
         }, true);
     }
+}
+
+function doubleClickToSetQueryListV2() {
+    //dbl click to view and update filter condition
+    jQuery('div.breadcrumb_container').on("dblclick", function (event) {
+        var qry = GlideList2.get(jQuery('#sys_target').val());
+        var newValue = prompt('Filter condition:', qry.filter);
+        if (newValue !== qry.filter && newValue !== null) {
+            qry.setFilterAndRefresh(newValue);
+        }
+    });
 }
 
 var qry = ''
@@ -87,7 +108,7 @@ function clickToList() {
                 g_form.clearMessages();
                 if (elm == 'sys_id' && qry.length <= 45) {
                     qry = '';
-                    if ($j(event.target).hasClass('form-group')) {
+                    if (!$j(event.target).hasClass('btn')) {
                         window.open(listurl, tbl);
                     }
                 }
@@ -144,11 +165,25 @@ function addTechnicalNames() {
     });
 }
 
-function useCtrlS() {
-    if (typeof g_form != 'undefined') {
-        mySysId = g_form.getUniqueValue();
-        document.addEventListener("keydown", function (event) {
+function setShortCuts() {
+
+    document.addEventListener("keydown", function (event) {
+
+        //across all pages to set focus to left menu
+        if ((event.ctrlKey || event.metaKey && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
+            var doc = (window.self == window.top) ? document : top.document;
+            if (doc.getElementById('filter')) { //switch between Navigator and search on hitting cmd-shift-f
+                var elm = (document.activeElement.id != 'filter') ? 'filter' : 'sysparm_search';
+                doc.getElementById(elm).focus();
+                doc.getElementById(elm).select();
+            }
+        }
+
+        //a few specific for forms
+        else if (typeof g_form != 'undefined') {
+            mySysId = g_form.getUniqueValue();
             if ((event.ctrlKey || event.metaKey) && event.keyCode == 83) { //cmd-s
+
                 event.preventDefault();
                 var doInsertStay = false;
                 if (event.shiftKey) {
@@ -168,9 +203,22 @@ function useCtrlS() {
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             }
-        }, false);
-    };
+        }
+
+
+    }, false);
+
+
+    if (document.getElementById('filter')) {
+        var ky = (window.navigator.platform.startsWith("Mac")) ? "(CMD-SHIFT-F)" : "(CTRL-SHIFT-F)";
+        document.getElementById('filter').placeholder = "Filter navigator " + ky;
+
+    }
+
 }
+
+
+
 
 function bindPaste() {
 
@@ -235,8 +283,11 @@ function saveImage(imgData, fileInfo) {
 
     if (typeof jQuery == 'undefined') return; //not in studio
 
+    //var fileName = prompt("Filename to use:", fileInfo.name) || fileInfo.name;
+    
+
     var URL = "/api/now/attachment/file?table_name=" +
-        g_form.getTableName() + "&table_sys_id=" + g_form.getUniqueValue() + "&file_name=" + fileInfo.name
+        g_form.getTableName() + "&table_sys_id=" + g_form.getUniqueValue() + "&file_name=" + fileInfo.name;
 
     jQuery.ajax({
         url: URL,
@@ -253,7 +304,16 @@ function saveImage(imgData, fileInfo) {
         contentType: 'application/json; charset=utf-8',
         success: function (r) {
             g_form.clearMessages();
-            g_form.addInfoMessage("<a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important'/></a> Pasted image added as attachment")
+            console.log(r);
+            g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" + 
+        `<div class="input-group">
+        <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="`+ r.result.file_name.replace('.png','')+`" style='width:200px;'class="form-control" placeholder="Image name">
+        <span class="input-group-btn" style="display: inline; ">
+          <button class="btn btn-primary" onClick='renamePasted("` + r.result.sys_id + `")' style="width: 80px;" type="button">.png Save..</button>
+        </span>
+      </div><span id='divRenamed'></span></form>`);
+$j('#tbxImageName').focus().select();
+
         },
         error: function (error) {
             console.log(error);
@@ -265,6 +325,38 @@ function saveImage(imgData, fileInfo) {
 
 };
 
+
+function renamePasted(sysID, check){
+
+if (!$j('#tbxImageName').val()){
+    alert("Please insert a valid filename.");
+    return false;
+}
+
+
+var requestBody = {
+    "file_name" : $j('#tbxImageName').val()
+}
+
+var client=new XMLHttpRequest();
+client.open("put","/api/now/table/sys_attachment/" + sysID);
+client.setRequestHeader('Accept','application/json');
+client.setRequestHeader('Content-Type','application/json');
+if (typeof g_ck != 'undefined')
+    client.setRequestHeader('X-UserToken',g_ck);
+
+client.onreadystatechange = function() { 
+	if(this.readyState == this.DONE) {
+        if (this.status == 200) 
+		    document.getElementById("divRenamed").innerHTML= " Filename saved!"; 
+        else
+		    document.getElementById("divRenamed").innerHTML=this.status + this.response; 
+	}
+}; 
+client.send(JSON.stringify(requestBody));
+   
+
+}
 
 function getListV3Fields() {
     try {
@@ -288,6 +380,18 @@ function getListV3Fields() {
             "fields": fields.toString()
 
         };
+
+        //dbl click to view and update filter condition
+        jQuery('div.breadcrumb-container').on("dblclick", function (event) {
+            var qry = angular.element('.list-container').scope().$parent.$parent.queryString;
+            var newValue = prompt('Filter condition:', qry);
+            if (newValue !== qry && newValue !== null) {
+                var qry = angular.element('.list-container').scope().$parent.$parent.queryString = newValue || '';
+                setTimeout(function () {
+                    angular.element('.list-container').scope().$parent.$parent.updateList();
+                }, 300);
+            }
+        });
 
     }
     catch (err) {
@@ -317,3 +421,15 @@ function getFormElementNames() {
 
 }
 getFormElementNames();
+
+// if (typeof g_form !== 'undefined') {
+//     // The ID of the extension we want to talk to.
+//     //var chUtilsId = "pebbidlifabkglkbebloodgglcpcljgb"; //dev
+//     var chUtilsId = "jgaodbdddndbaijmcljdbglhpdhnjobg"; //prod
+
+//     // Make a simple request:
+//     chrome.runtime.sendMessage(chUtilsId, { "table": g_form.tableName, "g_ck": g_ck },
+//         function (response) {
+//             console.log(response)
+//         });
+// }

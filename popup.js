@@ -8,10 +8,12 @@ var userName;
 var roles;
 var dtUpdateSets;
 var dtUpdates;
+var dtNodes;
 var dtTables;
 var dtDataExplore;
 var dtScriptFields;
 var tablesloaded = false;
+var nodesloaded = false;
 var dataexploreloaded = false;
 var userloaded = false;
 var updatesetsloaded = false;
@@ -61,13 +63,13 @@ function setRecordVariables(obj, scriptsync) {
 
     var xmllink = url + '/' + obj.myVars.NOWtargetTable + '.do?sys_id=' + obj.myVars.NOWsysId + '&sys_target=&XML';
     $('#btnviewxml').click(function () {
-        window.open(xmllink, '_blank');
+        chrome.tabs.create({ "url" : xmllink , "active": false});
     }).prop('disabled', isNoRecord);
 
 
 
     $('#btnupdatesets').click(function () {
-        window.open(url + '/sys_update_set_list.do?sysparm_query=state%3Din%20progress', '_blank');
+        chrome.tabs.create({ "url" : url + '/sys_update_set_list.do?sysparm_query=state%3Din%20progress' , "active": false});
     });
 
     if (scriptsync) {
@@ -143,6 +145,24 @@ function prepareJsonTable() {
     })
 }
 
+//Try to get json with instance nodes, first from chrome storage, else via REST api
+function prepareJsonNodes() {
+    var query = [instance + "-nodes", instance + "-nodes-date"];
+    chrome.storage.local.get(query, function (result) {
+        try {
+            var thedate = new Date().toDateString();
+            if (thedate == result[query[1]].toString()) {
+                bgPage.getActiveNode(result[query[0]]);
+            }
+            else
+                bgPage.getNodes();
+        }
+        catch (err) {
+            bgPage.getNodes();
+        }
+    })
+}
+
 
 //Try to get json with servicenow tables, first from chrome storage, else via REST api
 function prepareJsonScriptFields() {
@@ -200,6 +220,7 @@ function setBrowserVariables(obj) {
     });
     $('#tbxname').keypress(function (e) {
         if (e.which == '13') {
+            e.preventDefault();
             getUserDetails(false);
         }
     });
@@ -207,6 +228,11 @@ function setBrowserVariables(obj) {
         $('#waitingtables').show();
         bgPage.getScriptFields();
         bgPage.getTables();
+    });
+
+    $('#btnrefreshnodes').click(function () {
+        $('#waitingnodes').show();
+        bgPage.getNodes();
     });
 
     $('input').on('blur', function () {
@@ -218,11 +244,17 @@ function setBrowserVariables(obj) {
     });
     $('#tbxgrname').keypress(function (e) {
         if (e.which == '13') {
+            e.preventDefault();
             getGRQuery();
         }
     });
     $('#tbxgrtemplate').change(function (e) {
         getGRQuery();
+    });
+
+    $('a.popuplinks').click(function () {
+        event.preventDefault();
+        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
     });
 
 
@@ -257,6 +289,16 @@ function setBrowserVariables(obj) {
                     $(this).select();
                 });
                 break;
+            case "#tabnodes":
+                if (!nodesloaded) {
+                    $('#waitingnodes').show();
+                    prepareJsonNodes();
+                    nodesloaded = true;
+                }
+                $('#tbxnodes').focus(function () {
+                    $(this).select();
+                });
+                break;   
             case "#tabtables":
                 if (!tablesloaded) {
                     $('#waitingtables').show();
@@ -278,18 +320,18 @@ function setBrowserVariables(obj) {
                 });
                 break;        
             case "#tablink":
-                $('#waitinglink').show()
+                $('#waitinglink').show();
                 bgPage.getRecordVariables(false);
                 break;
             case "#tabgr":
                 getGRQuery();
                 break;
             case "#tabscript":
-                checkSnufsRunning()
+                checkSnufsRunning();
                 //$('#waitingscript').show()
                 prepareJsonScriptFields();
                 bgPage.getRecordVariables(true);
-                break;
+                break;            
             case "#tabuser":
                 if (!userloaded) {
                     if ($('#tbxname').val().length > 0)
@@ -301,36 +343,8 @@ function setBrowserVariables(obj) {
                 });
                 break;
         }
+
     });
-
-
-    // if ('' + myFrameHref.length > 10) {
-    //     $('#popout').click(function () {
-    //         chrome.tabs.update({
-    //             url: myFrameHref
-    //         });
-    //         window.close();
-    //     });
-    //     $('#popin').css('color', '#e5e5e5').addClass('not-active');
-    // }
-    // else {
-    //     $('#popin').click(function () {
-    //         var newHref = encodeURIComponent(urlFull.replace(url, ''));
-    //         var newUrl = url + '/nav_to.do?uri=' + newHref;
-    //         chrome.tabs.update({
-    //             url: newUrl
-    //         });
-    //         window.close();
-    //     });
-    //     $('#popout').css('color', '#e5e5e5');
-    // }
-    // $('#popoutcopy').click(function () {
-    //     var newHref =  myFrameHref || urlFull;
-    //     window.open(newHref, '_blank');
-    //     window.close();
-    // });
-
-
 
     chrome.tabs.sendMessage(tabid, { method: "getSelection" }, function (selresponse) {
         var selectedText = ('' + selresponse.selectedText).trim();
@@ -386,7 +400,7 @@ function createScriptSyncChecboxes(tbl, sysid) {
         for (var i = 0; i < fields.length; i++) {
             var checked = (fields[i].element == 'script') ? 'checked="checked"' : '';
 
-            scripthtml += '<div class="checkbox"><label><input class="scriptcbx" data-type="' + fields[i]['internal_type.name'] + '" type="checkbox" '
+            scripthtml += '<div class="form-check checkbox"><label class="form-check-label"><input class="form-check-input scriptcbx" data-type="' + fields[i]['internal_type.name'] + '" type="checkbox" '
                 + checked
                 + ' value="' + fields[i].element + '">' + fields[i].element + ' (' + fields[i]['internal_type.name'] + ')</label></div>';
 
@@ -480,7 +494,7 @@ function setDataTableUpdateSets(nme) {
                 mRender: function (data, type, row) {
                     var iscurrent = "";
                     if (row.sysId == nme.result.current.sysId) iscurrent = "iscurrent";
-                    return "<a href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + row.sysId + "' title='Table definition' target='_blank'><i class='fa fa-list' aria-hidden='true'></i></a> " +
+                    return "<a class='updatesetlist' href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + row.sysId + "' title='Table definition' ><i class='fa fa-list' aria-hidden='true'></i></a> " +
                         "<a class='setcurrent " + iscurrent + "' data-post='{name: \"" + row.name + "\", sysId: \"" + row.sysId + "\"}' href='#" + row.sysId + "' title='Set curren updateset'><i class='fa fa-dot-circle-o' aria-hidden='true'></i></a> ";
                 }
             }
@@ -488,6 +502,11 @@ function setDataTableUpdateSets(nme) {
         "drawCallback": function () {
             var row0 = $("#updatesets tbody tr a.iscurrent").closest('tr').clone();
             $('#updatesets tbody tr:first').before(row0.css('background-color', '#5ebeff'));
+        },
+        "language": {
+            "info": "Matched: _TOTAL_ of _MAX_ updatesets | Hold down CMD or CTRL to keep window open after clicking a link",
+            "infoFiltered": "",
+            "infoEmpty": "No matches found"
         },
         "bLengthChange": false,
         "bSortClasses": false,
@@ -501,12 +520,71 @@ function setDataTableUpdateSets(nme) {
         dtUpdateSets.search($(this).val()).draw();
     }).focus().trigger('keyup');
 
+    $('a.updatesetlist').click(function () {
+        event.preventDefault();
+        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
+    });
+
     $('a.setcurrent').click(function () {
         $('#waitingupdatesets').show();
         bgPage.setUpdateSet($(this).data('post'));
     });
 
     $('#waitingupdatesets').hide();
+
+}
+
+
+function setNodes(jsn) {
+
+    if (typeof jsn == "undefined" || jsn == "error"){
+        $('#instancenodes').hide().after('<br /><div class="alert alert-danger">Nodes data can not be retrieved, are you Admin?</div>');
+        $('#waitingnodes').hide();
+        return false;
+    }
+
+    setToChromeStorage("nodes", jsn);
+    bgPage.getActiveNode(jsn);
+}
+
+//set or refresh datatable with ServiceNow updatesets
+function setDataTableNodes(nme, node) {
+
+
+    if (dtNodes) dtNodes.destroy();
+    dtNodes = $('#instancenodes').DataTable({
+        "aaData": nme,
+        "aoColumns": [
+            {
+                mRender: function (data, type, row) {
+                    return row.node.display_value.split(":")[1];
+                }
+            },
+            { "mDataProp": "node.display_value" },
+            {
+                mRender: function (data, type, row) {
+                    var iscurrent =  (row.node.value == node); 
+                    return "<a class='setnode " + (iscurrent ? "iscurrent" : "")+ "' data-node='" + row.node.display_value + "' href='#' id='" + row.node.value + "' title='Switch to Node'><i class='fa fa-dot-circle-o' aria-hidden='true'></i>"+ (iscurrent ? " Active Node" : " Set Active")+"</a> ";
+                }
+            }
+        ],
+        "bLengthChange": false,
+        "bSortClasses": false,
+        "scrollY": "200px",
+        "scrollCollapse": true,
+        "paging": false
+
+    });
+
+    $('#tbxnodes').keyup(function () {
+        dtNodes.search($(this).val()).draw();
+    }).focus().trigger('keyup');
+
+    $('a.setnode').click(function () {  
+        bgPage.setActiveNode(this.id, $(this).attr('data-node'));
+    });
+
+    $('#waitingnodes').hide();
 
 }
 
@@ -531,11 +609,16 @@ function setDataTableUpdates(nme) {
             {
                 mRender: function (data, type, row) {
                     var i = row.name.lastIndexOf("_");
-                    return "<a href='" + url + '/' + row.name.substr(0, i) + ".do?sys_id=" + row.name.substr(i + 1) + "' target='_blank' title='Open related record' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></a> " +
-                        "<a href='" + url + "/sys_update_xml.do?sys_id=" + row.sys_id + "' target='_blank' title='View update' ><i class='fa fa-history' aria-hidden='true'></i></a> ";
+                    return "<a class='updatetarget' href='" + url + "/" + row.name.substr(0, i) + ".do?sys_id=" + row.name.substr(i + 1) + "' title='Open related record' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></a> " +
+                        "<a class='updatetarget' href='" + url + "/sys_update_xml.do?sys_id=" + row.sys_id + "' title='View update' ><i class='fa fa-history' aria-hidden='true'></i></a> ";
                 }
             }
         ],
+        "language": {
+            "info": "Matched: _TOTAL_ of _MAX_ updates | Hold down CMD or CTRL to keep window open after clicking a link",
+            "infoFiltered": "",
+            "infoEmpty": "No matches found"
+        },
         "bLengthChange": false,
         "bSortClasses": false,
         "scrollY": "200px",
@@ -543,6 +626,12 @@ function setDataTableUpdates(nme) {
         "order": [[2, "desc"]],
         "paging": false
 
+    });
+
+
+    $('a.updatetarget').click(function () {
+        event.preventDefault();
+        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
     });
 
     $('#tbxupdates').keyup(function () {
@@ -560,6 +649,8 @@ function setTables(jsn) {
     setDataTableTables(jsn);
 }
 
+
+
 //set or refresh datatable with ServiceNow tables
 function setDataTableTables(nme) {
 
@@ -572,12 +663,17 @@ function setDataTableTables(nme) {
             { "mDataProp": "name" },
             {
                 mRender: function (data, type, row) {
-                    return "<a href='" + url + '/' + row.name + "_list.do' target='_blank' title='Go to list' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
-                        "<a href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to dictionary' target='_blank'><i class='fa fa-cog' aria-hidden='true'></i></a> " +
-                        "<a href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map' target='_blank'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
+                    return "<a class='tabletarget' href='" + url + '/' + row.name + "_list.do' title='Go to list' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
+                        "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fa fa-cog' aria-hidden='true'></i></a> " +
+                        "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
                 }
             }
         ],
+        "language": {
+            "info": "Matched: _TOTAL_ of _MAX_ tables | Hold down CMD or CTRL to keep window open after clicking a link",
+            "infoFiltered": "",
+            "infoEmpty": "No matches found"
+        },
         "bLengthChange": false,
         "bSortClasses": false,
         "scrollY": "200px",
@@ -585,9 +681,14 @@ function setDataTableTables(nme) {
         "paging": false,
         "dom": 'rti<"btns"B>',
         "buttons": [
-        "copyHtml5","excelHtml5"
+        "copyHtml5"
         ]
 
+    });
+
+    $('a.tabletarget').click(function () {
+        event.preventDefault();
+        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
     });
 
     $('#tbxtables').keyup(function () {
@@ -597,6 +698,7 @@ function setDataTableTables(nme) {
 
     $('#waitingtables').hide();
 }
+
 
 
 //set or refresh datatable with ServiceNow tables
@@ -614,6 +716,11 @@ function setDataExplore(nme) {
             { "mDataProp": "value"},
             { "mDataProp": "display_value"}
         ],
+        "language": {
+            "info": "Matched: _TOTAL_ of _MAX_ fields | Hold down CMD or CTRL to keep window open after clicking a link",
+            "infoFiltered": "",
+            "infoEmpty": "No matches found"
+        },
         "bLengthChange": false,
         "bSortClasses": false,
         "scrollY": "200px",
@@ -621,7 +728,7 @@ function setDataExplore(nme) {
         "paging": false,
         "dom": 'rti<"btns"B>',
         "buttons": [
-        "copyHtml5", "excelHtml5",
+        "copyHtml5",  
             {
                 text: 'Toggle Type',
                 action: function ( e, dt, node, config ) {
@@ -637,6 +744,11 @@ function setDataExplore(nme) {
     $('#tbxdataexplore').keyup(function () {
         dtDataExplore.search($(this).val()).draw();
     }).focus().trigger('keyup');
+
+    $('a.referencelink').click(function () {
+        event.preventDefault();
+        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
+    });
 
 
     $('#waitingdataexplore').hide();

@@ -1,68 +1,110 @@
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Source Sans Pro Regular'), local('SourceSansPro-Regular'), url(/fonts/SourceSansPro.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
 
-        html{
-            width:798px;
-            min-height: 400px;   
-            margin: 2px;
-            padding: 2px;      
-                
-        }
-        
-        
-        body {
+body {
+    background: white;
+    font-family: 'Source Sans Pro', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: 10pt;
+    width: 800px;
+    height: 500px;
+    overflow-x: hidden;
+}
+table{
+width: 100%;
 
-            background: white;
-            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-            width:794px;
-            min-height: 400px;
-            overflow-x: hidden;
-        }
-        
-        div#content {
-            width: 100%;
-            padding: 2px;
-            margin: 2px;
-            min-height: 220px;
-        }
-        
-        table.dataTable tbody th,
-        table.dataTable tbody td {
-            padding: 2px 2px;
-        }
-        
-        .dataTables_filter {
-            display: none;
-        }
-        
-        .dataTables_info {
-            font-size: 8pt;
-        }
-        
-        .nav-tabs.compact > li > a {
-            font-size: 0.9em;
-            padding: 6px 7px;
-            margin-right: 4px;
-            line-height: 20px;
-        }
-        
-        .tab-pane{
-            margin-top:10px;
-        }
+}
 
+a.iscurrent{
+    cursor: default;
+    text-decoration-line: none;
+}
 
-        span.waiting {
-            display: none;
-        }
-        
-        a.iscurrent{
-            color:red;
-        }
-       
-        
-        a {
-            color: #278efc;
-        }
-        
-        .btn-primary {
+ul.nav {
+    background-color: #2962ff;
+    border-bottom: #768fff 5px solid;
+    padding-top: 7px;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    border-radius: 0;
+    color: #fff !important;
+    background-color: #0039cb;
+    border-color: #768fff #768fff #0039cb;
+    border-width: 5px 5px 8px;
+    margin-top: -7px;
+    margin-bottom: -4px;
+    padding-top: 12px;
+    height: 50px;
+    border-bottom-style: none;
+}
+
+.nav-link {
+    color: #e5e5e5 !important;
+}
+
+.nav-link:hover:not(.active) {
+    color: #fff !important;
+    border: none;
+    text-decoration: underline!important;
+    text-decoration-color: #fff !important;
+}
+
+div#content {
+    width: 794px;
+    padding: 2px;
+    margin: 2px;
+}
+
+div.tab-content {
+    padding: 6px;
+}
+
+table.dataTable tbody th, table.dataTable tbody td {
+    padding: 2px 2px;
+}
+
+.dataTables_filter {
+    display: none;
+}
+
+.dataTables_info {
+    font-size: 8pt;
+}
+
+.nav-tabs>li>a {
+    font-size: 0.9em;
+    padding: 8px 9px;
+    margin-right: 0px;
+    line-height: 20px;
+}
+
+.tab-pane {
+    margin-top: 10px;
+}
+
+span.waiting {
+    display: none;
+}
+
+.fa-spinner{
+    color:#fff !important;
+    z-index: 1000;
+}
+
+a.iscurrent {
+    color: red;
+}
+
+a {
+    color: #278efc;
+}
+
+.btn-primary {
     color: #fff;
     background-color: #278efc;
     border-color: #0368d4;
@@ -74,35 +116,48 @@
     transition: box-shadow 0.2s;
 }
 
-        th { font-size: 10pt; }
-        td { font-size: 9pt; }
-        td i { font-size: 14pt; }
-        
-        @media screen and (max-width: 640px) {
-            .dataTables_wrapper .dataTables_length,
-            .dataTables_wrapper .dataTables_filter {
-                float: left;
-                text-align: left;
-            }
-        }
-        a.not-active {
-   pointer-events: none;
-   cursor: default;
+th {
+    font-size: 10pt;
+}
+
+td {
+    font-size: 9pt;
+}
+
+td i {
+    font-size: 14pt;
+}
+
+@media screen and (max-width: 640px) {
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+        float: left;
+        text-align: left;
+    }
+}
+
+a.not-active {
+    pointer-events: none;
+    cursor: default;
 }
 
 table.dataTable tbody td {
-  vertical-align: top !important;
+    vertical-align: top !important;
 }
 
 .dataTables_scrollBody {
-        max-height: 250px !important;
-
+    max-height: 250px !important;
 }
-.btns{
+
+.btns {
     clear: both;
 }
 
-a.dt-button {
-    padding: 0.2em 0.5em;
-    font-size: 8pt;
+.dt-button {
+    padding: 0.2em 0.5em !important;
+    font-size: 8pt !important;
+}
+
+.form-control:focus {
+    border-color: #6c757d;
+    box-shadow: none;
 }

@@ -5,6 +5,7 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
     else if (request.snippet) {
         insertTextAtCursor(request.snippet);
     }
+
 });
 
 

@@ -1,21 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 
 <head>
     <title>ServiceNow Utils by arnoudkooi.com</title>
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/datatables.css">
-    <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/font-awesome.min.css">
     <link rel="stylesheet" href="/css/style.css">
 
     <script src="/js/jquery.js"></script>
     <script src="/js/bootstrap.js"></script>
     <script src="/js/datatables.js"></script>
-    <script src="/js/buttons.js"></script>
     <script src="/js/moment.js"></script>
     <script src="/js/functions.js"></script>
-    <script src="/js/jszip.js"></script>
     <script src="/popup.js"></script>
 </head>
 
@@ -24,43 +21,72 @@
         <form>
             <input id='tbxactivetab' name='tbxactivetab' value="tababout" class="sync" type="hidden" />
             <ul class="nav nav-tabs compact" id="myTab">
-                <li class='onlyadmin'><a data-target="#tabupdatesets" data-toggle="tab">Update Set
-                <span id="waitingupdatesets" class="waiting"><i class='fa fa-spinner fa-spin' aria-hidden='true'></i></span></a>
+                <li class='nav-item onlyadmin'>
+                    <a class="nav-link" data-target="#tabupdatesets" data-toggle="tab">Update Set
+                        <span id="waitingupdatesets" class="waiting">
+                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                        </span>
+                    </a>
                 </li>
-                <li class='onlyadmin'><a data-target="#tabupdates" data-toggle="tab">Updates
-                <span id="waitingupdates" class="waiting"><i class='fa fa-spinner fa-spin' aria-hidden='true'></i></span></a>
+                <li class='nav-item onlyadmin'>
+                    <a class="nav-link" data-target="#tabupdates" data-toggle="tab">Updates
+                        <span id="waitingupdates" class="waiting">
+                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                        </span>
+                    </a>
                 </li>
-                <li><a data-target="#tabtables" data-toggle="tab">Tables
-                <span id="waitingtables" class="waiting"><i class='fa fa-spinner fa-spin' aria-hidden='true'></i></span></a>
+                <li class='nav-item onlyadmin'>
+                    <a class="nav-link" data-target="#tabnodes" data-toggle="tab">Nodes
+                        <span id="waitingnodes" class="waiting">
+                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                        </span>
+                    </a>
                 </li>
-                <li><a data-target="#tabdataexplore" data-toggle="tab">View Data
-                <span id="waitingdataexplore" class="waiting"><i class='fa fa-spinner fa-spin' aria-hidden='true'></i></span></a>
+                <li class='nav-item'>
+                    <a class="nav-link" data-target="#tabtables" data-toggle="tab">Tables
+                        <span id="waitingtables" class="waiting">
+                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                        </span>
+                    </a>
                 </li>
-                <li><a data-target="#tabuser" data-toggle="tab">User
-                <span id="waitinguser" class="waiting"><i class='fa fa-spinner fa-spin' aria-hidden='true'></i></span></a>
+                <li class='nav-item'>
+                    <a class="nav-link" data-target="#tabdataexplore" data-toggle="tab">View Data
+                        <span id="waitingdataexplore" class="waiting">
+                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                        </span>
+                    </a>
                 </li>
-                <!--<li><a data-target="#tablink" data-toggle="tab">Links
-                <span id="waitinglink" class="waiting"><i class='fa fa-spinner fa-spin' aria-hidden='true'></i></span></a>
+                <li class='nav-item'>
+                    <a class="nav-link" data-target="#tabuser" data-toggle="tab">User
+                        <span id="waitinguser" class="waiting">
+                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                        </span>
+                    </a>
                 </li>
-                <li><a data-target="#tabframe" data-toggle="tab">Frames</a></li>-->
-                <li><a data-target="#tabgr" data-toggle="tab">GlideRecord</a></li>
-                <!--<li><a data-target="#tabrest" data-toggle="tab">Rest</a></li>-->
-                <li><a data-target="#tabscript" data-toggle="tab">ScriptSync
-                    <span id="waitingscript" class="waiting"><i class='fa fa-spinner fa-spin' aria-hidden='true'></i></span></a></li>
-                <li class="active"><a data-target="#tababout" data-toggle="tab">About</a></li>
+                <li class='nav-item'>
+                    <a class="nav-link" data-target="#tabgr" data-toggle="tab">GlideRecord</a>
+                </li>
+                <li class='nav-item'>
+                    <a class="nav-link" data-target="#tabscript" data-toggle="tab">ScriptSync
+                        <span id="waitingscript" class="waiting">
+                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                        </span>
+                    </a>
+                </li>
+                <li class='nav-item'>
+                    <a class="nav-link active" data-target="#tababout" data-toggle="tab">About</a>
+                </li>
             </ul>
 
             <div class="tab-content">
                 <div class="tab-pane" id="tabupdatesets">
-                    <br />
-
                     <div class="input-group">
-                        <input type="search" id="tbxupdatesets" name="tbxupdatesets" class="form-control sync" placeholder="Search in progress update set...">
-                        <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">Go!</button>
-                     </span>
+                        <input type="search" id="tbxupdatesets" name="tbxupdatesets" class="form-control form-control-sm sync" placeholder="Search in progress update set in current scope...">
+                        <span class="input-group-append">
+                            <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
+                        </span>
                     </div>
-                    <table id="updatesets" class="display table-condensed" cellspacing="0" width="100%">
+                    <table id="updatesets" class="display table-condensed">
                         <thead>
                             <tr>
                                 <th>Updateset</th>
@@ -69,19 +95,19 @@
                         </thead>
                     </table>
                     <span style="font-size:8pt">
-                    <a id='btnnewupdateset' href='' target="_blank" >New updateset...</a> &nbsp;&nbsp;&nbsp;&nbsp;
-                    <a id='btnopenupdatesets' target="_blank" >Update Sets - In Progress</a>
+                        <a class="popuplinks" id='btnnewupdateset' href='' target="_blank">New updateset...</a> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <a class="popuplinks" id='btnopenupdatesets' target="_blank">Update Sets - In Progress</a>
                     </span>
                 </div>
                 <div class="tab-pane" id="tabupdates">
 
                     <div class="input-group">
-                        <input type="search" id="tbxupdates" name="tbxupdates" class="form-control sync" placeholder="Search in your last 20 updates...">
-                        <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">Go!</button>
-                     </span>
+                        <input type="search" id="tbxupdates" name="tbxupdates" class="form-control form-control-sm sync" placeholder="Search in your last 20 updates...">
+                        <span class="input-group-append">
+                            <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
+                        </span>
                     </div>
-                    <table id="updts" class="display table-condensed" cellspacing="0" width="100%">
+                    <table id="updts" class="display table-condensed">
                         <thead>
                             <tr>
                                 <th>Type</th>
@@ -93,15 +119,35 @@
                         </thead>
                     </table>
                 </div>
+
+                <div class="tab-pane" id="tabnodes">
+                    <div class="input-group">
+                        <input type="search" id="tbxnodes" name="tbxnodes" class="form-control form-control-sm" placeholder="Search Instance Nodes...">
+                        <span class="input-group-append">
+                            <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm" type="button">Refresh</button>
+                        </span>
+
+                    </div>
+                    <table id="instancenodes" class="display table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Node</th>
+                                <th>Full name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
                 <div class="tab-pane" id="tabtables">
 
                     <div class="input-group">
-                        <input type="search" id="tbxtables" name="tbxtables" class="form-control sync" placeholder="Search tables...">
-                        <span class="input-group-btn">
-                        <button id='btnrefreshtables' class="btn btn-default" title="Force refresh of the ServiceNow tables (API Call)" type="button">Refresh</button>
-                     </span>
+                        <input type="search" id="tbxtables" name="tbxtables" class="form-control form-control-sm sync" placeholder="Search tables...">
+                        <span class="input-group-append">
+                            <button id='btnrefreshtables' class="btn btn-outline-secondary btn-sm" title="Force refresh of the ServiceNow tables (API Call)"
+                                type="button">Refresh</button>
+                        </span>
                     </div>
-                    <table id="tbls" class="display table-condensed" cellspacing="0" width="100%">
+                    <table id="tbls" class="display table-condensed">
                         <thead>
                             <tr>
                                 <th>Label</th>
@@ -115,13 +161,13 @@
 
                 <div class="tab-pane" id="tabdataexplore">
 
-                     <div class="input-group">
-                        <input type="search" id="tbxdataexplore" name="tbxdataexplore" class="form-control sync" placeholder="Search data...">
-                        <span class="input-group-btn">
-                        <button id='btnrefreshdataexplore' class="btn btn-default" title="Refresh data" type="button">Refresh</button>
-                     </span>    
-                     </div>               
-                    <table id="dataexplore" class="display table-condensed" cellspacing="0" style="width:100%; table-layout: fixed;word-wrap:break-word;">
+                    <div class="input-group">
+                        <input type="search" id="tbxdataexplore" name="tbxdataexplore" class="form-control form-control-sm sync" placeholder="Search data...">
+                        <span class="input-group-append">
+                            <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm" title="Refresh data" type="button">Refresh</button>
+                        </span>
+                    </div>
+                    <table id="dataexplore" class="display table-condensed" style="width:100%; table-layout: fixed;word-wrap:break-word;">
                         <thead>
                             <tr>
                                 <th>Label</th>
@@ -131,141 +177,118 @@
                                 <th>Display Value</th>
                             </tr>
                         </thead>
-                    </table> 
-                    
-                </div>
-
-                <div class="tab-pane" id="tablink">
-                    <div class="row">
-                        <div class="col-xs-6"><button id='btnviewxml' type="button" class="btn btn-primary">View XML (new tab)</button></div>
-                        <div class="col-xs-6"><button id='btnupdatesets' type="button" class="btn btn-primary">Update Sets - In Progress</button></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-6">Ideas for new buttons? Let me know!</div>
-                        <div class="col-xs-6"></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-6"></div>
-                        <div class="col-xs-6"></div>
-                    </div>
-                </div>
-                <div class="tab-pane" id="tabuser">
-                    <div class="input-group">
-                        <input type="search" id="tbxname" name="tbxname" class="form-control" placeholder="Search by username...">
-                        <span class="input-group-btn">
-                        <button id='btnGetUser' class="btn btn-default" type="button">Go!</button>
-                     </span>
-                    </div>
-                    <div id="rspns"></div>
-                </div>
-                
-                <div class="tab-pane" id="tabframe">
-
-                    <table id="tblpop" class="table table-condensed table-bordered table-striped" cellspacing="0" width="100%">
-                        <thead>
-                            <tr>
-                                <th>PopIn</th>
-                                <th>PopOut</th>
-                                <th>PopOutCopy</th>
-                            </tr>
-                            <tr>
-                                <td class="text-center"><a id='popin' href='#' title='Put the content window inside the ServiceNow UI'><i class="fa fa-compress fa-5x" aria-hidden="true"></i></a></td>
-                                <td class="text-center"><a id='popout' href='#' title='Open the content window without the ServiceNow UI'><i class="fa fa-expand fa-5x" aria-hidden="true"></i></a></td>
-                                <td class="text-center">
-                                    <a id='popoutcopy' href='#' title='Copy the content window without the ServiceNow UI'><i class="fa fa-clone fa-5x" aria-hidden="true"></i></a>
-                                </td>
-
-                            </tr>
-                            <tr>
-                                <td>Put the content window inside the ServiceNow UI</td>
-                                <td>Open the content window without the ServiceNow UI</td>
-                                <td>Copy the content window without the ServiceNow UI</td>
-                            </tr>
-                        </thead>
                     </table>
 
                 </div>
+
+
+                <div class="tab-pane" id="tabuser">
+                    <div class="input-group">
+                        <input type="search" id="tbxname" name="tbxname" class="form-control form-control-sm" placeholder="Search by username...">
+                        <span class="input-group-append">
+                            <button id='btnGetUser' class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
+                        </span>
+                    </div>
+                    <div id="rspns"></div>
+                </div>
+
                 <div class="tab-pane" id="tabgr">
                     <div class="input-group">
-                        <input id="tbxgrname" name="tbxgrname" class="form-control" placeholder="Change default gr variable name...">
-                        <span class="input-group-btn">
-                        <button id='btnSetGRName' class="btn btn-default" type="button">Create GlideRecord Template.</button>
-                     </span>
+                        <input id="tbxgrname" name="tbxgrname" class="form-control form-control-sm" placeholder="Change default gr variable name...">
+                        <span class="input-group-append">
+                            <button id='btnSetGRName' class="btn btn-outline-secondary btn-sm" type="button">Create GlideRecord Template.</button>
+                        </span>
                     </div>
                     <div class="form-group">
-                    <label for="tbxgrtemplate">Template for fields: ({0} = variable like gr, {1} = field name like sys_created_on)</label>
-                    <select class="form-control" name="tbxgrtemplate" id="tbxgrtemplate">
-                        <option>gs.print('{1}: ' + {0}.{1});</option>
-                        <option>{0}.{1}</option>
-                        <option>//{0}.{1} = '';</option>
-                        <option>{0}.setValue('{1}','');</option>
-                        <option>gs.addInfoMessage('{1}: ' + {0}.{1});</option>
-                        <option>gs.print('{1}: ' + {0}.{1}); //{0}.{1} = '';</option>
-                    </select>
-                    </div>                
-                    <textarea class="form-control" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
+                        <label for="tbxgrtemplate">Template for fields: ({0} = variable like gr, {1} = field name like sys_created_on)</label>
+                        <select class="form-control form-control-sm" name="tbxgrtemplate" id="tbxgrtemplate">
+                            <option>gs.info('{1}: ' + {0}.getValue('{1}'));</option>
+                            <option>{0}.getValue('{1}');</option>
+                            <option>{0}.setValue('{1}','');</option>
+                            <option>gs.addInfoMessage('{1}: ' + {0}.{1});</option>
+                            <option>{0}.{1}</option>
+                            <option>{0}.{1} = '';</option>
+                            <option value=''>- none -</option>
+                        </select>
+                    </div>
+                    <textarea class="form-control form-control-sm" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
                         id="txtgrquery"></textarea>
 
                     <br />
-                    <!--
-                    <div class="btns">
-                        <div class="dt-buttons">
-                            <a class="dt-button" id="btncopygr" href="#"><span>Copy</span></a>
-                        </div>
-                    </div>
-                    -->
+
                 </div>
 
                 <div class="tab-pane" id="tabrest">
-                
-                    <textarea class="form-control" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
+
+                    <textarea class="form-control form-control-sm" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
                         id="txtrest"></textarea>
 
                     <br />
                 </div>
 
-
-
-
                 <div class="tab-pane" id="tabscript">
-                    <div class="container" id='sciptcontainerdiv'>
-                        <p>Select <span id='scripttable' style='font-weight:bold'></span> field(s) to edit localy (existing files will be overwritten)</p>
-                        <div id='scriptform'>
+                    <div class="col-12" id='sciptcontainerdiv'>
+                        <p>Select
+                            <span id='scripttable' style='font-weight:bold'></span> field(s) to edit localy (existing files will be overwritten)</p>
+                        <div class="col-6" id='scriptform'>
                         </div>
-                        <div class="col-xs-6"><button id='btncreatefiles' type="button" class="btn btn-primary">Create Files</button>
-                        <span id='scriptmessage'></span>
+                        <div class="col-6">
+                            <br />
+                            <button id='btncreatefiles' type="button" class="btn btn-primary btn-sm">Create Files</button>
+                            <span id='scriptmessage'></span>
                         </div>
-                        
+
                     </div>
 
 
                 </div>
+
                 <div class="tab-pane active" id="tababout">
-                    <h3>ServiceNow Utils</h3>
-                    <br /> Developed by <a href="http://arnoudkooi.com" target="_blank">arnoudkooi.com</a>
-                    <br /> Makes working with ServiceNow a bit easier.<br /><br />
-                    <br /> Click below to watch video's explaining feautures
-                    <br /><br />
-                    <a target="_blank" href="https://www.youtube.com/watch?v=VMcjzmnDzP4" ><img src="/images/basics.png" alt="basics" style="width:175px" title="Watch basics video on YouTube" /></a>
-                    &nbsp;&nbsp;
-                    <a target="_blank" href="https://www.youtube.com/watch?v=2ZoubJMePD8" ><img src="/images/advanced.png" alt="advanced" style="width:175px" title="Watch advanced video on YouTube" /></a>
-                    <br /><br />
-                    <br /> New features:
+                    <h4>ServiceNow Utils</h4>
+                    Developed by
+                    <a class="popuplinks" href="http://arnoudkooi.com" target="_blank">arnoudkooi.com</a>
                     <br />
+                    <br /> Click below to watch video's explaining features:
+                    <br />
+                    <a class="popuplinks" target="_blank" href="https://www.youtube.com/watch?v=VMcjzmnDzP4">
+                        <img src="/images/basics.png" alt="basics" style="width:175px" title="Watch basics video on YouTube" />
+                    </a>
+                    &nbsp;&nbsp;
+                    <a class="popuplinks" target="_blank" href="https://www.youtube.com/watch?v=2ZoubJMePD8">
+                        <img src="/images/advanced.png" alt="advanced" style="width:175px" title="Watch advanced video on YouTube" />
+                    </a>
+                    &nbsp;&nbsp;
+                    <a class="popuplinks" target="_blank" href="https://www.youtube.com/watch?v=KHMH0weFTao">
+                        <img src="/images/4-2018.png" alt="updates" style="width:175px" title="Watch April 2018 updates video on YouTube" />
+                    </a>                   
+                    <br />
+                    Check my <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos" target="_blank">YouTube Channel</a> for the latest updates.
+                    <br /><br /> New features:
                     <ul>
-                        
+
                         <li>
                             Support for studio.
                         </li>
                         <li>
-                            Context menu to insert code snippets, or open common linkss, like cancel transaction. (beta)
+                            Context menu to insert code snippets, or open usefull links, like cancel transactions and show versions. 
                         </li>
-                    
+                        <li>
+                            Node list and switch for admins.
+                        </li>
+                        <li>
+                            Updated usability, look and feel.
+                        </li>
+                        <li>
+                            Rename pasted image.
+                        </li>
+                        <li>
+                            Doubleclick in breadcrumb area of list to view/edit encodedquery.
+                        </li>
                     </ul>
-                
-                <br /> Sourcecode is available on <a target="_blank" href="https://github.com/arnoudkooi/ServiceNow-Utils">GitHub</a> for review purposes. (Redistribution not allowed)
-                <br /> Please connect with me, if you have feedback or feature requests.
-                    <div id="livemessage" />
+                    Sourcecode is available on
+                    <a class="popuplinks" href="https://github.com/arnoudkooi/ServiceNow-Utils" target="_blank">GitHub</a> for review purposes. (Redistribution not allowed)
+                    <br /> Please connect with me, if you have feedback or feature requests, or good snippets to integrate.
+                    <div id="livemessage"></div>
 
                 </div>
             </div>

@@ -11,6 +11,8 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
 });
 
 
+
+
 //get the selected text, user gas selected with mouse.
 function getSelection() {
 
@@ -113,5 +115,6 @@ function getVars(varstring) {
     }
 
     $(doc.body).find("#tmpScript").remove();
+
     return ret;
 }

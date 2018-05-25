@@ -1,9 +1,9 @@
 {
     "name": "ServiceNow Utils",
     "short_name": "ServiceNow Utils",
-    "description": "Makes working with ServiceNow, just a bit easier. (Personal work, not affiliated to ServiceNow)",
+    "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "1.9",
+    "version": "2.1",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -11,22 +11,14 @@
         "storage",
         "nativeMessaging",
         "contextMenus",
-        "management"
+        "management",
+        "cookies"
     ],
     "icons": {
         "16": "images/icon16.png",
         "32": "images/icon32.png",
         "48": "images/icon48.png",
         "128": "images/icon128.png"
-    },
-    "commands": {
-        "togglePop": {
-        "suggested_key": {
-            "default": "Ctrl+Shift+T",
-            "mac": "Command+Shift+T"
-        },
-        "description": "Toggle Pop In Pop Out"
-      }
     },
     "background": {
         "scripts": [
@@ -36,6 +28,7 @@
         ],
         "persistent": true
     },
+
     "content_scripts": [
         {
             "matches": [
@@ -56,10 +49,34 @@
             "all_frames": true
         }
     ],
+    "commands": {
+        "show-technical-names": {
+          "suggested_key": {
+            "default": "Ctrl+Shift+T",
+            "mac": "Command+Shift+T"
+          },
+          "description": "Show Technical Names"
+        },
+        "pop": {
+            "suggested_key": {
+              "default": "Ctrl+Shift+P",
+              "mac": "Command+Shift+P"
+            },
+            "description": "Pop-In / Pop-Out"
+          },
+        "_execute_page_action": {
+          "suggested_key": {
+            "default": "Ctrl+Shift+W",
+            "mac": "Command+Shift+W"
+          }
+        }
+      },
     "page_action": {
         "default_title": "ServiceNow Utils",
         "default_popup": "popup.html"
     },
-    "web_accessible_resources": ["inject.js"],
+    "web_accessible_resources": [
+        "inject.js"
+    ],
     "manifest_version": 2
 }
