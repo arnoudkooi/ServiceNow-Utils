@@ -7,7 +7,7 @@ var instance;
 var nme;
 var jsnNodes;
 var urlFull;
-var updateSetTables =[];
+var updateSetTables = [];
 
 //Attatch eventlistener, setting extension only active on *.service-now.com
 chrome.runtime.onInstalled.addListener(function () {
@@ -31,11 +31,11 @@ chrome.runtime.onUpdateAvailable.addListener(function () {
 });
 
 
-chrome.commands.onCommand.addListener(function(command) {
+chrome.commands.onCommand.addListener(function (command) {
     if (command == "show-technical-names")
         addTechnicalNames();
-    else (command == "pop")
-        togglePop();
+    else if (command == "pop")
+        pop();
 
 });
 
@@ -259,7 +259,36 @@ function openTableList(e) {
 }
 
 
+function pop() {
+
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function (tabs) {
+        var u = tabs[0].url;
+        var tid = tabs[0].id;
+        var baseUrl = u.substring(0, u.indexOf(".com/") + 4);
+        var navToIdx = u.indexOf("nav_to.do?uri=");
+        if (navToIdx > -1) {
+            var pth = decodeURIComponent(u.substring(navToIdx + 14, 1000));
+            chrome.tabs.update(tid, {
+                url: baseUrl + pth
+            })
+        }
+        else {
+            var pth = "/nav_to.do?uri=" + encodeURIComponent(u.substring(u.indexOf(".com/") + 5, 1000));
+            chrome.tabs.update(tid, {
+                url: baseUrl + pth
+            })
+        }
+    });
+}
+
+
 function togglePop(clickData, tid) {
+
+    console.log(clickData);
+    console.log(tid);
 
     var frameHref = clickData.frameUrl || '';
     var urlFull = '' + clickData.pageUrl.match(/([^;]*\/){3}/)[0];

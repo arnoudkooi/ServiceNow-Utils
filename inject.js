@@ -433,3 +433,50 @@ getFormElementNames();
 //             console.log(response)
 //         });
 // }
+
+
+
+//Query ServiceNow for tables and set to chrome storage
+function setUpdateSetTables() {
+
+    var myurl =  "/api/now/table/sys_dictionary?sysparm_fields=name&sysparm_query=" +
+        "name=javascript:new PAUtils().getTableDecendants('sys_metadata')^internal_type=collection^attributesNOT LIKEupdate_synch=false^NQattributesLIKEupdate_synch=true";
+    loadXMLDoc(g_ck, myurl, null, function (jsn) {
+
+        var tbls = [];
+        for (var t in jsn.result) {
+            if(jsn.result[t].name.length > 1)
+                tbls.push(jsn.result[t].name);
+        }
+        localStorage.setItem("updatesettables", JSON.stringify(tbls));
+        //updateSetTables = tbls;
+    });
+}
+
+//Function to query Servicenow API
+function loadXMLDoc(token, url, post, callback) {
+
+    var hdrs = {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+
+    if (token) //only for instances with high security plugin enabled
+        hdrs['X-UserToken'] = token;
+
+    var method = "GET";
+    if (post) method = "PUT";
+
+    jQuery.ajax({
+        url: url,
+        method: method,
+        data: post,
+        headers: hdrs
+    }).done(function (rspns) {
+        callback(rspns);
+    }).fail(function (jqXHR, textStatus) {
+        callback(textStatus);
+    });
+
+};
