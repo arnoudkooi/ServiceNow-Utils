@@ -1,7 +1,10 @@
 var fields = [];
 var g_list = {};
 var mySysId = '';
-
+//Initialize Typeahead Data
+var bloodhound = {};
+var autoCompletionLimit = 100;
+var iframeName = 'gsft_main';
 
 if (typeof jQuery != "undefined") {
 
@@ -18,6 +21,26 @@ if (typeof jQuery != "undefined") {
         clickToList();
         setShortCuts();
         bindPaste();
+        initializeAutocomplete()
+    });
+}
+
+function initializeAutocomplete(array) {
+    if (typeof Bloodhound == 'undefined') return;
+
+    bloodhound = new Bloodhound({
+        local: array || [],
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        datumTokenizer: Bloodhound.tokenizers.whitespace
+    });
+    //Activate autocomplete for technical table names
+    jQuery('#filter').typeahead({
+        minLength: 2,
+        highlight: true
+    }, {
+        name: 'my-dataset',
+        limit: autoCompletionLimit,
+        source: bloodhound
     });
 }
 
@@ -172,10 +195,85 @@ function setShortCuts() {
         //across all pages to set focus to left menu
         if (((event.ctrlKey || event.metaKey) && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
             var doc = (window.self == window.top) ? document : top.document;
-            if (doc.getElementById('filter')) { //switch between Navigator and search on hitting cmd-shift-f
+            if (applicationFilter) { //switch between Navigator and search on hitting cmd-shift-f
                 var elm = (document.activeElement.id != 'filter') ? 'filter' : 'sysparm_search';
                 doc.getElementById(elm).focus();
                 doc.getElementById(elm).select();
+            }
+        }
+
+        if (event.ctrlKey && event.keyCode == 32) { //cmd||ctrl-space
+            var applicationFilter = jQuery('#filter');
+            var doc = (window.self == window.top) ? document : top.document;
+            if (applicationFilter && document.activeElement.id == 'filter') {
+                var value = applicationFilter.val();
+
+                if (value.indexOf('.') > -1) {
+                    jQuery('#filter').typeahead('destroy');
+                    value = value.substr(0, value.indexOf('.'));
+                    appendices = ['list', 'LIST', 'struct', 'STRUCT', 'mine', 'MINE', 'config', 'CONFIG', 'do', 'DO'];
+                    initializeAutocomplete(appendices.map(function (a) { return value + '.' + a }));
+
+                    applicationFilter.focus();
+                    // applicationFilter.select();
+                    applicationFilter.selectionStart = applicationFilter.selectionEnd = value.length;
+                } else {
+
+                    var myurl = '/api/now/table/sys_db_object?sysparm_fields=name&sysparm_query=sys_update_nameISNOTEMPTY^nameSTARTSWITH' + value + '^nameNOT LIKE00%5EORDERBYname&&sysparm_limit=' + autoCompletionLimit;
+                    loadXMLDoc(g_ck, myurl, null, function (json) {
+                        jQuery('#filter').typeahead('destroy');
+                        json = (json.result.map(function (t) { return t.name }));
+                        initializeAutocomplete(json);
+
+                        applicationFilter.focus();
+                        // applicationFilter.select();
+                        applicationFilter.selectionStart = applicationFilter.selectionEnd = value.length;
+                    });
+                }
+            }
+        }
+
+        else if (event.keyCode == 13) { //return
+            var applicationFilter = jQuery('#filter');
+            var doc = (window.self == window.top) ? document : top.document;
+            if (applicationFilter && document.activeElement.id == 'filter') {
+                var value = applicationFilter.val();
+                var listurl = '';
+                var query = [];
+                var table = value.substr(0, value.indexOf('.'));
+                var action = value.substr(value.indexOf('.') + 1);
+
+                if (action != '') {
+                    //Restrict records to today for certain tables
+                    if (['sys_update_version', 'syslog'].indexOf(table) > -1) {
+                        query.push('sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)');
+                    }
+                    //set url for all actions
+                    if (action.toLowerCase() == 'do') {
+                        listurl = '/' + table + '.do';
+                    }
+                    else if (action.toLowerCase() == 'list') {
+                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query);
+                    }
+                    else if (action.toLowerCase() == 'mine') {
+                        query.push('sys_created_by=' + window.NOW.user.name);
+                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query);
+                    }
+                    else if (action.toLowerCase() == 'struct') {
+                        listurl = '/sys_db_object.do?sysparm_query=name' + table;
+                    }
+                    else if (action.toLowerCase() == 'config') {
+                        listurl = '/personalize_all.do?sysparm_rules_table=' + table + '&sysparm_rules_label=' + table;
+                    } else {
+                        return;
+                    }
+                    //open window if action is applicable
+                    if (action == action.toUpperCase()) {
+                        window.open(listurl, table)
+                    } else {
+                        loadIframe(listurl);
+                    }
+                }
             }
         }
 
@@ -217,8 +315,12 @@ function setShortCuts() {
 
 }
 
-
-
+function getSysParmAppendix(encodedQueryArr) {
+    if(encodedQueryArr.length > 0) {
+        return '?sysparm_query=' + encodedQueryArr.join('^');
+    }
+    return '';
+}
 
 function bindPaste() {
 
@@ -401,7 +503,7 @@ function getListV3Fields() {
 }
 
 function loadIframe(url) {
-    var $iframe = $('#' + iframeName);
+    var $iframe = jQuery('#' + iframeName);
     if ($iframe.length) {
         $iframe.attr('src', url);
         return false;
