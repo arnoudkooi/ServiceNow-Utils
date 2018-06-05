@@ -211,7 +211,7 @@ function setShortCuts() {
                 if (value.indexOf('.') > -1) {
                     jQuery('#filter').typeahead('destroy');
                     value = value.substr(0, value.indexOf('.'));
-                    appendices = ['list', 'LIST', 'struct', 'STRUCT', 'mine', 'MINE', 'config', 'CONFIG', 'do', 'DO'];
+                    appendices = ['li', 'LI', 'struct', 'STRUCT', 'mine', 'MINE', 'config', 'CONFIG', 'do', 'DO'];
                     initializeAutocomplete(appendices.map(function (a) { return value + '.' + a }));
 
                     applicationFilter.focus();
@@ -252,7 +252,7 @@ function setShortCuts() {
                     if (action.toLowerCase() == 'do') {
                         listurl = '/' + table + '.do';
                     }
-                    else if (action.toLowerCase() == 'list') {
+                    else if (action.toLowerCase() == 'li') {
                         listurl = '/' + table + '_list.do' + getSysParmAppendix(query);
                     }
                     else if (action.toLowerCase() == 'mine') {
