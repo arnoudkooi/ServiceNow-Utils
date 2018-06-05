@@ -170,7 +170,7 @@ function setShortCuts() {
     document.addEventListener("keydown", function (event) {
 
         //across all pages to set focus to left menu
-        if ((event.ctrlKey || event.metaKey && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
+        if (((event.ctrlKey || event.metaKey) && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
             var doc = (window.self == window.top) ? document : top.document;
             if (doc.getElementById('filter')) { //switch between Navigator and search on hitting cmd-shift-f
                 var elm = (document.activeElement.id != 'filter') ? 'filter' : 'sysparm_search';
