@@ -4,7 +4,9 @@ var mySysId = '';
 //Initialize Typeahead Data
 var bloodhound = {};
 var autoCompletionLimit = 100;
+var autoComletionMinLength = 2;
 var iframeName = 'gsft_main';
+var applicationFilter = jQuery('#filter');
 
 if (typeof jQuery != "undefined") {
 
@@ -34,9 +36,12 @@ function initializeAutocomplete(array) {
         datumTokenizer: Bloodhound.tokenizers.whitespace
     });
     //Activate autocomplete for technical table names
-    jQuery('#filter').typeahead({
-        minLength: 2,
-        highlight: true
+    applicationFilter.typeahead({
+        minLength: autoComletionMinLength,
+        highlight: true,
+        classNames: {
+            'cursor': 'mark'
+        }
     }, {
         name: 'my-dataset',
         limit: autoCompletionLimit,
@@ -202,39 +207,43 @@ function setShortCuts() {
             }
         }
 
-        if (event.ctrlKey && event.keyCode == 32) { //cmd||ctrl-space
-            var applicationFilter = jQuery('#filter');
+        else if (event.ctrlKey && event.keyCode == 32) { //cmd||ctrl-space
+            
             var doc = (window.self == window.top) ? document : top.document;
             if (applicationFilter && document.activeElement.id == 'filter') {
                 var value = applicationFilter.val();
+                if(value.length < autoComletionMinLength) return;
 
                 if (value.indexOf('.') > -1) {
-                    jQuery('#filter').typeahead('destroy');
+                    applicationFilter.typeahead('destroy');
                     value = value.substr(0, value.indexOf('.'));
                     appendices = ['li', 'LI', 'struct', 'STRUCT', 'mine', 'MINE', 'config', 'CONFIG', 'do', 'DO'];
                     initializeAutocomplete(appendices.map(function (a) { return value + '.' + a }));
 
                     applicationFilter.focus();
-                    // applicationFilter.select();
-                    applicationFilter.selectionStart = applicationFilter.selectionEnd = value.length;
+                    applicationFilter.select();
                 } else {
 
                     var myurl = '/api/now/table/sys_db_object?sysparm_fields=name&sysparm_query=sys_update_nameISNOTEMPTY^nameSTARTSWITH' + value + '^nameNOT LIKE00%5EORDERBYname&&sysparm_limit=' + autoCompletionLimit;
                     loadXMLDoc(g_ck, myurl, null, function (json) {
-                        jQuery('#filter').typeahead('destroy');
+                        applicationFilter.typeahead('destroy');
                         json = (json.result.map(function (t) { return t.name }));
                         initializeAutocomplete(json);
 
                         applicationFilter.focus();
-                        // applicationFilter.select();
-                        applicationFilter.selectionStart = applicationFilter.selectionEnd = value.length;
+                        applicationFilter.select();
+                        setTimeout(function() {
+                            applicationFilter.prop({
+                                'selectionStart': value.length,
+                                'selectionEnd': value.length
+                            });
+                        },10);
                     });
                 }
             }
         }
 
         else if (event.keyCode == 13) { //return
-            var applicationFilter = jQuery('#filter');
             var doc = (window.self == window.top) ? document : top.document;
             if (applicationFilter && document.activeElement.id == 'filter') {
                 var value = applicationFilter.val();
