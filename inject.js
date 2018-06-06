@@ -251,22 +251,24 @@ function setShortCuts() {
                 var query = [];
                 var table = value.substr(0, value.indexOf('.'));
                 var action = value.substr(value.indexOf('.') + 1);
+                var orderAttr = 'sys_updated_on';
 
                 if (action != '') {
                     //Restrict records to today for certain tables
                     if (['sys_update_version', 'syslog'].indexOf(table) > -1) {
                         query.push('sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)');
+                        orderAttr = 'sys_created_on';
                     }
                     //set url for all actions
                     if (action.toLowerCase() == 'do') {
                         listurl = '/' + table + '.do';
                     }
                     else if (action.toLowerCase() == 'li') {
-                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query);
+                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
                     }
                     else if (action.toLowerCase() == 'mine') {
                         query.push('sys_created_by=' + window.NOW.user.name);
-                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query);
+                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
                     }
                     else if (action.toLowerCase() == 'struct') {
                         listurl = '/sys_db_object.do?sysparm_query=name' + table;
@@ -324,11 +326,13 @@ function setShortCuts() {
 
 }
 
-function getSysParmAppendix(encodedQueryArr) {
+function getSysParmAppendix(encodedQueryArr, orderAttr) {
+    if(typeof orderAttr == 'undefined') orderAttr = 'sys_updated_on';
+    var orderQuery = 'sysparm_order=' + orderAttr + '&sysparm_order_direction=desc';
     if(encodedQueryArr.length > 0) {
-        return '?sysparm_query=' + encodedQueryArr.join('^');
+        return '?sysparm_query=' + encodedQueryArr.join('^') + '&' + orderQuery;   
     }
-    return '';
+    return '?' + orderQuery;
 }
 
 function bindPaste() {
