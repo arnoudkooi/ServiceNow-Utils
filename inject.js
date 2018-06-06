@@ -267,11 +267,11 @@ function setShortCuts() {
                         listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
                     }
                     else if (action.toLowerCase() == 'mine') {
-                        query.push('sys_created_by=' + window.NOW.user.name);
+                        query.push('sys_created_by=' + window.NOW.user.name + '^ORsys_updated_by=' + window.NOW.user.name);
                         listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
                     }
                     else if (action.toLowerCase() == 'struct') {
-                        listurl = '/sys_db_object.do?sysparm_query=name' + table;
+                        listurl = '/sys_db_object.do?sysparm_query=name=' + table;
                     }
                     else if (action.toLowerCase() == 'config') {
                         listurl = '/personalize_all.do?sysparm_rules_table=' + table + '&sysparm_rules_label=' + table;
