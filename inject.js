@@ -5,10 +5,13 @@ var mySysId = '';
 var bloodhound = {};
 var autoCompletionLimit = 100;
 var autoComletionMinLength = 2;
-var iframeName = 'gsft_main';
-var applicationFilter = jQuery('#filter');
+var iframeId = 'gsft_main';
+var applicationFilterId = 'filter';
+var globalSearchId = 'sysparm_search';
 
 if (typeof jQuery != "undefined") {
+    var applicationFilterEl = jQuery('#' + applicationFilterId);
+    var globalSearchEl = jQuery('#' + globalSearchId);
 
     makeUpdateSetIconClickable();
 
@@ -36,7 +39,7 @@ function initializeAutocomplete(array) {
         datumTokenizer: Bloodhound.tokenizers.whitespace
     });
     //Activate autocomplete for technical table names
-    applicationFilter.typeahead({
+    applicationFilterEl.typeahead({
         minLength: autoComletionMinLength,
         highlight: true,
         classNames: {
@@ -65,7 +68,7 @@ function makeUpdateSetIconClickable() {
             if (e.shiftKey || e.ctrlKey || e.metaKey)
                 jQuery("<a>").attr("href", url).attr("target", "_blank")[0].click();
             else
-                jQuery('#gsft_main').attr('src', url);
+                jQuery('#' + iframeId).attr('src', url);
         });
     }
 }
@@ -200,8 +203,8 @@ function setShortCuts() {
         //across all pages to set focus to left menu
         if (((event.ctrlKey || event.metaKey) && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
             var doc = (window.self == window.top) ? document : top.document;
-            if (applicationFilter) { //switch between Navigator and search on hitting cmd-shift-f
-                var elm = (document.activeElement.id != 'filter') ? 'filter' : 'sysparm_search';
+            if (applicationFilterEl) { //switch between Navigator and search on hitting cmd-shift-f
+                var elm = (document.activeElement.id != applicationFilterId) ? applicationFilterId : globalSearchId;
                 doc.getElementById(elm).focus();
                 doc.getElementById(elm).select();
             }
@@ -210,30 +213,30 @@ function setShortCuts() {
         else if (event.ctrlKey && event.keyCode == 32) { //cmd||ctrl-space
             
             var doc = (window.self == window.top) ? document : top.document;
-            if (applicationFilter && document.activeElement.id == 'filter') {
-                var value = applicationFilter.val();
+            if (applicationFilterEl && document.activeElement.id == applicationFilterId) {
+                var value = applicationFilterEl.val();
                 if(value.length < autoComletionMinLength) return;
 
                 if (value.indexOf('.') > -1) {
-                    applicationFilter.typeahead('destroy');
+                    applicationFilterEl.typeahead('destroy');
                     value = value.substr(0, value.indexOf('.'));
                     appendices = ['li', 'LI', 'struct', 'STRUCT', 'mine', 'MINE', 'config', 'CONFIG', 'do', 'DO'];
                     initializeAutocomplete(appendices.map(function (a) { return value + '.' + a }));
 
-                    applicationFilter.focus();
-                    applicationFilter.select();
+                    applicationFilterEl.focus();
+                    applicationFilterEl.select();
                 } else {
 
                     var myurl = '/api/now/table/sys_db_object?sysparm_fields=name&sysparm_query=sys_update_nameISNOTEMPTY^nameSTARTSWITH' + value + '^nameNOT LIKE00%5EORDERBYname&&sysparm_limit=' + autoCompletionLimit;
                     loadXMLDoc(g_ck, myurl, null, function (json) {
-                        applicationFilter.typeahead('destroy');
+                        applicationFilterEl.typeahead('destroy');
                         json = (json.result.map(function (t) { return t.name }));
                         initializeAutocomplete(json);
 
-                        applicationFilter.focus();
-                        applicationFilter.select();
+                        applicationFilterEl.focus();
+                        applicationFilterEl.select();
                         setTimeout(function() {
-                            applicationFilter.prop({
+                            applicationFilterEl.prop({
                                 'selectionStart': value.length,
                                 'selectionEnd': value.length
                             });
@@ -245,8 +248,8 @@ function setShortCuts() {
 
         else if (event.keyCode == 13) { //return
             var doc = (window.self == window.top) ? document : top.document;
-            if (applicationFilter && document.activeElement.id == 'filter') {
-                var value = applicationFilter.val();
+            if (applicationFilterEl && document.activeElement.id == applicationFilterId) {
+                var value = applicationFilterEl.val();
                 var listurl = '';
                 var query = [];
                 var table = value.substr(0, value.indexOf('.'));
@@ -319,9 +322,9 @@ function setShortCuts() {
     }, false);
 
 
-    if (document.getElementById('filter')) {
+    if (document.getElementById(applicationFilterId)) {
         var ky = (window.navigator.platform.startsWith("Mac")) ? "(CMD-SHIFT-F)" : "(CTRL-SHIFT-F)";
-        document.getElementById('filter').placeholder = "Filter navigator " + ky;
+        document.getElementById(applicationFilterId).placeholder = "Filter navigator " + ky;
 
     }
 
@@ -517,7 +520,7 @@ function getListV3Fields() {
 }
 
 function loadIframe(url) {
-    var $iframe = jQuery('#' + iframeName);
+    var $iframe = jQuery('#' + iframeId);
     if ($iframe.length) {
         $iframe.attr('src', url);
         return false;
