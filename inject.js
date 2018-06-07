@@ -289,6 +289,12 @@ function setShortCuts() {
                         loadIframe(listurl);
                     }
                 }
+            } else if (globalSearchEl &&  document.activeElement.id == globalSearchId) {
+                var value = globalSearchEl.val();
+                if(value.match(/^[a-z0-9]{32,32}$/g) != null && value.length == 32) {
+                    event.preventDefault();
+                    searchSysIdTables(value);
+                }
             }
         }
 
@@ -599,3 +605,49 @@ function loadXMLDoc(token, url, post, callback) {
     });
 
 };
+
+function searchSysIdTables(sysId) {
+    try {
+        jQuery.ajax({
+            url: 'sys.scripts.do',
+            method: 'GET', //POST does not work somehow
+            headers: {
+                'X-UserToken': g_ck,
+                'Cache-Control': 'no-cache',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: {
+                script: 'function findSysID(e){var s,d,n=new GlideRecord("sys_db_object");n.addEncodedQuery("' + 
+                [
+                    'super_class=NULL', //do not include extended tables 
+                    'sys_update_nameISNOTEMPTY' , 
+                    'nameNOT LIKEts_', 
+                    'nameNOT LIKEsysx_', 
+                    'nameNOT LIKEv_', 
+                    'nameNOT LIKE00',
+                    'nameNOT LIKEsys_rollback_',
+                    'nameNOT LIKEpa_',
+                ].join('^') + 
+                '"),n.query();for(var a=[];n.next();)d=n.name+"",(s=new GlideRecord(d)).isValid()&&(s.addQuery("sys_id",e),s.queryNoDomain(),s.setLimit(1),s.query(),s.hasNext()&&a.push(d));gs.print("###"+a+"###")}findSysID("' + sysId + '");',
+                runscript: "Run script",
+                sysparm_ck: g_ck,
+                sys_scope: 'e24e9692d7702100738dc0da9e6103dd'
+            }
+        }).done(function (rspns) {
+            answer = rspns.match(/###(.*)###/);
+            if(answer != null && answer[1]) {
+                var tables = answer[1].split(',');
+                var url;
+                for (var i = 0; i < tables.length; i++) {
+                    url = tables[i] + '.do?sys_id=' + sysId;
+                    window.open(url, '_blank');                    
+                }                
+            }
+        }).fail(function (jqXHR, textStatus) {
+            console.error('Could not retrieve sys_id');
+        });
+    } catch (error) {
+        console.error('Could not retrieve sys_id');
+    }
+}
