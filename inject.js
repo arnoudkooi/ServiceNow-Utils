@@ -136,7 +136,7 @@ function clickToList() {
                 g_form.clearMessages();
                 if (elm == 'sys_id' && qry.length <= 45) {
                     qry = '';
-                    if (!$j(event.target).hasClass('btn')) {
+                    if (!$j(event.target).hasClass('btn') && !$j(event.target).is('a')) {
                         window.open(listurl, tbl);
                     }
                 }
@@ -275,7 +275,8 @@ function setShortCuts() {
                     }
                     else if (action.toLowerCase() == 'config') {
                         listurl = '/personalize_all.do?sysparm_rules_table=' + table + '&sysparm_rules_label=' + table;
-                    } else {
+                    }
+                    else {
                         return;
                     }
                     //open window if action is applicable
