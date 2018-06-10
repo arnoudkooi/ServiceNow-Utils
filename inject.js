@@ -26,7 +26,11 @@ if (typeof jQuery != "undefined") {
         clickToList();
         setShortCuts();
         bindPaste();
-        initializeAutocomplete()
+        initializeAutocomplete();
+    
+        //Initialize Alert
+        var alertContainer = '<div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>';
+        jQuery('header').prepend(alertContainer);
     });
 }
 
@@ -580,33 +584,76 @@ function setUpdateSetTables() {
 
 //Function to query Servicenow API
 function loadXMLDoc(token, url, post, callback) {
+    try {
+        var hdrs = {
+            'Cache-Control': 'no-cache',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
 
-    var hdrs = {
-        'Cache-Control': 'no-cache',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        if (token) //only for instances with high security plugin enabled
+            hdrs['X-UserToken'] = token;
+
+        var method = "GET";
+        if (post) method = "PUT";
+
+        jQuery.ajax({
+            url: url,
+            method: method,
+            data: post,
+            headers: hdrs
+        }).done(function (rspns) {
+            callback(rspns);
+        }).fail(function (jqXHR, textStatus) {
+            showAlert('Server Request failed (' + jqXHR.statusText + ')', 'danger');
+            callback(textStatus);
+        });
+    } catch(error) {
+        showAlert('Server Request failed (' + error + ')', 'danger');
     }
-
-    if (token) //only for instances with high security plugin enabled
-        hdrs['X-UserToken'] = token;
-
-    var method = "GET";
-    if (post) method = "PUT";
-
-    jQuery.ajax({
-        url: url,
-        method: method,
-        data: post,
-        headers: hdrs
-    }).done(function (rspns) {
-        callback(rspns);
-    }).fail(function (jqXHR, textStatus) {
-        callback(textStatus);
-    });
-
 };
 
 function searchSysIdTables(sysId) {
+    try {
+        showAlert('Searching for sys_id. This could take some seconds...')
+        var script = 'function findSysID(e){var s,d,n=new GlideRecord("sys_db_object");n.addEncodedQuery("' +
+            [
+                'super_class=NULL', //do not include extended tables 
+                'sys_update_nameISNOTEMPTY',
+                'nameNOT LIKEts_',
+                'nameNOT LIKEsysx_',
+                'nameNOT LIKEv_',
+                'nameNOT LIKE00',
+                'nameNOT LIKEsys_rollback_',
+                'nameNOT LIKEpa_',
+            ].join('^') +
+            '"),n.query();for(var a=[];n.next();)d=n.name+"",(s=new GlideRecord(d)).isValid()&&(s.addQuery("sys_id",e),s.queryNoDomain(),s.setLimit(1),s.query(),s.hasNext()&&a.push(d));gs.print("###"+a+"###")}findSysID("' + sysId + '");'
+        startBackgroundScript(script, function (rspns) {
+            answer = rspns.match(/###(.*)###/);
+            if (answer != null && answer[1]) {
+                showAlert('Success! All found records will be opened in a separate browser tab.', 'success');
+                var tables = answer[1].split(',');
+                var url;
+                for (var i = 0; i < tables.length; i++) {
+                    url = tables[i] + '.do?sys_id=' + sysId;
+                    window.open(url, '_blank');
+                }
+            } else {
+                showAlert('sys_id was not found in the system.', 'warning');
+            }
+        });
+    } catch (error) {
+        showAlert(error, 'danger');
+    }
+}
+
+/**
+ * @function startBackgroundScript
+ * @param  {String} script   {the script that should be executed}
+ * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
+ * @return {undefined}
+ */
+function startBackgroundScript(script, callback) {
     try {
         jQuery.ajax({
             url: 'sys.scripts.do',
@@ -618,36 +665,37 @@ function searchSysIdTables(sysId) {
                 'Content-Type': 'application/json'
             },
             data: {
-                script: 'function findSysID(e){var s,d,n=new GlideRecord("sys_db_object");n.addEncodedQuery("' + 
-                [
-                    'super_class=NULL', //do not include extended tables 
-                    'sys_update_nameISNOTEMPTY' , 
-                    'nameNOT LIKEts_', 
-                    'nameNOT LIKEsysx_', 
-                    'nameNOT LIKEv_', 
-                    'nameNOT LIKE00',
-                    'nameNOT LIKEsys_rollback_',
-                    'nameNOT LIKEpa_',
-                ].join('^') + 
-                '"),n.query();for(var a=[];n.next();)d=n.name+"",(s=new GlideRecord(d)).isValid()&&(s.addQuery("sys_id",e),s.queryNoDomain(),s.setLimit(1),s.query(),s.hasNext()&&a.push(d));gs.print("###"+a+"###")}findSysID("' + sysId + '");',
+                script: script,
                 runscript: "Run script",
                 sysparm_ck: g_ck,
                 sys_scope: 'e24e9692d7702100738dc0da9e6103dd'
             }
         }).done(function (rspns) {
-            answer = rspns.match(/###(.*)###/);
-            if(answer != null && answer[1]) {
-                var tables = answer[1].split(',');
-                var url;
-                for (var i = 0; i < tables.length; i++) {
-                    url = tables[i] + '.do?sys_id=' + sysId;
-                    window.open(url, '_blank');                    
-                }                
-            }
+            callback(rspns);
         }).fail(function (jqXHR, textStatus) {
-            console.error('Could not retrieve sys_id');
+            showAlert('Background Script failed (' + jqXHR.statusText + ')', 'danger');
         });
     } catch (error) {
-        console.error('Could not retrieve sys_id');
+        showAlert('Background Script failed (' + error + ')', 'danger');
     }
+}
+
+/**
+ * @function showAlert
+ * @param  {String} msg  {Message to show}
+ * @param  {String} type {types: success, info, warning, danger (defaults to 'info')}
+ * @param  {Integer} timeout {time to close the flash message in ms (defaults to '3000')}
+ * @return {undefined}
+ */
+function showAlert(msg, type, timeout) {
+    msg = 'ServiceNow Utils (Chrome Extension): ' + msg;
+    if (typeof type == 'undefined') type = 'info';
+    if (typeof timeout == 'undefined') timeout = 3000;
+    jQuery('header .service-now-util-alert>div>span').html(msg);
+    jQuery('header .service-now-util-alert').addClass('visible');
+    jQuery('header .service-now-util-alert>.notification').addClass('notification-' + type);
+    setTimeout(function () {
+        jQuery('header .service-now-util-alert').removeClass('visible');
+        jQuery('header .service-now-util-alert>.notification').removeClass('notification-' + type);
+    }, timeout)
 }
