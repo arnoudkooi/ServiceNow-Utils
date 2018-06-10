@@ -3,7 +3,7 @@
     "short_name": "ServiceNow Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "2.1.1",
+    "version": "2.4.0",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -75,7 +75,8 @@
         "default_popup": "popup.html"
     },
     "web_accessible_resources": [
-        "inject.js"
+        "inject.js",
+        "js/typeahead.bundle.min.js"
     ],
     "manifest_version": 2
 }

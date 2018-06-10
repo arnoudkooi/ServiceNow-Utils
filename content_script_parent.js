@@ -1,3 +1,11 @@
+//add typeahead for usage in Application Navigator
+var t = document.createElement('script');
+t.src = chrome.extension.getURL('js/typeahead.bundle.min.js');
+t.onload = function() {
+    this.remove();
+};
+(document.head || document.documentElement).appendChild(t);
+
 //attach event listener from popup
 chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.method == "getSelection")

@@ -1,9 +1,17 @@
 var fields = [];
 var g_list = {};
 var mySysId = '';
-
+//Initialize Typeahead Data
+var bloodhound = {};
+var autoCompletionLimit = 100;
+var autoComletionMinLength = 2;
+var iframeId = 'gsft_main';
+var applicationFilterId = 'filter';
+var globalSearchId = 'sysparm_search';
 
 if (typeof jQuery != "undefined") {
+    var applicationFilterEl = jQuery('#' + applicationFilterId);
+    var globalSearchEl = jQuery('#' + globalSearchId);
 
     makeUpdateSetIconClickable();
 
@@ -18,6 +26,33 @@ if (typeof jQuery != "undefined") {
         clickToList();
         setShortCuts();
         bindPaste();
+        initializeAutocomplete();
+    
+        //Initialize Alert
+        var alertContainer = '<div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>';
+        jQuery('header').prepend(alertContainer);
+    });
+}
+
+function initializeAutocomplete(array) {
+    if (typeof Bloodhound == 'undefined') return;
+
+    bloodhound = new Bloodhound({
+        local: array || [],
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        datumTokenizer: Bloodhound.tokenizers.whitespace
+    });
+    //Activate autocomplete for technical table names
+    applicationFilterEl.typeahead({
+        minLength: autoComletionMinLength,
+        highlight: true,
+        classNames: {
+            'cursor': 'mark'
+        }
+    }, {
+        name: 'my-dataset',
+        limit: autoCompletionLimit,
+        source: bloodhound
     });
 }
 
@@ -37,7 +72,7 @@ function makeUpdateSetIconClickable() {
             if (e.shiftKey || e.ctrlKey || e.metaKey)
                 jQuery("<a>").attr("href", url).attr("target", "_blank")[0].click();
             else
-                jQuery('#gsft_main').attr('src', url);
+                jQuery('#' + iframeId).attr('src', url);
         });
     }
 }
@@ -108,7 +143,7 @@ function clickToList() {
                 g_form.clearMessages();
                 if (elm == 'sys_id' && qry.length <= 45) {
                     qry = '';
-                    if (!$j(event.target).hasClass('btn')) {
+                    if (!$j(event.target).hasClass('btn') && !$j(event.target).is('a')) {
                         window.open(listurl, tbl);
                     }
                 }
@@ -170,12 +205,100 @@ function setShortCuts() {
     document.addEventListener("keydown", function (event) {
 
         //across all pages to set focus to left menu
-        if ((event.ctrlKey || event.metaKey && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
+        if (((event.ctrlKey || event.metaKey) && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
             var doc = (window.self == window.top) ? document : top.document;
-            if (doc.getElementById('filter')) { //switch between Navigator and search on hitting cmd-shift-f
-                var elm = (document.activeElement.id != 'filter') ? 'filter' : 'sysparm_search';
+            if (applicationFilterEl) { //switch between Navigator and search on hitting cmd-shift-f
+                var elm = (document.activeElement.id != applicationFilterId) ? applicationFilterId : globalSearchId;
                 doc.getElementById(elm).focus();
                 doc.getElementById(elm).select();
+            }
+        }
+
+        else if (event.ctrlKey && event.keyCode == 32) { //cmd||ctrl-space
+            
+            var doc = (window.self == window.top) ? document : top.document;
+            if (applicationFilterEl && document.activeElement.id == applicationFilterId) {
+                var value = applicationFilterEl.val();
+                if(value.length < autoComletionMinLength) return;
+
+                if (value.indexOf('.') > -1) {
+                    applicationFilterEl.typeahead('destroy');
+                    value = value.substr(0, value.indexOf('.'));
+                    appendices = ['li', 'LI', 'struct', 'STRUCT', 'mine', 'MINE', 'config', 'CONFIG', 'do', 'DO'];
+                    initializeAutocomplete(appendices.map(function (a) { return value + '.' + a }));
+
+                    applicationFilterEl.focus();
+                    applicationFilterEl.select();
+                } else {
+
+                    var myurl = '/api/now/table/sys_db_object?sysparm_fields=name&sysparm_query=sys_update_nameISNOTEMPTY^nameSTARTSWITH' + value + '^nameNOT LIKE00%5EORDERBYname&&sysparm_limit=' + autoCompletionLimit;
+                    loadXMLDoc(g_ck, myurl, null, function (json) {
+                        applicationFilterEl.typeahead('destroy');
+                        json = (json.result.map(function (t) { return t.name }));
+                        initializeAutocomplete(json);
+
+                        applicationFilterEl.focus();
+                        applicationFilterEl.select();
+                        setTimeout(function() {
+                            applicationFilterEl.prop({
+                                'selectionStart': value.length,
+                                'selectionEnd': value.length
+                            });
+                        },10);
+                    });
+                }
+            }
+        }
+
+        else if (event.keyCode == 13) { //return
+            var doc = (window.self == window.top) ? document : top.document;
+            if (applicationFilterEl && document.activeElement.id == applicationFilterId) {
+                var value = applicationFilterEl.val();
+                var listurl = '';
+                var query = [];
+                var table = value.substr(0, value.indexOf('.'));
+                var action = value.substr(value.indexOf('.') + 1);
+                var orderAttr = 'sys_updated_on';
+
+                if (action != '') {
+                    //Restrict records to today for certain tables
+                    if (['sys_update_version', 'syslog'].indexOf(table) > -1) {
+                        query.push('sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)');
+                        orderAttr = 'sys_created_on';
+                    }
+                    //set url for all actions
+                    if (action.toLowerCase() == 'do') {
+                        listurl = '/' + table + '.do';
+                    }
+                    else if (action.toLowerCase() == 'li') {
+                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
+                    }
+                    else if (action.toLowerCase() == 'mine') {
+                        query.push('sys_created_by=' + window.NOW.user.name + '^ORsys_updated_by=' + window.NOW.user.name);
+                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
+                    }
+                    else if (action.toLowerCase() == 'struct') {
+                        listurl = '/sys_db_object.do?sysparm_query=name=' + table;
+                    }
+                    else if (action.toLowerCase() == 'config') {
+                        listurl = '/personalize_all.do?sysparm_rules_table=' + table + '&sysparm_rules_label=' + table;
+                    }
+                    else {
+                        return;
+                    }
+                    //open window if action is applicable
+                    if (action == action.toUpperCase()) {
+                        window.open(listurl, table)
+                    } else {
+                        loadIframe(listurl);
+                    }
+                }
+            } else if (globalSearchEl &&  document.activeElement.id == globalSearchId) {
+                var value = globalSearchEl.val();
+                if(value.match(/^[a-z0-9]{32,32}$/g) != null && value.length == 32) {
+                    event.preventDefault();
+                    searchSysIdTables(value);
+                }
             }
         }
 
@@ -209,16 +332,22 @@ function setShortCuts() {
     }, false);
 
 
-    if (document.getElementById('filter')) {
+    if (document.getElementById(applicationFilterId)) {
         var ky = (window.navigator.platform.startsWith("Mac")) ? "(CMD-SHIFT-F)" : "(CTRL-SHIFT-F)";
-        document.getElementById('filter').placeholder = "Filter navigator " + ky;
+        document.getElementById(applicationFilterId).placeholder = "Filter navigator " + ky;
 
     }
 
 }
 
-
-
+function getSysParmAppendix(encodedQueryArr, orderAttr) {
+    if(typeof orderAttr == 'undefined') orderAttr = 'sys_updated_on';
+    var orderQuery = 'sysparm_order=' + orderAttr + '&sysparm_order_direction=desc';
+    if(encodedQueryArr.length > 0) {
+        return '?sysparm_query=' + encodedQueryArr.join('^') + '&' + orderQuery;   
+    }
+    return '?' + orderQuery;
+}
 
 function bindPaste() {
 
@@ -401,7 +530,7 @@ function getListV3Fields() {
 }
 
 function loadIframe(url) {
-    var $iframe = $('#' + iframeName);
+    var $iframe = jQuery('#' + iframeId);
     if ($iframe.length) {
         $iframe.attr('src', url);
         return false;
@@ -455,28 +584,118 @@ function setUpdateSetTables() {
 
 //Function to query Servicenow API
 function loadXMLDoc(token, url, post, callback) {
+    try {
+        var hdrs = {
+            'Cache-Control': 'no-cache',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
 
-    var hdrs = {
-        'Cache-Control': 'no-cache',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        if (token) //only for instances with high security plugin enabled
+            hdrs['X-UserToken'] = token;
+
+        var method = "GET";
+        if (post) method = "PUT";
+
+        jQuery.ajax({
+            url: url,
+            method: method,
+            data: post,
+            headers: hdrs
+        }).done(function (rspns) {
+            callback(rspns);
+        }).fail(function (jqXHR, textStatus) {
+            showAlert('Server Request failed (' + jqXHR.statusText + ')', 'danger');
+            callback(textStatus);
+        });
+    } catch(error) {
+        showAlert('Server Request failed (' + error + ')', 'danger');
     }
-
-    if (token) //only for instances with high security plugin enabled
-        hdrs['X-UserToken'] = token;
-
-    var method = "GET";
-    if (post) method = "PUT";
-
-    jQuery.ajax({
-        url: url,
-        method: method,
-        data: post,
-        headers: hdrs
-    }).done(function (rspns) {
-        callback(rspns);
-    }).fail(function (jqXHR, textStatus) {
-        callback(textStatus);
-    });
-
 };
+
+function searchSysIdTables(sysId) {
+    try {
+        showAlert('Searching for sys_id. This could take some seconds...')
+        var script = 'function findSysID(e){var s,d,n=new GlideRecord("sys_db_object");n.addEncodedQuery("' +
+            [
+                'super_class=NULL', //do not include extended tables 
+                'sys_update_nameISNOTEMPTY',
+                'nameNOT LIKEts_',
+                'nameNOT LIKEsysx_',
+                'nameNOT LIKEv_',
+                'nameNOT LIKE00',
+                'nameNOT LIKEsys_rollback_',
+                'nameNOT LIKEpa_',
+            ].join('^') +
+            '"),n.query();for(var a=[];n.next();)d=n.name+"",(s=new GlideRecord(d)).isValid()&&(s.addQuery("sys_id",e),s.queryNoDomain(),s.setLimit(1),s.query(),s.hasNext()&&a.push(d));gs.print("###"+a+"###")}findSysID("' + sysId + '");'
+        startBackgroundScript(script, function (rspns) {
+            answer = rspns.match(/###(.*)###/);
+            if (answer != null && answer[1]) {
+                showAlert('Success! All found records will be opened in a separate browser tab.', 'success');
+                var tables = answer[1].split(',');
+                var url;
+                for (var i = 0; i < tables.length; i++) {
+                    url = tables[i] + '.do?sys_id=' + sysId;
+                    window.open(url, '_blank');
+                }
+            } else {
+                showAlert('sys_id was not found in the system.', 'warning');
+            }
+        });
+    } catch (error) {
+        showAlert(error, 'danger');
+    }
+}
+
+/**
+ * @function startBackgroundScript
+ * @param  {String} script   {the script that should be executed}
+ * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
+ * @return {undefined}
+ */
+function startBackgroundScript(script, callback) {
+    try {
+        jQuery.ajax({
+            url: 'sys.scripts.do',
+            method: 'GET', //POST does not work somehow
+            headers: {
+                'X-UserToken': g_ck,
+                'Cache-Control': 'no-cache',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: {
+                script: script,
+                runscript: "Run script",
+                sysparm_ck: g_ck,
+                sys_scope: 'e24e9692d7702100738dc0da9e6103dd'
+            }
+        }).done(function (rspns) {
+            callback(rspns);
+        }).fail(function (jqXHR, textStatus) {
+            showAlert('Background Script failed (' + jqXHR.statusText + ')', 'danger');
+        });
+    } catch (error) {
+        showAlert('Background Script failed (' + error + ')', 'danger');
+    }
+}
+
+/**
+ * @function showAlert
+ * @param  {String} msg  {Message to show}
+ * @param  {String} type {types: success, info, warning, danger (defaults to 'info')}
+ * @param  {Integer} timeout {time to close the flash message in ms (defaults to '3000')}
+ * @return {undefined}
+ */
+function showAlert(msg, type, timeout) {
+    msg = 'ServiceNow Utils (Chrome Extension): ' + msg;
+    if (typeof type == 'undefined') type = 'info';
+    if (typeof timeout == 'undefined') timeout = 3000;
+    jQuery('header .service-now-util-alert>div>span').html(msg);
+    jQuery('header .service-now-util-alert').addClass('visible');
+    jQuery('header .service-now-util-alert>.notification').addClass('notification-' + type);
+    setTimeout(function () {
+        jQuery('header .service-now-util-alert').removeClass('visible');
+        jQuery('header .service-now-util-alert>.notification').removeClass('notification-' + type);
+    }, timeout)
+}
