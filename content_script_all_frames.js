@@ -8,14 +8,14 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
 
 });
 
-
-var s = document.createElement('script');
-s.src = chrome.extension.getURL('inject.js');
-s.onload = function() {
-    this.remove();
-};
-(document.head || document.documentElement).appendChild(s);
-
+(function(){
+    var s = document.createElement('script');
+    s.src = chrome.extension.getURL('inject.js');
+    s.onload = function() {
+        this.remove();
+    };
+    (document.head || document.documentElement).appendChild(s);
+  })();
 
 
 function runFunction(f) {

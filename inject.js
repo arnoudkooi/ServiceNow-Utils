@@ -1,81 +1,22 @@
 var fields = [];
 var g_list = {};
 var mySysId = '';
-//Initialize Typeahead Data
-var bloodhound = {};
-var autoCompletionLimit = 100;
-var autoComletionMinLength = 2;
-var iframeId = 'gsft_main';
-var applicationFilterId = 'filter';
-var globalSearchId = 'sysparm_search';
+
 
 if (typeof jQuery != "undefined") {
-    var applicationFilterEl = jQuery('#' + applicationFilterId);
-    var globalSearchEl = jQuery('#' + globalSearchId);
-
-    makeUpdateSetIconClickable();
-
     jQuery(function () {
         if (typeof angular != "undefined")
             setTimeout(getListV3Fields, 2000);
         else
             doubleClickToSetQueryListV2();
 
-
         doubleClickToShowField();
         clickToList();
         setShortCuts();
         bindPaste();
-        initializeAutocomplete();
-    
-        //Initialize Alert
-        var alertContainer = '<div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>';
-        jQuery('header').prepend(alertContainer);
     });
 }
 
-function initializeAutocomplete(array) {
-    if (typeof Bloodhound == 'undefined') return;
-
-    bloodhound = new Bloodhound({
-        local: array || [],
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        datumTokenizer: Bloodhound.tokenizers.whitespace
-    });
-    //Activate autocomplete for technical table names
-    applicationFilterEl.typeahead({
-        minLength: autoComletionMinLength,
-        highlight: true,
-        classNames: {
-            'cursor': 'mark'
-        }
-    }, {
-        name: 'my-dataset',
-        limit: autoCompletionLimit,
-        source: bloodhound
-    });
-}
-
-function makeUpdateSetIconClickable() {
-    if (!jQuery("a.icon-document-multiple[href*='sys_update_set']").length) { //starting Jakarta this is oob
-        jQuery('update-set-picker')
-            .find('.icon-document-multiple')
-            .first()
-            .css('color', 'red')
-            .wrap("<a name='openupdateset' href='#' ></a>");
-
-
-        jQuery("[name='openupdateset']").on('click', function (e) {
-            var ussysid = jQuery("[name='update_set_picker_select']").val().replace('string:', '');
-            var url = '/sys_update_set.do?sys_id=' + ussysid;
-
-            if (e.shiftKey || e.ctrlKey || e.metaKey)
-                jQuery("<a>").attr("href", url).attr("target", "_blank")[0].click();
-            else
-                jQuery('#' + iframeId).attr('src', url);
-        });
-    }
-}
 
 
 function doubleClickToShowField() {
@@ -214,93 +155,6 @@ function setShortCuts() {
             }
         }
 
-        else if (event.ctrlKey && event.keyCode == 32) { //cmd||ctrl-space
-            
-            var doc = (window.self == window.top) ? document : top.document;
-            if (applicationFilterEl && document.activeElement.id == applicationFilterId) {
-                var value = applicationFilterEl.val();
-                if(value.length < autoComletionMinLength) return;
-
-                if (value.indexOf('.') > -1) {
-                    applicationFilterEl.typeahead('destroy');
-                    value = value.substr(0, value.indexOf('.'));
-                    appendices = ['li', 'LI', 'struct', 'STRUCT', 'mine', 'MINE', 'config', 'CONFIG', 'do', 'DO'];
-                    initializeAutocomplete(appendices.map(function (a) { return value + '.' + a }));
-
-                    applicationFilterEl.focus();
-                    applicationFilterEl.select();
-                } else {
-
-                    var myurl = '/api/now/table/sys_db_object?sysparm_fields=name&sysparm_query=sys_update_nameISNOTEMPTY^nameSTARTSWITH' + value + '^nameNOT LIKE00%5EORDERBYname&&sysparm_limit=' + autoCompletionLimit;
-                    loadXMLDoc(g_ck, myurl, null, function (json) {
-                        applicationFilterEl.typeahead('destroy');
-                        json = (json.result.map(function (t) { return t.name }));
-                        initializeAutocomplete(json);
-
-                        applicationFilterEl.focus();
-                        applicationFilterEl.select();
-                        setTimeout(function() {
-                            applicationFilterEl.prop({
-                                'selectionStart': value.length,
-                                'selectionEnd': value.length
-                            });
-                        },10);
-                    });
-                }
-            }
-        }
-
-        else if (event.keyCode == 13) { //return
-            var doc = (window.self == window.top) ? document : top.document;
-            if (applicationFilterEl && document.activeElement.id == applicationFilterId) {
-                var value = applicationFilterEl.val();
-                var listurl = '';
-                var query = [];
-                var table = value.substr(0, value.indexOf('.'));
-                var action = value.substr(value.indexOf('.') + 1);
-                var orderAttr = 'sys_updated_on';
-
-                if (action != '') {
-                    //Restrict records to today for certain tables
-                    if (['sys_update_version', 'syslog'].indexOf(table) > -1) {
-                        query.push('sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)');
-                        orderAttr = 'sys_created_on';
-                    }
-                    //set url for all actions
-                    if (action.toLowerCase() == 'do') {
-                        listurl = '/' + table + '.do';
-                    }
-                    else if (action.toLowerCase() == 'li') {
-                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
-                    }
-                    else if (action.toLowerCase() == 'mine') {
-                        query.push('sys_created_by=' + window.NOW.user.name + '^ORsys_updated_by=' + window.NOW.user.name);
-                        listurl = '/' + table + '_list.do' + getSysParmAppendix(query, orderAttr);
-                    }
-                    else if (action.toLowerCase() == 'struct') {
-                        listurl = '/sys_db_object.do?sysparm_query=name=' + table;
-                    }
-                    else if (action.toLowerCase() == 'config') {
-                        listurl = '/personalize_all.do?sysparm_rules_table=' + table + '&sysparm_rules_label=' + table;
-                    }
-                    else {
-                        return;
-                    }
-                    //open window if action is applicable
-                    if (action == action.toUpperCase()) {
-                        window.open(listurl, table)
-                    } else {
-                        loadIframe(listurl);
-                    }
-                }
-            } else if (globalSearchEl &&  document.activeElement.id == globalSearchId) {
-                var value = globalSearchEl.val();
-                if(value.match(/^[a-z0-9]{32,32}$/g) != null && value.length == 32) {
-                    event.preventDefault();
-                    searchSysIdTables(value);
-                }
-            }
-        }
 
         //a few specific for forms
         else if (typeof g_form != 'undefined') {
@@ -331,23 +185,9 @@ function setShortCuts() {
 
     }, false);
 
-
-    if (document.getElementById(applicationFilterId)) {
-        var ky = (window.navigator.platform.startsWith("Mac")) ? "(CMD-SHIFT-F)" : "(CTRL-SHIFT-F)";
-        document.getElementById(applicationFilterId).placeholder = "Filter navigator " + ky;
-
-    }
-
 }
 
-function getSysParmAppendix(encodedQueryArr, orderAttr) {
-    if(typeof orderAttr == 'undefined') orderAttr = 'sys_updated_on';
-    var orderQuery = 'sysparm_order=' + orderAttr + '&sysparm_order_direction=desc';
-    if(encodedQueryArr.length > 0) {
-        return '?sysparm_query=' + encodedQueryArr.join('^') + '&' + orderQuery;   
-    }
-    return '?' + orderQuery;
-}
+
 
 function bindPaste() {
 
@@ -413,7 +253,7 @@ function saveImage(imgData, fileInfo) {
     if (typeof jQuery == 'undefined') return; //not in studio
 
     //var fileName = prompt("Filename to use:", fileInfo.name) || fileInfo.name;
-    
+
 
     var URL = "/api/now/attachment/file?table_name=" +
         g_form.getTableName() + "&table_sys_id=" + g_form.getUniqueValue() + "&file_name=" + fileInfo.name;
@@ -434,14 +274,14 @@ function saveImage(imgData, fileInfo) {
         success: function (r) {
             g_form.clearMessages();
             console.log(r);
-            g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" + 
-        `<div class="input-group">
-        <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="`+ r.result.file_name.replace('.png','')+`" style='width:200px;'class="form-control" placeholder="Image name">
+            g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" +
+                `<div class="input-group">
+        <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="` + r.result.file_name.replace('.png', '') + `" style='width:200px;'class="form-control" placeholder="Image name">
         <span class="input-group-btn" style="display: inline; ">
           <button class="btn btn-primary" onClick='renamePasted("` + r.result.sys_id + `")' style="width: 80px;" type="button">.png Save..</button>
         </span>
       </div><span id='divRenamed'></span></form>`);
-$j('#tbxImageName').focus().select();
+            $j('#tbxImageName').focus().select();
 
         },
         error: function (error) {
@@ -455,35 +295,35 @@ $j('#tbxImageName').focus().select();
 };
 
 
-function renamePasted(sysID, check){
+function renamePasted(sysID, check) {
 
-if (!$j('#tbxImageName').val()){
-    alert("Please insert a valid filename.");
-    return false;
-}
+    if (!$j('#tbxImageName').val()) {
+        alert("Please insert a valid filename.");
+        return false;
+    }
 
 
-var requestBody = {
-    "file_name" : $j('#tbxImageName').val()
-}
+    var requestBody = {
+        "file_name": $j('#tbxImageName').val()
+    }
 
-var client=new XMLHttpRequest();
-client.open("put","/api/now/table/sys_attachment/" + sysID);
-client.setRequestHeader('Accept','application/json');
-client.setRequestHeader('Content-Type','application/json');
-if (typeof g_ck != 'undefined')
-    client.setRequestHeader('X-UserToken',g_ck);
+    var client = new XMLHttpRequest();
+    client.open("put", "/api/now/table/sys_attachment/" + sysID);
+    client.setRequestHeader('Accept', 'application/json');
+    client.setRequestHeader('Content-Type', 'application/json');
+    if (typeof g_ck != 'undefined')
+        client.setRequestHeader('X-UserToken', g_ck);
 
-client.onreadystatechange = function() { 
-	if(this.readyState == this.DONE) {
-        if (this.status == 200) 
-		    document.getElementById("divRenamed").innerHTML= " Filename saved!"; 
-        else
-		    document.getElementById("divRenamed").innerHTML=this.status + this.response; 
-	}
-}; 
-client.send(JSON.stringify(requestBody));
-   
+    client.onreadystatechange = function () {
+        if (this.readyState == this.DONE) {
+            if (this.status == 200)
+                document.getElementById("divRenamed").innerHTML = " Filename saved!";
+            else
+                document.getElementById("divRenamed").innerHTML = this.status + this.response;
+        }
+    };
+    client.send(JSON.stringify(requestBody));
+
 
 }
 
@@ -568,13 +408,13 @@ getFormElementNames();
 //Query ServiceNow for tables and set to chrome storage
 function setUpdateSetTables() {
 
-    var myurl =  "/api/now/table/sys_dictionary?sysparm_fields=name&sysparm_query=" +
+    var myurl = "/api/now/table/sys_dictionary?sysparm_fields=name&sysparm_query=" +
         "name=javascript:new PAUtils().getTableDecendants('sys_metadata')^internal_type=collection^attributesNOT LIKEupdate_synch=false^NQattributesLIKEupdate_synch=true";
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
 
         var tbls = [];
         for (var t in jsn.result) {
-            if(jsn.result[t].name.length > 1)
+            if (jsn.result[t].name.length > 1)
                 tbls.push(jsn.result[t].name);
         }
         localStorage.setItem("updatesettables", JSON.stringify(tbls));
@@ -608,77 +448,10 @@ function loadXMLDoc(token, url, post, callback) {
             showAlert('Server Request failed (' + jqXHR.statusText + ')', 'danger');
             callback(textStatus);
         });
-    } catch(error) {
+    } catch (error) {
         showAlert('Server Request failed (' + error + ')', 'danger');
     }
 };
-
-function searchSysIdTables(sysId) {
-    try {
-        showAlert('Searching for sys_id. This could take some seconds...')
-        var script = 'function findSysID(e){var s,d,n=new GlideRecord("sys_db_object");n.addEncodedQuery("' +
-            [
-                'super_class=NULL', //do not include extended tables 
-                'sys_update_nameISNOTEMPTY',
-                'nameNOT LIKEts_',
-                'nameNOT LIKEsysx_',
-                'nameNOT LIKEv_',
-                'nameNOT LIKE00',
-                'nameNOT LIKEsys_rollback_',
-                'nameNOT LIKEpa_',
-            ].join('^') +
-            '"),n.query();for(var a=[];n.next();)d=n.name+"",(s=new GlideRecord(d)).isValid()&&(s.addQuery("sys_id",e),s.queryNoDomain(),s.setLimit(1),s.query(),s.hasNext()&&a.push(d));gs.print("###"+a+"###")}findSysID("' + sysId + '");'
-        startBackgroundScript(script, function (rspns) {
-            answer = rspns.match(/###(.*)###/);
-            if (answer != null && answer[1]) {
-                showAlert('Success! All found records will be opened in a separate browser tab.', 'success');
-                var tables = answer[1].split(',');
-                var url;
-                for (var i = 0; i < tables.length; i++) {
-                    url = tables[i] + '.do?sys_id=' + sysId;
-                    window.open(url, '_blank');
-                }
-            } else {
-                showAlert('sys_id was not found in the system.', 'warning');
-            }
-        });
-    } catch (error) {
-        showAlert(error, 'danger');
-    }
-}
-
-/**
- * @function startBackgroundScript
- * @param  {String} script   {the script that should be executed}
- * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
- * @return {undefined}
- */
-function startBackgroundScript(script, callback) {
-    try {
-        jQuery.ajax({
-            url: 'sys.scripts.do',
-            method: 'GET', //POST does not work somehow
-            headers: {
-                'X-UserToken': g_ck,
-                'Cache-Control': 'no-cache',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            data: {
-                script: script,
-                runscript: "Run script",
-                sysparm_ck: g_ck,
-                sys_scope: 'e24e9692d7702100738dc0da9e6103dd'
-            }
-        }).done(function (rspns) {
-            callback(rspns);
-        }).fail(function (jqXHR, textStatus) {
-            showAlert('Background Script failed (' + jqXHR.statusText + ')', 'danger');
-        });
-    } catch (error) {
-        showAlert('Background Script failed (' + error + ')', 'danger');
-    }
-}
 
 /**
  * @function showAlert

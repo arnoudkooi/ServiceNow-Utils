@@ -1,10 +1,26 @@
-//add typeahead for usage in Application Navigator
-var t = document.createElement('script');
-t.src = chrome.extension.getURL('js/typeahead.bundle.min.js');
-t.onload = function() {
-    this.remove();
-};
-(document.head || document.documentElement).appendChild(t);
+(function () {
+
+    if (document.getElementById("filter") != null) {
+        //add typeahead for usage in Application Navigator
+        var t = document.createElement('script');
+        t.src = chrome.extension.getURL('js/typeahead.bundle.min.js');
+        t.onload = function () {
+            this.remove();
+        };
+        (document.head || document.documentElement).appendChild(t);
+
+
+        //add script to extend search field
+        var c = document.createElement('script');
+        c.src = chrome.extension.getURL('inject_parent.js');
+        c.onload = function () {
+            this.remove();
+        };
+        (document.head || document.documentElement).appendChild(c);
+    }
+
+})();
+
 
 //attach event listener from popup
 chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
@@ -15,7 +31,7 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
     else if (request.method == "getLocation")
         sendResponse({ url: location.origin, frameHref: getFrameHref() });
     //else
-        //sendResponse({ url: location.origin });
+    //sendResponse({ url: location.origin });
 });
 
 
@@ -30,7 +46,7 @@ function getSelection() {
 
     var result = '' + self.document.getSelection().toString();
     for (var i = 0; !result && i < self.frames.length; i++) {
-       
+
         try {
             result = self.frames[i].document.getSelection().toString();
         } catch (error) {
@@ -45,8 +61,8 @@ function getFrameHref() {
     var frameHref = '';
 
     if (jQuery('#gsft_main').length)
-        frameHref = document.getElementById("gsft_main").contentWindow.location.href ;
-    else if (jQuery('div.tab-pane.active').length == 1){
+        frameHref = document.getElementById("gsft_main").contentWindow.location.href;
+    else if (jQuery('div.tab-pane.active').length == 1) {
         frameHref = jQuery('iframe.activetab')[0].contentWindow.location.href;
     }
     else
@@ -64,7 +80,7 @@ function setGList() {
         doc = $('#gsft_main')[0].contentWindow.document;
     else
         doc = document;
-    
+
     var scriptContent = "try{ var g_list = GlideList2.get(jQuery('#sys_target').val()); } catch(err){console.log(err);}";
     var script = doc.createElement('script');
     script.appendChild(doc.createTextNode(scriptContent));
@@ -77,12 +93,12 @@ function setGList() {
 //try to return the window variables, defined in the comma separated varstring string
 function getVars(varstring) {
 
-   // if(window.frameElement && window.frameElement.nodeName == "IFRAME")
-   //     return; //dont run in iframes
+    // if(window.frameElement && window.frameElement.nodeName == "IFRAME")
+    //     return; //dont run in iframes
 
     if (varstring.indexOf('g_list') > -1)
         setGList();
-    
+
 
 
 
@@ -90,7 +106,7 @@ function getVars(varstring) {
     var ret = {};
     if (jQuery('#gsft_main').length)
         doc = jQuery('#gsft_main')[0].contentWindow.document;
-    else if (jQuery('div.tab-pane.active').length == 1){
+    else if (jQuery('div.tab-pane.active').length == 1) {
 
         ret.g_ck = jQuery('input#sysparm_ck').val();
         ret.arnoud = 'kooi';
@@ -102,14 +118,14 @@ function getVars(varstring) {
     else
         doc = document;
 
-    
+
     var variables = varstring.replace(/ /g, "").split(",");
     var scriptContent = "";
     for (var i = 0; i < variables.length; i++) {
         var currVariable = variables[i];
         scriptContent += "try{ if (typeof window." + currVariable + " !== 'undefined') jQuery('body').attr('tmp_" + currVariable.replace(/\./g, "") + "', window." + currVariable + "); } catch(err){console.log(err);}\n"
     }
-    
+
 
     var script = doc.createElement('script');
     script.id = 'tmpScript';

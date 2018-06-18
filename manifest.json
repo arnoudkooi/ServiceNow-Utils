@@ -76,6 +76,7 @@
     },
     "web_accessible_resources": [
         "inject.js",
+        "inject_parent.js",
         "js/typeahead.bundle.min.js"
     ],
     "manifest_version": 2
