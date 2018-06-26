@@ -52,8 +52,8 @@ function clickToList() {
             if ((event.ctrlKey || event.metaKey)) {
                 var tpe = '';
                 var tbl = g_form.getTableName();
-                var elm = 'sys_id';
-                var val = g_form.getUniqueValue();
+                var elm = '';
+                var val = 'none';
                 var operator = '=';
                 var val;
                 if (jQuery(event.target).hasClass('label-text')) {
@@ -61,6 +61,11 @@ function clickToList() {
                     tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
                     val = g_form.getValue(elm);
                 }
+                if (jQuery(event.target).hasClass('container-fluid')) {
+                    elm = 'sys_id';
+                    val = g_form.getUniqueValue();
+                }
+                if (val == 'none') return;
 
                 if (tpe == 'glide_list' && elm != 'sys_id') {
                     operator = 'LIKE';
@@ -82,13 +87,7 @@ function clickToList() {
 
                 var listurl = '/' + tbl + '_list.do?sysparm_query=' + qry;
                 g_form.clearMessages();
-                if (elm == 'sys_id' && qry.length <= 45) {
-                    qry = '';
-                    if (!$j(event.target).hasClass('btn') && !$j(event.target).is('a')) {
-                        window.open(listurl, tbl);
-                    }
-                }
-                else if (qry)
+                if (qry)
                     g_form.addInfoMessage('Filter <a href="javascript:delQry()">delete</a> :<a href="' + listurl + '" target="' + tbl + '">' + listurl + '</a>');
 
             }
