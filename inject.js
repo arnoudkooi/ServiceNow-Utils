@@ -1,5 +1,4 @@
 var fields = [];
-var g_list = {};
 var mySysId = '';
 
 
@@ -330,8 +329,8 @@ function getListV3Fields() {
     try {
         //g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.,g_list.fields
 
-        if (document.getElementsByClassName('list-container').length == 0)
-            return false;
+        if (document.getElementsByClassName('list-container').length == 0) return false;
+        if (document.getElementById('related_lists_wrapper') == null) return false; //not on form with related lists
 
         var ang = angular.element('.list-container').scope().$parent.$parent;
 
