@@ -366,7 +366,7 @@ function getRecordVariables(scriptscync) {
 
 function getGRQuery(varName, template) {
 
-    varName = varName || 'gr';
+    varName = varName || 'myGR';
 
     popup = chrome.extension.getViews({ type: "popup" })[0];
 
@@ -407,7 +407,7 @@ function getGRQuery(varName, template) {
 
 function getGRQueryForm(varName, template) {
 
-    varName = varName || 'gr';
+    varName = varName || 'myGR';
 
     popup = chrome.extension.getViews({ type: "popup" })[0];
 

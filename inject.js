@@ -13,6 +13,7 @@ if (typeof jQuery != "undefined") {
         clickToList();
         setShortCuts();
         bindPaste();
+        makeReadOnlyContentCopyable();
     });
 }
 
@@ -116,6 +117,22 @@ function loadjQuery() {
         return Promise.resolve();
     } else {
         return loadScript('//code.jquery.com/jquery-latest.min.js');
+    }
+}
+
+/**
+ * this solves an issue where e.g. OOTB read-only Script Include content was not copyable
+ */
+function makeReadOnlyContentCopyable() {
+    try {
+        if (typeof g_glideEditorArray != 'undefined' && g_glideEditorArray instanceof Array) {
+            for (var i = 0; i < g_glideEditorArray.length; i++) {
+                if (g_glideEditorArray[i].editor.getOption('readOnly') == 'nocursor')
+                    g_glideEditorArray[i].editor.setOption('readOnly', true);
+            }
+        }
+    } catch (error) {
+        console.error(error)
     }
 }
 
@@ -330,7 +347,7 @@ function getListV3Fields() {
         //g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.,g_list.fields
 
         if (document.getElementsByClassName('list-container').length == 0) return false;
-        if (document.getElementById('related_lists_wrapper') == null) return false; //not on form with related lists
+        if (document.getElementById('related_lists_wrapper') != null) return false; //not on form with related lists
 
         var ang = angular.element('.list-container').scope().$parent.$parent;
 

@@ -229,6 +229,14 @@ function setBrowserVariables(obj) {
         bgPage.getScriptFields();
         bgPage.getTables();
     });
+    $('#btnSendXplore').click(function () {
+        var script = $('#txtgrquery').val();
+        var win = chrome.tabs.create({ "url" : url + "/snd_xplore.do"  , "active" : !(event.ctrlKey||event.metaKey) }); //window.open('');
+        jQuery(win).bind('load', function(){
+            win.snd_xplore_editor.setValue(script);
+        });
+    });
+    
 
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
@@ -377,6 +385,7 @@ function setGRQuery(gr) {
     if (gr.indexOf("GlideRecord('undefined')")  > -1) gr = "This only works in forms and lists."
         $('#txtgrquery').val(gr).select();
 }
+
 
 
 //next release, integrate with other extension
