@@ -247,6 +247,10 @@ function setBrowserVariables(obj) {
         setToChromeSyncStorage("formvalues", $('form .sync').serialize());
     })
 
+    $('select').on('change', function () {
+        setToChromeSyncStorage("formvalues", $('form .sync').serialize());
+    })
+
     $('#btnSetGRName').click(function () {
         getGRQuery();
     });
@@ -672,7 +676,7 @@ function setDataTableTables(nme) {
             { "mDataProp": "name" },
             {
                 mRender: function (data, type, row) {
-                    return "<a class='tabletarget' href='" + url + '/' + row.name + "_list.do' title='Go to list' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
+                    return "<a class='tabletargetlist' href='" + url + '/' + row.name + "_list.do' title='Go to List (Using query selected below)' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
                         "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fa fa-cog' aria-hidden='true'></i></a> " +
                         "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
                 }
@@ -693,6 +697,15 @@ function setDataTableTables(nme) {
         "copyHtml5"
         ]
 
+    });
+
+    $('a.tabletargetlist').click(function () {
+        event.preventDefault();
+        var url = $(this).attr('href') + "?sysparm_query=" + $('#slctlistquery').val();
+        if (url.indexOf("syslog") > 1){
+            url = url.replace(/sys_updated_on/g, 'sys_created_on'); //syslog tables have no updated columnn.
+        }
+        chrome.tabs.create({ "url" : url  , "active" : !(event.ctrlKey||event.metaKey) });
     });
 
     $('a.tabletarget').click(function () {

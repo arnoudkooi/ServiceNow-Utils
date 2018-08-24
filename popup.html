@@ -149,7 +149,9 @@
                             <button id='btnrefreshtables' class="btn btn-outline-secondary btn-sm" title="Force refresh of the ServiceNow tables (API Call)"
                                 type="button">Refresh</button>
                         </span>
+
                     </div>
+
                     <table id="tbls" class="display table-condensed">
                         <thead>
                             <tr>
@@ -159,6 +161,11 @@
                             </tr>
                         </thead>
                     </table>
+                    <select style="margin-top:5px;" class="form-control form-control-sm sync" id="slctlistquery" name="slctlistquery">
+                        <option value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on">Listview query: Updated on Today / Order by Updated desc.</option>
+                        <option value="sys_id=-1">Listview query: Empty list (sys_id=-1)</option>
+                        <option value="">Listview query: None (all records)</option>
+                    </select>
                     <!--<a href='/snutils.html' target='_blank' >Open this table list in new tab.</a>-->
                 </div>
 
@@ -217,7 +224,7 @@
                     <textarea class="form-control form-control-sm" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
                         id="txtgrquery"></textarea>
 
-                    
+
                     <!-- <div class="btns">
                         <div class="dt-buttons">
                             <button class="dt-button" id="btnSendBackGround">
@@ -288,8 +295,7 @@
                         <img src="/images/4-2018.png" alt="updates" style="width:175px" title="Watch April 2018 updates video on YouTube" />
                     </a>
                     <br /> Check my
-                    <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos"
-                        target="_blank">YouTube Channel</a> for the latest updates.
+                    <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos" target="_blank">YouTube Channel</a> for the latest updates.
                     <br />
                     <br /> Updates August 2018:
                     <ul>
@@ -298,13 +304,16 @@
                             Ability to copy / select text in read-only script fields (Credit Meinzeugde)
                         </li>
                         <li>
-                            Minor bugfixes / improvements.                       
+                            In tables list a select is added, to add a query when opening a list, to prevent loading large dataset.
+                        </li>
+                        <li>
+                            Minor bugfixes / improvements.
                         </li>
 
-                    </ul> 
+                    </ul>
                     Sourcecode is available on
-                    <a class="popuplinks" href="https://github.com/arnoudkooi/ServiceNow-Utils" target="_blank">GitHub</a> for review purposes.<br />
-                    Please connect with me if you want to contribute. (Redistribution to Chrome Store is not allowed)
+                    <a class="popuplinks" href="https://github.com/arnoudkooi/ServiceNow-Utils" target="_blank">GitHub</a> for review purposes.
+                    <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is not allowed)
                     <br /> Also reach out if you have feedback or feature requests, or good snippets to integrate.
                     <div id="livemessage"></div>
 
