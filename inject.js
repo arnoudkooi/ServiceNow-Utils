@@ -124,7 +124,7 @@ function clickToList() {
                 g_form.clearMessages();
                 if (qry) {
                     var qryDisp2 = qryDisp.substring(0, qryDisp.length - 3);
-                    g_form.addInfoMessage('Filter <a href="javascript:delQry()">delete</a> :<a href="' + listurl + '" target="' + tbl + '">List filter: ' + qryDisp2 + '</a>');
+                    g_form.addInfoMessage('Filter for ' + tbl + ' <a href="javascript:delQry()">delete</a> :<a href="' + listurl + '" target="' + tbl + '">List filter: ' + qryDisp2 + '</a>');
                 }
             }
         }, true);
