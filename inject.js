@@ -45,6 +45,7 @@ function doubleClickToSetQueryListV2() {
 }
 
 var qry = ''
+var qryDisp = '';
 function clickToList() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("click", function (event) {
@@ -53,43 +54,77 @@ function clickToList() {
                 var tpe = '';
                 var tbl = g_form.getTableName();
                 var elm = '';
+                var elmDisp = '';
                 var val = 'none';
+                var valDisp = '';
                 var operator = '=';
                 var val;
                 if (jQuery(event.target).hasClass('label-text')) {
                     elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-                    tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
+                    tpe = g_form.getGlideUIElement(elm).type
+                    //tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
                     val = g_form.getValue(elm);
+
+                    elmDisp = jQuery(event.target).text();
+
+                    valDisp = g_form.getDisplayBox(elm) ? g_form.getDisplayBox(elm).value : g_form.getValue(elm);
+
                 }
                 if (jQuery(event.target).hasClass('container-fluid')) {
                     elm = 'sys_id';
                     val = g_form.getUniqueValue();
+
+                    elmDisp = 'DisplayValue';
+                    valDisp = g_form.getDisplayValue();
                 }
                 if (val == 'none') return;
 
                 if (tpe == 'glide_list' && elm != 'sys_id') {
                     operator = 'LIKE';
                 }
-                else if (val.length != 32 && val.length > 20) {
-                    val = val.substring(0, 32);
-                    operator = 'LIKE';
-                }
                 else if (val.length == 0) {
                     val = '';
+                    valDisp = '';
                     operator = 'ISEMPTY';
                 }
+                else if (tpe == 'glide_date_time' || tpe == 'glide_date') {
+
+                    operator = 'ON';
+                    //do some magic to get encodedquery to generate date
+                    var dte = val.substring(0, 10);
+                    valDisp = dte;
+                    var dateNumber = getDateFromFormat(g_form.getValue(elm), g_user_date_time_format);
+                    var dateJs = new Date(dateNumber)
+                    dte = dateJs.getFullYear() + '-' +
+                        ("0" + (dateJs.getMonth() + 1)).slice(-2) + '-' +
+                        ("0" + dateJs.getDate()).slice(-2);
+
+                    val = dte + "@javascript:gs.dateGenerate('" + dte + "','start')@javascript:gs.dateGenerate('" + dte + "','end')";
+   
+                }
+                else if (val.length > 60) {
+                    val = val.substring(0, 60);
+                    valDisp = val;
+                    operator = 'LIKE';
+                }
+
 
                 var idx = qry.indexOf(elm + operator);
-                if (idx > -1)
+                if (idx > -1) {
                     qry = qry.replace(elm + operator + val + '^', '');
-                else
+                    qryDisp = qryDisp.replace(elmDisp + ' ' + operator + ' <b>' + valDisp + '</b> > ', '');
+                }
+                else {
                     qry += elm + operator + val + '^';
+                    qryDisp += elmDisp + ' ' + operator + ' <b>' + valDisp + '</b> > ';
+                }
 
                 var listurl = '/' + tbl + '_list.do?sysparm_query=' + qry;
                 g_form.clearMessages();
-                if (qry)
-                    g_form.addInfoMessage('Filter <a href="javascript:delQry()">delete</a> :<a href="' + listurl + '" target="' + tbl + '">' + listurl + '</a>');
-
+                if (qry) {
+                    var qryDisp2 = qryDisp.substring(0, qryDisp.length - 3);
+                    g_form.addInfoMessage('Filter <a href="javascript:delQry()">delete</a> :<a href="' + listurl + '" target="' + tbl + '">List filter: ' + qryDisp2 + '</a>');
+                }
             }
         }, true);
     }
@@ -97,6 +132,7 @@ function clickToList() {
 
 function delQry() {
     qry = '';
+    qryDisp = '';
     g_form.clearMessages();
 }
 
@@ -153,6 +189,22 @@ function addTechnicalNames() {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
         if (jQuery(this).find('a.list_hdrcell, a.sort-columns').text().indexOf('|') == -1)
             jQuery(this).find('a.list_hdrcell, a.sort-columns').prepend('<i>' + tname + ' | </i> ');
+    });
+
+    showSelectFieldValues()
+}
+
+function showSelectFieldValues() {
+    if (typeof jQuery == 'undefined') return; //not in studio
+
+    jQuery('option').not(":contains('=>')").each(function (i, el) {
+        var jqEl = jQuery(el);
+        jqEl.html(el.text + ' => ' + el.value);
+    });
+
+    jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('=>')").each(function (i, el) {
+        var jqEl = jQuery(el);
+        jqEl.html(el.text + ' => ' + el.name);
     });
 }
 
