@@ -14,6 +14,7 @@ if (typeof jQuery != "undefined") {
         setShortCuts();
         bindPaste();
         makeReadOnlyContentCopyable();
+
     });
 }
 
@@ -100,7 +101,7 @@ function clickToList() {
                         ("0" + dateJs.getDate()).slice(-2);
 
                     val = dte + "@javascript:gs.dateGenerate('" + dte + "','start')@javascript:gs.dateGenerate('" + dte + "','end')";
-   
+
                 }
                 else if (val.length > 60) {
                     val = val.substring(0, 60);
@@ -191,7 +192,8 @@ function addTechnicalNames() {
             jQuery(this).find('a.list_hdrcell, a.sort-columns').prepend('<i>' + tname + ' | </i> ');
     });
 
-    showSelectFieldValues()
+    showSelectFieldValues();
+    searchLargeSelects();
 }
 
 function showSelectFieldValues() {
@@ -207,6 +209,52 @@ function showSelectFieldValues() {
         jqEl.html(el.text + ' => ' + el.name);
     });
 }
+
+function searchLargeSelects() {
+    var minItems = 20;
+
+    jQuery('select:not(.searchified)').each(function (i, el) {
+        if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
+            var input = document.createElement("input");
+            input.type = "text";
+            input.placeholder = "Filter choices...";
+            input.className = "form-control";
+            input.style.marginBottom = "2px";
+
+            jQuery(el).before(input).filterByText(input, true).addClass('searchified');
+        }
+    });
+}
+
+jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
+    return this.each(function () {
+        var select = this;
+        var options = [];
+        jQuery(select).find('option').each(function () {
+            options.push({ value: jQuery(this).val(), text: jQuery(this).text() });
+        });
+        jQuery(select).data('options', options);
+        jQuery(textbox).bind('change keyup', function () {
+            var options = jQuery(select).empty().data('options');
+            var search = jQuery.trim(jQuery(this).val());
+            var regex = new RegExp(search, "gi");
+
+            jQuery.each(options, function (i) {
+                var option = options[i];
+                if (option.text.match(regex) !== null) {
+                    jQuery(select).append(
+                        jQuery('<option>').text(option.text).val(option.value)
+                    );
+                }
+            });
+            if (selectSingleMatch === true && jQuery(select).children().length === 1) {
+                jQuery(select).children().get(0).selected = true;
+            }
+        });
+    });
+};
+
+
 
 function setShortCuts() {
 
