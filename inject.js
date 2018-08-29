@@ -1,6 +1,6 @@
 var fields = [];
 var mySysId = '';
-
+var atfMode = false;
 
 if (typeof jQuery != "undefined") {
     jQuery(function () {
@@ -14,6 +14,8 @@ if (typeof jQuery != "undefined") {
         setShortCuts();
         bindPaste();
         makeReadOnlyContentCopyable();
+
+        toggleATFMode();
 
     });
 }
@@ -48,10 +50,17 @@ function doubleClickToSetQueryListV2() {
 var qry = ''
 var qryDisp = '';
 function clickToList() {
+
+
+
     if (typeof g_form != 'undefined') {
         document.addEventListener("click", function (event) {
 
             if ((event.ctrlKey || event.metaKey)) {
+                if (atfMode) {
+                    generateATFValues(event);
+                    return;
+                }
                 var tpe = '';
                 var tbl = g_form.getTableName();
                 var elm = '';
@@ -128,6 +137,94 @@ function clickToList() {
                 }
             }
         }, true);
+    }
+}
+
+function generateATFValues(event) {
+    var tpe = '';
+    var tbl = g_form.getTableName();
+    var elm = '';
+    var elmDisp = '';
+    var val = 'none';
+    var valDisp = '';
+    var operator = '=';
+    var val;
+    if (jQuery(event.target).hasClass('label-text')) {
+        elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+        tpe = g_form.getGlideUIElement(elm).type
+        //tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
+        val = g_form.getValue(elm);
+
+        elmDisp = jQuery(event.target).text();
+
+        if (tpe == "reference")
+            valDisp = g_form.getDisplayBox(elm).value;
+        else
+            valDisp = val;
+
+
+    }
+    if (val == 'none' || val == '') return;
+
+    else if (tpe == 'glide_date_time' || tpe == 'glide_date') {
+
+        //operator = 'ON';
+        //do some magic to get encodedquery to generate date
+        var dte = val.substring(0, 10);
+        valDisp = dte;
+        var dateNumber = getDateFromFormat(g_form.getValue(elm), g_user_date_time_format);
+        var dateJs = new Date(dateNumber)
+        dte = dateJs.getFullYear() + '-' +
+            ("0" + (dateJs.getMonth() + 1)).slice(-2) + '-' +
+            ("0" + dateJs.getDate()).slice(-2);
+
+        val = dte;
+
+    }
+    else if (val.length > 60) {
+        valDisp = val.substring(0, 60) + '...';
+    }
+    var idx = qry.indexOf('^' + elm + operator);
+    if (idx > -1) {
+        qry = qry.replace('^' + elm + operator + val, '');
+        qryDisp = qryDisp.replace("- " + elmDisp + ' ' + operator + ' <b>' + valDisp + '</b><br />', '');
+    }
+    else {
+        qry += '^' + elm + operator + val;
+        qryDisp += "- " + elmDisp + ' ' + operator + ' <b>' + valDisp + '</b><br />';
+    }
+
+    var listurl = qry.substring(1, 10000);
+    g_form.clearMessages();
+    if (qry) {
+        var qryDisp2 = qryDisp.substring(0, qryDisp.length - 6);
+        g_form.addInfoMessage('Input values ' + tbl + ' <a href="javascript:delQry()">delete</a><br />' + qryDisp2 + '<br /><input type="text" class="form-control" value="' + listurl + '"></input>');
+    }
+
+
+
+}
+var vals;
+function getFieldStates() {
+    vals = { "visible": [], "not_visible": [], "read_only": [], "not_read_only": [], "not_mandatory": [], "mandatory": [] };
+    for (var i = 0; i < g_form.elements.length; i++) {
+        var elm = g_form.elements[i];
+        var mid = 'div[id="element.' + elm.tableName + '.' + elm.fieldName +'"]'
+        if (jQuery(mid).is(":visible") && jQuery(mid).css('visibility') !== 'hidden') {
+            vals.visible.push(elm.fieldName);
+            if (elm.mandatory)
+                vals.mandatory.push(elm.fieldName);
+            else
+                vals.not_mandatory.push(elm.fieldName);
+            
+            if (jQuery(elm.getElement()).is('[readonly]'))
+                vals.read_only.push(elm.fieldName);
+            else
+                vals.not_read_only.push(elm.fieldName);
+                
+        }
+        else
+            vals.not_visible.push(elm.fieldName);
     }
 }
 
@@ -295,6 +392,13 @@ function setShortCuts() {
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             }
+            else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 84) { //cmd-shift-t 
+                event.preventDefault();
+                toggleATFMode();
+                return false;
+            }
+
+
         }
 
 
@@ -302,6 +406,18 @@ function setShortCuts() {
 
 }
 
+
+function toggleATFMode() {
+    if (jQuery('#header_atf_image').length) {
+        jQuery('#header_atf_image').remove();
+        atfMode = false;
+    }
+    else {
+        jQuery('.navbar-title-display-value').append(' <span style="color:red" id="header_atf_image" class="icon icon-alert-triangle"> ATF Helper Active</span>');
+        atfMode = true;
+        delQry();
+    }
+}
 
 
 function bindPaste() {
