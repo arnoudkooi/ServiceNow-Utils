@@ -24,24 +24,23 @@ if (typeof jQuery != "undefined") {
 function startMessageChannel() {
     if (typeof g_form != 'undefined') {
 
-        if (g_form.tableName == "sys_atf_step" || window.name == "atfMode"){
+        if (g_form.tableName == "sys_atf_step" || window.name == "atfMode") {
             atfChannel = new BroadcastChannel(g_ck);
-            
-            if (g_form.tableName == "sys_atf_step"){
+
+            if (g_form.tableName == "sys_atf_step") {
                 atfChannel.postMessage(getStepDetails(g_form.getValue("step_config")));
             }
-            atfChannel.onmessage = function (ev) { 
-                if (ev.data.step != "undefined"){
+            atfChannel.onmessage = function (ev) {
+                if (ev.data.step != "undefined") {
                     delQry();
                     g_form.addInfoMessage(ev.data.step);
-                //console.log(ev);
-                }
-                else {
+                    //console.log(ev);
+                } else {
                     g_form.setValue(getStepDetails(g_form.getValue("step_config")).return.read_only, ev.data.set.read_only);
 
                 }
             }
-            
+
 
         }
     }
@@ -75,8 +74,9 @@ function doubleClickToSetQueryListV2() {
     });
 }
 
-var qry = ''
+var qry = '';
 var qryDisp = '';
+
 function clickToList() {
 
 
@@ -119,13 +119,11 @@ function clickToList() {
 
                 if (tpe == 'glide_list' && elm != 'sys_id') {
                     operator = 'LIKE';
-                }
-                else if (val.length == 0) {
+                } else if (val.length == 0) {
                     val = '';
                     valDisp = '';
                     operator = 'ISEMPTY';
-                }
-                else if (tpe == 'glide_date_time' || tpe == 'glide_date') {
+                } else if (tpe == 'glide_date_time' || tpe == 'glide_date') {
 
                     operator = 'ON';
                     //do some magic to get encodedquery to generate date
@@ -139,8 +137,7 @@ function clickToList() {
 
                     val = dte + "@javascript:gs.dateGenerate('" + dte + "','start')@javascript:gs.dateGenerate('" + dte + "','end')";
 
-                }
-                else if (val.length > 60) {
+                } else if (val.length > 60) {
                     val = val.substring(0, 60);
                     valDisp = val;
                     operator = 'LIKE';
@@ -151,8 +148,7 @@ function clickToList() {
                 if (idx > -1) {
                     qry = qry.replace(elm + operator + val + '^', '');
                     qryDisp = qryDisp.replace(elmDisp + ' ' + operator + ' <b>' + valDisp + '</b> > ', '');
-                }
-                else {
+                } else {
                     qry += elm + operator + val + '^';
                     qryDisp += elmDisp + ' ' + operator + ' <b>' + valDisp + '</b> > ';
                 }
@@ -208,16 +204,14 @@ function generateATFValues(event) {
 
         val = dte;
 
-    }
-    else if (val.length > 60) {
+    } else if (val.length > 60) {
         valDisp = val.substring(0, 60) + '...';
     }
     var idx = qry.indexOf('^' + elm + operator);
     if (idx > -1) {
         qry = qry.replace('^' + elm + operator + val, '');
         qryDisp = qryDisp.replace("- " + elmDisp + ' ' + operator + ' <b>' + valDisp + '</b><br />', '');
-    }
-    else {
+    } else {
         qry += '^' + elm + operator + val;
         qryDisp += "- " + elmDisp + ' ' + operator + ' <b>' + valDisp + '</b><br />';
     }
@@ -233,25 +227,32 @@ function generateATFValues(event) {
 
 }
 var vals;
+
 function getFieldStates() {
-    vals = { "visible": [], "not_visible": [], "read_only": [], "not_read_only": [], "not_mandatory": [], "mandatory": [] };
+    vals = {
+        "visible": [],
+        "not_visible": [],
+        "read_only": [],
+        "not_read_only": [],
+        "not_mandatory": [],
+        "mandatory": []
+    };
     for (var i = 0; i < g_form.elements.length; i++) {
         var elm = g_form.elements[i];
-        var mid = 'div[id="element.' + elm.tableName + '.' + elm.fieldName +'"]'
+        var mid = 'div[id="element.' + elm.tableName + '.' + elm.fieldName + '"]'
         if (jQuery(mid).is(":visible") && jQuery(mid).css('visibility') !== 'hidden') {
             vals.visible.push(elm.fieldName);
             if (elm.mandatory)
                 vals.mandatory.push(elm.fieldName);
             else
                 vals.not_mandatory.push(elm.fieldName);
-            
+
             if (jQuery(elm.getElement()).is('[readonly]'))
                 vals.read_only.push(elm.fieldName);
             else
                 vals.not_read_only.push(elm.fieldName);
-                
-        }
-        else
+
+        } else
             vals.not_visible.push(elm.fieldName);
     }
 }
@@ -319,7 +320,7 @@ function addTechnicalNames() {
 
     //also show viewname
     var viewName = jQuery('input#sysparm_view').val();
-    if (viewName &&  !jQuery('i.viewName').length)
+    if (viewName && !jQuery('i.viewName').length)
         jQuery('.section-content').first().prepend('<i class="viewName">Viewname: ' + viewName + '</i><br /> ');
 
     showSelectFieldValues();
@@ -341,7 +342,42 @@ function showSelectFieldValues() {
 }
 
 function searchLargeSelects() {
-    var minItems = 20;
+
+    if (typeof jQuery.fn.filterByText == 'undefined') {
+        jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
+            return this.each(function () {
+                var select = this;
+                var options = [];
+                jQuery(select).find('option').each(function () {
+                    options.push({
+                        value: jQuery(this).val(),
+                        text: jQuery(this).text()
+                    });
+                });
+                jQuery(select).data('options', options);
+                jQuery(textbox).bind('change keyup', function () {
+                    var options = jQuery(select).empty().data('options');
+                    var search = jQuery.trim(jQuery(this).val());
+                    var regex = new RegExp(search, "gi");
+
+                    jQuery.each(options, function (i) {
+                        var option = options[i];
+                        if (option.text.match(regex) !== null) {
+                            jQuery(select).append(
+                                jQuery('<option>').text(option.text).val(option.value)
+                            );
+                        }
+                    });
+                    if (selectSingleMatch === true && jQuery(select).children().length === 1) {
+                        jQuery(select).children().get(0).selected = true;
+                    }
+                });
+            });
+        };
+    }
+
+
+    var minItems = 25;
 
     jQuery('select:not(.searchified)').each(function (i, el) {
         if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
@@ -356,33 +392,8 @@ function searchLargeSelects() {
     });
 }
 
-jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
-    return this.each(function () {
-        var select = this;
-        var options = [];
-        jQuery(select).find('option').each(function () {
-            options.push({ value: jQuery(this).val(), text: jQuery(this).text() });
-        });
-        jQuery(select).data('options', options);
-        jQuery(textbox).bind('change keyup', function () {
-            var options = jQuery(select).empty().data('options');
-            var search = jQuery.trim(jQuery(this).val());
-            var regex = new RegExp(search, "gi");
 
-            jQuery.each(options, function (i) {
-                var option = options[i];
-                if (option.text.match(regex) !== null) {
-                    jQuery(select).append(
-                        jQuery('<option>').text(option.text).val(option.value)
-                    );
-                }
-            });
-            if (selectSingleMatch === true && jQuery(select).children().length === 1) {
-                jQuery(select).children().get(0).selected = true;
-            }
-        });
-    });
-};
+
 
 
 
@@ -418,14 +429,12 @@ function setShortCuts() {
                 var action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
-            }
-            else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
+            } else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
                 event.preventDefault();
                 var action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
-            }
-            else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 84) { //cmd-shift-t 
+            } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 84) { //cmd-shift-t 
                 event.preventDefault();
                 toggleATFMode();
                 return false;
@@ -437,6 +446,15 @@ function setShortCuts() {
 
     }, false);
 
+    //Helper for ATF show ui action sys_id 
+    jQuery('.action_context').on('mouseover', function(event){
+        if (event.ctrlKey || event.metaKey) {
+            event.stopImmediatePropagation()
+            prompt("UI Action:" + jQuery(this).text() + "\nsys_id",jQuery(this).attr('gsft_id'));
+        } 
+    
+    });
+
 }
 
 
@@ -447,8 +465,7 @@ function toggleATFMode() {
         jQuery('#header_atf_image').remove();
         atfMode = false;
         window.name = "";
-    }
-    else {
+    } else {
         jQuery('.navbar-title-display-value').append(' <span style="color:red" id="header_atf_image" class="icon icon-alert-triangle"> ATF Helper Active</span>');
         window.name = "atfMode";
         atfMode = true;
@@ -514,7 +531,9 @@ function getBlob(encoded) {
         }
         byteArrays[sliceIndex] = new Uint8Array(bytes);
     }
-    return new Blob(byteArrays, { type: "image/png" });
+    return new Blob(byteArrays, {
+        type: "image/png"
+    });
 }
 
 function saveImage(imgData, fileInfo) {
@@ -631,8 +650,7 @@ function getListV3Fields() {
             }
         });
 
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err);
 
     }
@@ -648,6 +666,7 @@ function loadIframe(url) {
 }
 
 var elNames = '';
+
 function getFormElementNames() {
     if (typeof g_form !== 'undefined') {
         var elArr = []
@@ -743,7 +762,7 @@ function showAlert(msg, type, timeout) {
 }
 
 
-function getStepDetails(step){
+function getStepDetails(step) {
     var steps = {
         "071ee5b253331200040729cac2dc348d": {
             "step": "Impersonate a user",

@@ -3,7 +3,7 @@
     "short_name": "ServiceNow Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "2.7",
+    "version": "2.7.1",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
