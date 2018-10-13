@@ -79,7 +79,8 @@
             "48": "images/icon48.png",
             "128": "images/icon128.png"
         },
-        "show_matches": ["https://*.service-now.com/*"]
+        "show_matches": ["https://*.service-now.com/*"],
+        "hide_matches": ["https://signon.service-now.com/*"]
     },
     "web_accessible_resources": [
         "inject.js",
