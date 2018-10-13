@@ -11,6 +11,10 @@ var updateSetTables = [];
 
 //Attatch eventlistener, setting extension only active on *.service-now.com
 chrome.runtime.onInstalled.addListener(function () {
+    // firefox uses manifest pageAction.show_matches for the same functionality
+    if (typeof chrome.declarativeContent === 'undefined')
+        return;
+
     chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
         chrome.declarativeContent.onPageChanged.addRules([
             {
@@ -169,8 +173,10 @@ function addTechnicalNames() {
     chrome.tabs.query(
         { currentWindow: true, active: true },
         function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { method: "runFunction", myVars: "addTechnicalNames();", funtion() { } });
-
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "runFunction",
+                myVars: "addTechnicalNames()"
+            });
         })
 
 }

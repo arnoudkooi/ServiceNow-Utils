@@ -3,7 +3,7 @@
     if (document.getElementById("filter") != null) {
         //add typeahead for usage in Application Navigator
         var t = document.createElement('script');
-        t.src = chrome.extension.getURL('js/typeahead.bundle.min.js');
+        t.src = chrome.runtime.getURL('js/typeahead.bundle.min.js');
         t.onload = function () {
             this.remove();
         };
@@ -12,7 +12,7 @@
 
         //add script to extend search field
         var c = document.createElement('script');
-        c.src = chrome.extension.getURL('inject_parent.js');
+        c.src = chrome.runtime.getURL('inject_parent.js');
         c.onload = function () {
             this.remove();
         };
@@ -23,7 +23,7 @@
 
 
 //attach event listener from popup
-chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.method == "getSelection")
         sendResponse({ selectedText: getSelection() });
     else if (request.method == "getVars")
