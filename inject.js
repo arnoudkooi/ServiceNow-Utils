@@ -605,9 +605,9 @@ function renamePasted(sysID, check) {
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
             if (this.status == 200)
-                document.getElementById("divRenamed").innerHTML = " Filename saved!";
+                document.getElementById("divRenamed").textContent = " Filename saved!";
             else
-                document.getElementById("divRenamed").innerHTML = this.status + this.response;
+                document.getElementById("divRenamed").textContent = this.status + this.response;
         }
     };
     client.send(JSON.stringify(requestBody));
