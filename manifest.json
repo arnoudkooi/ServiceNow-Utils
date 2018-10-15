@@ -33,6 +33,10 @@
             "matches": [
                 "https://*.service-now.com/*"
             ],
+            "exclude_matches": [
+                "https://signon.service-now.com/*",
+                "https://*.service-now.com/*XML=*"
+            ],
             "js": [
                 "content_script_parent.js"
             ]
@@ -40,6 +44,10 @@
         {
             "matches": [
                 "https://*.service-now.com/*"
+            ],
+            "exclude_matches": [
+                "https://signon.service-now.com/*",
+                "https://*.service-now.com/*XML=*"
             ],
             "js": [
                 "js/jquery.js",
