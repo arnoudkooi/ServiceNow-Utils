@@ -84,7 +84,8 @@ function setRecordVariables(obj, scriptsync) {
 function checkSnufsRunning() {
     chrome.runtime.sendMessage(snufsid, { checkRunning: true, instance: instance },
         function (response) {
-            if (typeof response == 'undefined') {
+            if (typeof response == 'undefined' &&
+                typeof chrome.management !== 'undefined') {
                 chrome.management.launchApp(snufsid, function (resp) {
                     chrome.runtime.sendMessage(snufsid, { checkRunning: true, instance: instance },
                         function (res) {

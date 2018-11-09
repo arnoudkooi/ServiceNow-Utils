@@ -402,12 +402,12 @@ function setShortCuts() {
     document.addEventListener("keydown", function (event) {
 
         //across all pages to set focus to left menu
-        if (((event.ctrlKey || event.metaKey) && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-s
-            var doc = (window.self == window.top) ? document : top.document;
-            if (applicationFilterEl) { //switch between Navigator and search on hitting cmd-shift-f
-                var elm = (document.activeElement.id != applicationFilterId) ? applicationFilterId : globalSearchId;
-                doc.getElementById(elm).focus();
-                doc.getElementById(elm).select();
+        if (((event.ctrlKey || event.metaKey) && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-f
+            var topWindow = (window.self == window.top) ? window : window.top;
+            if (topWindow.applicationFilterEl) { //switch between Navigator and search on hitting cmd-shift-f
+                var elm = (document.activeElement.id != topWindow.applicationFilterId) ? topWindow.applicationFilterId : topWindow.globalSearchId;
+                topWindow.document.getElementById(elm).focus();
+                topWindow.document.getElementById(elm).select();
             }
         }
 
@@ -605,9 +605,9 @@ function renamePasted(sysID, check) {
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
             if (this.status == 200)
-                document.getElementById("divRenamed").innerHTML = " Filename saved!";
+                document.getElementById("divRenamed").textContent = " Filename saved!";
             else
-                document.getElementById("divRenamed").innerHTML = this.status + this.response;
+                document.getElementById("divRenamed").textContent = this.status + this.response;
         }
     };
     client.send(JSON.stringify(requestBody));

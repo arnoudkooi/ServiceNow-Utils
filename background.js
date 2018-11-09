@@ -11,6 +11,10 @@ var updateSetTables = [];
 
 //Attatch eventlistener, setting extension only active on *.service-now.com
 chrome.runtime.onInstalled.addListener(function () {
+    // firefox uses manifest pageAction.show_matches for the same functionality
+    if (typeof chrome.declarativeContent === 'undefined')
+        return;
+
     chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
         chrome.declarativeContent.onPageChanged.addRules([
             {
@@ -53,26 +57,32 @@ chrome.commands.onCommand.addListener(function (command) {
 // });
 
 
+var menuItems = [
+{ "type": "separator" },
 
-chrome.contextMenus.create({ "type": "separator" });
+{ "id": "goto", "contexts": ["selection"], "title": "Search / GoTo" },
+{ "id": "instancesearch", "parentId": "goto", "title": "Instance Search: %s", contexts: ["selection"], "onclick": openSearch },
+{ "id": "openscript", "parentId": "goto", "title": "Script Include: %s", contexts: ["selection"], "onclick": openScriptInclude },
+{ "id": "opentablelist", "parentId": "goto", "title": "Table list: %s", contexts: ["selection"], "onclick": openTableList },
+{ "id": "tools", "contexts": ["all"], "title": "Tools" },
+{ "id": "popinout", "parentId": "tools", "title": "PopIn / PopOut", "contexts": ["all"], "onclick": togglePop },
+{ "id": "shownames", "parentId": "tools", "title": "Show technical names", "contexts": ["all"], "onclick": addTechnicalNames },
+{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/cancel_my_transactions.do'); } },
+//{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
+{ "id": "props", "parentId": "tools", "title": "Properties", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/sys_properties_list.do') } },
+{ "id": "updates", "parentId": "tools", "title": "Today's Updates", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on') } },
+{ "id": "versions", "parentId": "tools", "title": "Update Versions", "contexts": ["all"], "onclick": function (e, f) { openVersions(e, f) } },
+{ "id": "stats", "parentId": "tools", "title": "stats.do", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/stats.do') } },
+{ "id": "codesnippets", "contexts": ["editable"], "title": "Code Snippets" },
+{ "id": "worknotesnippets", "contexts": ["editable"], "title": "Worknote Snippets" }
+];
 
-chrome.contextMenus.create({ "id": "goto", "contexts": ["selection"], "title": "Search / GoTo" });
-chrome.contextMenus.create({ "id": "instancesearch", "parentId": "goto", "title": "Instance Search: %s", contexts: ["selection"], "onclick": openSearch });
-chrome.contextMenus.create({ "id": "openscript", "parentId": "goto", "title": "Script Include: %s", contexts: ["selection"], "onclick": openScriptInclude });
-chrome.contextMenus.create({ "id": "opentablelist", "parentId": "goto", "title": "Table list: %s", contexts: ["selection"], "onclick": openTableList });
-chrome.contextMenus.create({ "id": "tools", "contexts": ["all"], "title": "Tools" });
-chrome.contextMenus.create({ "id": "popinout", "parentId": "tools", "title": "PopIn / PopOut", "contexts": ["all"], "onclick": togglePop });
-chrome.contextMenus.create({ "id": "shownames", "parentId": "tools", "title": "Show technical names", "contexts": ["all"], "onclick": addTechnicalNames });
-chrome.contextMenus.create({ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/cancel_my_transactions.do'); } });
-//chrome.contextMenus.create({ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } });
-chrome.contextMenus.create({ "id": "props", "parentId": "tools", "title": "Properties", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/sys_properties_list.do') } });
-chrome.contextMenus.create({ "id": "updates", "parentId": "tools", "title": "Today's Updates", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on') } });
-chrome.contextMenus.create({ "id": "versions", "parentId": "tools", "title": "Update Versions", "contexts": ["all"], "onclick": function (e, f) { openVersions(e, f) } });
-chrome.contextMenus.create({ "id": "stats", "parentId": "tools", "title": "stats.do", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/stats.do') } });
-chrome.contextMenus.create({ "id": "codesnippets", "contexts": ["editable"], "title": "Code Snippets" });
-chrome.contextMenus.create({ "id": "worknotesnippets", "contexts": ["editable"], "title": "Worknote Snippets" });
-
-
+const defaultMenuConf = {
+    "documentUrlPatterns": ["https://*.service-now.com/*"]
+};
+for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
+    chrome.contextMenus.create(Object.assign(menuItems[itemIdx], defaultMenuConf));
+}
 
 var snippets = {
     "codesnippet1": ["codesnippets", "GlideAggregate Count", `var count = new GlideAggregate('incident');
@@ -141,7 +151,9 @@ var snippets = {
 };
 
 for (var snip in snippets) {
-    chrome.contextMenus.create({ "id": snip, "parentId": snippets[snip][0], "contexts": ["editable"], "title": snippets[snip][1], "onclick": insertSnippet });
+    chrome.contextMenus.create(Object.assign(
+        { "id": snip, "parentId": snippets[snip][0], "contexts": ["editable"], "title": snippets[snip][1], "onclick": insertSnippet },
+        defaultMenuConf));
 }
 
 function insertSnippet(e, f) {
@@ -169,8 +181,10 @@ function addTechnicalNames() {
     chrome.tabs.query(
         { currentWindow: true, active: true },
         function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { method: "runFunction", myVars: "addTechnicalNames();", funtion() { } });
-
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "runFunction",
+                myVars: "addTechnicalNames()"
+            });
         })
 
 }

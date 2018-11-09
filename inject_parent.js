@@ -89,8 +89,8 @@ function setSearch() {
                 var value = applicationFilterEl.val();
                 var listurl = '';
                 var query = [];
-                var table = value.substr(0, value.indexOf('.'));
-                var action = value.substr(value.indexOf('.') + 1);
+                var table = value.indexOf('.') > -1 ? value.substr(0, value.indexOf('.')) : value;
+                var action = value.indexOf('.') > -1 ? value.substr(value.indexOf('.') + 1) : '';
                 var orderAttr = 'sys_updated_on';
 
                 applicationFilterEl.val('');
@@ -130,15 +130,21 @@ function setSearch() {
                     } else {
                         loadIframe(listurl);
                     }
-                }
-            } else {
-                var value = globalSearchEl.val();
-                if (value.match(/^[a-z0-9]{32,32}$/g) != null && value.length == 32) {
-                    event.preventDefault();
-                    searchSysIdTables(value);
+                } else {
+                    let sysId = table;
+                    if (sysId.match(/^[a-z0-9]{32,32}$/g) != null && sysId.length == 32) {
+                        event.preventDefault();
+                        searchSysIdTables(sysId);
+                    }
                 }
             }
 
+        } else if (globalSearchEl && document.activeElement.id == globalSearchId) {
+            let value = globalSearchEl.val();
+            if (value.match(/^[a-z0-9]{32,32}$/g) != null && value.length == 32) {
+                event.preventDefault();
+                searchSysIdTables(value);
+            }
         }
 
 

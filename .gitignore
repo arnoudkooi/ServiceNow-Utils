@@ -1,3 +1,7 @@
 images/.DS_Store
 fonts/.DS_Store
 .DS_Store
+
+# web-ext stuff
+.web-extension-id
+web-ext-artifacts/

@@ -1,5 +1,5 @@
 //attach event listener from popup
-chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.method == "runFunction")
         runFunction(request.myVars);
     else if (request.snippet) {
@@ -10,7 +10,7 @@ chrome.extension.onMessage.addListener(function (request, sender, sendResponse) 
 
 (function(){
     var s = document.createElement('script');
-    s.src = chrome.extension.getURL('inject.js');
+    s.src = chrome.runtime.getURL('inject.js');
     s.onload = function() {
         this.remove();
     };

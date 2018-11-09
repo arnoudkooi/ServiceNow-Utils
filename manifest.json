@@ -3,7 +3,7 @@
     "short_name": "ServiceNow Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "2.7.1",
+    "version": "2.7.2.2",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -33,6 +33,10 @@
             "matches": [
                 "https://*.service-now.com/*"
             ],
+            "exclude_matches": [
+                "https://signon.service-now.com/*",
+                "https://*.service-now.com/*XML=*"
+            ],
             "js": [
                 "content_script_parent.js"
             ]
@@ -40,6 +44,10 @@
         {
             "matches": [
                 "https://*.service-now.com/*"
+            ],
+            "exclude_matches": [
+                "https://signon.service-now.com/*",
+                "https://*.service-now.com/*XML=*"
             ],
             "js": [
                 "js/jquery.js",
@@ -72,12 +80,25 @@
     },
     "page_action": {
         "default_title": "ServiceNow Utils",
-        "default_popup": "popup.html"
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "images/icon16.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        },
+        "show_matches": ["https://*.service-now.com/*"],
+        "hide_matches": ["https://signon.service-now.com/*"]
     },
     "web_accessible_resources": [
         "inject.js",
         "inject_parent.js",
         "js/typeahead.bundle.min.js"
     ],
-    "manifest_version": 2
+    "manifest_version": 2,
+    "applications": {
+        "gecko": {
+            "id": "servicenow-utils@arnoudkooi.com"
+        }
+    }
 }
