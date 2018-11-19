@@ -11,8 +11,6 @@ if (typeof jQuery != "undefined") {
     var applicationFilterEl = jQuery('#' + applicationFilterId);
     var globalSearchEl = jQuery('#' + globalSearchId);
 
-    makeUpdateSetIconClickable();
-
     jQuery(function () {
        // initializeAutocomplete();
        // setSearch();
@@ -45,26 +43,6 @@ function initializeAutocomplete(array) {
         });
 }
 
-function makeUpdateSetIconClickable() {
-    if (!jQuery("a.icon-document-multiple[href*='sys_update_set']").length) { //starting Jakarta this is oob
-        jQuery('update-set-picker')
-            .find('.icon-document-multiple')
-            .first()
-            .css('color', 'red')
-            .wrap("<a name='openupdateset' href='#' ></a>");
-
-
-        jQuery("[name='openupdateset']").on('click', function (e) {
-            var ussysid = jQuery("[name='update_set_picker_select']").val().replace('string:', '');
-            var url = '/sys_update_set.do?sys_id=' + ussysid;
-
-            if (e.shiftKey || e.ctrlKey || e.metaKey)
-                jQuery("<a>").attr("href", url).attr("target", "_blank")[0].click();
-            else
-                jQuery('#' + iframeId).attr('src', url);
-        });
-    }
-}
 
 
 function setSearch() {
@@ -220,7 +198,7 @@ function setSearch() {
 
         }
     }
-    setFilterPlaceHolder();
+    // setFilterPlaceHolder();
 
 
 

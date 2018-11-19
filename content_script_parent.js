@@ -1,13 +1,13 @@
 (function () {
 
     if (document.getElementById("filter") != null) {
-        //add typeahead for usage in Application Navigator
-        var t = document.createElement('script');
-        t.src = chrome.runtime.getURL('js/typeahead.bundle.min.js');
-        t.onload = function () {
-            this.remove();
-        };
-        (document.head || document.documentElement).appendChild(t);
+        // //add typeahead for usage in Application Navigator
+        // var t = document.createElement('script');
+        // t.src = chrome.runtime.getURL('js/typeahead.bundle.min.js');
+        // t.onload = function () {
+        //     this.remove();
+        // };
+        // (document.head || document.documentElement).appendChild(t);
 
 
         //add script to extend search field
