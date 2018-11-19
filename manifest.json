@@ -61,7 +61,8 @@
             "suggested_key": {
                 "default": "Ctrl+1",
                 "mac": "Command+1"
-            }
+            },
+            "description": "Activate Extension"
         },
         "pop": {
             "suggested_key": {
@@ -89,6 +90,10 @@
         },
         "show_matches": ["https://*.service-now.com/*"],
         "hide_matches": ["https://signon.service-now.com/*"]
+    },
+    "options_ui": {
+        "page": "options.html",
+        "browser_style": true
     },
     "web_accessible_resources": [
         "inject.js",

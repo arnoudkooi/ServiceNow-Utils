@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
 //setIcon("images/icon32newer.png");
 
     });
-
+    document.querySelector('#firefoxoptions').href = chrome.runtime.getURL("options.html");
 });
 
 function setIcon(icon){
