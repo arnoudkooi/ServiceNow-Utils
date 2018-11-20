@@ -1,8 +1,10 @@
 //attach event listener from popup
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.method == "runFunction")
+    if (request.method == "runFunction") {
         runFunction(request.myVars);
-    else if (request.snippet) {
+    } else if (request.method == "runFunctionChild") {
+        runFunction(request.myVars, 'child');
+    } else if (request.snippet) {
         insertTextAtCursor(request.snippet);
     }
 
@@ -17,9 +19,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     (document.head || document.documentElement).appendChild(s);
   })();
 
-
-function runFunction(f) {
+function runFunction(f, context) {
     var doc;
+
+    if (context == 'child' && jQuery('#gsft_main').length)
+        return;
+
     if (jQuery('#gsft_main').length)
         doc = jQuery('#gsft_main')[0].contentWindow.document;
     else

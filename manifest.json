@@ -84,6 +84,9 @@
                 "mac": "Command+Shift+F"
             },
             "description": "Toggle between Application Filter and Global Search"
+        },
+        "toggle-atf": {
+            "description": "Toggle ATF Helper"
         }
     },
     "page_action": {

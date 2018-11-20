@@ -42,6 +42,8 @@ chrome.commands.onCommand.addListener(function (command) {
         pop();
     else if (command == "toggle-focus-filter")
         sendToggleSearchFocus();
+    else if (command == "toggle-atf")
+        sendToggleAtfHelper();
 
 });
 
@@ -198,6 +200,17 @@ function sendToggleSearchFocus() {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "toggleSearch"
             }, {frameId: 0});
+        });
+}
+
+function sendToggleAtfHelper() {
+    chrome.tabs.query(
+        { currentWindow: true, active: true },
+        function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "runFunctionChild",
+                myVars: "toggleATFMode()"
+            });
         });
 }
 

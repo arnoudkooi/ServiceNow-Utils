@@ -423,10 +423,6 @@ function setShortCuts() {
                 var action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
-            } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 84) { //cmd-shift-t 
-                event.preventDefault();
-                toggleATFMode();
-                return false;
             }
 
 
