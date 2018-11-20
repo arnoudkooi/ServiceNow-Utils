@@ -77,6 +77,13 @@
                 "mac": "Command+3"
             },
             "description": "Show Technical Names"
+        },
+        "toggle-focus-filter": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+F",
+                "mac": "Command+Shift+F"
+            },
+            "description": "Toggle between Application Filter and Global Search"
         }
     },
     "page_action": {

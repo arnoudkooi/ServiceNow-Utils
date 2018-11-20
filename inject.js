@@ -401,19 +401,8 @@ function setShortCuts() {
 
     document.addEventListener("keydown", function (event) {
 
-        //across all pages to set focus to left menu
-        if (((event.ctrlKey || event.metaKey) && event.shiftKey) && event.keyCode == 70) { //cmd||ctrl-shift-f
-            var topWindow = (window.self == window.top) ? window : window.top;
-            if (topWindow.applicationFilterEl) { //switch between Navigator and search on hitting cmd-shift-f
-                var elm = (document.activeElement.id != topWindow.applicationFilterId) ? topWindow.applicationFilterId : topWindow.globalSearchId;
-                topWindow.document.getElementById(elm).focus();
-                topWindow.document.getElementById(elm).select();
-            }
-        }
-
-
         //a few specific for forms
-        else if (typeof g_form != 'undefined') {
+        if (typeof g_form != 'undefined') {
             mySysId = g_form.getUniqueValue();
             if ((event.ctrlKey || event.metaKey) && event.keyCode == 83) { //cmd-s
 
