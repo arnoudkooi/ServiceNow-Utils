@@ -61,7 +61,8 @@
             "suggested_key": {
                 "default": "Ctrl+1",
                 "mac": "Command+1"
-            }
+            },
+            "description": "Activate Extension"
         },
         "pop": {
             "suggested_key": {
@@ -76,6 +77,16 @@
                 "mac": "Command+3"
             },
             "description": "Show Technical Names"
+        },
+        "toggle-focus-filter": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+F",
+                "mac": "Command+Shift+F"
+            },
+            "description": "Toggle between Application Filter and Global Search"
+        },
+        "toggle-atf": {
+            "description": "Toggle ATF Helper"
         }
     },
     "page_action": {
@@ -89,6 +100,10 @@
         },
         "show_matches": ["https://*.service-now.com/*"],
         "hide_matches": ["https://signon.service-now.com/*"]
+    },
+    "options_ui": {
+        "page": "options.html",
+        "browser_style": true
     },
     "web_accessible_resources": [
         "inject.js",

@@ -40,6 +40,10 @@ chrome.commands.onCommand.addListener(function (command) {
         addTechnicalNames();
     else if (command == "pop")
         pop();
+    else if (command == "toggle-focus-filter")
+        sendToggleSearchFocus();
+    else if (command == "toggle-atf")
+        sendToggleAtfHelper();
 
 });
 
@@ -185,8 +189,29 @@ function addTechnicalNames() {
                 method: "runFunction",
                 myVars: "addTechnicalNames()"
             });
-        })
+        });
 
+}
+
+function sendToggleSearchFocus() {
+    chrome.tabs.query(
+        { currentWindow: true, active: true },
+        function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "toggleSearch"
+            }, {frameId: 0});
+        });
+}
+
+function sendToggleAtfHelper() {
+    chrome.tabs.query(
+        { currentWindow: true, active: true },
+        function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "runFunctionChild",
+                myVars: "toggleATFMode()"
+            });
+        });
 }
 
 

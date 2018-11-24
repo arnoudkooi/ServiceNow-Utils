@@ -30,11 +30,21 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         sendResponse({ myVars: getVars(request.myVars), url: location.origin, frameHref: getFrameHref() });
     else if (request.method == "getLocation")
         sendResponse({ url: location.origin, frameHref: getFrameHref() });
+    else if (request.method == "toggleSearch") {
+        toggleSearch();
+    }
     //else
     //sendResponse({ url: location.origin });
+
 });
 
 
+function toggleSearch() {
+    let nextFocus = (document.activeElement.id == "filter")
+        ? "sysparm_search" : "filter";
+    document.getElementById(nextFocus).focus();
+    document.getElementById(nextFocus).select();
+}
 
 
 //get the selected text, user gas selected with mouse.
