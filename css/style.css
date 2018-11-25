@@ -14,12 +14,13 @@ body {
     height: 500px;
     overflow-x: hidden;
 }
-table{
-width: 100%;
+
+table {
+    width: 100%;
 
 }
 
-a.iscurrent{
+a.iscurrent {
     cursor: default;
     text-decoration-line: none;
 }
@@ -30,7 +31,8 @@ ul.nav {
     padding-top: 7px;
 }
 
-.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+.nav-tabs .nav-item.show .nav-link,
+.nav-tabs .nav-link.active {
     border-radius: 0;
     color: #fff !important;
     background-color: #0039cb;
@@ -50,7 +52,7 @@ ul.nav {
 .nav-link:hover:not(.active) {
     color: #fff !important;
     border: none;
-    text-decoration: underline!important;
+    text-decoration: underline !important;
     text-decoration-color: #fff !important;
 }
 
@@ -64,7 +66,8 @@ div.tab-content {
     padding: 6px;
 }
 
-table.dataTable tbody th, table.dataTable tbody td {
+table.dataTable tbody th,
+table.dataTable tbody td {
     padding: 2px 2px;
 }
 
@@ -91,8 +94,8 @@ span.waiting {
     display: none;
 }
 
-.fa-spinner{
-    color:#fff !important;
+.fa-spinner {
+    color: #fff !important;
     z-index: 1000;
 }
 
@@ -110,7 +113,8 @@ a {
     border-color: #0368d4;
 }
 
-.btn-primary:hover, .btn-primary.hover {
+.btn-primary:hover,
+.btn-primary.hover {
     background-color: #278efc;
     box-shadow: 0 6px 18px -9px #000000;
     transition: box-shadow 0.2s;
@@ -129,7 +133,9 @@ td i {
 }
 
 @media screen and (max-width: 640px) {
-    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
         float: left;
         text-align: left;
     }
@@ -160,4 +166,50 @@ table.dataTable tbody td {
 .form-control:focus {
     border-color: #6c757d;
     box-shadow: none;
+}
+
+.hide-in-browser {
+    display: none;
+}
+
+/* Hacks for browser specific messages*/
+@-moz-document url-prefix() {
+    .hide-in-firefox {
+        display: none;
+    }
+
+    .show-in-firefox {
+        display: inline;
+    }
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) and (min-resolution:.001dpcm) {
+    .hide-in-chrome {
+        display: none;
+    }
+
+    .show-in-chrome {
+        display: inline;
+    }
+}
+
+/* fix path to datatables sort images*/
+table.dataTable thead .sorting {
+    background: url("/images/sort_both.png") no-repeat center right;
+}
+
+table.dataTable thead .sorting_asc {
+    background: url("/images/sort_asc.png") no-repeat center right;
+}
+
+table.dataTable thead .sorting_desc {
+    background: url("/images/sort_desc.png") no-repeat center right;
+}
+
+table.dataTable thead .sorting_asc_disabled {
+    background: url("/images/sort_asc_disabled.png") no-repeat center right;
+}
+
+table.dataTable thead .sorting_desc_disabled {
+    background: url("/images/sort_desc_disabled.png") no-repeat center right;
 }

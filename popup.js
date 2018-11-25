@@ -21,7 +21,7 @@ var updatesloaded = false;
 var myFrameHref;
 var datetimeformat;
 var table;
-var sys_id
+var sys_id;
 var isNoRecord = true;
 var snufsid = 'gfmcfepahcbpafgckmomdopifchjbdcg';// prod
 //var snufsid = 'kbledokkkhpgehnehfghicncdndkdnoa';// dev
@@ -125,7 +125,7 @@ function setFormFromSyncStorage(callback) {
             $('form').deserialize(result[query]);
         }
         callback();
-    })
+    });
 }
 
 //Try to get json with servicenow tables, first from chrome storage, else via REST api
@@ -143,7 +143,7 @@ function prepareJsonTable() {
         catch (err) {
             bgPage.getTables();
         }
-    })
+    });
 }
 
 //Try to get json with instance nodes, first from chrome storage, else via REST api
@@ -161,7 +161,7 @@ function prepareJsonNodes() {
         catch (err) {
             bgPage.getNodes();
         }
-    })
+    });
 }
 
 
@@ -180,7 +180,7 @@ function prepareJsonScriptFields() {
         catch (err) {
             bgPage.getScriptFields();
         }
-    })
+    });
 }
 
 //add object to storage and refresh datatable
@@ -246,11 +246,11 @@ function setBrowserVariables(obj) {
 
     $('input').on('blur', function () {
         setToChromeSyncStorage("formvalues", $('form .sync').serialize());
-    })
+    });
 
     $('select').on('change', function () {
         setToChromeSyncStorage("formvalues", $('form .sync').serialize());
-    })
+    });
 
     $('#btnSetGRName').click(function () {
         getGRQuery();
@@ -275,7 +275,7 @@ function setBrowserVariables(obj) {
     $.fn.dataTable.moment(datetimeformat);
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        var target = $(e.target).data("target") // activated tab
+        var target = $(e.target).data("target"); // activated tab
 
         $('#tbxactivetab').val(target);
         setToChromeSyncStorage("formvalues", $('form .sync').serialize());
@@ -313,14 +313,15 @@ function setBrowserVariables(obj) {
                 });
                 break;   
             case "#tabtables":
+                $('#tbxtables').focus(function () {
+                    $(this).select();
+                }).focus();
                 if (!tablesloaded) {
                     $('#waitingtables').show();
                     prepareJsonTable();
                     tablesloaded = true;
                 }
-                $('#tbxtables').focus(function () {
-                    $(this).select();
-                });
+
                 break;
             case "#tabdataexplore":
                 if (!dataexploreloaded) {
@@ -328,7 +329,7 @@ function setBrowserVariables(obj) {
                      bgPage.getExploreData();
                      dataexploreloaded = true;
                 }
-                $('#tbxtables').focus(function () {
+                $('#tbxdataexplore').focus(function () {
                     $(this).select();
                 });
                 break;        
@@ -354,6 +355,12 @@ function setBrowserVariables(obj) {
                 $('#tbxname').focus(function () {
                     $(this).select();
                 });
+                break;
+            case "tabshortcuts":
+                if (typeof InstallTrigger !== 'undefined'){
+                    jQuery(".hide-in-chrome").css('display','inline');
+                    alert(1);
+                }
                 break;
         }
 
@@ -387,7 +394,7 @@ function getGRQuery() {
 }
 
 function setGRQuery(gr) {
-    if (gr.indexOf("GlideRecord('undefined')")  > -1) gr = "This only works in forms and lists."
+    if (gr.indexOf("GlideRecord('undefined')")  > -1) gr = "This only works in forms and lists.";
         $('#txtgrquery').val(gr).select();
 }
 
@@ -395,11 +402,11 @@ function setGRQuery(gr) {
 
 //next release, integrate with other extension
 function createScriptSyncChecboxes(tbl, sysid) {
-    var fields = []
+    var fields = [];
     if (dtScriptFields) {
         fields = dtScriptFields.filter(function (el) {
             return el.name == tbl;
-        }).sort()
+        }).sort();
     }
 
     if (fields.length == 0) {
@@ -410,13 +417,13 @@ function createScriptSyncChecboxes(tbl, sysid) {
     $('#scripttable').html(tbl);
 
     if (fields) {
-        var scripthtml = ''
+        var scripthtml = '';
         for (var i = 0; i < fields.length; i++) {
             var checked = (fields[i].element == 'script') ? 'checked="checked"' : '';
 
-            scripthtml += '<div class="form-check checkbox"><label class="form-check-label"><input class="form-check-input scriptcbx" data-type="' + fields[i]['internal_type.name'] + '" type="checkbox" '
-                + checked
-                + ' value="' + fields[i].element + '">' + fields[i].element + ' (' + fields[i]['internal_type.name'] + ')</label></div>';
+            scripthtml += '<div class="form-check checkbox"><label class="form-check-label"><input class="form-check-input scriptcbx" data-type="' + fields[i]['internal_type.name'] + 
+                '" type="checkbox" ' + checked +
+                ' value="' + fields[i].element + '">' + fields[i].element + ' (' + fields[i]['internal_type.name'] + ')</label></div>';
 
         }
         $('#scriptform').html(scripthtml);
@@ -428,7 +435,7 @@ function sendToSnuFileSync() {
     var url = 'https://' + instance + '.service-now.com/api/now/table/' + table + '/' + sys_id;
 
     bgPage.loadXMLDoc(g_ck, url, "", function (respons) {
-        var idx = 0
+        var idx = 0;
         $('input.scriptcbx:checked').each(function (index, item) {
             var tpe = $(this).data('type');
             //console.log('div' + value + ':' + $(this).data('type'));
@@ -496,7 +503,7 @@ function setDataTableUpdateSets(nme) {
         return false;
     }
 
-    $('#btnnewupdateset').attr('href', url + '/nav_to.do?uri=%2Fsys_update_set.do%3Fsys_id%3D')
+    $('#btnnewupdateset').attr('href', url + '/nav_to.do?uri=%2Fsys_update_set.do%3Fsys_id%3D');
     $('#btnopenupdatesets').attr('href', url + '/nav_to.do?uri=%2Fsys_update_set_list.do?sysparm_query=state%3Din%20progress');
 
     if (dtUpdateSets) dtUpdateSets.destroy();

@@ -16,16 +16,16 @@ chrome.runtime.onInstalled.addListener(function () {
         return;
 
     chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
-        chrome.declarativeContent.onPageChanged.addRules([
-            {
-                conditions: [
-                    new chrome.declarativeContent.PageStateMatcher({
-                        pageUrl: { urlContains: '.service-now.com' },
-                    })
-                ],
-                actions: [new chrome.declarativeContent.ShowPageAction()]
-            }
-        ]);
+        chrome.declarativeContent.onPageChanged.addRules([{
+            conditions: [
+                new chrome.declarativeContent.PageStateMatcher({
+                    pageUrl: {
+                        urlContains: '.service-now.com'
+                    },
+                })
+            ],
+            actions: [new chrome.declarativeContent.ShowPageAction()]
+        }]);
     });
 });
 
@@ -61,24 +61,111 @@ chrome.commands.onCommand.addListener(function (command) {
 // });
 
 
-var menuItems = [
-{ "type": "separator" },
+var menuItems = [{
+        "type": "separator"
+    },
 
-{ "id": "goto", "contexts": ["selection"], "title": "Search / GoTo" },
-{ "id": "instancesearch", "parentId": "goto", "title": "Instance Search: %s", contexts: ["selection"], "onclick": openSearch },
-{ "id": "openscript", "parentId": "goto", "title": "Script Include: %s", contexts: ["selection"], "onclick": openScriptInclude },
-{ "id": "opentablelist", "parentId": "goto", "title": "Table list: %s", contexts: ["selection"], "onclick": openTableList },
-{ "id": "tools", "contexts": ["all"], "title": "Tools" },
-{ "id": "popinout", "parentId": "tools", "title": "PopIn / PopOut", "contexts": ["all"], "onclick": togglePop },
-{ "id": "shownames", "parentId": "tools", "title": "Show technical names", "contexts": ["all"], "onclick": addTechnicalNames },
-{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/cancel_my_transactions.do'); } },
-//{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
-{ "id": "props", "parentId": "tools", "title": "Properties", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/sys_properties_list.do') } },
-{ "id": "updates", "parentId": "tools", "title": "Today's Updates", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on') } },
-{ "id": "versions", "parentId": "tools", "title": "Update Versions", "contexts": ["all"], "onclick": function (e, f) { openVersions(e, f) } },
-{ "id": "stats", "parentId": "tools", "title": "stats.do", "contexts": ["all"], "onclick": function (e, f) { openUrl(e, f, '/stats.do') } },
-{ "id": "codesnippets", "contexts": ["editable"], "title": "Code Snippets" },
-{ "id": "worknotesnippets", "contexts": ["editable"], "title": "Worknote Snippets" }
+    {
+        "id": "goto",
+        "contexts": ["selection"],
+        "title": "Search / GoTo"
+    },
+    {
+        "id": "instancesearch",
+        "parentId": "goto",
+        "title": "Instance Search: %s",
+        contexts: ["selection"],
+        "onclick": openSearch
+    },
+    {
+        "id": "openscript",
+        "parentId": "goto",
+        "title": "Script Include: %s",
+        contexts: ["selection"],
+        "onclick": openScriptInclude
+    },
+    {
+        "id": "opentablelist",
+        "parentId": "goto",
+        "title": "Table list: %s",
+        contexts: ["selection"],
+        "onclick": openTableList
+    },
+    {
+        "id": "tools",
+        "contexts": ["all"],
+        "title": "Tools"
+    },
+    {
+        "id": "popinout",
+        "parentId": "tools",
+        "title": "PopIn / PopOut",
+        "contexts": ["all"],
+        "onclick": togglePop
+    },
+    {
+        "id": "shownames",
+        "parentId": "tools",
+        "title": "Show technical names",
+        "contexts": ["all"],
+        "onclick": addTechnicalNames
+    },
+    {
+        "id": "canceltransaction",
+        "parentId": "tools",
+        "title": "Cancel transactions",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            openUrl(e, f, '/cancel_my_transactions.do');
+        }
+    },
+    //{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
+    {
+        "id": "props",
+        "parentId": "tools",
+        "title": "Properties",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            openUrl(e, f, '/sys_properties_list.do')
+        }
+    },
+    {
+        "id": "updates",
+        "parentId": "tools",
+        "title": "Today's Updates",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on')
+        }
+    },
+    {
+        "id": "versions",
+        "parentId": "tools",
+        "title": "Update Versions",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            openVersions(e, f)
+        }
+    },
+    {
+        "id": "stats",
+        "parentId": "tools",
+        "title": "stats.do",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            openUrl(e, f, '/stats.do')
+        }
+    },
+    {
+        "id": "codesnippets",
+        "contexts": ["editable"],
+        "title": "Code Snippets"
+    },
+    {
+        "id": "worknotesnippets",
+        "contexts": ["editable"],
+        "title": "Worknote Snippets"
+    }
 ];
 
 const defaultMenuConf = {
@@ -155,19 +242,29 @@ var snippets = {
 };
 
 for (var snip in snippets) {
-    chrome.contextMenus.create(Object.assign(
-        { "id": snip, "parentId": snippets[snip][0], "contexts": ["editable"], "title": snippets[snip][1], "onclick": insertSnippet },
+    chrome.contextMenus.create(Object.assign({
+            "id": snip,
+            "parentId": snippets[snip][0],
+            "contexts": ["editable"],
+            "title": snippets[snip][1],
+            "onclick": insertSnippet
+        },
         defaultMenuConf));
 }
 
 function insertSnippet(e, f) {
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function (tabs) {
         var pretext = '';
         if (snippets[e.menuItemId][2] == "codessnippet")
             pretext = "// Below snippet inserted via SN Utils Chrome Extension\n";
 
-        chrome.tabs.sendMessage(tabs[0].id, { "snippet": pretext + snippets[e.menuItemId][2] });
+        chrome.tabs.sendMessage(tabs[0].id, {
+            "snippet": pretext + snippets[e.menuItemId][2]
+        });
     });
 }
 
@@ -182,8 +279,10 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
 
 function addTechnicalNames() {
 
-    chrome.tabs.query(
-        { currentWindow: true, active: true },
+    chrome.tabs.query({
+            currentWindow: true,
+            active: true
+        },
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
@@ -194,18 +293,24 @@ function addTechnicalNames() {
 }
 
 function sendToggleSearchFocus() {
-    chrome.tabs.query(
-        { currentWindow: true, active: true },
+    chrome.tabs.query({
+            currentWindow: true,
+            active: true
+        },
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "toggleSearch"
-            }, {frameId: 0});
+            }, {
+                frameId: 0
+            });
         });
 }
 
 function sendToggleAtfHelper() {
-    chrome.tabs.query(
-        { currentWindow: true, active: true },
+    chrome.tabs.query({
+            currentWindow: true,
+            active: true
+        },
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunctionChild",
@@ -245,13 +350,14 @@ function openVersions(e, f) {
                     if (typeof jsn == "undefined" || jsn == "error")
                         alert("No access to Update Versions");
                     else if (Number(jsn.result.stats.count))
-                        chrome.tabs.create({ "url": baseurl + "/sys_update_version_list.do?sysparm_query=name=" + updateName + sys_id + "^ORDERBYDESCsys_recorded_at" });
+                        chrome.tabs.create({
+                            "url": baseurl + "/sys_update_version_list.do?sysparm_query=name=" + updateName + sys_id + "^ORDERBYDESCsys_recorded_at"
+                        });
                     else
                         alert("No Update versions found for record: " + updateName + sys_id);
                 });
         });
-    }
-    else
+    } else
         alert("No table and sys_id found in this page / frame");
 
 }
@@ -261,15 +367,16 @@ function cancelTransactions(e) {
     var url = tokens.join('/');
     jQuery.get(url + '/cancel_my_transactions.do', function (r) {
         alert(r);
-    }
-    )
+    });
 }
 
 
 function openUrl(e, f, u) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var url = tokens.join('/') + u;
-    chrome.tabs.create({ "url": url });
+    chrome.tabs.create({
+        "url": url
+    });
 }
 
 function openSearch(e) {
@@ -278,7 +385,9 @@ function openSearch(e) {
 
     var srch = e.selectionText;
     if (srch.length < 100)
-        chrome.tabs.create({ url: URL + "/textsearch.do?sysparm_search=" + srch });
+        chrome.tabs.create({
+            url: URL + "/textsearch.do?sysparm_search=" + srch
+        });
 }
 
 function openScriptInclude(e) {
@@ -286,7 +395,9 @@ function openScriptInclude(e) {
         URL = tokens.join('/');
     var srch = e.selectionText;
     if (srch.length < 40)
-        chrome.tabs.create({ url: URL + "/sys_script_include.do?sysparm_refkey=name&sys_id=" + srch });
+        chrome.tabs.create({
+            url: URL + "/sys_script_include.do?sysparm_refkey=name&sys_id=" + srch
+        });
 }
 
 function openTableList(e) {
@@ -294,7 +405,9 @@ function openTableList(e) {
         URL = tokens.join('/');
     var srch = e.selectionText;
     if (srch.length < 40)
-        chrome.tabs.create({ url: URL + "/" + srch + "_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)" });
+        chrome.tabs.create({
+            url: URL + "/" + srch + "_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)"
+        });
 }
 
 
@@ -304,21 +417,21 @@ function pop() {
         active: true,
         currentWindow: true
     }, function (tabs) {
+        var pth;
         var u = tabs[0].url;
         var tid = tabs[0].id;
         var baseUrl = u.substring(0, u.indexOf(".com/") + 4);
         var navToIdx = u.indexOf("nav_to.do?uri=");
         if (navToIdx > -1) {
-            var pth = decodeURIComponent(u.substring(navToIdx + 14, 1000));
+            pth = decodeURIComponent(u.substring(navToIdx + 14, 1000));
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
-            })
-        }
-        else {
-            var pth = "/nav_to.do?uri=" + encodeURIComponent(u.substring(u.indexOf(".com/") + 5, 1000));
+            });
+        } else {
+            pth = "/nav_to.do?uri=" + encodeURIComponent(u.substring(u.indexOf(".com/") + 5, 1000));
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
-            })
+            });
         }
     });
 }
@@ -334,9 +447,8 @@ function togglePop(clickData, tid) {
     if (frameHref.length > 10) {
         chrome.tabs.update(tid, {
             url: frameHref
-        })
-    }
-    else {
+        });
+    } else {
         var newHref = encodeURIComponent(clickData.pageUrl.replace(urlFull, ''));
         var newUrl = urlFull + '/nav_to.do?uri=' + newHref;
         chrome.tabs.update(tid, {
@@ -356,11 +468,14 @@ chrome.runtime.onMessageExternal.addListener(
                 url + '/api/now/table/' + request.details[2] + '/' + request.details[4].split('.')[0],
                 "{" + request.details[3] + ":" + JSON.stringify(request.details[1]) + "}",
                 function (resp) {
-                    sendResponse({ result: "saved" });
+                    sendResponse({
+                        result: "saved"
+                    });
                 });
-        }
-        else if (request.instance) {
-            sendResponse({ instance: (instance || 'not set') });
+        } else if (request.instance) {
+            sendResponse({
+                instance: (instance || 'not set')
+            });
         }
     });
 
@@ -368,8 +483,13 @@ chrome.runtime.onMessageExternal.addListener(
 //Retrieve variables from browser tab, passing them back to popup
 function getBrowserVariables(tid) {
     tabid = tid;
-    popup = chrome.extension.getViews({ type: "popup" })[0];
-    chrome.tabs.sendMessage(tabid, { method: "getVars", myVars: "g_ck,g_user_date_time_format,NOW.user.roles,NOW.user.name,NOW.user_name" }, function (response) {
+    popup = chrome.extension.getViews({
+        type: "popup"
+    })[0];
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "g_ck,g_user_date_time_format,NOW.user.roles,NOW.user.name,NOW.user_name"
+    }, function (response) {
         g_ck = response.myVars.g_ck || '';
         url = response.url;
         instance = url.replace("https://", "").replace(".service-now.com", "");
@@ -383,8 +503,14 @@ function getGck(callback) {
     if (g_ck && sysId)
         callback();
     else {
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { method: "getVars", myVars: "g_ck,NOW.sysId" }, function (response) {
+        chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "getVars",
+                myVars: "g_ck,NOW.sysId"
+            }, function (response) {
                 g_ck = response.myVars.g_ck || '';
                 sysId = response.myVars.NOWsysId || '';
                 callback();
@@ -393,26 +519,41 @@ function getGck(callback) {
     }
 }
 
-
+function grVarName(tableName){
+    grVar = tableName.replace(/[-_]([a-z])/g, function (g) { return g[1].toUpperCase(); })
+    return 'gr' + grVar.charAt(0).toUpperCase() + grVar.slice(1);
+}
 
 //Try to retrieve current table and syid from browser tab, passing them back to popup
 function getRecordVariables(scriptscync) {
-    popup = chrome.extension.getViews({ type: "popup" })[0];
-    chrome.tabs.sendMessage(tabid, { method: "getVars", myVars: "NOW.targetTable,NOW.sysId,mySysId,document.cookie" }, function (response) {
+    popup = chrome.extension.getViews({
+        type: "popup"
+    })[0];
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "NOW.targetTable,NOW.sysId,mySysId,document.cookie"
+    }, function (response) {
         popup.setRecordVariables(response, scriptscync);
     });
 }
 
 function getGRQuery(varName, template) {
 
-    varName = varName || 'myGR';
+    popup = chrome.extension.getViews({
+        type: "popup"
+    })[0];
 
-    popup = chrome.extension.getViews({ type: "popup" })[0];
+    chrome.tabs.sendMessage(tabid, {
+        method: "runFunction",
+        myVars: "getListV3Fields()"
+    }, function () {
 
-    chrome.tabs.sendMessage(tabid, { method: "runFunction", myVars: "getListV3Fields()" }, function () {
-
-        chrome.tabs.sendMessage(tabid, { method: "getVars", myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields" }, function (response) {
+        chrome.tabs.sendMessage(tabid, {
+            method: "getVars",
+            myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
+        }, function (response) {
             var tableName = response.myVars.g_listtableName;
+            var varName = varName || grVarName(tableName);
             var encQuery = response.myVars.g_listfilter;
             var orderBy = response.myVars.g_listsortBy;
             var isDesc = (response.myVars.g_listsortDir == "DESC");
@@ -432,9 +573,8 @@ function getGRQuery(varName, template) {
                 for (var i = 0; i < fields.length; i++) {
                     queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
                 }
-            }
-            else
-                queryStr += "\n\n    //todo: code ;)\n\n"
+            } else
+                queryStr += "\n\n    //todo: code ;)\n\n";
             queryStr += "    //" + varName + ".update();\n";
             queryStr += "    //" + varName + ".insert();\n";
             queryStr += "    //" + varName + ".deleteRecord();\n";
@@ -446,12 +586,16 @@ function getGRQuery(varName, template) {
 
 function getGRQueryForm(varName, template) {
 
-    varName = varName || 'myGR';
+    popup = chrome.extension.getViews({
+        type: "popup"
+    })[0];
 
-    popup = chrome.extension.getViews({ type: "popup" })[0];
-
-    chrome.tabs.sendMessage(tabid, { method: "getVars", myVars: "g_form.tableName,NOW.sysId,mySysId,elNames" }, function (response) {
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
+    }, function (response) {
         var tableName = response.myVars.g_formtableName;
+        var varName = varName || grVarName(tableName);
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
         var fields = ('' + response.myVars.elNames).split(',');
         var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
@@ -461,8 +605,7 @@ function getGRQueryForm(varName, template) {
             for (var i = 0; i < fields.length; i++) {
                 queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
             }
-        }
-        else
+        } else
             queryStr += "\n\n    //todo: code ;)\n\n"
         queryStr += "    //" + varName + ".update();\n";
         queryStr += "    //" + varName + ".insert();\n";
@@ -495,8 +638,7 @@ function getUserDetails(userName) {
                 "<tr><td>Phone:</td><td>" + usr.phone.display_value + "</td></tr>" +
                 "<tr><td>E-mail:</td><td><a href='mailto:" + usr.email.display_value + "'>" + usr.email.display_value + "</a></td></tr></table>";
             popup.setUserDetails(html);
-        }
-        else {
+        } else {
             var html = "<br /><table class='table table-condensed table-bordered table-striped'><tr><th>User details</th><th>" + userName + listhyperlink + "</th></tr>" +
                 "<tr><td>Result:</td><td>No exact match, try clicking the list icon.</td></tr></table>";
             popup.setUserDetails(html);
@@ -516,7 +658,6 @@ function getTables() {
 
 //Query ServiceNow for tables and set to chrome storage
 function setUpdateSetTables() {
-
     var myurl = url + "/api/now/table/sys_dictionary?sysparm_fields=name&sysparm_query=" +
         "name=javascript:new PAUtils().getTableDecendants('sys_metadata')^internal_type=collection^attributesNOT LIKEupdate_synch=false^NQattributesLIKEupdate_synch=true";
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
@@ -532,23 +673,18 @@ function setUpdateSetTables() {
 
 
 function getUpdateSetTables() {
-
-
-
     var query = [instance + "-updatesettables", instance + "-updatesettables-date"];
     chrome.storage.local.get(query, function (result) {
         try {
             var thedate = new Date().toDateString();
             if (thedate == result[query[1]].toString()) {
                 updateSetTables = result[query[0]];
-            }
-            else
+            } else
                 setUpdateSetTables()
-        }
-        catch (err) {
+        } catch (err) {
             setUpdateSetTables();
         }
-    })
+    });
 
 }
 
@@ -645,8 +781,13 @@ function getActiveNode(jsn) {
 //Query ServiceNow for tables, pass JSON back to popup
 function getExploreData() {
 
-    popup = chrome.extension.getViews({ type: "popup" })[0];
-    chrome.tabs.sendMessage(tabid, { method: "getVars", myVars: "g_form.tableName,NOW.sysId,mySysId,elNames" }, function (response) {
+    popup = chrome.extension.getViews({
+        type: "popup"
+    })[0];
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
+    }, function (response) {
         var tableName = response.myVars.g_formtableName;
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
 
@@ -667,7 +808,10 @@ function getExploreData() {
                 var dataExplore = [];
                 var propObj = {};
                 propObj.name = "#TABLE / SYS_ID";
-                propObj.meta = { "label": "#TABLE / SYS_ID", "type": "TABLE" };
+                propObj.meta = {
+                    "label": "#TABLE / SYS_ID",
+                    "type": "TABLE"
+                };
                 propObj.display_value = "<a class='referencelink' href='" + url + "/" + tableName + ".do?sys_id=" + sysId + "' target='_blank'>" + tableName + " / " + sysId + "</a>";
                 propObj.value = tableName + " / " + sysId;
                 dataExplore.push(propObj);
@@ -675,7 +819,7 @@ function getExploreData() {
                 var rows = jsn.result[0];
 
                 for (var key in rows) {
-                    var propObj = {}
+                    var propObj = {};
                     if (!rows.hasOwnProperty(key)) continue;
 
                     var display_value = rows[key].display_value;
@@ -744,7 +888,7 @@ function loadXMLDoc(token, url, post, callback) {
         'Cache-Control': 'no-cache',
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-    }
+    };
 
     if (token) //only for instances with high security plugin enabled
         hdrs['X-UserToken'] = token;
@@ -763,4 +907,4 @@ function loadXMLDoc(token, url, post, callback) {
         callback(textStatus);
     });
 
-};
+}

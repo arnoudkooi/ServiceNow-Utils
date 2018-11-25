@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/style.css">
 
     <script src="js/jquery.js"></script>
+    <script src="js/jquery.deserialize.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="js/moment.js"></script>
     <script src="js/datatables.min.js"></script>
@@ -68,7 +69,7 @@
                 <li class='nav-item'>
                     <a class="nav-link" data-target="#tabgr" data-toggle="tab">GlideRecord</a>
                 </li>
-                <li class='nav-item'>
+                <li class='nav-item hide-in-firefox'>
                     <a class="nav-link" data-target="#tabscript" data-toggle="tab">ScriptSync
                         <span id="waitingscript" class="waiting">
                             <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
@@ -86,7 +87,8 @@
             <div class="tab-content">
                 <div class="tab-pane" id="tabupdatesets">
                     <div class="input-group">
-                        <input type="search" id="tbxupdatesets" name="tbxupdatesets" class="form-control form-control-sm sync" placeholder="Search in progress update set in current scope...">
+                        <input type="search" id="tbxupdatesets" name="tbxupdatesets" class="form-control form-control-sm sync"
+                            placeholder="Search in progress update set in current scope...">
                         <span class="input-group-append">
                             <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
                         </span>
@@ -100,14 +102,16 @@
                         </thead>
                     </table>
                     <span style="font-size:8pt">
-                        <a class="popuplinks" id='btnnewupdateset' href='' target="_blank">New updateset...</a> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <a class="popuplinks" id='btnnewupdateset' href='' target="_blank">New updateset...</a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
                         <a class="popuplinks" id='btnopenupdatesets' target="_blank">Update Sets - In Progress</a>
                     </span>
                 </div>
                 <div class="tab-pane" id="tabupdates">
 
                     <div class="input-group">
-                        <input type="search" id="tbxupdates" name="tbxupdates" class="form-control form-control-sm sync" placeholder="Search in your last 20 updates...">
+                        <input type="search" id="tbxupdates" name="tbxupdates" class="form-control form-control-sm sync"
+                            placeholder="Search in your last 20 updates...">
                         <span class="input-group-append">
                             <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
                         </span>
@@ -127,7 +131,8 @@
 
                 <div class="tab-pane" id="tabnodes">
                     <div class="input-group">
-                        <input type="search" id="tbxnodes" name="tbxnodes" class="form-control form-control-sm" placeholder="Search Instance Nodes...">
+                        <input type="search" id="tbxnodes" name="tbxnodes" class="form-control form-control-sm"
+                            placeholder="Search Instance Nodes...">
                         <span class="input-group-append">
                             <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm" type="button">Refresh</button>
                         </span>
@@ -146,7 +151,8 @@
                 <div class="tab-pane" id="tabtables">
 
                     <div class="input-group">
-                        <input type="search" id="tbxtables" name="tbxtables" class="form-control form-control-sm sync" placeholder="Search tables...">
+                        <input type="search" id="tbxtables" name="tbxtables" class="form-control form-control-sm sync"
+                            placeholder="Search tables...">
                         <span class="input-group-append">
                             <button id='btnrefreshtables' class="btn btn-outline-secondary btn-sm" title="Force refresh of the ServiceNow tables (API Call)"
                                 type="button">Refresh</button>
@@ -164,7 +170,8 @@
                         </thead>
                     </table>
                     <select style="margin-top:5px;" class="form-control form-control-sm sync" id="slctlistquery" name="slctlistquery">
-                        <option value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on">Listview query: Updated on Today / Order by Updated desc.</option>
+                        <option value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on">Listview
+                            query: Updated on Today / Order by Updated desc.</option>
                         <option value="sys_id=-1">Listview query: Empty list (sys_id=-1)</option>
                         <option value="">Listview query: None (all records)</option>
                     </select>
@@ -174,9 +181,11 @@
                 <div class="tab-pane" id="tabdataexplore">
 
                     <div class="input-group">
-                        <input type="search" id="tbxdataexplore" name="tbxdataexplore" class="form-control form-control-sm sync" placeholder="Search data...">
+                        <input type="search" id="tbxdataexplore" name="tbxdataexplore" class="form-control form-control-sm sync"
+                            placeholder="Search data...">
                         <span class="input-group-append">
-                            <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm" title="Refresh data" type="button">Refresh</button>
+                            <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm" title="Refresh data"
+                                type="button">Refresh</button>
                         </span>
                     </div>
                     <table id="dataexplore" class="display table-condensed" style="width:100%; table-layout: fixed;word-wrap:break-word;">
@@ -196,7 +205,8 @@
 
                 <div class="tab-pane" id="tabuser">
                     <div class="input-group">
-                        <input type="search" id="tbxname" name="tbxname" class="form-control form-control-sm" placeholder="Search by username...">
+                        <input type="search" id="tbxname" name="tbxname" class="form-control form-control-sm"
+                            placeholder="Search by username...">
                         <span class="input-group-append">
                             <button id='btnGetUser' class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
                         </span>
@@ -206,13 +216,15 @@
 
                 <div class="tab-pane" id="tabgr">
                     <div class="input-group">
-                        <input id="tbxgrname" name="tbxgrname" class="form-control form-control-sm" placeholder="Change default gr variable name...">
+                        <input id="tbxgrname" name="tbxgrname" class="form-control form-control-sm" placeholder="Change default grTableName variable...">
                         <span class="input-group-append">
-                            <button id='btnSetGRName' class="btn btn-outline-secondary btn-sm" type="button">Create GlideRecord Template.</button>
+                            <button id='btnSetGRName' class="btn btn-outline-secondary btn-sm" type="button">Create
+                                GlideRecord Template.</button>
                         </span>
                     </div>
                     <div class="form-group">
-                        <label for="tbxgrtemplate">Template for fields: ({0} = variable like gr, {1} = field name like sys_created_on)</label>
+                        <label for="tbxgrtemplate">Template for fields: ({0} = variable like gr, {1} = field name like
+                            sys_created_on)</label>
                         <select class="form-control form-control-sm" name="tbxgrtemplate" id="tbxgrtemplate">
                             <option>gs.info('{1}: ' + {0}.getValue('{1}'));</option>
                             <option>{0}.getValue('{1}');</option>
@@ -223,7 +235,8 @@
                             <option value=''>- none -</option>
                         </select>
                     </div>
-                    <textarea class="form-control form-control-sm" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
+                    <textarea class="form-control form-control-sm" autocomplete="off" autocapitalize="off" spellcheck="false"
+                        style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
                         id="txtgrquery"></textarea>
 
 
@@ -243,7 +256,8 @@
 
                 <div class="tab-pane" id="tabrest">
 
-                    <textarea class="form-control form-control-sm" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
+                    <textarea class="form-control form-control-sm" autocomplete="off" autocapitalize="off" spellcheck="false"
+                        style="font-family: Consolas, Lucida Console, monospace; font-size:10pt; height:290px; margin-top:20px; margin-right:4px;"
                         id="txtrest"></textarea>
 
                     <br />
@@ -252,7 +266,8 @@
                 <div class="tab-pane" id="tabscript">
                     <div class="col-12" id='sciptcontainerdiv'>
                         <p>Select
-                            <span id='scripttable' style='font-weight:bold'></span> field(s) to edit localy (existing files will be overwritten)</p>
+                            <span id='scripttable' style='font-weight:bold'></span> field(s) to edit localy (existing
+                            files will be overwritten)</p>
                         <div class="col-6" id='scriptform'>
                         </div>
                         <div class="col-6">
@@ -268,13 +283,19 @@
 
                 <div class="tab-pane" id="tabshortcuts">
                     <h4>Shortcuts</h4>
-                    Go to
-                    <a class="popuplinks" href="chrome://extensions/shortcuts" target="_blank">chrome://extensions/shortcuts</a> to adjust the extension shortcuts or to
-                    <a class="popuplinks" target="_blank" id="firefoxoptions">Options page</a> in Firefox.
-                    <br />
-                    <a class="popuplinks" target="_blank" href="https://www.youtube.com/watch?v=2ZoubJMePD8">
-                        <img src="/images/shortcuts.png" alt="shortcuts" title="Shortcuts" />
-                    </a>
+                    
+                    <div class="hide-in-firefox">
+                        Go to <a class="popuplinks" href="chrome://extensions/shortcuts" target="_blank">chrome://extensions/shortcuts</a>
+                        to adjust the extension shortcuts.
+
+                        <br />
+                        <a class="popuplinks" target="_blank" href="https://www.youtube.com/watch?v=2ZoubJMePD8">
+                            <img src="/images/shortcuts.png" alt="shortcuts" title="Shortcuts" />
+                        </a>
+                    </div>
+                    <div class="hide-in-browser show-in-firefox">
+                        Go to <a class="popuplinks" target="_blank" id="firefoxoptions">Options page</a> in Firefox.
+                    </div>
 
                 </div>
 
@@ -298,11 +319,15 @@
                         <img src="/images/4-2018.png" alt="updates" style="width:175px" title="Watch April 2018 updates video on YouTube" />
                     </a>
                     <br /> Check my
-                    <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos" target="_blank">YouTube Channel</a> for the latest updates.
+                    <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos" target="_blank">YouTube
+                        Channel</a> for the latest updates.
                     <br />
                     <br /> Latest updates per version:
                     <ul>
 
+                        <li>
+                            2.8: Firefox campatability (credit Ricardo Constantino) and minor improvements
+                        </li>
                         <li>
                             2.7: Search for choicelist with > 20 items
                         </li>
@@ -313,7 +338,8 @@
                             2.6: Improved clicking labels to generate List view query
                         </li>
                         <li>
-                            2.5 In tables list a select is added, to add a query when opening a list, to prevent loading large dataset.
+                            2.5 In tables list a select is added, to add a query when opening a list, to prevent
+                            loading large dataset.
                         </li>
                         <li>
                             2.5: Ability to copy / select text in read-only script fields (Credit: Meinzeugde)
@@ -324,8 +350,10 @@
 
                     </ul>
                     Sourcecode is available on
-                    <a class="popuplinks" href="https://github.com/arnoudkooi/ServiceNow-Utils" target="_blank">GitHub</a> for review purposes.
-                    <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is not allowed)
+                    <a class="popuplinks" href="https://github.com/arnoudkooi/ServiceNow-Utils" target="_blank">GitHub</a>
+                    for review purposes.
+                    <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is not
+                    allowed)
                     <br /> Also reach out if you have feedback or feature requests, or good snippets to integrate.
                     <div id="livemessage"></div>
 
