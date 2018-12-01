@@ -24,10 +24,10 @@ a.iscurrent {
     cursor: default;
     text-decoration-line: none;
 }
-
+ 
 ul.nav {
-    background-color: #2962ff;
-    border-bottom: #768fff 5px solid;
+    background-color: #293e40;
+    border-bottom: #5a7f71 5px solid;
     padding-top: 7px;
 }
 
@@ -35,8 +35,8 @@ ul.nav {
 .nav-tabs .nav-link.active {
     border-radius: 0;
     color: #fff !important;
-    background-color: #0039cb;
-    border-color: #768fff #768fff #0039cb;
+    background-color: #2f4f4e;
+    border-color: #5a7f71 #5a7f71 #293e40;
     border-width: 5px 5px 8px;
     margin-top: -7px;
     margin-bottom: -4px;

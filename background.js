@@ -92,6 +92,13 @@ var menuItems = [{
         "onclick": openTableList
     },
     {
+        "id": "propertie",
+        "parentId": "goto",
+        "title": "Propertie: %s",
+        contexts: ["selection"],
+        "onclick": openPropertie
+    },   
+    {
         "id": "tools",
         "contexts": ["all"],
         "title": "Tools"
@@ -410,6 +417,16 @@ function openTableList(e) {
         });
 }
 
+function openPropertie(e) {
+    var tokens = e.pageUrl.split('/').slice(0, 3),
+        URL = tokens.join('/');
+    var srch = e.selectionText;
+    if (srch.length < 100)
+        chrome.tabs.create({
+            url: URL + "/sys_properties_list.do?sysparm_query=name=" + srch
+        });
+}
+
 
 function pop() {
 
@@ -553,7 +570,7 @@ function getGRQuery(varName, template) {
             myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
         }, function (response) {
             var tableName = response.myVars.g_listtableName;
-            var varName = varName || grVarName(tableName);
+            varName = varName || grVarName(tableName);
             var encQuery = response.myVars.g_listfilter;
             var orderBy = response.myVars.g_listsortBy;
             var isDesc = (response.myVars.g_listsortDir == "DESC");
@@ -595,7 +612,7 @@ function getGRQueryForm(varName, template) {
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
         var tableName = response.myVars.g_formtableName;
-        var varName = varName || grVarName(tableName);
+        varName = varName || grVarName(tableName);
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
         var fields = ('' + response.myVars.elNames).split(',');
         var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";

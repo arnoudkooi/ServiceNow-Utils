@@ -66,10 +66,16 @@ function doubleClickToShowField() {
 function doubleClickToSetQueryListV2() {
     //dbl click to view and update filter condition
     jQuery('div.breadcrumb_container').on("dblclick", function (event) {
-        var qry = GlideList2.get(jQuery('#sys_target').val());
-        var newValue = prompt('Filter condition:', qry.filter);
-        if (newValue !== qry.filter && newValue !== null) {
-            qry.setFilterAndRefresh(newValue);
+
+        if (event.shiftKey) {
+            splitContainsToAnd();
+        } else {
+
+            var qry = GlideList2.get(jQuery('#sys_target').val());
+            var newValue = prompt('Filter condition:', qry.filter);
+            if (newValue !== qry.filter && newValue !== null) {
+                qry.setFilterAndRefresh(newValue);
+            }
         }
     });
 }
@@ -306,16 +312,16 @@ function addTechnicalNames() {
 
     if (typeof g_form != 'undefined') {
         jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
-
+            jQuery('label').removeAttr('for'); //remove to easier select text
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-            jQuery(this).prepend('<i>' + elm + ' | </i> ');
+            jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
         });
-    };
+    }
 
     jQuery('th.list_hdr, th.table-column-header').each(function (index) {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
         if (jQuery(this).find('a.list_hdrcell, a.sort-columns').text().indexOf('|') == -1)
-            jQuery(this).find('a.list_hdrcell, a.sort-columns').prepend('<i>' + tname + ' | </i> ');
+            jQuery(this).find('a.list_hdrcell, a.sort-columns').append(' | <span style="font-family:monospace; font-size:small;">' + tname + '</span> ');
     });
 
     //also show viewname
@@ -330,14 +336,14 @@ function addTechnicalNames() {
 function showSelectFieldValues() {
     if (typeof jQuery == 'undefined') return; //not in studio
 
-    jQuery('option').not(":contains('=>')").each(function (i, el) {
+    jQuery('option').not(":contains('|')").each(function (i, el) {
         var jqEl = jQuery(el);
-        jqEl.html(el.text + ' => ' + el.value);
+        jqEl.html(el.text + ' | ' + el.value);
     });
 
-    jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('=>')").each(function (i, el) {
+    jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('|')").each(function (i, el) {
         var jqEl = jQuery(el);
-        jqEl.html(el.text + ' => ' + el.name);
+        jqEl.html(el.text + ' | ' + el.name);
     });
 }
 
@@ -432,12 +438,12 @@ function setShortCuts() {
     }, false);
 
     //Helper for ATF show ui action sys_id 
-    jQuery('.action_context').on('mouseover', function(event){
+    jQuery('.action_context').on('mouseover', function (event) {
         if (event.ctrlKey || event.metaKey) {
             event.stopImmediatePropagation()
-            prompt("UI Action:" + jQuery(this).text() + "\nsys_id",jQuery(this).attr('gsft_id'));
-        } 
-    
+            prompt("UI Action:" + jQuery(this).text() + "\nsys_id", jQuery(this).attr('gsft_id'));
+        }
+
     });
 
 }
@@ -459,6 +465,24 @@ function toggleATFMode() {
     }
 }
 
+function splitContainsToAnd() {
+    var qry = GlideList2.get(jQuery('#sys_target').val());
+    var qa = qry.filter.split("^");
+    var qaNew = [];
+    for (var i = 0; i < qa.length; i++) {
+        var re = qa[i].match(/LIKE(.*)/);
+        if (re) {
+            var words = re[1].split(" ");
+            for (var j = 0; j < words.length; j++) {
+                var qs = re.input.substring(0, re.index) + "LIKE" + words[j];
+                qaNew.push(qs);
+            }
+        } else
+            qaNew.push(qa[i]);
+    }
+    qry.setFilterAndRefresh(qaNew.join("^"));
+
+}
 
 function bindPaste() {
 
