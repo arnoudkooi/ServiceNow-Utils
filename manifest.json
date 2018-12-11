@@ -3,7 +3,7 @@
     "short_name": "ServiceNow Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "2.8.1.0",
+    "version": "2.8.1.1",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -54,6 +54,16 @@
                 "content_script_all_frames.js"
             ],
             "all_frames": true
+        },
+        {
+            "matches": [
+                    "https://*/*SAMLRequest*service-now.com*",
+                    "https://*/*SAMLRequest*service-now.com"
+            ],
+            "js": [ 
+                    "js/jquery.js",
+                    "redirected.js"
+            ]
         }
     ],
     "commands": {

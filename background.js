@@ -496,6 +496,24 @@ chrome.runtime.onMessageExternal.addListener(
         }
     });
 
+//This listens for messages from redirected.js and or removes the localLoginUrl to/from local storage
+chrome.runtime.onMessage.addListener(
+    function(request){
+        if (request.from == 'redirected'){
+            chrome.storage.sync.get(['cbxredirected'], function(result){
+                if (result.cbxredirected) {
+                    if (request.url) {
+                        chrome.storage.local.set({'localLoginUrl': request.url});
+                    } else {
+                        chrome.storage.local.remove('localLoginUrl');
+                    }
+                }
+            });
+        }
+	//allow this to be called asynchonously
+	return true;
+});
+
 
 //Retrieve variables from browser tab, passing them back to popup
 function getBrowserVariables(tid) {
