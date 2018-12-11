@@ -40,7 +40,7 @@ async function createUI() {
         line.appendChild(reset);
         let resetText = document.createTextNode("Reset");
         reset.append(resetText);
-    }
+		}
 }
 
 /**
@@ -78,3 +78,25 @@ async function resetShortcut(e) {
  * Update the UI when the page loads.
  */
 document.addEventListener('DOMContentLoaded', createUI);
+document.addEventListener('DOMContentLoaded', function () {
+
+// Enable SSO redirect detection checkbox click handler
+$('#cbxredirect').click(function () {
+	console.log("JCB running the redirect checkbox click handler");
+	var cbxval = $('#cbxredirect').prop('checked');
+	console.log("JCB saving checkbox state = " + cbxval);
+	chrome.storage.sync.set({'cbxredirected': cbxval});
+});
+
+//get the value of Enable SSO redirect detection checkbox and set the checkbox to match
+console.log("JCB DOMcontentloaded is right");
+chrome.storage.sync.get('cbxredirected', function(result){
+	console.log("JCB retrieved from sync storage cbxredirected = " + JSON.stringify(result));
+	if (result.cbxredirected) {
+			//check the checkbox
+			$('#cbxredirect').attr('checked', true); 
+	}
+});
+
+
+});
