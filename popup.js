@@ -38,7 +38,21 @@ document.addEventListener('DOMContentLoaded', function () {
 //setIcon("images/icon32newer.png");
 
     });
-
+    
+    //Check if there is a URL in local storage and display it on the popup
+    chrome.storage.local.get(['localLoginUrl'], function(result){
+        if (result.localLoginUrl) {
+            $('#notification').append('<p>It looks like you got redirected to SSO login, do you want to go back to:<a href="#" id="localLoginUrl">' + result.localLoginUrl + '</a></p>');
+            $('#localLoginUrl').click(function (){
+                //The url was clicked, so redirect the tab to the URL and then hide the link
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.update(tabs[0].id,{'url': result.localLoginUrl});
+                    chrome.storage.local.remove('localLoginUrl');
+                    $('#notification').empty();
+                });
+            });
+        }
+    });
 });
 
 function setIcon(icon){
@@ -776,5 +790,6 @@ function setDataExplore(nme) {
 
     $('#waitingdataexplore').hide();
 
-}
+    
 
+}
