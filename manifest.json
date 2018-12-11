@@ -3,7 +3,7 @@
     "short_name": "ServiceNow Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "2.7.2.5",
+    "version": "2.7.2.6",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -105,9 +105,11 @@
         "inject_parent.js"
     ],
     "manifest_version": 2,
+    "options_page": "options.html",
     "applications": {
         "gecko": {
             "id": "email@arnoudkooi.com"
         }
-    }
+	},
+
 }
