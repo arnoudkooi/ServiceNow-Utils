@@ -817,7 +817,7 @@ function addFieldSyncButtons() {
     if (typeof g_form != 'undefined') {
         jQuery(".label-text").each(function (index, value) {
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-            var fieldType = jQuery(this).closest('[type]').attr('type');
+            var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
             for (var i = 0; i <fieldTypes.length; i++){
                 if(fieldType.indexOf(fieldTypes[i]) > -1){
                     jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="'+ elm +'" class="icon scriptSync icon-save"></span>');

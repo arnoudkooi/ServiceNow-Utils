@@ -118,7 +118,7 @@ function setToChromeSyncStorage(theName, theValue) {
 }
 
 //Try to get saved form state and set it
-function setFromSyncStorage(callback) {
+function setFormFromSyncStorage(callback) {
     var query = instance + "-formvalues";
     chrome.storage.sync.get(query, function (result) {
         if (query in result) {
@@ -183,6 +183,16 @@ function prepareJsonScriptFields() {
     });
 }
 
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href.toLowerCase();
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
 //add object to storage and refresh datatable
 function setScriptFields(jsn) {
     dtScriptFields = jsn;
@@ -206,7 +216,7 @@ function setBrowserVariables(obj) {
     datetimeformat = obj.myVars.g_user_date_time_format;
     myFrameHref = obj.frameHref;
 
-    setFormSyncStorage(function () {
+    setFormFromSyncStorage(function () {
         $('.nav-tabs a[data-target="' + $('#tbxactivetab').val() + '"]').tab('show');
     });
 

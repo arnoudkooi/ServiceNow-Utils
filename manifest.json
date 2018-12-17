@@ -106,11 +106,5 @@
         "inject.js",
         "inject_parent.js"
     ],
-    "manifest_version": 2,
-    "applications": {
-        "gecko": {
-            "id": "email@arnoudkooi.com"
-        }
-    }
-
+    "manifest_version": 2
 }
