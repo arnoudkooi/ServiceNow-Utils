@@ -12,14 +12,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 (function(){
     var s = document.createElement('script');
-    s.setAttribute("id","snUtils");
-    s.setAttribute("data-extension", chrome.runtime.id);
-    s.setAttribute("data-syncpage", chrome.runtime.getURL("filesync.html"));
     s.src = chrome.runtime.getURL('inject.js');
     s.onload = function() {
-       // this.remove();
+        getFromSyncStorageGlobal("scriptsync-active",function(answer){
+            if (answer){
+                runFunction('if (typeof addFieldSyncButtons == "function") addFieldSyncButtons()');
+            }
+        });
+    
     };
     (document.head || document.documentElement).appendChild(s);
+    
+
+
   })();
 
 function runFunction(f, context) {
@@ -37,6 +42,13 @@ function runFunction(f, context) {
     script.appendChild(doc.createTextNode(f));
     doc.body.appendChild(script);
 
+}
+
+//get an instance independent sync parameter
+function getFromSyncStorageGlobal(theName, callback) {
+    chrome.storage.sync.get(theName, function (result) {
+        callback(result[theName]);
+    });
 }
 
 

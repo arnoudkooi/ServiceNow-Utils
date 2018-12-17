@@ -39,7 +39,7 @@ function startMessageChannel() {
                     g_form.setValue(getStepDetails(g_form.getValue("step_config")).return.read_only, ev.data.set.read_only);
 
                 }
-            }
+            };
 
 
         }
@@ -102,10 +102,9 @@ function clickToList() {
                 var val = 'none';
                 var valDisp = '';
                 var operator = '=';
-                var val;
                 if (jQuery(event.target).hasClass('label-text')) {
                     elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-                    tpe = g_form.getGlideUIElement(elm).type
+                    tpe = g_form.getGlideUIElement(elm).type;
                     //tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
                     val = g_form.getValue(elm);
 
@@ -136,7 +135,7 @@ function clickToList() {
                     var dte = val.substring(0, 10);
                     valDisp = dte;
                     var dateNumber = getDateFromFormat(g_form.getValue(elm), g_user_date_time_format);
-                    var dateJs = new Date(dateNumber)
+                    var dateJs = new Date(dateNumber);
                     dte = dateJs.getFullYear() + '-' +
                         ("0" + (dateJs.getMonth() + 1)).slice(-2) + '-' +
                         ("0" + dateJs.getDate()).slice(-2);
@@ -178,10 +177,9 @@ function generateATFValues(event) {
     var val = 'none';
     var valDisp = '';
     var operator = '=';
-    var val;
     if (jQuery(event.target).hasClass('label-text')) {
         elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-        tpe = g_form.getGlideUIElement(elm).type
+        tpe = g_form.getGlideUIElement(elm).type;
         //tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
         val = g_form.getValue(elm);
 
@@ -203,7 +201,7 @@ function generateATFValues(event) {
         var dte = val.substring(0, 10);
         valDisp = dte;
         var dateNumber = getDateFromFormat(g_form.getValue(elm), g_user_date_time_format);
-        var dateJs = new Date(dateNumber)
+        var dateJs = new Date(dateNumber);
         dte = dateJs.getFullYear() + '-' +
             ("0" + (dateJs.getMonth() + 1)).slice(-2) + '-' +
             ("0" + dateJs.getDate()).slice(-2);
@@ -245,7 +243,7 @@ function getFieldStates() {
     };
     for (var i = 0; i < g_form.elements.length; i++) {
         var elm = g_form.elements[i];
-        var mid = 'div[id="element.' + elm.tableName + '.' + elm.fieldName + '"]'
+        var mid = 'div[id="element.' + elm.tableName + '.' + elm.fieldName + '"]';
         if (jQuery(mid).is(":visible") && jQuery(mid).css('visibility') !== 'hidden') {
             vals.visible.push(elm.fieldName);
             if (elm.mandatory)
@@ -301,7 +299,7 @@ function makeReadOnlyContentCopyable() {
             }
         }
     } catch (error) {
-        console.error(error)
+        console.error(error);
     }
 }
 
@@ -410,6 +408,7 @@ function setShortCuts() {
         //a few specific for forms
         if (typeof g_form != 'undefined') {
             mySysId = g_form.getUniqueValue();
+            var action;
             if ((event.ctrlKey || event.metaKey) && event.keyCode == 83) { //cmd-s
 
                 event.preventDefault();
@@ -421,12 +420,12 @@ function setShortCuts() {
                         return false;
                     }
                 }
-                var action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
+                action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             } else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
                 event.preventDefault();
-                var action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
+                action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             }
@@ -440,7 +439,7 @@ function setShortCuts() {
     //Helper for ATF show ui action sys_id 
     jQuery('.action_context').on('mouseover', function (event) {
         if (event.ctrlKey || event.metaKey) {
-            event.stopImmediatePropagation()
+            event.stopImmediatePropagation();
             prompt("UI Action:" + jQuery(this).text() + "\nsys_id", jQuery(this).attr('gsft_id'));
         }
 
@@ -503,7 +502,7 @@ function bindPaste() {
                 g_form.addInfoMessage('<span class="icon icon-loading"></span> Pasted image being processed...');
 
                 var fileInfo = e.originalEvent.clipboardData.items[0].getAsFile();
-                var fr = new FileReader;
+                var fr = new FileReader();
                 fr.onloadend = function () {
                     var imgData = getBlob(fr.result);
                     saveImage(imgData, fileInfo);
@@ -512,7 +511,7 @@ function bindPaste() {
             }
         });
 
-    };
+    }
 }
 
 function tryPaste() {
@@ -558,7 +557,6 @@ function saveImage(imgData, fileInfo) {
     jQuery.ajax({
         url: URL,
         type: 'POST',
-        contentType: 'application/octet-stream',
         data: imgData,
         processData: false,
         headers: {
@@ -584,13 +582,12 @@ function saveImage(imgData, fileInfo) {
         error: function (error) {
             console.log(error);
             g_form.clearMessages();
-            g_form.addErrorMessage(error.responseJSON.error.detail)
+            g_form.addErrorMessage(error.responseJSON.error.detail);
 
         }
     });
 
-};
-
+}
 
 function renamePasted(sysID, check) {
 
@@ -602,7 +599,7 @@ function renamePasted(sysID, check) {
 
     var requestBody = {
         "file_name": $j('#tbxImageName').val()
-    }
+    };
 
     var client = new XMLHttpRequest();
     client.open("put", "/api/now/table/sys_attachment/" + sysID);
@@ -652,7 +649,7 @@ function getListV3Fields() {
             var qry = angular.element('.list-container').scope().$parent.$parent.queryString;
             var newValue = prompt('Filter condition:', qry);
             if (newValue !== qry && newValue !== null) {
-                var qry = angular.element('.list-container').scope().$parent.$parent.queryString = newValue || '';
+                qry = angular.element('.list-container').scope().$parent.$parent.queryString = newValue || '';
                 setTimeout(function () {
                     angular.element('.list-container').scope().$parent.$parent.updateList();
                 }, 300);
@@ -678,7 +675,7 @@ var elNames = '';
 
 function getFormElementNames() {
     if (typeof g_form !== 'undefined') {
-        var elArr = []
+        var elArr = [];
         for (i = 0; i < g_form.elements.length; i++) {
             elArr.push(g_form.elements[i].fieldName);
         }
@@ -726,7 +723,7 @@ function loadXMLDoc(token, url, post, callback) {
             'Cache-Control': 'no-cache',
             'Accept': 'application/json',
             'Content-Type': 'application/json'
-        }
+        };
 
         if (token) //only for instances with high security plugin enabled
             hdrs['X-UserToken'] = token;
@@ -748,7 +745,7 @@ function loadXMLDoc(token, url, post, callback) {
     } catch (error) {
         showAlert('Server Request failed (' + error + ')', 'danger');
     }
-};
+}
 
 /**
  * @function showAlert
@@ -767,7 +764,7 @@ function showAlert(msg, type, timeout) {
     setTimeout(function () {
         jQuery('header .service-now-util-alert').removeClass('visible');
         jQuery('header .service-now-util-alert>.notification').removeClass('notification-' + type);
-    }, timeout)
+    }, timeout);
 }
 
 
@@ -781,6 +778,7 @@ function showAlert(msg, type, timeout) {
 
 function postToScriptSync(field) {
 
+    g_form.clearMessages();
     var instance = {};
     instance.name = window.location.host.split('.')[0];
     instance.url = window.location.origin;
@@ -813,7 +811,7 @@ function postToScriptSync(field) {
 
 function addFieldSyncButtons() {
 
-    var fieldTypes = ["script", "xml", "html", "json","css"]
+    var fieldTypes = ["script", "xml", "html", "json","css"];
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
@@ -835,7 +833,7 @@ function addFieldSyncButtons() {
 
     }
 }
-addFieldSyncButtons();
+
 
 
 
@@ -917,7 +915,7 @@ function getStepDetails(step) {
                 "assert_type": "inputs.var__m_atf_input_variable_be8e0a935332120028bc29cac2dc34e4.assert_type"
             }
         }
-    }
+    };
 
     return steps[step];
 }

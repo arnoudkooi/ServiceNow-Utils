@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
     document.querySelector('#firefoxoptions').href = chrome.runtime.getURL("options.html");
-    document.querySelector('#avscodesync').href = chrome.runtime.getURL("scriptsync.html");
 
 });
 
@@ -119,7 +118,7 @@ function setToChromeSyncStorage(theName, theValue) {
 }
 
 //Try to get saved form state and set it
-function setFormFromSyncStorage(callback) {
+function setFromSyncStorage(callback) {
     var query = instance + "-formvalues";
     chrome.storage.sync.get(query, function (result) {
         if (query in result) {
@@ -207,7 +206,7 @@ function setBrowserVariables(obj) {
     datetimeformat = obj.myVars.g_user_date_time_format;
     myFrameHref = obj.frameHref;
 
-    setFormFromSyncStorage(function () {
+    setFormSyncStorage(function () {
         $('.nav-tabs a[data-target="' + $('#tbxactivetab').val() + '"]').tab('show');
     });
 

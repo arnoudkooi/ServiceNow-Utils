@@ -44,6 +44,8 @@ chrome.commands.onCommand.addListener(function (command) {
         sendToggleSearchFocus();
     else if (command == "toggle-atf")
         sendToggleAtfHelper();
+    else if (command == "toggle-scriptsync")
+        sendToggleSnScriptsync();
 
 });
 
@@ -97,7 +99,7 @@ var menuItems = [{
         "title": "Propertie: %s",
         contexts: ["selection"],
         "onclick": openPropertie
-    },   
+    },
     {
         "id": "tools",
         "contexts": ["all"],
@@ -131,13 +133,13 @@ var menuItems = [{
         "parentId": "tools",
         "title": "Clear cookies (Logout > Refresh page)",
         "contexts": ["all"]
-    },  
+    },
     {
         "id": "clearcookiessidedoor",
         "parentId": "tools",
         "title": "Clear cookies (Logout > login.do)",
         "contexts": ["all"]
-    },    
+    },
     //{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
     {
         "id": "props",
@@ -145,7 +147,7 @@ var menuItems = [{
         "title": "Properties",
         "contexts": ["all"],
         "onclick": function (e, f) {
-            openUrl(e, f, '/sys_properties_list.do')
+            openUrl(e, f, '/sys_properties_list.do');
         }
     },
     {
@@ -154,7 +156,7 @@ var menuItems = [{
         "title": "Today's Updates",
         "contexts": ["all"],
         "onclick": function (e, f) {
-            openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on')
+            openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on');
         }
     },
     {
@@ -163,7 +165,7 @@ var menuItems = [{
         "title": "Update Versions",
         "contexts": ["all"],
         "onclick": function (e, f) {
-            openVersions(e, f)
+            openVersions(e, f);
         }
     },
     {
@@ -172,7 +174,7 @@ var menuItems = [{
         "title": "stats.do",
         "contexts": ["all"],
         "onclick": function (e, f) {
-            openUrl(e, f, '/stats.do')
+            openUrl(e, f, '/stats.do');
         }
     },
     {
@@ -184,10 +186,42 @@ var menuItems = [{
         "id": "worknotesnippets",
         "contexts": ["editable"],
         "title": "Worknote Snippets"
+    },
+    {
+        "id": "scriptsync",
+        "contexts": ["all"],
+        "title": "VS Code sriptsync"
+    },
+    {
+        "id": "enablescriptsync",
+        "parentId": "scriptsync",
+        "title": "Enable",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            sendToggleSnScriptsync("enable");
+        }
+    },
+    {
+        "id": "disablescriptsync",
+        "parentId": "scriptsync",
+        "title": "Disable",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            sendToggleSnScriptsync("disable");
+        }
+    },
+    {
+        "id": "opentabscriptsync",
+        "parentId": "scriptsync",
+        "title": "Open Helper Tab",
+        "contexts": ["all"],
+        "onclick": function (e, f) {
+            sendToggleSnScriptsync("opentabonly");
+        }
     }
 ];
 
-const defaultMenuConf = {
+var defaultMenuConf = {
     "documentUrlPatterns": ["https://*.service-now.com/*"]
 };
 for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
@@ -342,6 +376,57 @@ function sendToggleAtfHelper() {
         });
 }
 
+function sendToggleSnScriptsync(force) {
+
+    getFromSyncStorageGlobal("scriptsync-active", function (answer) {
+        var newValue = !(answer || false);
+
+        if (force == "enable" || force == "opentabonly") newValue = true;
+        if (force == "disable") newValue = false;
+
+
+        setToChromeSyncStorageGlobal("scriptsync-active", newValue);
+
+        if (force != "opentabonly") {
+            chrome.tabs.query({
+                active: true,
+                currentWindow: true
+            }, function (tabs) {
+                chrome.tabs.reload(tabs[0].id);
+            });
+        }
+
+        if (newValue) {
+        
+            getFromSyncStorageGlobal("synctab", function (tid) {
+                if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
+                    chrome.tabs.get(tid, function () {
+                        if (chrome.runtime.lastError) {
+                            createScriptSyncTab();
+                        } else {
+                            chrome.tabs.update(tid, {
+                                'active': false
+                            });
+                        }
+                    });
+                } else
+                    createScriptSyncTab();
+            });
+        }
+    });
+
+}
+
+function createScriptSyncTab() {
+    var url = chrome.runtime.getURL("scriptsync.html");
+    chrome.tabs.create({
+        'url': url,
+        'active': false
+    }, function (t) {
+        setToChromeSyncStorageGlobal("synctab", t.id);
+    });
+}
+
 
 function openVersions(e, f) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
@@ -394,7 +479,7 @@ function cancelTransactions(e) {
 }
 
 function togglePop(clickData, tid) {
-    
+
     var frameHref = clickData.frameUrl || '';
     var urlFull = '' + clickData.pageUrl.match(/([^;]*\/){3}/)[0];
     if (frameHref.length > 10) {
@@ -411,18 +496,25 @@ function togglePop(clickData, tid) {
 
 }
 
-function clearCookies(e, tabid, target){
-    
+function clearCookies(e, tabid, target) {
+
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var url = tokens.join('/');
     var domain = e.pageUrl.split('/')[2];
-    chrome.cookies.getAll({domain: domain }, function(cookies) {
-        for(var i=0; i<cookies.length;i++) {
-            chrome.cookies.remove({url: url + cookies[i].path, name: cookies[i].name});
+    chrome.cookies.getAll({
+        domain: domain
+    }, function (cookies) {
+        for (var i = 0; i < cookies.length; i++) {
+            chrome.cookies.remove({
+                url: url + cookies[i].path,
+                name: cookies[i].name
+            });
         }
     });
     if (target)
-        chrome.tabs.update(tabid, {url: url + target});
+        chrome.tabs.update(tabid, {
+            url: url + target
+        });
     else
         chrome.tabs.reload(tabid);
 
@@ -565,8 +657,10 @@ function getGck(callback) {
     }
 }
 
-function grVarName(tableName){
-    grVar = tableName.replace(/[-_]([a-z])/g, function (g) { return g[1].toUpperCase(); })
+function grVarName(tableName) {
+    grVar = tableName.replace(/[-_]([a-z])/g, function (g) {
+        return g[1].toUpperCase();
+    });
     return 'gr' + grVar.charAt(0).toUpperCase() + grVar.slice(1);
 }
 
@@ -652,7 +746,7 @@ function getGRQueryForm(varName, template) {
                 queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
             }
         } else
-            queryStr += "\n\n    //todo: code ;)\n\n"
+            queryStr += "\n\n    //todo: code ;)\n\n";
         queryStr += "    //" + varName + ".update();\n";
         queryStr += "    //" + varName + ".insert();\n";
         queryStr += "    //" + varName + ".deleteRecord();\n";
@@ -668,10 +762,10 @@ function getUserDetails(userName) {
     var myurl = url + "/api/now/table/sys_user?sysparm_display_value=all&sysparm_query=user_name%3D" + userName;
     loadXMLDoc(g_ck, myurl, null, function (fetchResult) {
         var listhyperlink = " <a target='_blank' href='" + url + "/sys_user_list.do?sysparm_query=user_nameLIKE" + userName + "%5EORnameLIKE" + userName + "'> <i class='fa fa-list' aria-hidden='true'></i></a>";
-
+        var html;
         if (fetchResult.result.length > 0) {
             var usr = fetchResult.result[0];
-            var html = "<br /><table class='table table-condensed table-bordered table-striped'>" +
+            html = "<br /><table class='table table-condensed table-bordered table-striped'>" +
                 "<tr><th>User details</th><th>" + usr.user_name.display_value + listhyperlink + "</th></tr>" +
 
                 "<tr><td>Name:</td><td><a href='" + url + "/nav_to.do?uri=sys_user.do?sys_id=" +
@@ -685,7 +779,7 @@ function getUserDetails(userName) {
                 "<tr><td>E-mail:</td><td><a href='mailto:" + usr.email.display_value + "'>" + usr.email.display_value + "</a></td></tr></table>";
             popup.setUserDetails(html);
         } else {
-            var html = "<br /><table class='table table-condensed table-bordered table-striped'><tr><th>User details</th><th>" + userName + listhyperlink + "</th></tr>" +
+            html = "<br /><table class='table table-condensed table-bordered table-striped'><tr><th>User details</th><th>" + userName + listhyperlink + "</th></tr>" +
                 "<tr><td>Result:</td><td>No exact match, try clicking the list icon.</td></tr></table>";
             popup.setUserDetails(html);
         }
@@ -726,7 +820,7 @@ function getUpdateSetTables() {
             if (thedate == result[query[1]].toString()) {
                 updateSetTables = result[query[0]];
             } else
-                setUpdateSetTables()
+                setUpdateSetTables();
         } catch (err) {
             setUpdateSetTables();
         }
@@ -742,6 +836,22 @@ function setToChromeStorage(theName, theValue) {
     myobj[instance + "-" + theName + "-date"] = new Date().toDateString();
     chrome.storage.local.set(myobj, function () {
 
+    });
+}
+
+//set an instance independent sync parameter
+function setToChromeSyncStorageGlobal(theName, theValue) {
+    var myobj = {};
+    myobj[theName] = theValue;
+    chrome.storage.sync.set(myobj, function () {
+
+    });
+}
+
+//get an instance independent sync parameter
+function getFromSyncStorageGlobal(theName, callback) {
+    chrome.storage.sync.get(theName, function (result) {
+        callback(result[theName]);
     });
 }
 
