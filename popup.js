@@ -35,10 +35,11 @@ document.addEventListener('DOMContentLoaded', function () {
         bgPage = chrome.extension.getBackgroundPage();
         bgPage.getBrowserVariables(tabid);
 
-//setIcon("images/icon32newer.png");
 
     });
     document.querySelector('#firefoxoptions').href = chrome.runtime.getURL("options.html");
+    document.querySelector('#avscodesync').href = chrome.runtime.getURL("scriptsync.html");
+
 });
 
 function setIcon(icon){

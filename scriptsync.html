@@ -1,0 +1,46 @@
+<html>
+<head>
+    <title>Scriptsync ServiceNow Utils by arnoudkooi.com</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/datatables.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        body {
+            background: white;
+            font-family: 'Source Sans Pro', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: 10pt;
+            width: 95%;
+            margin: 10px;
+            padding: 10px;
+        }
+        .code {
+            font-family: Menlo, "Courier New", Courier, monospace;
+        }
+        .dataTables_scrollBody {
+            max-height: 100% !important;
+        }
+    </style>
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.deserialize.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/moment.js"></script>
+    <script src="js/datatables.min.js"></script>
+    <script src="js/datatables-datetime.js"></script>
+    <script src="scriptsync.js"></script>
+</head>
+<body>
+    <table id="synclog" class="display table-condensed" style="width:100%; table-layout: fixed;word-wrap:break-word;">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Origin</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</body>
+</html>

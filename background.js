@@ -126,6 +126,18 @@ var menuItems = [{
             openUrl(e, f, '/cancel_my_transactions.do');
         }
     },
+    {
+        "id": "clearcookies",
+        "parentId": "tools",
+        "title": "Clear cookies (Logout > Refresh page)",
+        "contexts": ["all"]
+    },  
+    {
+        "id": "clearcookiessidedoor",
+        "parentId": "tools",
+        "title": "Clear cookies (Logout > login.do)",
+        "contexts": ["all"]
+    },    
     //{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
     {
         "id": "props",
@@ -281,6 +293,10 @@ function insertSnippet(e, f) {
 chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
     if (clickData.menuItemId == "popinout")
         togglePop(clickData, tab.id);
+    else if (clickData.menuItemId == "clearcookies")
+        clearCookies(clickData, tabid, "");
+    else if (clickData.menuItemId == "clearcookiessidedoor")
+        clearCookies(clickData, tabid, "/login.do");
 });
 
 
@@ -377,6 +393,41 @@ function cancelTransactions(e) {
     });
 }
 
+function togglePop(clickData, tid) {
+    
+    var frameHref = clickData.frameUrl || '';
+    var urlFull = '' + clickData.pageUrl.match(/([^;]*\/){3}/)[0];
+    if (frameHref.length > 10) {
+        chrome.tabs.update(tid, {
+            url: frameHref
+        });
+    } else {
+        var newHref = encodeURIComponent(clickData.pageUrl.replace(urlFull, ''));
+        var newUrl = urlFull + '/nav_to.do?uri=' + newHref;
+        chrome.tabs.update(tid, {
+            url: newUrl
+        });
+    }
+
+}
+
+function clearCookies(e, tabid, target){
+    
+    var tokens = e.pageUrl.split('/').slice(0, 3);
+    var url = tokens.join('/');
+    var domain = e.pageUrl.split('/')[2];
+    chrome.cookies.getAll({domain: domain }, function(cookies) {
+        for(var i=0; i<cookies.length;i++) {
+            chrome.cookies.remove({url: url + cookies[i].path, name: cookies[i].name});
+        }
+    });
+    if (target)
+        chrome.tabs.update(tabid, {url: url + target});
+    else
+        chrome.tabs.reload(tabid);
+
+}
+
 
 function openUrl(e, f, u) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
@@ -451,28 +502,6 @@ function pop() {
             });
         }
     });
-}
-
-
-function togglePop(clickData, tid) {
-
-    console.log(clickData);
-    console.log(tid);
-
-    var frameHref = clickData.frameUrl || '';
-    var urlFull = '' + clickData.pageUrl.match(/([^;]*\/){3}/)[0];
-    if (frameHref.length > 10) {
-        chrome.tabs.update(tid, {
-            url: frameHref
-        });
-    } else {
-        var newHref = encodeURIComponent(clickData.pageUrl.replace(urlFull, ''));
-        var newUrl = urlFull + '/nav_to.do?uri=' + newHref;
-        chrome.tabs.update(tid, {
-            url: newUrl
-        });
-    }
-
 }
 
 

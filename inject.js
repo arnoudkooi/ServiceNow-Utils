@@ -771,6 +771,74 @@ function showAlert(msg, type, timeout) {
 }
 
 
+
+
+
+// var sriptSyncSocket = new WebSocket("ws://localhost:8999");
+// sriptSyncSocket.onmessage = function (evt) {
+//     console.log((event));
+// };
+
+function postToScriptSync(field) {
+
+    var instance = {};
+    instance.name = window.location.host.split('.')[0];
+    instance.url = window.location.origin;
+    instance.g_ck = g_ck;
+
+    var data = {};
+    data.instance = instance;
+    data.table = g_form.getTableName();
+    data.sys_id = g_form.getUniqueValue();
+    data.field = field;
+    data.content = g_form.getValue(field);
+    data.fieldType = g_form.getGlideUIElement(field).type;
+    data.name = g_form.getDisplayValue().replace(/[^a-z0-9+]+/gi, ' ');
+
+    var client = new XMLHttpRequest();
+    client.open("post", "http://localhost:1977");
+    client.onreadystatechange = function (m) {
+        // if (client.readyState == 4 && client.status != 200)
+        //     g_form.addErrorMessage(client.responseText);
+    };
+    client.onerror = function (e) {
+        g_form.addErrorMessage("Error, please check if VS Code with SN SriptSync is running");
+    };
+    client.send(JSON.stringify(data));
+
+    // var syncPage = jQuery("#snUtils").data("syncpage");
+    // window.open(syncPage, syncPage);
+
+}
+
+function addFieldSyncButtons() {
+
+    var fieldTypes = ["script", "xml", "html", "json","css"]
+    if (typeof jQuery == 'undefined') return; //not in studio
+
+    if (typeof g_form != 'undefined') {
+        jQuery(".label-text").each(function (index, value) {
+            var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+            var fieldType = jQuery(this).closest('[type]').attr('type');
+            for (var i = 0; i <fieldTypes.length; i++){
+                if(fieldType.indexOf(fieldTypes[i]) > -1){
+                    jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="'+ elm +'" class="icon scriptSync icon-save"></span>');
+                    break;
+                }
+            }
+        });
+
+        jQuery('span.scriptSync').on('click',function(){
+            postToScriptSync(jQuery(this).data('field'));
+            jQuery(this).css('color','#81B5A1');
+        });
+
+    }
+}
+addFieldSyncButtons();
+
+
+
 function getStepDetails(step) {
     var steps = {
         "071ee5b253331200040729cac2dc348d": {

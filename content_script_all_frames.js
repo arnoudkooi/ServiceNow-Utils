@@ -12,9 +12,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 (function(){
     var s = document.createElement('script');
+    s.setAttribute("id","snUtils");
+    s.setAttribute("data-extension", chrome.runtime.id);
+    s.setAttribute("data-syncpage", chrome.runtime.getURL("filesync.html"));
     s.src = chrome.runtime.getURL('inject.js');
     s.onload = function() {
-        this.remove();
+       // this.remove();
     };
     (document.head || document.documentElement).appendChild(s);
   })();
