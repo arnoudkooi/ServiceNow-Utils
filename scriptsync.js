@@ -28,7 +28,7 @@ $(document).ready(function () {
 
 
 
-    ws = new WebSocket("ws://localhost:1978");
+    ws = new WebSocket("ws://127.0.0.1:1978");
 
 
     ws.onerror = function (evt) {

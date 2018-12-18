@@ -769,13 +769,6 @@ function showAlert(msg, type, timeout) {
 
 
 
-
-
-// var sriptSyncSocket = new WebSocket("ws://localhost:8999");
-// sriptSyncSocket.onmessage = function (evt) {
-//     console.log((event));
-// };
-
 function postToScriptSync(field) {
 
     g_form.clearMessages();
@@ -794,7 +787,7 @@ function postToScriptSync(field) {
     data.name = g_form.getDisplayValue().replace(/[^a-z0-9+]+/gi, ' ');
 
     var client = new XMLHttpRequest();
-    client.open("post", "http://localhost:1977");
+    client.open("post", "http://127.0.0.1:1977");
     client.onreadystatechange = function (m) {
         // if (client.readyState == 4 && client.status != 200)
         //     g_form.addErrorMessage(client.responseText);
