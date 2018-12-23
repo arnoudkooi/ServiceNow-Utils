@@ -86,14 +86,17 @@ function checkSnufsRunning() {
         function (response) {
             if (typeof response == 'undefined' &&
                 typeof chrome.management !== 'undefined') {
-                chrome.management.launchApp(snufsid, function (resp) {
+                    $('#chromeapp').on('click', 
+                    function(){
+                        chrome.management.launchApp(snufsid, function (resp) { });
+                    });
                     chrome.runtime.sendMessage(snufsid, { checkRunning: true, instance: instance },
                         function (res) {
                             if (typeof res == 'undefined') {
-                                $('#sciptcontainerdiv').html('Please install <a href="https://chrome.google.com/webstore/detail/gfmcfepahcbpafgckmomdopifchjbdcg" target="_blank">ServiceNow Utils SciptSyncer</a> from the Chrome Webstore!' + '<br />Or enable it from your extension page if you disabled it.');
+                                $('#sciptcontainerdiv').html('');
                             }
                         });
-                });
+               // });
             }
         });
 }

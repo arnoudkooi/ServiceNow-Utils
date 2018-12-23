@@ -5,3 +5,4 @@ fonts/.DS_Store
 # web-ext stuff
 .web-extension-id
 web-ext-artifacts/
+.jshintrc

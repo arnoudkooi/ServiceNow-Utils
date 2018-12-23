@@ -3,7 +3,7 @@
     "short_name": "ServiceNow Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "2.9.0.1",
+    "version": "3.0.0.0",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -83,7 +83,7 @@
                 "default": "Ctrl+4",
                 "mac": "Command+4"
             },
-            "description": "Toggle VS Code ScriptSync"
+            "description": "Open VS Code ScriptSync tab"
         }
     },
     "page_action": {

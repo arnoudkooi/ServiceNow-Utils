@@ -95,7 +95,7 @@ function setSearch() {
                     else if (action.toLowerCase() == 'struct') {
                         listurl = '/sys_db_object.do?sysparm_query=name=' + table;
                     }
-                    else if (action.toLowerCase() == 'config') {
+                    else if (action.toLowerCase() == './') {
                         listurl = '/personalize_all.do?sysparm_rules_table=' + table + '&sysparm_rules_label=' + table;
                     }
 

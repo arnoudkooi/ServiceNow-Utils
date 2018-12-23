@@ -45,7 +45,7 @@ chrome.commands.onCommand.addListener(function (command) {
     else if (command == "toggle-atf")
         sendToggleAtfHelper();
     else if (command == "toggle-scriptsync")
-        sendToggleSnScriptsync();
+        sendToggleSnScriptsync("opentabonly");
 
 });
 

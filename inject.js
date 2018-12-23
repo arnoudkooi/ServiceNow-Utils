@@ -44,8 +44,6 @@ function startMessageChannel() {
 
         }
     }
-
-
 }
 
 
@@ -769,6 +767,43 @@ function showAlert(msg, type, timeout) {
 
 
 
+function postRequestToScriptSync(requestType) {
+
+    var instance = {};
+    instance.name = window.location.host.split('.')[0];
+    instance.url = window.location.origin;
+    instance.g_ck = g_ck;
+    var data = {};
+
+    data.instance = instance;
+    if (requestType == 'widget') {
+        var angularObject = angular.element(document.getElementById('vscode-btn')).scope().$parent;
+        var angularData = angularObject.data;
+        if(angularObject.c.readOnly){
+            alert("This is a Readonly widget, and can not be edited in VS Code. Please Clone the widget first");
+            return;
+        }
+
+        data.action = 'saveWidget';
+        data.tableName = 'sp_widget';
+        data.name = angularData.title;
+        data.sys_id = angularData.sys_id;
+        data.widget = angularData.f._fields;
+        data.widget.data_table.choices = []; //skip useless data
+
+        var client = new XMLHttpRequest();
+        client.open("post", "http://127.0.0.1:1977");
+        client.onreadystatechange = function (m) {
+            if (client.readyState == 4 && client.status != 200)
+                g_form.addErrorMessage(client.responseText);
+        };
+        client.onerror = function (e) {
+            alert("Error, please check if VS Code with SN SriptSync is running");
+        };
+        client.send(JSON.stringify(data));
+    }
+}
+
 function postToScriptSync(field) {
 
     g_form.clearMessages();
@@ -778,6 +813,7 @@ function postToScriptSync(field) {
     instance.g_ck = g_ck;
 
     var data = {};
+    data.action = 'saveFieldAsFile';
     data.instance = instance;
     data.table = g_form.getTableName();
     data.sys_id = g_form.getUniqueValue();
@@ -804,31 +840,41 @@ function postToScriptSync(field) {
 
 function addFieldSyncButtons() {
 
-    var fieldTypes = ["script", "xml", "html", "json","css"];
+    var fieldTypes = ["script", "xml", "html", "json", "css"];
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
+        if (g_form.isNewRecord()) return;
         jQuery(".label-text").each(function (index, value) {
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
             var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
-            for (var i = 0; i <fieldTypes.length; i++){
-                if(fieldType.indexOf(fieldTypes[i]) > -1){
-                    jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="'+ elm +'" class="icon scriptSync icon-save"></span>');
+            for (var i = 0; i < fieldTypes.length; i++) {
+                if (fieldType.indexOf(fieldTypes[i]) > -1) {
+                    jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
                     break;
                 }
             }
         });
-
-        jQuery('span.scriptSync').on('click',function(){
+        jQuery('span.scriptSync').on('click', function () {
             postToScriptSync(jQuery(this).data('field'));
-            jQuery(this).css('color','#81B5A1');
+            jQuery(this).css('color', '#81B5A1');
         });
 
+    } else if (location.href.includes("sp_config/?id=widget_editor") ||
+               location.href.includes("sp_config?id=widget_editor")) {
+
+        var $body = angular.element(document.body); // 1
+        var $rootScope = $body.scope().$root;
+        $rootScope.$watch("loadingIndicator", function (newValue, oldValue) {
+            if (!newValue) {
+                $('#vscode-btn').remove() 
+                let btn = `<button id='vscode-btn' class="btn btn-info btn-group" onclick="postRequestToScriptSync('widget')" title="Edit widget in VS Code (SN ScriptSync)">
+                <span class="glyphicon glyphicon-floppy-save"></span></button>`;
+                $('button[type=submit]').before(btn);
+            }
+        });
     }
 }
-
-
-
 
 function getStepDetails(step) {
     var steps = {
