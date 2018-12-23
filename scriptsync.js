@@ -37,6 +37,7 @@ $(document).ready(function () {
         ]).draw(false);
         increaseTitlecounter();
         flashFavicon('images/iconred48.png', 3);
+        setTimeout(function () { location.reload(true); }, 180000);
     };
 
     ws.onclose = function (evt) {
