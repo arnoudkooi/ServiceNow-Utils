@@ -15,10 +15,11 @@ if (typeof jQuery != "undefined") {
         setShortCuts();
         bindPaste();
         makeReadOnlyContentCopyable();
-        startMessageChannel();
+        //startMessageChannel();
 
     });
 }
+addStudioSearch();
 
 //used to communicate between browser tabs when recording ATF steps
 function startMessageChannel() {
@@ -867,14 +868,63 @@ function addFieldSyncButtons() {
         var $rootScope = $body.scope().$root;
         $rootScope.$watch("loadingIndicator", function (newValue, oldValue) {
             if (!newValue) {
-                $('#vscode-btn').remove() 
-                let btn = `<button id='vscode-btn' class="btn btn-info btn-group" onclick="postRequestToScriptSync('widget')" title="Edit widget in VS Code (SN ScriptSync)">
-                <span class="glyphicon glyphicon-floppy-save"></span></button>`;
-                $('button[type=submit]').before(btn);
+                setTimeout(function(){
+                    $('#vscode-btn').remove() 
+                    let btn = `<button id='vscode-btn' class="btn btn-info btn-group" onclick="postRequestToScriptSync('widget')" title="Edit widget in VS Code (SN ScriptSync)">
+                    <span class="glyphicon glyphicon-floppy-save"></span></button>`;
+                    $('button[type=submit]').before(btn);
+                },500);
             }
         });
     }
 }
+
+
+
+function addStudioSearch(){
+        
+    if (!location.href.includes("$studio.do")) return; //only in studio
+    if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
+
+
+    var snuGroupFilter = '<input onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px 0; padding:2px" placeholder="Filter Group">'
+    var snuFileFilter = '<input onkeyup="doFileSearch(this.value)" id="snuFileFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter File">'
+    document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter + snuFileFilter);
+}
+
+function doGroupSearch(srch){
+    
+    //expand all when searching
+    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function(el, i){
+        el.classList.remove('collapsed');
+    });
+
+    //filter based on item text.
+    var elms = document.querySelectorAll('.app-explorer-tree ul.record-type-section span')
+    Array.prototype.forEach.call(elms, function(el, i){
+
+        el.closest('li.project-group, li.record-type-group').style.display = 
+        (el.innerText.toLowerCase().includes(srch.toLowerCase()) || 
+        el.closest('ul.record-type-section').parentElement.querySelectorAll('.toggle-bar')[0].
+            innerText.toLowerCase().includes(srch.toLowerCase())) ? "" : "none";
+    });
+}
+
+function doFileSearch(srch){
+    
+    //expand all when searching
+    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function(el, i){
+        el.classList.remove('collapsed');
+    });
+
+    //filter based on item text.
+    var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+    Array.prototype.forEach.call(elms, function(el, i){
+        el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
+    });
+}
+
+
 
 function getStepDetails(step) {
     var steps = {
