@@ -925,14 +925,14 @@ function doGroupSearch(search) {
 
     Array.prototype.forEach.call(elms, function (el, i) {
 
-        var parents = getParents(el, 'ul.record-type-section').reverse();
+        var parents = getParents(el, 'ul').reverse();
         var text = (search.length == 1) ? el.innerText.toLowerCase() + ' ' : '';
         var pars = [];
         Array.prototype.forEach.call(parents, function (par, i) {
             par.dataset.searching = true;
             text += par.parentElement.getElementsByTagName('span')[0].innerText.toLowerCase() + ' ';
             pars.push(par);
-
+console.log(text)
             for (par of pars) {
                 if (text.includes(srch)) { 
                     par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
