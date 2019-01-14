@@ -780,7 +780,7 @@ function postRequestToScriptSync(requestType) {
     if (requestType == 'widget') {
         var angularObject = angular.element(document.getElementById('vscode-btn')).scope().$parent;
         var angularData = angularObject.data;
-        if(angularObject.c.readOnly){
+        if (angularObject.c.readOnly) {
             alert("This is a Readonly widget, and can not be edited in VS Code. Please Clone the widget first");
             return;
         }
@@ -862,18 +862,18 @@ function addFieldSyncButtons() {
         });
 
     } else if (location.href.includes("sp_config/?id=widget_editor") ||
-               location.href.includes("sp_config?id=widget_editor")) {
+        location.href.includes("sp_config?id=widget_editor")) {
 
         var $body = angular.element(document.body); // 1
         var $rootScope = $body.scope().$root;
         $rootScope.$watch("loadingIndicator", function (newValue, oldValue) {
             if (!newValue) {
-                setTimeout(function(){
-                    $('#vscode-btn').remove() 
+                setTimeout(function () {
+                    $('#vscode-btn').remove()
                     let btn = `<button id='vscode-btn' class="btn btn-info btn-group" onclick="postRequestToScriptSync('widget')" title="Edit widget in VS Code (SN ScriptSync)">
                     <span class="glyphicon glyphicon-floppy-save"></span></button>`;
                     $('button[type=submit]').before(btn);
-                },500);
+                }, 500);
             }
         });
     }
@@ -881,48 +881,121 @@ function addFieldSyncButtons() {
 
 
 
-function addStudioSearch(){
-        
+function addStudioSearch() {
+
     if (!location.href.includes("$studio.do")) return; //only in studio
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
 
 
-    var snuGroupFilter = '<input onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px 0; padding:2px" placeholder="Filter Group">'
-    var snuFileFilter = '<input onkeyup="doFileSearch(this.value)" id="snuFileFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter File">'
+    var snuGroupFilter = '<input onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px ; padding:2px" placeholder="Filter navigator">'
+    var snuFileFilter = '';//'<input onkeyup="doFileSearch(this.value)" id="snuFileFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter File">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter + snuFileFilter);
 }
 
-function doGroupSearch(srch){
-    
+
+function doGroupSearch(srch) {
     //expand all when searching
-    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function(el, i){
+    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
         el.classList.remove('collapsed');
     });
 
-    //filter based on item text.
-    var elms = document.querySelectorAll('.app-explorer-tree ul.record-type-section span')
-    Array.prototype.forEach.call(elms, function(el, i){
-
-        el.closest('li.project-group, li.record-type-group').style.display = 
-        (el.innerText.toLowerCase().includes(srch.toLowerCase()) || 
-        el.closest('ul.record-type-section').parentElement.querySelectorAll('.toggle-bar')[0].
-            innerText.toLowerCase().includes(srch.toLowerCase())) ? "" : "none";
+    Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
+        el.dataset.viewCount = 0;
+        el.dataset.searching = false;
+        el.parentElement.style.display = "";
     });
+
+    if (srch.length == 0) return;
+
+
+    //filter based on item text.
+    //var elms = document.querySelectorAll('.app-explorer-tree ul.record-type-section span, .app-explorer-tree .explorer-sizer span')
+
+    var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+
+    Array.prototype.forEach.call(elms, function (el, i) {
+
+        var parents = getParents(el, 'ul.record-type-section').reverse();
+        var text = el.innerText.toLowerCase() + ' ';
+        var pars = [];
+        Array.prototype.forEach.call(parents, function (par, i) {
+            par.dataset.searching = true;
+            text += par.parentElement.getElementsByTagName('span')[0].innerText.toLowerCase() + ' ';
+            pars.push(par);
+
+            for (par of pars) {
+                if (text.includes(srch.toLowerCase())) {
+                    par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
+                    el.style.display = "";
+                }
+                else {
+                    par.dataset.viewCount = (Number(par.dataset.viewCount) || 0);
+                    el.style.display = "none";
+                }
+            }
+        });
+
+        // var itemHasText = el.innerText;
+        // var hasSubItem = el.closest('ul.record-type-section');
+        // var subItemHasText = false;
+        // if (hasSubItem)
+        //     subItemHasText = el.closest('ul.record-type-section').parentElement.querySelectorAll('.toggle-bar')[0]
+
+        // el.closest('li.project-group, li.record-type-group').style.display = 
+        //     (itemHasText || subItemHasText) ? "" : "none";
+
+
+
+    });
+
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
+        console.log(Number(el.dataset.viewCount));
+        //console.log(el.dataset.searching == "true");
+        if (el.dataset.viewCount == "0" && el.dataset.searching == "true")
+            el.parentElement.style.display = "none";
+    });
+
+
 }
 
-function doFileSearch(srch){
-    
+function doFileSearch(srch) {
+
     //expand all when searching
-    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function(el, i){
+    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
         el.classList.remove('collapsed');
     });
 
     //filter based on item text.
     var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
-    Array.prototype.forEach.call(elms, function(el, i){
+    Array.prototype.forEach.call(elms, function (el, i) {
         el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
     });
 }
+
+/**
+ * Get all of an element's parent elements up the DOM tree
+ * @param  {Node}   elem     The element
+ * @param  {String} selector Selector to match against [optional]
+ * @return {Array}           The parent elements
+ */
+var getParents = function (elem, selector) {
+    // Setup parents array
+    var parents = [];
+    // Get matching parent elements
+    for (; elem && elem !== document; elem = elem.parentNode) {
+
+        // Add matching parents to array
+        if (selector) {
+            if (elem.matches(selector)) {
+                parents.push(elem);
+            }
+        } else {
+            parents.push(elem);
+        }
+    }
+    return parents;
+};
 
 
 
