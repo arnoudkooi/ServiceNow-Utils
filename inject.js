@@ -887,13 +887,15 @@ function addStudioSearch() {
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
 
 
-    var snuGroupFilter = '<input onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px ; padding:2px" placeholder="Filter navigator">'
+    var snuGroupFilter = '<input onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups Files[,Files])">'
     var snuFileFilter = '';//'<input onkeyup="doFileSearch(this.value)" id="snuFileFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter File">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter + snuFileFilter);
 }
 
 
-function doGroupSearch(srch) {
+function doGroupSearch(search) {
+
+    
     //expand all when searching
     Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
         el.classList.remove('collapsed');
@@ -905,7 +907,10 @@ function doGroupSearch(srch) {
         el.parentElement.style.display = "";
     });
 
-    if (srch.length == 0) return;
+    if (search.length == 0) return;
+
+    search = search.split(',');
+    var srch = search[0];
 
 
     //filter based on item text.
@@ -956,7 +961,13 @@ function doGroupSearch(srch) {
             el.parentElement.style.display = "none";
     });
 
-
+    if (search.length > 1){
+        srch = search[1].trim();
+        var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+        Array.prototype.forEach.call(elms, function (el, i) {
+            el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
+        });
+    }
 }
 
 function doFileSearch(srch) {
