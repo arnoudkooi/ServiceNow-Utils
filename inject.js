@@ -961,13 +961,13 @@ function doGroupSearch(search) {
             el.parentElement.style.display = "none";
     });
 
-    if (search.length > 1){
-        srch = search[1].trim();
-        var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
-        Array.prototype.forEach.call(elms, function (el, i) {
-            el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
-        });
-    }
+
+    srch = search.length > 1 ? search[1].trim() : '';
+    var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+    Array.prototype.forEach.call(elms, function (el, i) {
+        el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
+    });
+    
 }
 
 function doFileSearch(srch) {
