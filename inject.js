@@ -887,12 +887,13 @@ function addStudioSearch() {
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
 
 
-    var snuGroupFilter = '<input onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups Files[,Files])">'
+    var snuGroupFilter = '<input onfocus="this.select();" onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
     var snuFileFilter = '';//'<input onkeyup="doFileSearch(this.value)" id="snuFileFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter File">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter + snuFileFilter);
 }
 
 
+//Some magic to filter the file tree in studio
 function doGroupSearch(search) {
 
     
@@ -907,21 +908,25 @@ function doGroupSearch(search) {
         el.parentElement.style.display = "";
     });
 
-    if (search.length == 0) return;
+    if (search.length == 0) {
+        var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+        Array.prototype.forEach.call(elms, function (el, i) {
+            el.style.display = "";
+        });
+        return;
+    }
 
     search = search.split(',');
-    var srch = search[0];
+    var srch = search[0].toLowerCase();
 
 
     //filter based on item text.
-    //var elms = document.querySelectorAll('.app-explorer-tree ul.record-type-section span, .app-explorer-tree .explorer-sizer span')
-
     var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
 
     Array.prototype.forEach.call(elms, function (el, i) {
 
         var parents = getParents(el, 'ul.record-type-section').reverse();
-        var text = el.innerText.toLowerCase() + ' ';
+        var text = (search.length == 1) ? el.innerText.toLowerCase() + ' ' : '';
         var pars = [];
         Array.prototype.forEach.call(parents, function (par, i) {
             par.dataset.searching = true;
@@ -929,44 +934,39 @@ function doGroupSearch(search) {
             pars.push(par);
 
             for (par of pars) {
-                if (text.includes(srch.toLowerCase())) {
+                if (text.includes(srch)) { 
                     par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
-                    el.style.display = "";
                 }
                 else {
                     par.dataset.viewCount = (Number(par.dataset.viewCount) || 0);
                     el.style.display = "none";
                 }
             }
+
+            if(text.includes(srch)){
+                el.style.display = "";
+            }
+            else
+                el.style.display = "none";
+
         });
-
-        // var itemHasText = el.innerText;
-        // var hasSubItem = el.closest('ul.record-type-section');
-        // var subItemHasText = false;
-        // if (hasSubItem)
-        //     subItemHasText = el.closest('ul.record-type-section').parentElement.querySelectorAll('.toggle-bar')[0]
-
-        // el.closest('li.project-group, li.record-type-group').style.display = 
-        //     (itemHasText || subItemHasText) ? "" : "none";
-
-
 
     });
 
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
-        console.log(Number(el.dataset.viewCount));
-        //console.log(el.dataset.searching == "true");
         if (el.dataset.viewCount == "0" && el.dataset.searching == "true")
             el.parentElement.style.display = "none";
     });
 
 
-    srch = search.length > 1 ? search[1].trim() : '';
-    var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
-    Array.prototype.forEach.call(elms, function (el, i) {
-        el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
-    });
+    if (search.length > 1) {
+        srch = search[1];
+        var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+        Array.prototype.forEach.call(elms, function (el, i) {
+            el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
+        });
+    }
     
 }
 
