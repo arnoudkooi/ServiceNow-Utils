@@ -849,11 +849,16 @@ function addFieldSyncButtons() {
         jQuery(".label-text").each(function (index, value) {
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
             var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
+            if (this.innerText.toLowerCase() == 'script'){
+                jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
+                return true;
+            }
             for (var i = 0; i < fieldTypes.length; i++) {
                 if (fieldType.indexOf(fieldTypes[i]) > -1) {
                     jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
                     break;
                 }
+                
             }
         });
         jQuery('span.scriptSync').on('click', function () {
@@ -932,7 +937,6 @@ function doGroupSearch(search) {
             par.dataset.searching = true;
             text += par.parentElement.getElementsByTagName('span')[0].innerText.toLowerCase() + ' ';
             pars.push(par);
-console.log(text)
             for (par of pars) {
                 if (text.includes(srch)) { 
                     par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
