@@ -19,6 +19,7 @@ if (typeof jQuery != "undefined") {
 
     });
 }
+
 addStudioSearch();
 
 //used to communicate between browser tabs when recording ATF steps
@@ -821,7 +822,7 @@ function postToScriptSync(field) {
     data.field = field;
     data.content = g_form.getValue(field);
     data.fieldType = g_form.getGlideUIElement(field).type;
-    data.name = g_form.getDisplayValue().replace(/[^a-z0-9+]+/gi, ' ');
+    data.name = g_form.getDisplayValue().replace(/[^a-z0-9.+]+/gi, ' ');
 
     var client = new XMLHttpRequest();
     client.open("post", "http://127.0.0.1:1977");
@@ -889,6 +890,14 @@ function addFieldSyncButtons() {
 function addStudioSearch() {
 
     if (!location.href.includes("$studio.do")) return; //only in studio
+
+    if (typeof g_ck == 'undefined'){
+        if (typeof InitialState != 'undefined'){
+            g_ck = InitialState.userToken;
+        }
+    }
+
+
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
 
 
