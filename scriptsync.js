@@ -60,6 +60,8 @@ $(document).ready(function () {
             increaseTitlecounter();
         } else if (wsObj.action == 'requestRecord') {
             requestRecord(wsObj);
+        } else if (wsObj.action == 'requestRecords') {
+            requestRecords(wsObj);
         } else if ('instance' in wsObj) {
             updateRecord(wsObj);
         } else {
