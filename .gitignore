@@ -6,3 +6,4 @@ fonts/.DS_Store
 .web-extension-id
 web-ext-artifacts/
 .jshintrc
+*.zip

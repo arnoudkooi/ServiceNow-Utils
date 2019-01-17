@@ -117,6 +117,40 @@ function requestRecord(scriptObj) {
     client.send();
 }
 
+function requestRecords(scriptObj) {
+    var client = new XMLHttpRequest();
+    client.open("get", scriptObj.instance.url + '/api/now/table/' +
+        scriptObj.tableName + '?' + scriptObj.queryString);
+
+    client.setRequestHeader('Accept', 'application/json');
+    client.setRequestHeader('Content-Type', 'application/json');
+    client.setRequestHeader('X-UserToken', scriptObj.instance.g_ck);
+
+    client.onreadystatechange = function () {
+        if (this.readyState == this.DONE) {
+            var resp = JSON.parse(this.response);
+
+            if (resp.hasOwnProperty('result')) {
+                t.row.add([
+                    new Date(), 'VS Code', 'Received from ServiceNow: <b>' + resp.result.length + ' records</b><br /><span class="code">Instance: ' +
+                    scriptObj.instance.name + ' | Table: ' + scriptObj.tableName + '</span>'
+
+                ]).draw(false);
+                increaseTitlecounter();
+                ws.send(this.response);
+
+            } else {
+                t.row.add([
+                    new Date(), 'VS Code', this.response
+                ]).draw(false);
+                increaseTitlecounter();
+                ws.send(this.response);
+            }
+        }
+    };
+    client.send();
+}
+
 
 function updateRecord(scriptObj) {
     var client = new XMLHttpRequest();

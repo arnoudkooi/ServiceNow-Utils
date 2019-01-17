@@ -78,6 +78,12 @@ function doubleClickToSetQueryListV2() {
             }
         }
     });
+
+    jQuery('div.breadcrumb_container').on("click", function (event) {
+        if (event.shiftKey) {
+            splitContainsToAnd();
+        } 
+    });
 }
 
 var qry = '';
@@ -303,6 +309,12 @@ function makeReadOnlyContentCopyable() {
     }
 }
 
+function openReference(event, refTable,refField){
+    var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + g_form.getValue(refField);
+    if ((event.ctrlKey || event.metaKey) && event.keyCode == 83)
+        url = '/' + refTable + '?sysparm_query=sys_idIN' + g_form.getValue(refField);
+    window.open(url,'refTable');
+}
 
 function addTechnicalNames() {
 
@@ -311,8 +323,15 @@ function addTechnicalNames() {
     if (typeof g_form != 'undefined') {
         jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
             jQuery('label').removeAttr('for'); //remove to easier select text
+            jQuery('label').removeAttr('onclick')
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-            jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
+            var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
+            var btn = '';
+            if (fieldType == 'reference' || fieldType == 'glide_list'){
+                var reftable = g_form.getGlideUIElement(elm).reference;
+                elm = ' <a onclick="openReference(\''+ reftable +'\',\''+ elm +'\');"  title="Reference table: '+ reftable +'" target="_blank">'+ elm +'</a>';
+            }
+            jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm +'</span> ');
         });
     }
 
@@ -329,6 +348,13 @@ function addTechnicalNames() {
 
     showSelectFieldValues();
     searchLargeSelects();
+}
+
+function openReference(refTable,refField){
+    var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + g_form.getValue(refField);
+    if (event.ctrlKey || event.metaKey)
+        url = '/' + refTable + '?sysparm_query=sys_idIN' + g_form.getValue(refField);
+    window.open(url,'refTable');
 }
 
 function showSelectFieldValues() {
@@ -842,7 +868,7 @@ function postToScriptSync(field) {
 
 function addFieldSyncButtons() {
 
-    var fieldTypes = ["script", "xml", "html", "json", "css"];
+    var fieldTypes = ["script", "xml", "html", "template", "json", "css"];
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
