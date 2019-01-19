@@ -37,7 +37,7 @@ $(document).ready(function () {
         ]).draw(false);
         increaseTitlecounter();
         flashFavicon('images/iconred48.png', 3);
-        setTimeout(function () { location.reload(true); }, 180000);
+        setTimeout(function () { location.reload(true); }, 30000);
     };
 
     ws.onclose = function (evt) {
@@ -85,14 +85,14 @@ $(document).ready(function () {
 
 });
 
-function requestRecord(scriptObj) {
+function requestRecord(requestJson) {
     var client = new XMLHttpRequest();
-    client.open("get", scriptObj.instance.url + '/api/now/table/' +
-        scriptObj.tableName + '/' + scriptObj.sys_id);
+    client.open("get", requestJson.instance.url + '/api/now/table/' +
+        requestJson.tableName + '/' + requestJson.sys_id);
 
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader('X-UserToken', scriptObj.instance.g_ck);
+    client.setRequestHeader('X-UserToken', requestJson.instance.g_ck);
 
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
@@ -100,12 +100,14 @@ function requestRecord(scriptObj) {
 
             if (resp.hasOwnProperty('result')) {
                 t.row.add([
-                    new Date(), 'VS Code', 'Received from ServiceNow: <b>' + scriptObj.name + '</b><br /><span class="code">Instance: ' +
-                    scriptObj.instance.name + ' | Table: ' + scriptObj.tableName + '</span>'
+                    new Date(), 'VS Code', 'Received from ServiceNow: <b>' + requestJson.name + '</b><br /><span class="code">Instance: ' +
+                    requestJson.instance.name + ' | Table: ' + requestJson.tableName + '</span>'
 
                 ]).draw(false);
                 increaseTitlecounter();
-                ws.send(this.response);
+                requestJson.type = "requestRecord";
+                requestJson.responses = this.response;
+                ws.send(requestJson);
 
             } else {
                 t.row.add([
@@ -119,14 +121,14 @@ function requestRecord(scriptObj) {
     client.send();
 }
 
-function requestRecords(scriptObj) {
+function requestRecords(requestJson) {
     var client = new XMLHttpRequest();
-    client.open("get", scriptObj.instance.url + '/api/now/table/' +
-        scriptObj.tableName + '?' + scriptObj.queryString);
+    client.open("get", requestJson.instance.url + '/api/now/table/' +
+        requestJson.tableName + '?' + requestJson.queryString);
 
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader('X-UserToken', scriptObj.instance.g_ck);
+    client.setRequestHeader('X-UserToken', requestJson.instance.g_ck);
 
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
@@ -135,18 +137,20 @@ function requestRecords(scriptObj) {
             if (resp.hasOwnProperty('result')) {
                 t.row.add([
                     new Date(), 'VS Code', 'Received from ServiceNow: <b>' + resp.result.length + ' records</b><br /><span class="code">Instance: ' +
-                    scriptObj.instance.name + ' | Table: ' + scriptObj.tableName + '</span>'
+                    requestJson.instance.name + ' | Table: ' + requestJson.tableName + '</span>'
 
                 ]).draw(false);
                 increaseTitlecounter();
-                ws.send(this.response);
+                requestJson.type = "requestRecords";
+                requestJson.results = resp.result;
+                ws.send(JSON.stringify(requestJson));
 
             } else {
                 t.row.add([
                     new Date(), 'VS Code', this.response
                 ]).draw(false);
                 increaseTitlecounter();
-                ws.send(this.response);
+                ws.send(JSON.stringify(resp));
             }
         }
     };
