@@ -337,8 +337,8 @@ function addTechnicalNames() {
 
     if (typeof g_form != 'undefined') {
         jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
-            jQuery('label').removeAttr('for'); //remove to easier select text
-            jQuery('label').removeAttr('onclick')
+            jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
+            jQuery('label:not(.checkbox-label)').removeAttr('onclick')
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
             var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
             var btn = '';
