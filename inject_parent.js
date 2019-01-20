@@ -18,9 +18,8 @@ if (typeof jQuery != "undefined") {
         //Initialize Alert
         var alertContainer = '<div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>';
         jQuery('header').prepend(alertContainer);
-    });
 
-    addStudioLink()
+    });
 }
 
 function initializeAutocomplete(array) {

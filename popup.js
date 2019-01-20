@@ -223,7 +223,6 @@ function setBrowserVariables(obj) {
         $('.nav-tabs a[data-target="' + $('#tbxactivetab').val() + '"]').tab('show');
     });
 
-
     //Attach eventlistners
     $('#btnGetUser').click(function () {
         getUserDetails(false);
@@ -250,7 +249,12 @@ function setBrowserVariables(obj) {
             win.snd_xplore_editor.setValue(script);
         });
     });
+
+    $('input.snu-setting').change(function() {
+        setSettings();
+    });
     
+
 
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
@@ -369,11 +373,12 @@ function setBrowserVariables(obj) {
                     $(this).select();
                 });
                 break;
-            case "tabshortcuts":
+            case "#tabsettings":
                 if (typeof InstallTrigger !== 'undefined'){
                     jQuery(".hide-in-chrome").css('display','inline');
                     alert(1);
                 }
+                getSettings();
                 break;
         }
 
@@ -392,6 +397,22 @@ function setBrowserVariables(obj) {
 //Set message, on about tab, callback from getInfoMessage
 function setInfoMessage(html) {
     $('#livemessage').html(html);
+}
+
+function getSettings(){
+    bgPage.getFromSyncStorageGlobal("snusettings", function(settings){
+        for (var setting in settings){
+            document.getElementById(setting).checked = settings[setting];
+        };
+    })
+}
+
+function setSettings(){
+    var snusettings = {};
+    $('input.snu-setting').each(function (index, item) {
+        snusettings[this.id] = this.checked;
+    });
+    bgPage.setToChromeSyncStorageGlobal("snusettings",snusettings);
 }
 
 

@@ -30,6 +30,7 @@ chrome.runtime.onInstalled.addListener(function () {
 });
 
 chrome.runtime.onUpdateAvailable.addListener(function () {
+    chrome.runtime.reload();
     //clear storage on update (just to keep it clean)
     chrome.storage.local.clear();
 });
@@ -64,161 +65,145 @@ chrome.commands.onCommand.addListener(function (command) {
 
 
 var menuItems = [{
-        "type": "separator"
-    },
+    "type": "separator"
+},
 
-    {
-        "id": "goto",
-        "contexts": ["selection"],
-        "title": "Search / GoTo"
-    },
-    {
-        "id": "instancesearch",
-        "parentId": "goto",
-        "title": "Instance Search: %s",
-        contexts: ["selection"],
-        "onclick": openSearch
-    },
-    {
-        "id": "openscript",
-        "parentId": "goto",
-        "title": "Script Include: %s",
-        contexts: ["selection"],
-        "onclick": openScriptInclude
-    },
-    {
-        "id": "opentablelist",
-        "parentId": "goto",
-        "title": "Table list: %s",
-        contexts: ["selection"],
-        "onclick": openTableList
-    },
-    {
-        "id": "propertie",
-        "parentId": "goto",
-        "title": "Propertie: %s",
-        contexts: ["selection"],
-        "onclick": openPropertie
-    },
-    {
-        "id": "tools",
-        "contexts": ["all"],
-        "title": "Tools"
-    },
-    {
-        "id": "popinout",
-        "parentId": "tools",
-        "title": "PopIn / PopOut",
-        "contexts": ["all"],
-        "onclick": togglePop
-    },
-    {
-        "id": "shownames",
-        "parentId": "tools",
-        "title": "Show technical names",
-        "contexts": ["all"],
-        "onclick": addTechnicalNames
-    },
-    {
-        "id": "canceltransaction",
-        "parentId": "tools",
-        "title": "Cancel transactions",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            openUrl(e, f, '/cancel_my_transactions.do');
-        }
-    },
-    {
-        "id": "clearcookies",
-        "parentId": "tools",
-        "title": "Clear cookies (Logout > Refresh page)",
-        "contexts": ["all"]
-    },
-    {
-        "id": "clearcookiessidedoor",
-        "parentId": "tools",
-        "title": "Clear cookies (Logout > login.do)",
-        "contexts": ["all"]
-    },
-    //{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
-    {
-        "id": "props",
-        "parentId": "tools",
-        "title": "Properties",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            openUrl(e, f, '/sys_properties_list.do');
-        }
-    },
-    {
-        "id": "updates",
-        "parentId": "tools",
-        "title": "Today's Updates",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on');
-        }
-    },
-    {
-        "id": "versions",
-        "parentId": "tools",
-        "title": "Update Versions",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            openVersions(e, f);
-        }
-    },
-    {
-        "id": "stats",
-        "parentId": "tools",
-        "title": "stats.do",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            openUrl(e, f, '/stats.do');
-        }
-    },
-    {
-        "id": "codesnippets",
-        "contexts": ["editable"],
-        "title": "Code Snippets"
-    },
-    {
-        "id": "worknotesnippets",
-        "contexts": ["editable"],
-        "title": "Worknote Snippets"
-    },
-    {
-        "id": "scriptsync",
-        "contexts": ["all"],
-        "title": "VS Code sriptsync"
-    },
-    {
-        "id": "enablescriptsync",
-        "parentId": "scriptsync",
-        "title": "Enable",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            sendToggleSnScriptsync("enable");
-        }
-    },
-    {
-        "id": "disablescriptsync",
-        "parentId": "scriptsync",
-        "title": "Disable",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            sendToggleSnScriptsync("disable");
-        }
-    },
-    {
-        "id": "opentabscriptsync",
-        "parentId": "scriptsync",
-        "title": "Open Helper Tab",
-        "contexts": ["all"],
-        "onclick": function (e, f) {
-            sendToggleSnScriptsync("opentabonly");
-        }
+{
+    "id": "goto",
+    "contexts": ["selection"],
+    "title": "Search / GoTo"
+},
+{
+    "id": "instancesearch",
+    "parentId": "goto",
+    "title": "Instance Search: %s",
+    contexts: ["selection"],
+    "onclick": openSearch
+},
+{
+    "id": "openscript",
+    "parentId": "goto",
+    "title": "Script Include: %s",
+    contexts: ["selection"],
+    "onclick": openScriptInclude
+},
+{
+    "id": "opentablelist",
+    "parentId": "goto",
+    "title": "Table list: %s",
+    contexts: ["selection"],
+    "onclick": openTableList
+},
+{
+    "id": "propertie",
+    "parentId": "goto",
+    "title": "Propertie: %s",
+    contexts: ["selection"],
+    "onclick": openPropertie
+},
+{
+    "id": "tools",
+    "contexts": ["all"],
+    "title": "Tools"
+},
+{
+    "id": "popinout",
+    "parentId": "tools",
+    "title": "PopIn / PopOut",
+    "contexts": ["all"],
+    "onclick": togglePop
+},
+{
+    "id": "shownames",
+    "parentId": "tools",
+    "title": "Show technical names",
+    "contexts": ["all"],
+    "onclick": addTechnicalNames
+},
+{
+    "id": "canceltransaction",
+    "parentId": "tools",
+    "title": "Cancel transactions",
+    "contexts": ["all"],
+    "onclick": function (e, f) {
+        openUrl(e, f, '/cancel_my_transactions.do');
     }
+},
+{
+    "id": "clearcookies",
+    "parentId": "tools",
+    "title": "Clear cookies (Logout > Refresh page)",
+    "contexts": ["all"]
+},
+{
+    "id": "clearcookiessidedoor",
+    "parentId": "tools",
+    "title": "Clear cookies (Logout > login.do)",
+    "contexts": ["all"]
+},
+//{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
+{
+    "id": "props",
+    "parentId": "tools",
+    "title": "Properties",
+    "contexts": ["all"],
+    "onclick": function (e, f) {
+        openUrl(e, f, '/sys_properties_list.do');
+    }
+},
+{
+    "id": "updates",
+    "parentId": "tools",
+    "title": "Today's Updates",
+    "contexts": ["all"],
+    "onclick": function (e, f) {
+        openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on');
+    }
+},
+{
+    "id": "versions",
+    "parentId": "tools",
+    "title": "Update Versions",
+    "contexts": ["all"],
+    "onclick": function (e, f) {
+        openVersions(e, f);
+    }
+},
+{
+    "id": "stats",
+    "parentId": "tools",
+    "title": "stats.do",
+    "contexts": ["all"],
+    "onclick": function (e, f) {
+        openUrl(e, f, '/stats.do');
+    }
+},
+{
+    "id": "codesnippets",
+    "contexts": ["editable"],
+    "title": "Code Snippets"
+},
+{
+    "id": "worknotesnippets",
+    "contexts": ["editable"],
+    "title": "Worknote Snippets"
+},
+{
+    "id": "opentabscriptsync",
+    "title": "Open ScriptSync Helper Tab",
+    "contexts": ["all"],
+    "onclick": function (e, f) {
+        createScriptSyncTab();
+    }
+},
+{
+    "id": "infoscriptsync",
+    "title": "Enable ScriptSync in the Settings tab.",
+    "contexts": ["all"],
+    "onclick": function (e, f) {
+       alert("Click the SN Utils Icon and go to Settings tab to enable or disable ScriptSync")
+    }
+}
 ];
 
 var defaultMenuConf = {
@@ -296,12 +281,12 @@ var snippets = {
 
 for (var snip in snippets) {
     chrome.contextMenus.create(Object.assign({
-            "id": snip,
-            "parentId": snippets[snip][0],
-            "contexts": ["editable"],
-            "title": snippets[snip][1],
-            "onclick": insertSnippet
-        },
+        "id": snip,
+        "parentId": snippets[snip][0],
+        "contexts": ["editable"],
+        "title": snippets[snip][1],
+        "onclick": insertSnippet
+    },
         defaultMenuConf));
 }
 
@@ -337,9 +322,9 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
 function addTechnicalNames() {
 
     chrome.tabs.query({
-            currentWindow: true,
-            active: true
-        },
+        currentWindow: true,
+        active: true
+    },
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
@@ -351,23 +336,23 @@ function addTechnicalNames() {
 
 function sendToggleSearchFocus() {
     chrome.tabs.query({
-            currentWindow: true,
-            active: true
-        },
+        currentWindow: true,
+        active: true
+    },
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "toggleSearch"
             }, {
-                frameId: 0
-            });
+                    frameId: 0
+                });
         });
 }
 
 function sendToggleAtfHelper() {
     chrome.tabs.query({
-            currentWindow: true,
-            active: true
-        },
+        currentWindow: true,
+        active: true
+    },
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunctionChild",
@@ -376,54 +361,75 @@ function sendToggleAtfHelper() {
         });
 }
 
-function sendToggleSnScriptsync(force) {
+// function sendToggleSnScriptsync(force) {
 
-    getFromSyncStorageGlobal("scriptsync-active", function (answer) {
-        var newValue = !(answer || false);
+//     getFromSyncStorageGlobal("scriptsync-active", function (answer) {
+//         var newValue = !(answer || false);
 
-        if (force == "enable" || force == "opentabonly") newValue = true;
-        if (force == "disable") newValue = false;
+//         if (force == "enable" || force == "opentabonly") newValue = true;
+//         if (force == "disable") newValue = false;
 
 
-        setToChromeSyncStorageGlobal("scriptsync-active", newValue);
+//         setToChromeSyncStorageGlobal("scriptsync-active", newValue);
 
-        if (force != "opentabonly") {
-            chrome.tabs.query({
-                active: true,
-                currentWindow: true
-            }, function (tabs) {
-                chrome.tabs.reload(tabs[0].id);
-            });
-        }
+//         if (force != "opentabonly") {
+//             chrome.tabs.query({
+//                 active: true,
+//                 currentWindow: true
+//             }, function (tabs) {
+//                 chrome.tabs.reload(tabs[0].id);
+//             });
+//         }
 
-        if (newValue) {
-        
-            getFromSyncStorageGlobal("synctab", function (tid) {
-                if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
-                    chrome.tabs.get(tid, function () {
-                        if (chrome.runtime.lastError) {
-                            createScriptSyncTab();
-                        } else {
-                            chrome.tabs.update(tid, {
-                                'active': false
-                            });
-                        }
-                    });
-                } else
-                    createScriptSyncTab();
-            });
-        }
-    });
+//         if (newValue) {
 
-}
+//             getFromSyncStorageGlobal("synctab", function (tid) {
+//                 if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
+//                     chrome.tabs.get(tid, function () {
+//                         if (chrome.runtime.lastError) {
+//                             createScriptSyncTab();
+//                         } else {
+//                             chrome.tabs.update(tid, {
+//                                 'active': false
+//                             });
+//                         }
+//                     });
+//                 } else
+//                     createScriptSyncTab();
+//             });
+//         }
+//     });
+
+// }
 
 function createScriptSyncTab() {
-    var url = chrome.runtime.getURL("scriptsync.html");
-    chrome.tabs.create({
-        'url': url,
-        'active': false
-    }, function (t) {
-        setToChromeSyncStorageGlobal("synctab", t.id);
+
+    getFromSyncStorageGlobal("synctab", function (tid) {
+        if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
+            chrome.tabs.get(tid, function () {
+                if (chrome.runtime.lastError) {
+                    var url = chrome.runtime.getURL("scriptsync.html");
+                    chrome.tabs.create({
+                        'url': url,
+                        'active': false
+                    }, function (t) {
+                        setToChromeSyncStorageGlobal("synctab", t.id);
+                    });
+                } else {
+                    chrome.tabs.update(tid, {
+                        'active': false
+                    });
+                }
+            });
+        } else {
+            var url = chrome.runtime.getURL("scriptsync.html");
+            chrome.tabs.create({
+                'url': url,
+                'active': false
+            }, function (t) {
+                setToChromeSyncStorageGlobal("synctab", t.id);
+            });
+        }
     });
 }
 

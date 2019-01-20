@@ -10,22 +10,21 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 });
 
-(function(){
+(function () {
     var s = document.createElement('script');
     s.src = chrome.runtime.getURL('inject.js');
-    s.onload = function() {
-        getFromSyncStorageGlobal("scriptsync-active",function(answer){
-            if (answer){
-                runFunction('if (typeof addFieldSyncButtons == "function") addFieldSyncButtons()');
-            }
+    s.onload = function () {
+        getFromSyncStorageGlobal("snusettings", function (settings) {
+            if (!settings) settings = {};
+            var script = document.createElement('script');
+            script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
+            (document.head || document.documentElement).appendChild(script);
+            //script.remove();
         });
-    
     };
     (document.head || document.documentElement).appendChild(s);
-    
 
-
-  })();
+})();
 
 function runFunction(f, context) {
     var doc;
@@ -37,7 +36,7 @@ function runFunction(f, context) {
         doc = jQuery('#gsft_main')[0].contentWindow.document;
     else
         doc = document;
-    
+
     var script = doc.createElement('script');
     script.appendChild(doc.createTextNode(f));
     doc.body.appendChild(script);

@@ -77,7 +77,7 @@
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabshortcuts" data-toggle="tab">Shortcuts</a>
+                    <a class="nav-link" data-target="#tabsettings" data-toggle="tab">Settings</a>
                 </li>
                 <li class='nav-item'>
                     <a class="nav-link active" data-target="#tababout" data-toggle="tab">About</a>
@@ -283,20 +283,46 @@
                         </div>
                     </div>
                     <div class="col-6" style='font-size:10pt; border:solid 1pt orange; margin: 20px; padding: 20px'>
-                
-                            New: Switch to ScriptSync for VS Code. Use contextmenu to enable
-                                <a href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync"
-                                    target="arnoudkooi">SN ScriptSync</a> <br /><br />
-    
-                            The support for <a id='chromeapp' href='#'>Chrome App ScriptSync</a> will be removed mid Q1 2019.
 
-    
-                     </div>
+                        New: Switch to ScriptSync for VS Code. Use contextmenu to enable
+                        <a href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync"
+                            target="arnoudkooi">SN ScriptSync</a> <br /><br />
+
+                        The support for <a id='chromeapp' href='#'>Chrome App ScriptSync</a> will be removed mid Q1
+                        2019.
+
+
+                    </div>
 
                 </div>
 
-                <div class="tab-pane" id="tabshortcuts">
-                    <h4>Shortcuts</h4>
+                <div class="tab-pane" id="tabsettings">
+                    <h5>Settings</h5>
+                    <div class="col-12" id='settingsdiv'>
+                        <form>
+                            <div class="form-check">
+                                <input class="form-check-input snu-setting" type="checkbox" id="vsscriptsync" name="scriptsyncactive">
+                                <label class="form-check-label" for="vsscriptsync">
+                                    Enable VS ScriptSync
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input snu-setting" type="checkbox" id="addtechnicalnames" name="addtechnicalnames">
+                                <label class="form-check-label" for="addtechnicalnames">
+                                    Show Technical names on page load
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="nouielements" name="nouielements">
+                                    <label class="form-check-label" for="nouielements">
+                                        Don't add UI elements to browser
+                                    </label>
+                            </div>                           
+                        </form>
+                    </div>
+
+                    <hr />
+                    <h5>Shortcuts</h5>
 
                     <div class="hide-in-firefox">
                         Go to <a class="popuplinks" href="chrome://extensions/shortcuts" target="_blank">chrome://extensions/shortcuts</a>
@@ -304,7 +330,7 @@
 
                         <br />
                         <a class="popuplinks" target="_blank" href="https://www.youtube.com/watch?v=2ZoubJMePD8">
-                            <img src="/images/shortcuts.png" alt="shortcuts" title="Shortcuts" />
+                            <img style="width:50%" src="/images/shortcuts.png" alt="shortcuts" title="Shortcuts" />
                         </a>
                     </div>
                     <div class="hide-in-browser show-in-firefox">

@@ -13,14 +13,31 @@ if (typeof jQuery != "undefined") {
         doubleClickToShowField();
         clickToList();
         setShortCuts();
-        bindPaste();
         makeReadOnlyContentCopyable();
         //startMessageChannel();
 
     });
 }
 
-addStudioSearch();
+function snuSettingsAdded(){
+
+    bindPaste(snusettings.nouielements == 'undefined' || snusettings.nouielements == false); 
+    
+    if (snusettings.vsscriptsync == true)
+        addFieldSyncButtons();
+
+    if (snusettings.nouielements == 'undefined' || snusettings.nouielements == false){
+        if (typeof addStudioLink != 'undefined') addStudioLink();
+        addStudioSearch();
+    }
+    
+    if (snusettings.addtechnicalnames == true)
+        addTechnicalNames()
+
+}
+
+
+
 
 //used to communicate between browser tabs when recording ATF steps
 function startMessageChannel() {
@@ -42,8 +59,6 @@ function startMessageChannel() {
 
                 }
             };
-
-
         }
     }
 }
@@ -82,7 +97,7 @@ function doubleClickToSetQueryListV2() {
     jQuery('div.breadcrumb_container').on("click", function (event) {
         if (event.shiftKey) {
             splitContainsToAnd();
-        } 
+        }
     });
 }
 
@@ -309,11 +324,11 @@ function makeReadOnlyContentCopyable() {
     }
 }
 
-function openReference(event, refTable,refField){
+function openReference(event, refTable, refField) {
     var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + g_form.getValue(refField);
     if ((event.ctrlKey || event.metaKey) && event.keyCode == 83)
         url = '/' + refTable + '?sysparm_query=sys_idIN' + g_form.getValue(refField);
-    window.open(url,'refTable');
+    window.open(url, 'refTable');
 }
 
 function addTechnicalNames() {
@@ -327,11 +342,11 @@ function addTechnicalNames() {
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
             var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
             var btn = '';
-            if (fieldType == 'reference' || fieldType == 'glide_list'){
+            if (fieldType == 'reference' || fieldType == 'glide_list') {
                 var reftable = g_form.getGlideUIElement(elm).reference;
-                elm = ' <a onclick="openReference(\''+ reftable +'\',\''+ elm +'\');"  title="Reference table: '+ reftable +'" target="_blank">'+ elm +'</a>';
+                elm = ' <a onclick="openReference(\'' + reftable + '\',\'' + elm + '\');"  title="Reference table: ' + reftable + '" target="_blank">' + elm + '</a>';
             }
-            jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm +'</span> ');
+            jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
         });
     }
 
@@ -350,11 +365,11 @@ function addTechnicalNames() {
     searchLargeSelects();
 }
 
-function openReference(refTable,refField){
+function openReference(refTable, refField) {
     var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + g_form.getValue(refField);
     if (event.ctrlKey || event.metaKey)
         url = '/' + refTable + '?sysparm_query=sys_idIN' + g_form.getValue(refField);
-    window.open(url,'refTable');
+    window.open(url, 'refTable');
 }
 
 function showSelectFieldValues() {
@@ -509,13 +524,14 @@ function splitContainsToAnd() {
 
 }
 
-function bindPaste() {
+function bindPaste(showIcon) {
 
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
 
-        jQuery('#header_add_attachment').after('<button id="header_paste_image" title="Paste screenshot as attachment" class="btn btn-icon glyphicon glyphicon-paste navbar-btn" aria-label="Paste Image as Attachments" data-original-title="Paste Image as Attachments" onclick="tryPaste()"></button>');
+        if (showIcon)
+            jQuery('#header_add_attachment').after('<button id="header_paste_image" title="Paste screenshot as attachment" class="btn btn-icon glyphicon glyphicon-paste navbar-btn" aria-label="Paste Image as Attachments" data-original-title="Paste Image as Attachments" onclick="tryPaste()"></button>');
 
 
         jQuery('body').bind('paste', function (e) {
@@ -817,7 +833,9 @@ function postRequestToScriptSync(requestType) {
         data.name = angularData.title;
         data.sys_id = angularData.sys_id;
         data.widget = angularData.f._fields;
-        data.widget.data_table.choices = []; //skip useless data
+        if (data.widget.hasOwnProperty('data_table'))
+            if (data.widget.data_table.hasOwnProperty('choices'))
+                data.widget.data_table.choices = []; //skip useless data
 
         var client = new XMLHttpRequest();
         client.open("post", "http://127.0.0.1:1977");
@@ -876,7 +894,7 @@ function addFieldSyncButtons() {
         jQuery(".label-text").each(function (index, value) {
             var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
             var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
-            if (this.innerText.toLowerCase() == 'script'){
+            if (this.innerText.toLowerCase() == 'script') {
                 jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
                 return true;
             }
@@ -885,7 +903,7 @@ function addFieldSyncButtons() {
                     jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
                     break;
                 }
-                
+
             }
         });
         jQuery('span.scriptSync').on('click', function () {
@@ -917,8 +935,8 @@ function addStudioSearch() {
 
     if (!location.href.includes("$studio.do")) return; //only in studio
 
-    if (typeof g_ck == 'undefined'){
-        if (typeof InitialState != 'undefined'){
+    if (typeof g_ck == 'undefined') {
+        if (typeof InitialState != 'undefined') {
             g_ck = InitialState.userToken;
         }
     }
@@ -936,7 +954,7 @@ function addStudioSearch() {
 //Some magic to filter the file tree in studio
 function doGroupSearch(search) {
 
-    
+
     //expand all when searching
     Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
         el.classList.remove('collapsed');
@@ -973,7 +991,7 @@ function doGroupSearch(search) {
             text += par.parentElement.getElementsByTagName('span')[0].innerText.toLowerCase() + ' ';
             pars.push(par);
             for (par of pars) {
-                if (text.includes(srch)) { 
+                if (text.includes(srch)) {
                     par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
                 }
                 else {
@@ -982,7 +1000,7 @@ function doGroupSearch(search) {
                 }
             }
 
-            if(text.includes(srch)){
+            if (text.includes(srch)) {
                 el.style.display = "";
             }
             else
@@ -1006,7 +1024,7 @@ function doGroupSearch(search) {
             el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
         });
     }
-    
+
 }
 
 function doFileSearch(srch) {
