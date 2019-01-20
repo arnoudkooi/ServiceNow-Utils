@@ -24,7 +24,6 @@ var table;
 var sys_id;
 var isNoRecord = true;
 var snufsid = 'gfmcfepahcbpafgckmomdopifchjbdcg';// prod
-//var snufsid = 'kbledokkkhpgehnehfghicncdndkdnoa';// dev
 var snufsrunning = false;
 
 
@@ -213,7 +212,7 @@ function setBrowserVariables(obj) {
     
     g_ck = obj.myVars.g_ck || '';
     url = obj.url;
-    instance = url.replace("https://", "").replace(".service-now.com", "");
+    instance = (new URL(url)).host.replace(".service-now.com", "");
     userName = obj.myVars.NOWusername || obj.myVars.NOWuser_name;
     //roles = obj.myVars.NOWuserroles ;
     datetimeformat = obj.myVars.g_user_date_time_format;

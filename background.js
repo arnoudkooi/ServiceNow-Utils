@@ -1,3 +1,4 @@
+var onprem = false; //set true if publishing on prem version
 var popup;
 var tabid;
 var g_ck;
@@ -9,7 +10,12 @@ var jsnNodes;
 var urlFull;
 var updateSetTables = [];
 
-//Attatch eventlistener, setting extension only active on *.service-now.com
+var urlContains = ".service-now.com";
+var urlPattern = "https://*.service-now.com/*"
+if (onprem) urlContains = "*";
+if (onprem) urlPattern = "*://*/*";
+
+//Attatch eventlistener, setting extension only active on matching urls
 chrome.runtime.onInstalled.addListener(function () {
     // firefox uses manifest pageAction.show_matches for the same functionality
     if (typeof chrome.declarativeContent === 'undefined')
@@ -20,7 +26,7 @@ chrome.runtime.onInstalled.addListener(function () {
             conditions: [
                 new chrome.declarativeContent.PageStateMatcher({
                     pageUrl: {
-                        urlContains: '.service-now.com'
+                        urlContains: urlContains
                     },
                 })
             ],
@@ -207,7 +213,7 @@ var menuItems = [{
 ];
 
 var defaultMenuConf = {
-    "documentUrlPatterns": ["https://*.service-now.com/*"]
+    "documentUrlPatterns": [urlPattern]
 };
 for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
     chrome.contextMenus.create(Object.assign(menuItems[itemIdx], defaultMenuConf));
@@ -636,7 +642,7 @@ function getBrowserVariables(tid) {
     }, function (response) {
         g_ck = response.myVars.g_ck || '';
         url = response.url;
-        instance = url.replace("https://", "").replace(".service-now.com", "");
+        instance = (new URL(url)).host.replace(".service-now.com", "");
         nme = response.myVars.NOWusername || response.myVars.NOWuser_name;
         popup.setBrowserVariables(response);
     });
@@ -901,14 +907,14 @@ function setActiveNode(nodeId, nodeName) {
             var encodeBIGIP = encodedIP + '.' + encodedPort + '.0000';
             chrome.cookies.set({
                 "name": "BIGipServerpool_" + instance,
-                "url": "https://" + instance + ".service-now.com",
+                "url": new URL(url).origin,
                 "secure": true,
                 "httpOnly": true,
                 "value": encodeBIGIP
             }, function (s) {
                 chrome.cookies.set({
                     "name": "glide_user_route",
-                    "url": "https://" + instance + ".service-now.com",
+                    "url": new URL(url).origin,
                     "secure": true,
                     "httpOnly": true,
                     "value": 'glide.' + nodeId
@@ -931,7 +937,7 @@ function getActiveNode(jsn) {
     jsnNodes = jsn;
     chrome.cookies.get({
         "name": "glide_user_route",
-        "url": "https://" + instance + ".service-now.com"
+        "url": new URL(url).origin
     }, function (c) {
         popup.setDataTableNodes(jsnNodes, c.value.replace('glide.', ''));
     });
