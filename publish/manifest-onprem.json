@@ -1,12 +1,12 @@
 {
-    "name": "ServiceNow Utils",
-    "short_name": "ServiceNow Utils",
+    "name": "SN Utils OnPrem",
+    "short_name": "SN Utils Onprem",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "3.2.0.2",
+    "version": "0.0.0.0",
     "permissions": [
         "activeTab",
-        "https://*.service-now.com/*",
+        "*://*/*",
         "declarativeContent",
         "storage",
         "nativeMessaging",
@@ -30,25 +30,13 @@
     },
     "content_scripts": [
         {
-            "matches": [
-                "https://*.service-now.com/*"
-            ],
-            "exclude_matches": [
-                "https://signon.service-now.com/*",
-                "https://*.service-now.com/*XML=*"
-            ],
+            "matches": ["*://*/*"],
             "js": [
                 "content_script_parent.js"
             ]
         },
         {
-            "matches": [
-                "https://*.service-now.com/*"
-            ],
-            "exclude_matches": [
-                "https://signon.service-now.com/*",
-                "https://*.service-now.com/*XML=*"
-            ],
+            "matches": ["*://*/*"],
             "js": [
                 "js/jquery.js",
                 "content_script_all_frames.js"
@@ -95,8 +83,7 @@
             "48": "images/icon48.png",
             "128": "images/icon128.png"
         },
-        "show_matches": ["https://*.service-now.com/*"],
-        "hide_matches": ["https://signon.service-now.com/*"]
+        "show_matches": ["*://*/*"]
     },
     "options_ui": {
         "page": "options.html",
@@ -106,10 +93,5 @@
         "inject.js",
         "inject_parent.js"
     ],
-    "manifest_version": 2,
-    "applications": {
-        "gecko": {
-            "id": "email@arnoudkooi.com"
-        }
-    }
+    "manifest_version": 2
 }

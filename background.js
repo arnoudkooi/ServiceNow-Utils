@@ -1,4 +1,5 @@
-var onprem = false; //set true if publishing on prem version
+var onprem = false;
+//set onprem true if publishing on prem version, KEEP the onprem var on line 1!!
 var popup;
 var tabid;
 var g_ck;

@@ -19,18 +19,19 @@ if (typeof jQuery != "undefined") {
     });
 }
 
-function snuSettingsAdded(){
+function snuSettingsAdded() {
 
-    bindPaste(snusettings.nouielements == 'undefined' || snusettings.nouielements == false); 
-    
+    bindPaste(snusettings.nouielements == 'undefined' || snusettings.nouielements == false);
+
     if (snusettings.vsscriptsync == true)
         addFieldSyncButtons();
 
-    if (snusettings.nouielements == 'undefined' || snusettings.nouielements == false){
+    if (snusettings.nouielements == 'undefined' || snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
         addStudioSearch();
+        addSgStudioPlatformLink();
     }
-    
+
     if (snusettings.addtechnicalnames == true)
         addTechnicalNames()
 
@@ -336,6 +337,7 @@ function addTechnicalNames() {
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
+        jQuery(".navbar-title-display-value:not(:contains('|'))").append(' | <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + '</span>');
         jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
             jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
             jQuery('label:not(.checkbox-label)').removeAttr('onclick')
@@ -927,6 +929,29 @@ function addFieldSyncButtons() {
             }
         });
     }
+}
+
+function addSgStudioPlatformLink() {
+
+    if (!location.href.includes("$sg-studio.do")) return; //only in studio
+    if (location.hash.split("/").length < 2) return;
+
+    setTimeout(function(){
+
+        var match = {
+            "applet": "sys_sg_screen",
+            "button": "sys_sg_button",
+            "smartButton": "sys_sg_button",
+            "navigation": "sys_sg_button",
+            "dataItem": "sys_sg_data_item"
+        }
+ 
+        var arr = location.hash.split("/");
+        if (match.hasOwnProperty(arr[1])) {
+            var elm = document.querySelector('.titlebar__title___1KfUu');
+            elm.innerHTML = "<a title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
+        }
+    },2000);
 }
 
 
