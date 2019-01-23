@@ -13,8 +13,10 @@ var updateSetTables = [];
 
 var urlContains = ".service-now.com";
 var urlPattern = "https://*.service-now.com/*"
-if (onprem) urlContains = "*";
-if (onprem) urlPattern = "*://*/*";
+if (onprem) {
+    urlContains = ".";
+    urlPattern = "*://*/*";
+}
 
 //Attatch eventlistener, setting extension only active on matching urls
 chrome.runtime.onInstalled.addListener(function () {

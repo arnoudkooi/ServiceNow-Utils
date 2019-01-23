@@ -936,22 +936,24 @@ function addSgStudioPlatformLink() {
     if (!location.href.includes("$sg-studio.do")) return; //only in studio
     if (location.hash.split("/").length < 2) return;
 
-    setTimeout(function(){
+    setTimeout(function () {
 
         var match = {
+            "application": "sys_sg_application",
             "applet": "sys_sg_screen",
             "button": "sys_sg_button",
             "smartButton": "sys_sg_button",
             "navigation": "sys_sg_button",
             "dataItem": "sys_sg_data_item"
         }
- 
+
         var arr = location.hash.split("/");
         if (match.hasOwnProperty(arr[1])) {
-            var elm = document.querySelector('.titlebar__title___1KfUu');
-            elm.innerHTML = "<a title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
+            var elm = document.querySelector('.titlebar__title');
+            if (elm)
+                elm.innerHTML = "<a title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
         }
-    },2000);
+    }, 2000);
 }
 
 
