@@ -337,19 +337,23 @@ function addTechnicalNames() {
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
-        jQuery(".navbar-title-display-value:not(:contains('|'))").append(' | <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + '</span>');
-        jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
-            jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
-            jQuery('label:not(.checkbox-label)').removeAttr('onclick')
-            var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-            var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
-            var btn = '';
-            if (fieldType == 'reference' || fieldType == 'glide_list') {
-                var reftable = g_form.getGlideUIElement(elm).reference;
-                elm = ' <a onclick="openReference(\'' + reftable + '\',\'' + elm + '\');"  title="Reference table: ' + reftable + '" target="_blank">' + elm + '</a>';
-            }
-            jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
-        });
+        try {
+            jQuery(".navbar-title-display-value:not(:contains('|'))").append(' | <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + '</span>');
+            jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
+                jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
+                jQuery('label:not(.checkbox-label)').removeAttr('onclick')
+                var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
+                var btn = '';
+                if (fieldType == 'reference' || fieldType == 'glide_list') {
+                    var reftable = g_form.getGlideUIElement(elm).reference;
+                    elm = ' <a onclick="openReference(\'' + reftable + '\',\'' + elm + '\');"  title="Reference table: ' + reftable + '" target="_blank">' + elm + '</a>';
+                }
+                jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
+            });
+        } catch (error) {
+
+        }
     }
 
     jQuery('th.list_hdr, th.table-column-header').each(function (index) {
@@ -894,17 +898,22 @@ function addFieldSyncButtons() {
     if (typeof g_form != 'undefined') {
         if (g_form.isNewRecord()) return;
         jQuery(".label-text").each(function (index, value) {
-            var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-            var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
-            if (this.innerText.toLowerCase() == 'script') {
-                jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
-                return true;
-            }
-            for (var i = 0; i < fieldTypes.length; i++) {
-                if (fieldType.indexOf(fieldTypes[i]) > -1) {
+            try {
+
+                var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
+                if (this.innerText.toLowerCase() == 'script') {
                     jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
-                    break;
+                    return true;
                 }
+                for (var i = 0; i < fieldTypes.length; i++) {
+                    if (fieldType.indexOf(fieldTypes[i]) > -1) {
+                        jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
+                        break;
+                    }
+
+                }
+            } catch (error) {
 
             }
         });
@@ -949,7 +958,7 @@ function addSgStudioPlatformLink() {
 
         var arr = location.hash.split("/");
         if (match.hasOwnProperty(arr[1])) {
-            var elm = document.querySelector('.titlebar__title');
+            var elm = document.querySelector("[class^='titlebar__title_'], .titlebar__title");
             if (elm)
                 elm.innerHTML = "<a title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
         }
