@@ -375,7 +375,6 @@ function setBrowserVariables(obj) {
             case "#tabsettings":
                 if (typeof InstallTrigger !== 'undefined'){
                     jQuery(".hide-in-chrome").css('display','inline');
-                    alert(1);
                 }
                 getSettings();
                 break;
