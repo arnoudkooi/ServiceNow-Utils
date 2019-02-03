@@ -961,8 +961,30 @@ function addSgStudioPlatformLink() {
             var elm = document.querySelector("[class^='titlebar__title_'], .titlebar__title");
             if (elm)
                 elm.innerHTML = "<a title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
+        
+        //add link to enable sluchbucket doubleclick 
+        if (arr[1] == "applet")
+            $("div[class^='FieldMappingBucket__field']").find('div:first p:first')
+            .append('<span class="snu-add-dblclick"><a href="javascript:snuAddDblClick()" title="Try to add doubleclick to toggle field slushbucket (Added by SN Utils)">Add doubleblclick</a></span>');
         }
+
     }, 2000);
+}
+
+//Enable sluchbucket doubleclick in studio to select fields in 
+function snuAddDblClick(){
+    $("div[class^='FieldMappingBucket__field']").each(function(){
+        var $elm = $(this);
+        $elm.css('userSelect','none');
+        $elm.find('.sg-dot-walk-picker, .sg-dot-walk-picker-content').on('dblclick',function(){
+            $elm.find('.add-rm-btn:first').click();
+        });
+        $elm.find('.selected-fieldsBox').on('dblclick',function(){
+            
+            $elm.find('.add-rm-btn:eq(1)').click();
+        });
+    });
+    $('.snu-add-dblclick').text('Doubleblclick enabled');
 }
 
 
