@@ -3,6 +3,7 @@ var mySysId = '';
 var atfMode = false;
 var atfChannel;
 
+
 if (typeof jQuery != "undefined") {
     jQuery(function () {
         if (typeof angular != "undefined")
@@ -19,6 +20,7 @@ if (typeof jQuery != "undefined") {
     });
 }
 
+
 function snuSettingsAdded() {
 
     bindPaste(snusettings.nouielements == 'undefined' || snusettings.nouielements == false);
@@ -33,9 +35,10 @@ function snuSettingsAdded() {
     }
 
     if (snusettings.addtechnicalnames == true)
-        addTechnicalNames()
+        addTechnicalNames();
 
 }
+
 
 
 
@@ -960,13 +963,16 @@ function addSgStudioPlatformLink() {
         if (match.hasOwnProperty(arr[1])) {
             var elm = document.querySelector("[class^='titlebar__title_'], .titlebar__title");
             if (elm)
-                elm.innerHTML = "<a title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
+                elm.innerHTML = "<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
         
         //add link to enable sluchbucket doubleclick 
         if (arr[1] == "applet")
             $("div[class^='FieldMappingBucket__field']").find('div:first p:first')
             .append('<span class="snu-add-dblclick"><a href="javascript:snuAddDblClick()" title="Try to add doubleclick to toggle field slushbucket (Added by SN Utils)">Add doubleblclick</a></span>');
         }
+
+        if (!document.querySelector('.snu-platformlink'))
+            addSgStudioPlatformLink(); //do again until loaded
 
     }, 2000);
 }
