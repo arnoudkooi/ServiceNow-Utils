@@ -548,7 +548,7 @@ function setDataTableUpdateSets(nme) {
                     var iscurrent = "";
                     if (row.sysId == nme.result.current.sysId) iscurrent = "iscurrent";
                     return "<a class='updatesetlist' href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + row.sysId + "' title='Table definition' ><i class='fa fa-list' aria-hidden='true'></i></a> " +
-                        "<a class='setcurrent " + iscurrent + "' data-post='{name: \"" + row.name + "\", sysId: \"" + row.sysId + "\"}' href='#" + row.sysId + "' title='Set curren updateset'><i class='fa fa-dot-circle-o' aria-hidden='true'></i></a> ";
+                        "<a class='setcurrent " + iscurrent + "' data-post='{name: \"" + row.name + "\", sysId: \"" + row.sysId + "\"}' href='#" + row.sysId + "' title='Set current updateset'><i class='fa fa-dot-circle-o' aria-hidden='true'></i></a> ";
                 }
             }
         ],
