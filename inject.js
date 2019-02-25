@@ -964,11 +964,11 @@ function addSgStudioPlatformLink() {
             var elm = document.querySelector("[class^='titlebar__title_'], .titlebar__title");
             if (elm)
                 elm.innerHTML = "<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
-        
-        //add link to enable sluchbucket doubleclick 
-        if (arr[1] == "applet")
-            $("div[class^='FieldMappingBucket__field']").find('div:first p:first')
-            .append('<span class="snu-add-dblclick"><a href="javascript:snuAddDblClick()" title="Try to add doubleclick to toggle field slushbucket (Added by SN Utils)">Add doubleblclick</a></span>');
+
+            //add link to enable sluchbucket doubleclick 
+            if (arr[1] == "applet")
+                $("div[class^='FieldMappingBucket__field']").find('div:first p:first')
+                    .append('<span class="snu-add-dblclick"><a href="javascript:snuAddDblClick()" title="Try to add doubleclick to toggle field slushbucket (Added by SN Utils)">Add doubleblclick</a></span>');
         }
 
         if (!document.querySelector('.snu-platformlink'))
@@ -978,22 +978,57 @@ function addSgStudioPlatformLink() {
 }
 
 //Enable sluchbucket doubleclick in studio to select fields in 
-function snuAddDblClick(){
-    $("div[class^='FieldMappingBucket__field']").each(function(){
+function snuAddDblClick() {
+    $("div[class^='FieldMappingBucket__field']").each(function () {
         var $elm = $(this);
-        $elm.css('userSelect','none');
-        $elm.find('.sg-dot-walk-picker, .sg-dot-walk-picker-content').on('dblclick',function(){
+        $elm.css('userSelect', 'none');
+        $elm.find('.sg-dot-walk-picker').on('dblclick', function () {
             $elm.find('.add-rm-btn:first').click();
         });
-        $elm.find('.selected-fieldsBox').on('dblclick',function(){
-            
+        $elm.find('.selected-fieldsBox').on('dblclick', function () {
+
             $elm.find('.add-rm-btn:eq(1)').click();
         });
     });
     $('.snu-add-dblclick').text('Doubleblclick enabled');
 }
 
+function sortStudioLists() {
 
+    var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
+
+    Array.prototype.forEach.call(elULs, function (ul) {
+
+        var nestedUls = ul.querySelectorAll('ul.file-section');
+        if (nestedUls.length > 0){
+            Array.prototype.forEach.call(nestedUls, function (nu) {
+                sortList(nu);
+            });
+        }
+        else
+            sortList(ul);
+    });
+
+    function sortList(list) {
+        var i, switching, b, shouldSwitch;
+        switching = true;
+        while (switching) {
+            switching = false;
+            b = list.getElementsByTagName("li");
+            for (i = 0; i < (b.length - 1); i++) {
+                shouldSwitch = false;
+                if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            if (shouldSwitch) {
+                b[i].parentNode.insertBefore(b[i + 1], b[i]);
+                switching = true;
+            }
+        }
+    }
+}
 
 function addStudioSearch() {
 
@@ -1009,7 +1044,7 @@ function addStudioSearch() {
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
 
 
-    var snuGroupFilter = '<input autocomplete="off" onfocus="this.select();" onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
+    var snuGroupFilter = '<input autocomplete="off" onfocus="sortStudioLists(); this.select();" onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter);
 }
 
@@ -1047,6 +1082,7 @@ function doGroupSearch(search) {
     Array.prototype.forEach.call(elms, function (el, i) {
 
         var parents = getParents(el, 'ul').reverse();
+        el.setAttribute("title", el.innerText);
         var text = (search.length == 1) ? el.innerText.toLowerCase() + ' ' : '';
         var pars = [];
         Array.prototype.forEach.call(parents, function (par, i) {
