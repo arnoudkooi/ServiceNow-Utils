@@ -443,6 +443,27 @@ function searchLargeSelects() {
 
             jQuery(el).before(input).filterByText(input, true).addClass('searchified');
         }
+
+        if (el.id == 'slush_right') {
+            var input = document.createElement("input");
+            input.type = "text";
+            input.placeholder = "Add dotwalk field";
+            input.className = "form-control";
+            input.style.marginTop = "2px";
+            input.style.marginLeft = "2px";
+            el.onclick = function (ev) { input.value = ev.target.value + '.'; input.focus() }
+            input.onkeydown = function (ev) {
+                if (ev.which == 13) {
+                    ev.preventDefault();
+                    var opt = document.createElement('option');
+                    opt.value = input.value;
+                    opt.innerHTML = input.value;
+                    el.appendChild(opt);
+                }
+            }
+            jQuery(el).after(input).addClass('searchified');
+        }
+
     });
 }
 
@@ -1000,7 +1021,7 @@ function sortStudioLists() {
     Array.prototype.forEach.call(elULs, function (ul) {
 
         var nestedUls = ul.querySelectorAll('ul.file-section');
-        if (nestedUls.length > 0){
+        if (nestedUls.length > 0) {
             Array.prototype.forEach.call(nestedUls, function (nu) {
                 sortList(nu);
             });
