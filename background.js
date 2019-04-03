@@ -55,7 +55,7 @@ chrome.commands.onCommand.addListener(function (command) {
     else if (command == "toggle-atf")
         sendToggleAtfHelper();
     else if (command == "toggle-scriptsync")
-        sendToggleSnScriptsync("opentabonly");
+        createScriptSyncTab();
 
 });
 
@@ -361,47 +361,6 @@ function sendToggleAtfHelper() {
             });
         });
 }
-
-// function sendToggleSnScriptsync(force) {
-
-//     getFromSyncStorageGlobal("scriptsync-active", function (answer) {
-//         var newValue = !(answer || false);
-
-//         if (force == "enable" || force == "opentabonly") newValue = true;
-//         if (force == "disable") newValue = false;
-
-
-//         setToChromeSyncStorageGlobal("scriptsync-active", newValue);
-
-//         if (force != "opentabonly") {
-//             chrome.tabs.query({
-//                 active: true,
-//                 currentWindow: true
-//             }, function (tabs) {
-//                 chrome.tabs.reload(tabs[0].id);
-//             });
-//         }
-
-//         if (newValue) {
-
-//             getFromSyncStorageGlobal("synctab", function (tid) {
-//                 if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
-//                     chrome.tabs.get(tid, function () {
-//                         if (chrome.runtime.lastError) {
-//                             createScriptSyncTab();
-//                         } else {
-//                             chrome.tabs.update(tid, {
-//                                 'active': false
-//                             });
-//                         }
-//                     });
-//                 } else
-//                     createScriptSyncTab();
-//             });
-//         }
-//     });
-
-// }
 
 function createScriptSyncTab() {
 
