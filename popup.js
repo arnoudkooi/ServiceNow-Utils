@@ -11,7 +11,6 @@ var dtUpdates;
 var dtNodes;
 var dtTables;
 var dtDataExplore;
-var dtScriptFields;
 var tablesloaded = false;
 var nodesloaded = false;
 var dataexploreloaded = false;
@@ -23,8 +22,7 @@ var datetimeformat;
 var table;
 var sys_id;
 var isNoRecord = true;
-var snufsid = 'gfmcfepahcbpafgckmomdopifchjbdcg';// prod
-var snufsrunning = false;
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -48,7 +46,7 @@ function setIcon(icon){
 }
 
 //Set variables, called by BG page after calling getRecordVariables
-function setRecordVariables(obj, scriptsync) {
+function setRecordVariables(obj) {
 
     isNoRecord = !obj.myVars.hasOwnProperty('NOWsysId');
     sys_id = obj.myVars.NOWsysId || obj.myVars.mySysId;
@@ -71,34 +69,11 @@ function setRecordVariables(obj, scriptsync) {
         chrome.tabs.create({ "url" : url + '/sys_update_set_list.do?sysparm_query=state%3Din%20progress' , "active": false});
     });
 
-    if (scriptsync) {
-        createScriptSyncChecboxes(table, sys_id);
-    }
 
     $('#waitinglink, #waitingscript').hide();
 
 }
 
-
-function checkSnufsRunning() {
-    chrome.runtime.sendMessage(snufsid, { checkRunning: true, instance: instance },
-        function (response) {
-            if (typeof response == 'undefined' &&
-                typeof chrome.management !== 'undefined') {
-                    $('#chromeapp').on('click', 
-                    function(){
-                        chrome.management.launchApp(snufsid, function (resp) { });
-                    });
-                    chrome.runtime.sendMessage(snufsid, { checkRunning: true, instance: instance },
-                        function (res) {
-                            if (typeof res == 'undefined') {
-                                $('#sciptcontainerdiv').html('');
-                            }
-                        });
-               // });
-            }
-        });
-}
 
 //Place the key value pair in the chrome local storage, with metafield for date added.
 function setToChromeStorage(theName, theValue) {
@@ -167,23 +142,7 @@ function prepareJsonNodes() {
 }
 
 
-//Try to get json with servicenow tables, first from chrome storage, else via REST api
-function prepareJsonScriptFields() {
-    var query = [instance + "-scriptfields", instance + "-scriptfields-date"];
-    chrome.storage.local.get(query, function (result) {
-        try {
-            var thedate = new Date().toDateString();
-            if (thedate == result[query[1]].toString()) {
-                dtScriptFields = result[query[0]];
-            }
-            else
-                bgPage.getScriptFields();
-        }
-        catch (err) {
-            bgPage.getScriptFields();
-        }
-    });
-}
+
 
 function getParameterByName(name, url) {
     if (!url) url = window.location.href.toLowerCase();
@@ -195,15 +154,6 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-//add object to storage and refresh datatable
-function setScriptFields(jsn) {
-    dtScriptFields = jsn;
-    dtScriptFields.push( //requested to add this field
-        {"internal_type.name" : "script", 
-         "name" : "catalog_script_client", 
-         "element" : "script"});
-    setToChromeStorage("scriptfields", jsn);
-}
 
 
 //Set variables, called by BG page after calling getBrowserVariables
@@ -238,7 +188,6 @@ function setBrowserVariables(obj) {
     });
     $('#btnrefreshtables').click(function () {
         $('#waitingtables').show();
-        bgPage.getScriptFields();
         bgPage.getTables();
     });
     $('#btnSendXplore').click(function () {
@@ -253,8 +202,6 @@ function setBrowserVariables(obj) {
         setSettings();
     });
     
-
-
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
         bgPage.getNodes();
@@ -351,17 +298,11 @@ function setBrowserVariables(obj) {
                 break;        
             case "#tablink":
                 $('#waitinglink').show();
-                bgPage.getRecordVariables(false);
+                bgPage.getRecordVariables();
                 break;
             case "#tabgr":
                 getGRQuery();
-                break;
-            case "#tabscript":
-                checkSnufsRunning();
-                //$('#waitingscript').show()
-                prepareJsonScriptFields();
-                bgPage.getRecordVariables(true);
-                break;            
+                break;         
             case "#tabuser":
                 if (!userloaded) {
                     if ($('#tbxname').val().length > 0)
@@ -432,69 +373,7 @@ function setGRQuery(gr) {
 
 
 
-//next release, integrate with other extension
-function createScriptSyncChecboxes(tbl, sysid) {
-    var fields = [];
-    if (dtScriptFields) {
-        fields = dtScriptFields.filter(function (el) {
-            return el.name == tbl;
-        }).sort();
-    }
 
-    if (fields.length == 0) {
-        $('#sciptcontainerdiv').html('No fields to edit found on current page..');
-        return;
-    }
-
-    $('#scripttable').html(tbl);
-
-    if (fields) {
-        var scripthtml = '';
-        for (var i = 0; i < fields.length; i++) {
-            var checked = (fields[i].element == 'script') ? 'checked="checked"' : '';
-
-            scripthtml += '<div class="form-check checkbox"><label class="form-check-label"><input class="form-check-input scriptcbx" data-type="' + fields[i]['internal_type.name'] + 
-                '" type="checkbox" ' + checked +
-                ' value="' + fields[i].element + '">' + fields[i].element + ' (' + fields[i]['internal_type.name'] + ')</label></div>';
-
-        }
-        $('#scriptform').html(scripthtml);
-    }
-}
-
-function sendToSnuFileSync() {
-
-    var url = 'https://' + instance + '.service-now.com/api/now/table/' + table + '/' + sys_id;
-
-    bgPage.loadXMLDoc(g_ck, url, "", function (respons) {
-        var idx = 0;
-        $('input.scriptcbx:checked').each(function (index, item) {
-            var tpe = $(this).data('type');
-            //console.log('div' + value + ':' + $(this).data('type'));
-            idx++;
-            var ext = '.js';
-            if (tpe.indexOf('html') > -1) ext = '.html';
-            else if (tpe.indexOf('xml') > -1) ext = '.xml';
-            chrome.runtime.sendMessage(
-                snufsid,
-                {
-                    instance: instance,
-                    table: table,
-                    sys_id: sys_id,
-                    field: item.value,
-                    name: respons.result.name || 'unknown',
-                    extension: ext,
-                    content: respons.result[item.value] || ''
-                },
-                function (response) {
-                    // console.log(response);
-                });
-        });
-        $('#scriptmessage').html(idx + ' file(s) created');
-
-    });
-
-}
 
 
 //Initiate Call to servicenow rest api

@@ -33,7 +33,8 @@ $(document).ready(function () {
 
     ws.onerror = function (evt) {
         t.row.add([
-            new Date(), 'WebSocket', '<b>Could not connect to WebSocket.</b><br />Check if VS Code is running and reload the page'
+            new Date(), 'WebSocket', '<b>Could not connect to WebSocket.</b><br />Check if VS Code is running and reload the page<br />' + 
+            '<a target="_blank" href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync">Get sn-scriptsync from Visual Code Marketplace</a>'
         ]).draw(false);
         increaseTitlecounter();
         flashFavicon('images/iconred48.png', 3);

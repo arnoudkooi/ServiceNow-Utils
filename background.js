@@ -204,14 +204,6 @@ var menuItems = [{
     "onclick": function (e, f) {
         createScriptSyncTab();
     }
-},
-{
-    "id": "infoscriptsync",
-    "title": "Enable ScriptSync in the Settings tab.",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-       alert("Click the SN Utils Icon and go to Settings tab to enable or disable ScriptSync")
-    }
 }
 ];
 
@@ -593,17 +585,17 @@ function pop() {
         currentWindow: true
     }, function (tabs) {
         var pth;
-        var u = tabs[0].url;
+        var u = new URL(tabs[0].url);
         var tid = tabs[0].id;
-        var baseUrl = u.substring(0, u.indexOf(".com/") + 4);
-        var navToIdx = u.indexOf("nav_to.do?uri=");
+        var baseUrl = u.origin
+        var navToIdx = u.href.indexOf("nav_to.do?uri=");
         if (navToIdx > -1) {
-            pth = decodeURIComponent(u.substring(navToIdx + 14, 1000));
+            pth = decodeURIComponent(u.href.substring(navToIdx + 14, 2000));
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
             });
         } else {
-            pth = "/nav_to.do?uri=" + encodeURIComponent(u.substring(u.indexOf(".com/") + 5, 1000));
+            pth = "/nav_to.do?uri=" + encodeURIComponent(u.pathname);
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
             });
@@ -680,7 +672,7 @@ function grVarName(tableName) {
 }
 
 //Try to retrieve current table and syid from browser tab, passing them back to popup
-function getRecordVariables(scriptscync) {
+function getRecordVariables() {
     popup = chrome.extension.getViews({
         type: "popup"
     })[0];
@@ -688,7 +680,7 @@ function getRecordVariables(scriptscync) {
         method: "getVars",
         myVars: "NOW.targetTable,NOW.sysId,mySysId,document.cookie"
     }, function (response) {
-        popup.setRecordVariables(response, scriptscync);
+        popup.setRecordVariables(response);
     });
 }
 
@@ -1019,12 +1011,6 @@ function getExploreData() {
 
 }
 
-function getScriptFields() {
-    var myurl = url + '/api/now/table/sys_dictionary?sysparm_display_value=true&sysparm_fields=name,element,internal_type.name&sysparm_query=internal_type.labelLIKEhtml^ORinternal_type.labelLIKEscript^ORinternal_type.labelLIKExml^ORinternal_type.labelLIKEcss';
-    loadXMLDoc(g_ck, myurl, null, function (jsn) {
-        popup.setScriptFields(jsn.result);
-    });
-}
 
 //Query ServiceNow for updatsets, pass JSON back to popup
 function getUpdateSets() {
