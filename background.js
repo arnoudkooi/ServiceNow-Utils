@@ -539,6 +539,7 @@ function openPropertie(e) {
 
 function pop() {
 
+
     chrome.tabs.query({
         active: true,
         currentWindow: true
@@ -549,17 +550,18 @@ function pop() {
         var baseUrl = u.origin
         var navToIdx = u.href.indexOf("nav_to.do?uri=");
         if (navToIdx > -1) {
-            pth = decodeURIComponent(u.href.substring(navToIdx + 14, 2000));
+            pth = decodeURIComponent(u.search.substring(5));
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
             });
         } else {
-            pth = "/nav_to.do?uri=" + encodeURIComponent(u.pathname);
+            pth = "/nav_to.do?uri=" + encodeURIComponent(u.pathname + u.search);
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
             });
         }
     });
+
 }
 
 

@@ -15,7 +15,14 @@ if (typeof jQuery != "undefined") {
         clickToList();
         setShortCuts();
         makeReadOnlyContentCopyable();
-        //startMessageChannel();
+        jQuery('input#filter').on('keypress', function (e) {
+            if (e.which == 13) {
+                if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
+                    e.preventDefault();
+                    searchSysIdTables(e.currentTarget.value);
+                }
+            }
+        });
 
     });
 }
@@ -816,6 +823,66 @@ function loadXMLDoc(token, url, post, callback) {
         });
     } catch (error) {
         showAlert('Server Request failed (' + error + ')', 'danger');
+    }
+}
+
+function searchSysIdTables(sysId) {
+    try {
+        showAlert('Searching for sys_id. This could take some seconds...')
+        var script = 'function findSysID(e){var s,d,n=new GlideRecord("sys_db_object");n.addEncodedQuery("' +
+            [
+                'nameINsys_metadata,task,cmdb_ci'
+            ].join('^') +
+            '"),n.query();for(var a=[];n.next();)d=n.name+"",(s=new GlideRecord(d)).isValid()&&(s.addQuery("sys_id",e),s.queryNoDomain(),s.setLimit(1),s.query(),s.hasNext()&&a.push(d));gs.print("###"+a+"###")}findSysID("' + sysId + '");'
+        startBackgroundScript(script, function (rspns) {
+            answer = rspns.match(/###(.*)###/);
+            if (answer != null && answer[1]) {
+                showAlert('Success! All found records will be opened in a separate browser tab.', 'success');
+                var tables = answer[1].split(',');
+                var url;
+                for (var i = 0; i < tables.length; i++) {
+                    url = tables[i] + '.do?sys_id=' + sysId;
+                    window.open(url, '_blank');
+                }
+            } else {
+                showAlert('sys_id was not found in the system.', 'warning');
+            }
+        });
+    } catch (error) {
+        showAlert(error, 'danger');
+    }
+}
+
+/**
+ * @function startBackgroundScript
+ * @param  {String} script   {the script that should be executed}
+ * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
+ * @return {undefined}
+ */
+function startBackgroundScript(script, callback) {
+    try {
+        jQuery.ajax({
+            url: 'sys.scripts.do',
+            method: 'GET', //POST does not work somehow
+            headers: {
+                'X-UserToken': g_ck,
+                'Cache-Control': 'no-cache',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: {
+                script: script,
+                runscript: "Run script",
+                sysparm_ck: g_ck,
+                sys_scope: 'e24e9692d7702100738dc0da9e6103dd'
+            }
+        }).done(function (rspns) {
+            callback(rspns);
+        }).fail(function (jqXHR, textStatus) {
+            showAlert('Background Script failed (' + jqXHR.statusText + ')', 'danger');
+        });
+    } catch (error) {
+        showAlert('Background Script failed (' + error + ')', 'danger');
     }
 }
 
