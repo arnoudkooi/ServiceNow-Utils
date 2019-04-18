@@ -428,7 +428,8 @@ function setDataTableUpdateSets(nme) {
                     if (row.sysId == nme.result.current.sysId) iscurrent = "iscurrent";
                     return "<a class='updatesetlist' href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + row.sysId + "' title='Table definition' ><i class='fa fa-list' aria-hidden='true'></i></a> " +
                         "<a class='setcurrent " + iscurrent + "' data-post='{name: \"" + row.name + "\", sysId: \"" + row.sysId + "\"}' href='#" + row.sysId + "' title='Set current updateset'><i class='fa fa-dot-circle-o' aria-hidden='true'></i></a> ";
-                }
+                },
+                "searchable": false
             }
         ],
         "drawCallback": function () {
@@ -497,7 +498,8 @@ function setDataTableNodes(nme, node) {
                 mRender: function (data, type, row) {
                     var iscurrent =  (row.node.value == node); 
                     return "<a class='setnode " + (iscurrent ? "iscurrent" : "")+ "' data-node='" + row.node.display_value + "' href='#' id='" + row.node.value + "' title='Switch to Node'><i class='fa fa-dot-circle-o' aria-hidden='true'></i>"+ (iscurrent ? " Active Node" : " Set Active")+"</a> ";
-                }
+                },
+                "searchable": false
             }
         ],
         "bLengthChange": false,
@@ -543,7 +545,8 @@ function setDataTableUpdates(nme) {
                     var i = row.name.lastIndexOf("_");
                     return "<a class='updatetarget' href='" + url + "/" + row.name.substr(0, i) + ".do?sys_id=" + row.name.substr(i + 1) + "' title='Open related record' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></a> " +
                         "<a class='updatetarget' href='" + url + "/sys_update_xml.do?sys_id=" + row.sys_id + "' title='View update' ><i class='fa fa-history' aria-hidden='true'></i></a> ";
-                }
+                },
+                "searchable": false
             }
         ],
         "language": {
@@ -598,11 +601,12 @@ function setDataTableTables(nme) {
                     return "<a class='tabletargetlist' href='" + url + '/' + row.name + "_list.do' title='Go to List (Using query selected below)' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
                         "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fa fa-cog' aria-hidden='true'></i></a> " +
                         "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
-                }
+                },
+                "searchable": false
             }
         ],
         "language": {
-            "info": "Matched: _TOTAL_ of _MAX_ tables | Hold down CMD or CTRL to keep window open after clicking a link",
+            "info": "Matched: _TOTAL_ of _MAX_ tables, showing max 250 | Hold down CMD or CTRL to keep window open after clicking a link ",
             "infoFiltered": "",
             "infoEmpty": "No matches found"
         },
@@ -610,7 +614,8 @@ function setDataTableTables(nme) {
         "bSortClasses": false,
         "scrollY": "200px",
         "scrollCollapse": true,
-        "paging": false,
+        "pageLength": 250,
+        //"paging": false,
         "dom": 'rti<"btns"B>',
         "buttons": [
         "copyHtml5"

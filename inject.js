@@ -826,32 +826,7 @@ function loadXMLDoc(token, url, post, callback) {
     }
 }
 
-function searchSysIdTables(sysId) {
-    try {
-        showAlert('Searching for sys_id. This could take some seconds...')
-        var script = 'function findSysID(e){var s,d,n=new GlideRecord("sys_db_object");n.addEncodedQuery("' +
-            [
-                'nameINsys_metadata,task,cmdb_ci'
-            ].join('^') +
-            '"),n.query();for(var a=[];n.next();)d=n.name+"",(s=new GlideRecord(d)).isValid()&&(s.addQuery("sys_id",e),s.queryNoDomain(),s.setLimit(1),s.query(),s.hasNext()&&a.push(d));gs.print("###"+a+"###")}findSysID("' + sysId + '");'
-        startBackgroundScript(script, function (rspns) {
-            answer = rspns.match(/###(.*)###/);
-            if (answer != null && answer[1]) {
-                showAlert('Success! All found records will be opened in a separate browser tab.', 'success');
-                var tables = answer[1].split(',');
-                var url;
-                for (var i = 0; i < tables.length; i++) {
-                    url = tables[i] + '.do?sys_id=' + sysId;
-                    window.open(url, '_blank');
-                }
-            } else {
-                showAlert('sys_id was not found in the system.', 'warning');
-            }
-        });
-    } catch (error) {
-        showAlert(error, 'danger');
-    }
-}
+
 
 /**
  * @function startBackgroundScript
