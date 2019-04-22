@@ -342,6 +342,13 @@ function openReference(event, refTable, refField) {
     window.open(url, 'refTable');
 }
 
+function openConditions(fieldName) {
+    var tableName = jQuery("[em-table]").first().attr('em-table');
+    var conditions = g_form.getValue(fieldName);
+    var url = '/' + tableName + '_list.do?sysparm_query=' + conditions;
+    window.open(url, 'condTable');
+}
+
 function addTechnicalNames() {
 
     if (typeof jQuery == 'undefined') return; //not in studio
@@ -358,6 +365,9 @@ function addTechnicalNames() {
                 if (fieldType == 'reference' || fieldType == 'glide_list') {
                     var reftable = g_form.getGlideUIElement(elm).reference;
                     elm = ' <a onclick="openReference(\'' + reftable + '\',\'' + elm + '\');"  title="Reference table: ' + reftable + '" target="_blank">' + elm + '</a>';
+                }
+                if (fieldType == 'conditions') {
+                    elm = '<a onclick="openConditions(\'' + elm + '\');"  title="Preview condition in list" target="_blank">' + elm + '</a>';
                 }
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
             });
