@@ -1,15 +1,16 @@
 var t;
+var realTimeUpdating = false;
 
 $(document).ready(function () {
     t = $('#synclog').DataTable({
         columnDefs: [{
-                render: $.fn.dataTable.render.moment('X', 'HH:mm:ss'),
-                targets: 0
-            },
-            {
-                width: 50,
-                targets: [0, 1]
-            }
+            render: $.fn.dataTable.render.moment('X', 'HH:mm:ss'),
+            targets: 0
+        },
+        {
+            width: 50,
+            targets: [0, 1]
+        }
         ],
         "bLengthChange": false,
         "bSortClasses": false,
@@ -33,7 +34,7 @@ $(document).ready(function () {
 
     ws.onerror = function (evt) {
         t.row.add([
-            new Date(), 'WebSocket', '<b>Could not connect to WebSocket.</b><br />Check if VS Code is running and reload the page<br />' + 
+            new Date(), 'WebSocket', '<b>Could not connect to WebSocket.</b><br />Check if VS Code is running and reload the page<br />' +
             '<a target="_blank" href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync">Get sn-scriptsync from Visual Code Marketplace</a>'
         ]).draw(false);
         increaseTitlecounter();
@@ -51,35 +52,40 @@ $(document).ready(function () {
 
     ws.onmessage = function (evt) {
         var wsObj = JSON.parse(evt.data);
-        if ('contentLength' in wsObj) {
-            t.row.add([
-                new Date(), 'ServiceNow', 'Opened in VS Code: <b>' + wsObj.name + '</b><br /><span class="code">Instance: ' +
-                wsObj.instance.name + ' | Field: ' + wsObj.table + '.' + wsObj.field +
-                ' | Characters: ' + wsObj.contentLength + '</code>'
-            ]).draw(false);
-            flashFavicon('images/icongreen48.png', 4);
-            increaseTitlecounter();
-        } else if (wsObj.action == 'requestRecord') {
-            requestRecord(wsObj);
-        } else if (wsObj.action == 'requestRecords') {
-            requestRecords(wsObj);
-        } else if ('instance' in wsObj) {
-            updateRecord(wsObj);
-        } else {
-            t.row.add([
-                new Date(), 'WebSocket', JSON.parse(evt.data)
-            ]).draw(false);
-            increaseTitlecounter();
-            if (evt.data.indexOf('error') > 0) {
-                flashFavicon('images/iconred48.png', 3);
-                ws.send(wsObj);
+        if ('liveupdate' in wsObj) {
+            updateRealtimeBrowser(wsObj);
+        }
+        else {
+            realTimeUpdating = false;
+            if ('contentLength' in wsObj) {
+                t.row.add([
+                    new Date(), 'ServiceNow', 'Opened in VS Code: <b>' + wsObj.name + '</b><br /><span class="code">Instance: ' +
+                    wsObj.instance.name + ' | Field: ' + wsObj.table + '.' + wsObj.field +
+                    ' | Characters: ' + wsObj.contentLength + '</code>'
+                ]).draw(false);
+                flashFavicon('images/icongreen48.png', 4);
+                increaseTitlecounter();
+            } else if (wsObj.action == 'requestRecord') {
+                requestRecord(wsObj);
+            } else if (wsObj.action == 'requestRecords') {
+                requestRecords(wsObj);
+            } else if ('instance' in wsObj) {
+                updateRecord(wsObj);
+            } else {
+                t.row.add([
+                    new Date(), 'WebSocket', JSON.parse(evt.data)
+                ]).draw(false);
+                increaseTitlecounter();
+                if (evt.data.indexOf('error') > 0) {
+                    flashFavicon('images/iconred48.png', 3);
+                    ws.send(wsObj);
+                }
             }
-
         }
     };
 
     window.onbeforeunload = function () {
-        ws.onclose = function () {};
+        ws.onclose = function () { };
         ws.close();
         return "Are you sure you want to navigate away?";
     };
@@ -156,6 +162,31 @@ function requestRecords(requestJson) {
         }
     };
     client.send();
+}
+
+
+
+function updateRealtimeBrowser(scriptObj) {
+    if (!realTimeUpdating) {
+        t.row.add([
+            new Date(), 'VS Code', 'Realtime updating widget CSS'
+        ]).draw(false);
+        realTimeUpdating = true;
+    }
+
+    if (scriptObj.hasOwnProperty('testUrls')) {
+    
+        for (var i = 0; i < scriptObj.testUrls.length; i++) {
+            chrome.tabs.query({
+                url: scriptObj.testUrls[i]
+            }, function (arrayOfTabs) {
+                if (arrayOfTabs.length)
+                    chrome.tabs.executeScript(arrayOfTabs[0].id, {"code" : "document.getElementById('v" + scriptObj.sys_id +"-s').innerHTML = `" +scriptObj.css + "`"});
+            });
+        }
+    }
+
+    console.log(scriptObj);
 }
 
 
