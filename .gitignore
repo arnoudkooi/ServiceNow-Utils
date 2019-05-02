@@ -7,3 +7,4 @@ fonts/.DS_Store
 web-ext-artifacts/
 .jshintrc
 publish/
+.vscode/settings.json

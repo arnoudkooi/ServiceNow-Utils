@@ -1068,6 +1068,8 @@ function snuAddDblClick() {
 
 function sortStudioLists() {
 
+    doGroupSearch(""); //call to remove var__m_ from flowdesigner 
+
     var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
 
     Array.prototype.forEach.call(elULs, function (ul) {
@@ -1137,13 +1139,13 @@ function doGroupSearch(search) {
         el.parentElement.style.display = "";
     });
 
-    if (search.length == 0) {
-        var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
-        Array.prototype.forEach.call(elms, function (el, i) {
-            el.style.display = "";
-        });
-        return;
-    }
+    // if (search.length == 0) {
+    //     var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+    //     Array.prototype.forEach.call(elms, function (el, i) {
+    //         el.style.display = "";
+    //     });
+    //     return;
+    // }
 
     search = search.split(',');
     var srch = search[0].toLowerCase();
@@ -1163,7 +1165,7 @@ function doGroupSearch(search) {
             text += par.parentElement.getElementsByTagName('span')[0].innerText.toLowerCase() + ' ';
             pars.push(par);
             for (par of pars) {
-                if (text.includes(srch)) {
+                if (text.includes(srch) && !text.includes("var__m_")) {
                     par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
                 }
                 else {
@@ -1172,7 +1174,7 @@ function doGroupSearch(search) {
                 }
             }
 
-            if (text.includes(srch)) {
+            if (text.includes(srch) && !text.includes("var__m_")) {
                 el.style.display = "";
             }
             else
