@@ -1,6 +1,6 @@
 {
-    "name": "ServiceNow Utils",
-    "short_name": "ServiceNow Utils",
+    "name": "SN Utils",
+    "short_name": "SN Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
     "version": "0.0.0.0",
@@ -8,6 +8,7 @@
         "activeTab",
         "https://*.service-now.com/*",
         "declarativeContent",
+        "tabs",
         "storage",
         "nativeMessaging",
         "contextMenus",

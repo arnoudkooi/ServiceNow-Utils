@@ -400,6 +400,7 @@ function openReference(refTable, refField) {
 
 function showSelectFieldValues() {
     if (typeof jQuery == 'undefined') return; //not in studio
+    if (location.pathname ==  "/sys_report_template.do" ) return; //not in report builder
 
     jQuery('option').not(":contains('|')").each(function (i, el) {
         var jqEl = jQuery(el);
@@ -450,7 +451,7 @@ function searchLargeSelects() {
 
     var minItems = 25;
 
-    jQuery('select:not(.searchified)').each(function (i, el) {
+    jQuery('select:not(.searchified, .select2)').each(function (i, el) {
         if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
             var input = document.createElement("input");
             input.type = "text";

@@ -1,9 +1,9 @@
 {
-    "name": "ServiceNow Utils",
-    "short_name": "ServiceNow Utils",
+    "name": "SN Utils",
+    "short_name": "SN Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "3.2.3.7",
+    "version": "3.2.3.8",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
