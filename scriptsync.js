@@ -186,7 +186,6 @@ function updateRealtimeBrowser(scriptObj) {
         }
     }
 
-    console.log(scriptObj);
 }
 
 

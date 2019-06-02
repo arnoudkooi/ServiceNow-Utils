@@ -5,23 +5,8 @@
     <link rel="stylesheet" href="css/datatables.min.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/scriptsync.css">
 
-    <style>
-        body {
-            background: white;
-            font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
-            font-size: 10pt;
-            width: 95%;
-            margin: 10px;
-            padding: 10px;
-        }
-        .code {
-            font-family: Menlo, "Courier New", Courier, monospace;
-        }
-        .dataTables_scrollBody {
-            max-height: 100% !important;
-        }
-    </style>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="js/moment.js"></script>
@@ -30,8 +15,8 @@
     <script src="scriptsync.js"></script>
 </head>
 <body>
-    <h5><img style="width:40px;" src="/images/icon128.png" alt="SN Utils logo" /> SN ScriptSync Helper Tab</h5>
-    <table id="synclog" class="display table-condensed" style="width:100%; table-layout: fixed;word-wrap:break-word;">
+    <h5><img class="wdth40" src="/images/icon128.png" alt="SN Utils logo" /> SN ScriptSync Helper Tab</h5>
+    <table id="synclog" class="display table-condensed tbl" >
         <thead>
             <tr>
                 <th>Time</th>
@@ -42,7 +27,7 @@
         <tbody>
         </tbody>
     </table>
-    <span style="font-size: 7pt">
+    <span class="ft7">
         By <a href="https://www.arnoudkooi.com" target="arnoudkooi">arnoudkooi.com</a> | 
         <a href="https://www.youtube.com/playlist?list=PLTyELlWS-zjT1GaLaJnWTKnHOMyEWA8Xe" target="arnoudkooi">YouTube Playlist </a> | 
         <a href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync" target="arnoudkooi">SN ScriptSync - VS Code Marketplace </a> | 
