@@ -9,9 +9,7 @@
         "*://*/*",
         "declarativeContent",
         "storage",
-        "nativeMessaging",
         "contextMenus",
-        "management",
         "cookies"
     ],
     "icons": {

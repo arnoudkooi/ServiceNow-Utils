@@ -10,9 +10,7 @@
         "declarativeContent",
         "tabs",
         "storage",
-        "nativeMessaging",
         "contextMenus",
-        "management",
         "cookies"
     ],
     "icons": {
@@ -112,5 +110,6 @@
         "gecko": {
             "id": "email@arnoudkooi.com"
         }
-    }
+    },
+    "content_security_policy": "script-src 'self' https://service-now.com; object-src 'self'"
 }

@@ -11,7 +11,7 @@ if (typeof jQuery != "undefined") {
         else
             doubleClickToSetQueryListV2();
 
-        doubleClickToShowField();
+        doubleClickToShowFieldOrReload();
         clickToList();
         setShortCuts();
         makeReadOnlyContentCopyable();
@@ -75,7 +75,7 @@ function startMessageChannel() {
 }
 
 
-function doubleClickToShowField() {
+function doubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("dblclick", function (event) {
             if (jQuery(event.target).hasClass('label-text')) {
@@ -85,6 +85,11 @@ function doubleClickToShowField() {
                 if (newValue !== null)
                     g_form.setValue(elm, newValue);
             }
+
+            else if (jQuery(event.target).hasClass('container-fluid')) {
+                location.reload();
+            }
+
         }, true);
     }
 }
@@ -451,7 +456,7 @@ function searchLargeSelects() {
 
     var minItems = 25;
 
-    jQuery('select:not(.searchified, .select2)').each(function (i, el) {
+    jQuery('select:not(.searchified, .select2, .select2-offscreen)').each(function (i, el) {
         if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
             var input = document.createElement("input");
             input.type = "text";

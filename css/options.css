@@ -1,0 +1,12 @@
+#shortcuts {
+    display: table;
+    width: 100%;
+    table-layout: auto;
+}
+.key-line {
+    display: table-row;
+}
+.key-line * {
+    display: table-cell;
+    margin: 0.25em 0.5em;
+}

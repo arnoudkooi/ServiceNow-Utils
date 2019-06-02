@@ -205,3 +205,36 @@ table.dataTable thead .sorting_asc_disabled {
 table.dataTable thead .sorting_desc_disabled {
     background: url("/images/sort_desc_disabled.png") no-repeat center right;
 }
+
+img.halfwidth{
+    width:50%;
+}
+
+img.ytthumbnail{
+    width:300px; 
+    border:solid 1pt #e3e3e3; 
+    padding:5px;
+    margin:20px;
+}
+
+.fonteight{
+    font-size:8pt;
+}
+
+.mtfive{
+    margin-top:5px;
+}
+
+.dxp{
+    width:100%; 
+    table-layout: fixed;
+    word-wrap:break-word;
+}
+
+.grtemplate{
+    font-family: Consolas, Lucida Console, monospace; 
+    font-size:10pt; 
+    height:290px; 
+    margin-top:20px; 
+    margin-right:4px;
+}
