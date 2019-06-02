@@ -111,5 +111,5 @@
             "id": "email@arnoudkooi.com"
         }
     },
-    "content_security_policy": "default-src 'self' https://*.service-now.com; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
+    "content_security_policy": "default-src 'self'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
 }
