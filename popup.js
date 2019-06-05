@@ -107,7 +107,8 @@ function setFormFromSyncStorage(callback) {
 
 //Try to get json with servicenow tables, first from chrome storage, else via REST api
 function prepareJsonTable() {
-    var query = [instance + "-tables", instance + "-tables-date"];
+    var dataset = $('#slctdataset').val();
+    var query = [instance + "-tables-" + dataset , instance + "-tables-" + dataset+ "-date"];
     chrome.storage.local.get(query, function (result) {
         try {
             var thedate = new Date().toDateString();
@@ -115,10 +116,10 @@ function prepareJsonTable() {
                 setDataTableTables(result[query[0]]);
             }
             else
-                bgPage.getTables();
+                bgPage.getTables(dataset);
         }
         catch (err) {
-            bgPage.getTables();
+            bgPage.getTables(dataset);
         }
     });
 }
@@ -133,10 +134,10 @@ function prepareJsonNodes() {
                 bgPage.getActiveNode(result[query[0]]);
             }
             else
-                bgPage.getNodes();
+                bgPage.getNodes($('#btnrefreshtables').val());
         }
         catch (err) {
-            bgPage.getNodes();
+            bgPage.getNodes($('#btnrefreshtables').val());
         }
     });
 }
@@ -188,7 +189,12 @@ function setBrowserVariables(obj) {
     });
     $('#btnrefreshtables').click(function () {
         $('#waitingtables').show();
-        bgPage.getTables();
+        bgPage.getTables($('#slctdataset').val());
+    });
+    $('#slctdataset').on('change', function() {
+        $('#waitingtables').show();
+        bgPage.getTables(this.value);
+        console.log(this.value);
     });
     $('#btnSendXplore').click(function () {
         var script = $('#txtgrquery').val();
@@ -579,8 +585,8 @@ function setDataTableUpdates(nme) {
 
 
 //add object to storage and refresh datatable
-function setTables(jsn) {
-    setToChromeStorage("tables", jsn);
+function setTables(dataset, jsn) {
+    setToChromeStorage("tables-" + dataset, jsn);
     setDataTableTables(jsn);
 }
 
@@ -589,22 +595,53 @@ function setTables(jsn) {
 //set or refresh datatable with ServiceNow tables
 function setDataTableTables(nme) {
 
-    if (dtTables) dtTables.destroy();
+    if (dtTables) {
+        dtTables.destroy();
+        $('#tbls thead tr .dyna').remove();
+        $('#tbls tbody tr').remove();
+    }
+
+    var columnDefs =  [
+        { "width": "46%", "targets": 0 },
+        { "width": "47%", "targets": 1 },
+        { "width": "7%", "targets": 2 }
+      ];
+
+    var aoColumns = [
+        { "mDataProp": "label" },
+        { "mDataProp": "name" },
+        {
+            mRender: function (data, type, row) {
+                return "<a class='tabletargetlist' href='" + url + '/' + row.name + "_list.do' title='Go to List (Using query selected below)' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
+                    "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fa fa-cog' aria-hidden='true'></i></a> " +
+                    "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
+            },
+            "searchable": false
+        }
+    ]
+
+    if (nme.length){
+        if (nme[0].hasOwnProperty("super_classname")){
+            aoColumns.splice(2, 0, { "mDataProp": "super_classname" });
+            aoColumns.splice(3, 0, { "mDataProp": "sys_scopescope" });
+            $('th#thaction').after('<th class="dyna">Extends</th><th class="dyna">Scope</th>');
+
+            var columnDefs =  [
+                { "width": "25%", "targets": 0 },
+                { "width": "25%", "targets": 1 },
+                { "width": "25%", "targets": 2 },
+                { "width": "18%", "targets": 3 },
+                { "width": "7%", "targets": 4 }
+              ];
+
+        }
+    }
 
     dtTables = $('#tbls').DataTable({
         "aaData": nme,
-        "aoColumns": [
-            { "mDataProp": "label" },
-            { "mDataProp": "name" },
-            {
-                mRender: function (data, type, row) {
-                    return "<a class='tabletargetlist' href='" + url + '/' + row.name + "_list.do' title='Go to List (Using query selected below)' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
-                        "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fa fa-cog' aria-hidden='true'></i></a> " +
-                        "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
-                },
-                "searchable": false
-            }
-        ],
+        "columnDefs": columnDefs,
+        "aoColumns": aoColumns,
+        "bAutoWidth": false,
         "language": {
             "info": "Matched: _TOTAL_ of _MAX_ tables, showing max 250 | Hold down CMD or CTRL to keep window open after clicking a link ",
             "infoFiltered": "",

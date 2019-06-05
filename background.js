@@ -756,13 +756,37 @@ function getUserDetails(userName) {
 
 
 //Query ServiceNow for tables, pass JSON back to popup
-function getTables() {
-    var myurl = url + '/api/now/table/sys_db_object?sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel';
+function getTables(dataset) {
+    
+    var fields = 'name,label';
+    var query = 'sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel';
+
+    if (dataset == 'advanced'){
+         fields = 'name,label,super_class.name,sys_scope.scope';
+    }
+    else 
+    if (dataset == 'customtables') {
+        fields = 'name,label,super_class.name,sys_scope.scope';
+        var query = 
+        "nameSTARTSWITHu_^ORnameSTARTSWITHx_^nameNOT LIKE_cmdb^super_class.name!=scheduled_data_import^super_class.name!=sys_portal_page"+
+        "^super_class.name!=cmn_location^super_class.name!=sf_state_flow^super_class.name!=sys_report_import_table_parent"+
+        "^super_class.name!=cmn_schedule_condition^super_class.name!=sys_auth_profile^super_class.name!=sys_transform_script"+
+        "^super_class.name!=dl_definition^super_class.name!=sys_dictionary^super_class.name!=sys_transform_map"+
+        "^super_class.name!=dl_matcher^super_class.name!=sys_filter^super_class.name!=sys_user_preference"+
+        "^super_class.name!=kb_knowledge^super_class.name!=sys_hub_action_type_base^super_class.name!=sysauto sc_cat_item_delivery_task"+
+        "^super_class.name!=sys_import_set_row^super_class.name!=syslog^NQnameSTARTSWITHu_^ORnameSTARTSWITHx_^super_classISEMPTY" +
+        "^sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel";
+    }
+
+
+    var myurl = url + '/api/now/table/sys_db_object?sysparm_fields=' + fields + '&sysparm_query=' + query;
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
-        popup.setTables(jsn.result);
+        var res = JSON.stringify(jsn.result).
+                                replace(/super_class.name/g,'super_classname').
+                                replace(/sys_scope.scope/g,'sys_scopescope'); //hack to get rid of . in object key names
+        popup.setTables(dataset, JSON.parse(res)); 
     });
 }
-
 
 //Query ServiceNow for tables and set to chrome storage
 function setUpdateSetTables() {

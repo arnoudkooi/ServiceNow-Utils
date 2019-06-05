@@ -6,6 +6,18 @@ This page is used to inform visitors regarding my policies with the collection, 
 If you choose to use my SN Utils, then you agree to the collection and use of information in relation to this policy. The Personal Information that I collect is used for providing and improving the Service. I will not use or share your information with anyone except as described in this Privacy Policy.
 
 
+## Disclore for permmissions
+Cookies: Needed and only used for stwitching Nodes
+Storage: Used to store setting and cache data like table list to reduce rest calls
+activeTab: Interact with ServiceNow vrowser window
+Tabs: Only requested for FireFox, to be able to live preview and realtime CSS from sn-scriptsync
+
+Content Security Policy:
+https://*.service-now.com: Access instance via REST API
+ws://127.0.0.1:1978/	Interact between Helper Tab and VS Code sn-scriptsync
+
+
+
 ## Security
 
 I value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and I cannot guarantee its absolute security.

@@ -30,12 +30,12 @@ if (typeof jQuery != "undefined") {
 
 function snuSettingsAdded() {
 
-    bindPaste(snusettings.nouielements == 'undefined' || snusettings.nouielements == false);
+    bindPaste(typeof snusettings.nouielements == 'undefined' || snusettings.nouielements == false);
 
     if (snusettings.vsscriptsync == true)
         addFieldSyncButtons();
 
-    if (snusettings.nouielements == 'undefined' || snusettings.nouielements == false) {
+    if (typeof snusettings.nouielements == 'undefined' || snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
         addStudioSearch();
         addSgStudioPlatformLink();

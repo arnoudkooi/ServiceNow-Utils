@@ -80,7 +80,8 @@
             <div class="tab-content">
                 <div class="tab-pane" id="tabupdatesets">
                     <div class="input-group">
-                        <input type="search" id="tbxupdatesets" name="tbxupdatesets" class="form-control form-control-sm sync"
+                        <input type="search" id="tbxupdatesets" name="tbxupdatesets"
+                            class="form-control form-control-sm sync"
                             placeholder="Search in progress update set in current scope...">
                         <span class="input-group-append">
                             <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
@@ -127,7 +128,8 @@
                         <input type="search" id="tbxnodes" name="tbxnodes" class="form-control form-control-sm"
                             placeholder="Search Instance Nodes...">
                         <span class="input-group-append">
-                            <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm" type="button">Refresh</button>
+                            <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm"
+                                type="button">Refresh</button>
                         </span>
 
                     </div>
@@ -145,10 +147,16 @@
 
                     <div class="input-group">
                         <input type="search" id="tbxtables" name="tbxtables" class="form-control form-control-sm sync"
-                            placeholder="Search tables...">
+                            placeholder="Search tables...                           >> Select dataset: Default, Advanced or Custom Tables >>">
+
                         <span class="input-group-append">
-                            <button id='btnrefreshtables' class="btn btn-outline-secondary btn-sm" title="Force refresh of the ServiceNow tables (API Call)"
-                                type="button">Refresh</button>
+                            <select name="slctdataset" id="slctdataset" class="form-control form-control-sm sync wdth" title="Select dataset: Default, Advanced or Custom Tables">
+                                <option value="default">Default</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="customtables">Custom Tables</option>
+                            </select>
+                            <button id='btnrefreshtables' class="btn btn-outline-secondary btn-sm"
+                                title="Force refresh of the ServiceNow tables (API Call)" type="button">Refresh</button>
                         </span>
 
                     </div>
@@ -158,12 +166,14 @@
                             <tr>
                                 <th>Label</th>
                                 <th>Table</th>
-                                <th>Action</th>
+                                <th id="thaction">Action</th>
                             </tr>
                         </thead>
                     </table>
                     <select class="form-control form-control-sm sync mtfive" id="slctlistquery" name="slctlistquery">
-                        <option value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on">Listview
+                        <option
+                            value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on">
+                            Listview
                             query: Updated on Today / Order by Updated desc.</option>
                         <option value="sys_id=-1">Listview query: Empty list (sys_id=-1)</option>
                         <option value="">Listview query: None (all records)</option>
@@ -174,14 +184,14 @@
                 <div class="tab-pane" id="tabdataexplore">
 
                     <div class="input-group">
-                        <input type="search" id="tbxdataexplore" name="tbxdataexplore" class="form-control form-control-sm sync"
-                            placeholder="Search data...">
+                        <input type="search" id="tbxdataexplore" name="tbxdataexplore"
+                            class="form-control form-control-sm sync" placeholder="Search data...">
                         <span class="input-group-append">
-                            <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm" title="Refresh data"
-                                type="button">Refresh</button>
+                            <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm"
+                                title="Refresh data" type="button">Refresh</button>
                         </span>
                     </div>
-                    <table id="dataexplore" class="display table-condensed dxp" >
+                    <table id="dataexplore" class="display table-condensed dxp">
                         <thead>
                             <tr>
                                 <th>Label</th>
@@ -209,7 +219,8 @@
 
                 <div class="tab-pane" id="tabgr">
                     <div class="input-group">
-                        <input id="tbxgrname" name="tbxgrname" class="form-control form-control-sm" placeholder="Change default grTableName variable...">
+                        <input id="tbxgrname" name="tbxgrname" class="form-control form-control-sm"
+                            placeholder="Change default grTableName variable...">
                         <span class="input-group-append">
                             <button id='btnSetGRName' class="btn btn-outline-secondary btn-sm" type="button">Create
                                 GlideRecord Template.</button>
@@ -228,8 +239,8 @@
                             <option value=''>- none -</option>
                         </select>
                     </div>
-                    <textarea class="form-control form-control-sm grtemplate" autocomplete="off" autocapitalize="off" spellcheck="false"
-                        id="txtgrquery"></textarea>
+                    <textarea class="form-control form-control-sm grtemplate" autocomplete="off" autocapitalize="off"
+                        spellcheck="false" id="txtgrquery"></textarea>
 
 
                     <!-- <div class="btns">
@@ -248,8 +259,8 @@
 
                 <div class="tab-pane" id="tabrest">
 
-                    <textarea class="form-control form-control-sm grtemplate" autocomplete="off" autocapitalize="off" spellcheck="false"
-                        id="txtrest"></textarea>
+                    <textarea class="form-control form-control-sm grtemplate" autocomplete="off" autocapitalize="off"
+                        spellcheck="false" id="txtrest"></textarea>
 
                     <br />
                 </div>
@@ -259,23 +270,26 @@
                     <div class="col-12" id='settingsdiv'>
                         <form>
                             <div class="form-check">
-                                <input class="form-check-input snu-setting" type="checkbox" id="vsscriptsync" name="scriptsyncactive">
+                                <input class="form-check-input snu-setting" type="checkbox" id="vsscriptsync"
+                                    name="scriptsyncactive">
                                 <label class="form-check-label" for="vsscriptsync">
                                     Enable VS ScriptSync
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input snu-setting" type="checkbox" id="addtechnicalnames" name="addtechnicalnames">
+                                <input class="form-check-input snu-setting" type="checkbox" id="addtechnicalnames"
+                                    name="addtechnicalnames">
                                 <label class="form-check-label" for="addtechnicalnames">
                                     Show Technical names on page load
                                 </label>
                             </div>
                             <div class="form-check">
-                                    <input class="form-check-input snu-setting" type="checkbox" id="nouielements" name="nouielements">
-                                    <label class="form-check-label" for="nouielements">
-                                        Don't add UI elements to browser
-                                    </label>
-                            </div>                           
+                                <input class="form-check-input snu-setting" type="checkbox" id="nouielements"
+                                    name="nouielements">
+                                <label class="form-check-label" for="nouielements">
+                                    Don't add UI elements to browser
+                                </label>
+                            </div>
                         </form>
                     </div>
 
@@ -283,7 +297,8 @@
                     <h5>Shortcuts</h5>
 
                     <div class="hide-in-firefox">
-                        Go to <a class="popuplinks" href="chrome://extensions/shortcuts" target="_blank">chrome://extensions/shortcuts</a>
+                        Go to <a class="popuplinks" href="chrome://extensions/shortcuts"
+                            target="_blank">chrome://extensions/shortcuts</a>
                         to adjust the extension shortcuts.
 
                         <br />
@@ -311,12 +326,14 @@
                     </a>
 
                     <br /> Check my
-                    <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos" target="_blank">YouTube
+                    <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos"
+                        target="_blank">YouTube
                         Channel</a> for the latest updates.
                     <br />
 
                     Sourcecode is available on
-                    <a class="popuplinks" href="https://github.com/arnoudkooi/ServiceNow-Utils" target="_blank">GitHub</a>
+                    <a class="popuplinks" href="https://github.com/arnoudkooi/ServiceNow-Utils"
+                        target="_blank">GitHub</a>
                     for review purposes.
                     <br />This tools comes as is, with no warranty.
                     <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is not

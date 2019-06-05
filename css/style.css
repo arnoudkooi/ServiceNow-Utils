@@ -238,3 +238,11 @@ img.ytthumbnail{
     margin-top:20px; 
     margin-right:4px;
 }
+.wdth{
+    width:180px;
+}
+
+#tbls {
+    table-layout: fixed;
+    word-wrap:break-word;  
+}
