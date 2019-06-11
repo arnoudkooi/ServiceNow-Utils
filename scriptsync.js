@@ -106,22 +106,26 @@ function requestRecord(requestJson) {
             var resp = JSON.parse(this.response);
 
             if (resp.hasOwnProperty('result')) {
-                t.row.add([
-                    new Date(), 'VS Code', 'Received from ServiceNow: <b>' + requestJson.name + '</b><br /><span class="code">Instance: ' +
-                    requestJson.instance.name + ' | Table: ' + requestJson.tableName + '</span>'
+                if (requestJson.hasOwnProperty('actionGoal')) {
+                    if (requestJson.actionGoal != 'updateCheck') {
+                        t.row.add([
+                            new Date(), 'VS Code', 'Received from ServiceNow: <b>' + requestJson.name + '</b><br /><span class="code">Instance: ' +
+                            requestJson.instance.name + ' | Table: ' + requestJson.tableName + '</span>'
 
-                ]).draw(false);
+                        ]).draw(false);
+                    }
+                }
                 increaseTitlecounter();
                 requestJson.type = "requestRecord";
-                requestJson.responses = this.response;
-                ws.send(requestJson);
+                requestJson.result = resp.result;
+                ws.send(JSON.stringify(requestJson));
 
             } else {
                 t.row.add([
                     new Date(), 'VS Code', this.response
                 ]).draw(false);
                 increaseTitlecounter();
-                ws.send(this.response);
+                ws.send(JSON.stringify(this.response));
             }
         }
     };
@@ -175,13 +179,13 @@ function updateRealtimeBrowser(scriptObj) {
     }
 
     if (scriptObj.hasOwnProperty('testUrls')) {
-    
+
         for (var i = 0; i < scriptObj.testUrls.length; i++) {
             chrome.tabs.query({
                 url: scriptObj.testUrls[i]
             }, function (arrayOfTabs) {
                 if (arrayOfTabs.length)
-                    chrome.tabs.executeScript(arrayOfTabs[0].id, {"code" : "document.getElementById('v" + scriptObj.sys_id +"-s').innerHTML = `" +scriptObj.css + "`"});
+                    chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": "document.getElementById('v" + scriptObj.sys_id + "-s').innerHTML = `" + scriptObj.css + "`" });
             });
         }
     }
