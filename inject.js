@@ -32,8 +32,10 @@ function snuSettingsAdded() {
 
     bindPaste(typeof snusettings.nouielements == 'undefined' || snusettings.nouielements == false);
 
-    if (snusettings.vsscriptsync == true)
+    if (snusettings.vsscriptsync == true){
         addFieldSyncButtons();
+        addStudioScriptSync();
+    }
 
     if (typeof snusettings.nouielements == 'undefined' || snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
@@ -901,6 +903,8 @@ function showAlert(msg, type, timeout) {
 
 function postRequestToScriptSync(requestType) {
 
+    snuScriptSync();
+
     var instance = {};
     instance.name = window.location.host.split('.')[0];
     instance.url = window.location.origin;
@@ -940,6 +944,8 @@ function postRequestToScriptSync(requestType) {
 
 function postToScriptSync(field) {
 
+    snuScriptSync();
+
     g_form.clearMessages();
     var instance = {};
     instance.name = window.location.host.split('.')[0];
@@ -964,6 +970,43 @@ function postToScriptSync(field) {
     };
     client.onerror = function (e) {
         g_form.addErrorMessage("Error, please check if VS Code with SN SriptSync is running");
+    };
+    client.send(JSON.stringify(data));
+
+    // var syncPage = jQuery("#snUtils").data("syncpage");
+    // window.open(syncPage, syncPage);
+
+}
+
+
+function postLinkRequestToScriptSync(field) {
+
+    snuScriptSync();
+
+    var instance = {};
+    instance.name = window.location.host.split('.')[0];
+    instance.url = window.location.origin;
+    instance.g_ck = g_ck;
+
+    var ngScope = angular.element(document.getElementById('explorer-editor-wrapper')).scope()
+    
+
+    var data = {};
+    data.action = 'linkAppToVSCode';
+    data.instance = instance;
+    data.appId = ngScope.ProjectConfig.APP_ID;
+    data.appName = ngScope.ProjectConfig.APP_NAME;
+    data.appScope = ngScope.ProjectConfig.APP_SCOPE;
+
+
+    var client = new XMLHttpRequest();
+    client.open("post", "http://127.0.0.1:1977");
+    client.onreadystatechange = function (m) {
+        // if (client.readyState == 4 && client.status != 200)
+        //     g_form.addErrorMessage(client.responseText);
+    };
+    client.onerror = function (e) {
+       alert("Error, please check if VS Code with SN SriptSync is running");
     };
     client.send(JSON.stringify(data));
 
@@ -1121,19 +1164,31 @@ function addStudioSearch() {
         }
     }
 
-
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
-
 
     var snuGroupFilter = '<input autocomplete="off" onfocus="sortStudioLists(); this.select();" onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter);
 }
 
+function addStudioScriptSync() {
+
+    if (!location.href.includes("$studio.do")) return; //only in studio
+    if (typeof g_ck == 'undefined') {
+        if (typeof InitialState != 'undefined') {
+            g_ck = InitialState.userToken;
+        }
+    }
+
+
+
+    if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
+
+    var snuScriptSyncLink = '<a style="color:white; margin-left:10px;" href="javascript:postLinkRequestToScriptSync();"> <span class="icon icon-save"></span> Link VS Code via sn-scriptsync</a>'
+    document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuScriptSyncLink);
+}
 
 //Some magic to filter the file tree in studio
 function doGroupSearch(search) {
-
-
     //expand all when searching
     Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
         el.classList.remove('collapsed');
@@ -1205,6 +1260,22 @@ function doGroupSearch(search) {
         });
     }
 
+}
+
+
+function snuScriptSync() {
+    var event = document.createEvent('Event');
+    event.initEvent('scriptsync');
+    document.dispatchEvent(event);
+    sncWait();
+}
+
+function sncWait(ms) { //dirty. but just need to wait a sec...
+    var start = Date.now(),
+        now = start;
+    while (now - start < (ms||1000)) {
+      now = Date.now();
+    }
 }
 
 function doFileSearch(srch) {

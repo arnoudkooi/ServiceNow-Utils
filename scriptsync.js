@@ -69,7 +69,11 @@ $(document).ready(function () {
                 requestRecord(wsObj);
             } else if (wsObj.action == 'requestRecords') {
                 requestRecords(wsObj);
-            } else if ('instance' in wsObj) {
+            } else if (wsObj.action == 'requestAppMeta') {
+                requestAppMeta(wsObj);
+            }else if (wsObj.action == 'linkAppToVSCode') {
+                // no need to log more..
+            }else if ('instance' in wsObj) {
                 updateRecord(wsObj);
             } else {
                 t.row.add([
@@ -167,6 +171,44 @@ function requestRecords(requestJson) {
     };
     client.send();
 }
+
+function requestAppMeta(requestJson) {
+    var client = new XMLHttpRequest();
+    client.open("get", requestJson.instance.url + '/_sn/sn_devstudio_/v1/ds?sysparm_transaction_scope=' + requestJson.appId);
+
+    client.setRequestHeader('Accept', 'application/json');
+    client.setRequestHeader('Content-Type', 'application/json');
+    client.setRequestHeader('X-UserToken', requestJson.instance.g_ck);
+
+    client.onreadystatechange = function () {
+        if (this.readyState == this.DONE) {
+            var resp = JSON.parse(this.response);
+
+            if (resp.hasOwnProperty('artifacts')) {
+
+                t.row.add([
+                    new Date(), 'VS Code', 'Received Scope artifacts from app: <b>' + requestJson.appName + '</b><br /><span class="code">Instance: ' +
+                    requestJson.instance.name + ' | scope: ' + requestJson.appScope + '</span>'
+
+                ]).draw(false);
+
+                increaseTitlecounter();
+                requestJson.type = "requestRecord";
+                requestJson.result = resp;
+                ws.send(JSON.stringify(requestJson));
+
+            } else {
+                t.row.add([
+                    new Date(), 'VS Code', this.response
+                ]).draw(false);
+                increaseTitlecounter();
+                ws.send(JSON.stringify(this.response));
+            }
+        }
+    };
+    client.send();
+}
+
 
 
 

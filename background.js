@@ -848,6 +848,9 @@ function getFromSyncStorageGlobal(theName, callback) {
 }
 
 
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    createScriptSyncTab();
+});
 
 
 //Query ServiceNow for nodes

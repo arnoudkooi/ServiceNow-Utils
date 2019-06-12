@@ -39,6 +39,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 });
 
 
+document.addEventListener("scriptsync", function(data) {
+    chrome.runtime.sendMessage("scriptsync");
+})
+
+
+
 function toggleSearch() {
     let nextFocus = (document.activeElement.id == "filter")
         ? "sysparm_search" : "filter";
