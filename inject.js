@@ -960,7 +960,7 @@ function postToScriptSync(field) {
     data.field = field;
     data.content = g_form.getValue(field);
     data.fieldType = g_form.getGlideUIElement(field).type;
-    data.name = g_form.getDisplayValue().replace(/[^a-z0-9.+]+/gi, ' ');
+    data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
 
     var client = new XMLHttpRequest();
     client.open("post", "http://127.0.0.1:1977");
