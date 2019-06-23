@@ -1,5 +1,7 @@
 var t;
 var realTimeUpdating = false;
+var msgCnt = 0;
+var msgShown = false;
 
 $(document).ready(function () {
     t = $('#synclog').DataTable({
@@ -28,71 +30,91 @@ $(document).ready(function () {
     });
 
 
+    function connect() {
 
-    ws = new WebSocket("ws://127.0.0.1:1978");
+        ws = new WebSocket("ws://127.0.0.1:1978");
 
 
-    ws.onerror = function (evt) {
-        t.row.add([
-            new Date(), 'WebSocket', '<b>Could not connect to WebSocket.</b><br />Check if VS Code is running and reload the page<br />' +
-            '<a target="_blank" href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync">Get sn-scriptsync from Visual Code Marketplace</a>'
-        ]).draw(false);
-        increaseTitlecounter();
-        flashFavicon('images/iconred48.png', 3);
-        setTimeout(function () { location.reload(true); }, 30000);
-    };
+        ws.onerror = function (evt) {
 
-    ws.onclose = function (evt) {
-        t.row.add([
-            new Date(), 'WebSocket', '<b>Connection to WebSocket lost, reload page to reconnect</b>'
-        ]).draw(false);
-        increaseTitlecounter();
-        flashFavicon('images/iconred48.png', 3);
-    };
+            if (msgShown) {
+                return;
+            }
+            msgShown = true;
 
-    ws.onmessage = function (evt) {
-        var wsObj = JSON.parse(evt.data);
-        if ('liveupdate' in wsObj) {
-            updateRealtimeBrowser(wsObj);
-        }
-        else {
-            realTimeUpdating = false;
-            if ('contentLength' in wsObj) {
+            t.row.add([
+                new Date(), 'WebSocket', '<b>Could not connect to WebSocket.</b><br />Check if VS Code is running and wait for connection or reload the page.<br />' +
+                '<a target="_blank" href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync">Get sn-scriptsync from Visual Code Marketplace</a>'
+            ]).draw(false);
+            increaseTitlecounter();
+            flashFavicon('images/iconred48.png', 3);
+            //setTimeout(function () { location.reload(true); }, 30000);
+        };
+
+        ws.onclose = function (evt) {
+            if (msgCnt > 0) {
                 t.row.add([
-                    new Date(), 'ServiceNow', 'Opened in VS Code: <b>' + wsObj.name + '</b><br /><span class="code">Instance: ' +
-                    wsObj.instance.name + ' | Field: ' + wsObj.table + '.' + wsObj.field +
-                    ' | Characters: ' + wsObj.contentLength + '</code>'
-                ]).draw(false);
-                flashFavicon('images/icongreen48.png', 4);
-                increaseTitlecounter();
-            } else if (wsObj.action == 'requestRecord') {
-                requestRecord(wsObj);
-            } else if (wsObj.action == 'requestRecords') {
-                requestRecords(wsObj);
-            } else if (wsObj.action == 'requestAppMeta') {
-                requestAppMeta(wsObj);
-            }else if (wsObj.action == 'linkAppToVSCode') {
-                // no need to log more..
-            }else if ('instance' in wsObj) {
-                updateRecord(wsObj);
-            } else {
-                t.row.add([
-                    new Date(), 'WebSocket', JSON.parse(evt.data)
+                    new Date(), 'WebSocket', '<b>Connection to WebSocket lost, check if sn-scriptsync runs and wait for connection or reload page.</b>'
                 ]).draw(false);
                 increaseTitlecounter();
-                if (evt.data.indexOf('error') > 0) {
-                    flashFavicon('images/iconred48.png', 3);
-                    ws.send(wsObj);
+                flashFavicon('images/iconred48.png', 3);
+                msgCnt = 0;
+            }
+
+            setTimeout(function () {
+                connect();
+            }, 1000);
+        };
+
+        ws.onmessage = function (evt) {
+            msgCnt++;
+            var wsObj = JSON.parse(evt.data);
+            if ('liveupdate' in wsObj) {
+                updateRealtimeBrowser(wsObj);
+            }
+            else {
+                realTimeUpdating = false;
+                if ('contentLength' in wsObj) {
+                    t.row.add([
+                        new Date(), 'ServiceNow', 'Opened in VS Code: <b>' + wsObj.name + '</b><br /><span class="code">Instance: ' +
+                        wsObj.instance.name + ' | Field: ' + wsObj.table + '.' + wsObj.field +
+                        ' | Characters: ' + wsObj.contentLength + '</code>'
+                    ]).draw(false);
+                    flashFavicon('images/icongreen48.png', 4);
+                    increaseTitlecounter();
+                } else if (wsObj.action == 'requestRecord') {
+                    requestRecord(wsObj);
+                } else if (wsObj.action == 'requestRecords') {
+                    requestRecords(wsObj);
+                } else if (wsObj.action == 'requestAppMeta') {
+                    requestAppMeta(wsObj);
+                } else if (wsObj.action == 'linkAppToVSCode') {
+                    // no need to log more..
+                } else if ('instance' in wsObj) {
+                    updateRecord(wsObj);
+                } else {
+                    t.row.add([
+                        new Date(), 'WebSocket', JSON.parse(evt.data)                        
+                    ]).draw(false);
+                    increaseTitlecounter();
+                    if (evt.data.indexOf('error') > 0) {
+                        flashFavicon('images/iconred48.png', 3);
+                        ws.send(wsObj);
+                    }
+                    else{
+                        flashFavicon('/images/icon32.png', 1);
+                    }
                 }
             }
-        }
-    };
+        };
 
-    window.onbeforeunload = function () {
-        ws.onclose = function () { };
-        ws.close();
-        return "Are you sure you want to navigate away?";
-    };
+        window.onbeforeunload = function () {
+            ws.onclose = function () { };
+            ws.close();
+            return "Are you sure you want to navigate away?";
+        };
+    }
+    connect();
 
 });
 
