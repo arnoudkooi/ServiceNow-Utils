@@ -358,8 +358,8 @@ function openConditions(fieldName) {
 
 
 function unhideFields() {
+    if (typeof g_form == 'undefined' || !g_user.hasRole('admin')) return; //only on forms and only if admin
     var bulb = '<span class="icon-lightbulb color-orange" title="Field displayed by SN Utils"></span>';
-    if (typeof g_form == 'undefined') return; //only on forms
     var sections = g_form.getSectionNames();
     for (var sec = 0; sec < sections.length; sec++) {
         g_form.setSectionDisplay(sections[sec], true);
