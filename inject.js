@@ -32,7 +32,7 @@ function snuSettingsAdded() {
 
     bindPaste(typeof snusettings.nouielements == 'undefined' || snusettings.nouielements == false);
 
-    if (snusettings.vsscriptsync == true){
+    if (snusettings.vsscriptsync == true) {
         addFieldSyncButtons();
         addStudioScriptSync();
     }
@@ -356,6 +356,28 @@ function openConditions(fieldName) {
     window.open(url, 'condTable');
 }
 
+
+function unhideFields() {
+    var bulb = '<span class="icon-lightbulb color-orange" title="Field displayed by SN Utils"></span>';
+    if (typeof g_form == 'undefined') return; //only on forms
+    var sections = g_form.getSectionNames();
+    for (var sec = 0; sec < sections.length; sec++) {
+        g_form.setSectionDisplay(sections[sec], true);
+    }
+    for (var ij = 0; ij < g_form.elements.length; ij++) {
+        try {
+
+
+            var hidden = g_form.elements[ij].elementParentNode.getAttribute("style").includes("none");
+            if (hidden) {
+
+                jQuery(g_form.elements[ij].elementParentNode).find('label:not(.checkbox-label)').prepend(bulb);
+                g_form.setDisplay(g_form.elements[ij].fieldName, true);
+            }
+        } catch (e) { };
+    }
+}
+
 function addTechnicalNames() {
 
     if (typeof jQuery == 'undefined') return; //not in studio
@@ -366,7 +388,9 @@ function addTechnicalNames() {
             jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
                 jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
+                
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                jQuery(this).closest('a').replaceWith(function() { return jQuery(this).contents(); });
                 var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var btn = '';
                 if (fieldType == 'reference' || fieldType == 'glide_list') {
@@ -407,7 +431,7 @@ function openReference(refTable, refField) {
 
 function showSelectFieldValues() {
     if (typeof jQuery == 'undefined') return; //not in studio
-    if (location.pathname ==  "/sys_report_template.do" ) return; //not in report builder
+    if (location.pathname == "/sys_report_template.do") return; //not in report builder
 
     jQuery('option').not(":contains('|')").each(function (i, el) {
         var jqEl = jQuery(el);
@@ -519,12 +543,18 @@ function setShortCuts() {
                 action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
-            } else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
+            } 
+            else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 85) { //cmd-shift-u 
+                unhideFields();
+            }
+            else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
                 event.preventDefault();
                 action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             }
+
+
 
 
         }
@@ -989,7 +1019,7 @@ function postLinkRequestToScriptSync(field) {
     instance.g_ck = g_ck;
 
     var ngScope = angular.element(document.getElementById('explorer-editor-wrapper')).scope()
-    
+
 
     var data = {};
     data.action = 'linkAppToVSCode';
@@ -1006,7 +1036,7 @@ function postLinkRequestToScriptSync(field) {
         //     g_form.addErrorMessage(client.responseText);
     };
     client.onerror = function (e) {
-       alert("Error, please check if VS Code with SN SriptSync is running");
+        alert("Error, please check if VS Code with SN SriptSync is running");
     };
     client.send(JSON.stringify(data));
 
@@ -1064,6 +1094,22 @@ function addFieldSyncButtons() {
         });
     }
 }
+
+function setAllMandatoryFieldsToFalse() {
+
+    if (typeof g_form != 'undefined' && typeof g_user != 'undefined') {
+        if (g_user.hasRole('admin')) {
+            var fields = g_form.getEditableFields();
+            for (var x = 0; x < fields.length; x++) {
+                g_form.setMandatory(fields[x], false);
+            }
+            showAlert('Removed mandatory restriction from all fields.', 'success');
+        } else {
+            showAlert('Admin rights required.', 'danger');
+        }
+    }
+}
+
 
 function addSgStudioPlatformLink() {
 
@@ -1273,8 +1319,8 @@ function snuScriptSync() {
 function sncWait(ms) { //dirty. but just need to wait a sec...
     var start = Date.now(),
         now = start;
-    while (now - start < (ms||1000)) {
-      now = Date.now();
+    while (now - start < (ms || 1000)) {
+        now = Date.now();
     }
 }
 

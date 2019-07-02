@@ -130,6 +130,13 @@ var menuItems = [{
     "onclick": addTechnicalNames
 },
 {
+    "id": "unhidefields",
+    "parentId": "tools",
+    "title": "Show hidden fields and sections",
+    "contexts": ["all"],
+    "onclick": unhideFields
+},
+{
     "id": "canceltransaction",
     "parentId": "tools",
     "title": "Cancel transactions",
@@ -330,6 +337,21 @@ function addTechnicalNames() {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
                 myVars: "addTechnicalNames()"
+            });
+        });
+
+}
+
+function unhideFields() {
+
+    chrome.tabs.query({
+        currentWindow: true,
+        active: true
+    },
+        function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "runFunction",
+                myVars: "unhideFields()"
             });
         });
 
