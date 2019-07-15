@@ -21,6 +21,43 @@ if (typeof jQuery != "undefined") {
                     e.preventDefault();
                     searchSysIdTables(e.currentTarget.value);
                 }
+                else if (e.currentTarget.value.startsWith("/")){
+
+                    var shortcuts = {
+                        "br" : "sys_script_list.do?sysparm_query=nameLIKE$0",
+                        "si" : "sys_script_include_list.do?sysparm_query=nameLIKE$0",
+                        "cs" : "sys_script_client_list.do?sysparm_query=nameLIKE$0",
+                        "ua" : "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
+                        "up" : "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0",
+                        "p" : "sys_properties_list.do?sysparm_query=nameLIKE$0",
+                        "sl" : "syslog_list.do?sysparm_query=sys_created_onONToday%40javascript%3Ags.daysAgoStart(0)%40javascript%3Ags.daysAgoEnd(0)%5EmessageLIKE$0",
+                        "tl" : "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
+                        "u" : "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0"
+                    }
+                    var filter = e.currentTarget.value.substr(1);
+                    var i = filter.indexOf(' ') 
+                    if (i == -1) i = filter.length;
+                    var shortcut = filter.slice(0,i).toLowerCase();
+                    if (shortcut == "help"){
+                        showAlert("This is a BETA feature!<br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />Current commands:<pre>" + 
+                        JSON.stringify(shortcuts,0,4) + "</pre>","info",100000);
+                        return;
+                    }
+                    if (!shortcuts.hasOwnProperty(shortcut)){
+                        showAlert("Shortcut not defined: /" + shortcut,"warning");
+                        return;
+                    }
+                    var url = shortcuts[shortcut].replace(/\$0/g, filter.slice(i+1));
+                    var inIFrame = (shortcut == filter.slice(0,i));
+
+                    if (inIFrame){
+                        jQuery('#gsft_main').attr('src', url);
+                    }
+                    else
+                    {
+                        window.open(url, '_blank');
+                    }
+                }
             }
         });
 
@@ -41,6 +78,17 @@ function snuSettingsAdded() {
         if (typeof addStudioLink != 'undefined') addStudioLink();
         addStudioSearch();
         addSgStudioPlatformLink();
+
+        //convert the updatset and application picker to select2
+        jQuery('#application_picker_select').select2({'dropdownAutoWidth':true})
+        jQuery('#application_picker_select').on('change', function (e) {
+            setTimeout(function(){
+                jQuery('#update_set_picker_select').trigger('change.select2');
+            },5000);
+           
+        });;
+        jQuery('#update_set_picker_select').select2({'dropdownAutoWidth':true});
+
     }
 
     if (snusettings.addtechnicalnames == true)
@@ -350,9 +398,14 @@ function openReference(event, refTable, refField) {
 }
 
 function openConditions(fieldName) {
-    var tableName = jQuery("[em-table]").first().attr('em-table');
+    var tableField = g_form.getControl(fieldName).attributes['data-dependent'].value || null;
     var conditions = g_form.getValue(fieldName);
-    var url = '/' + tableName + '_list.do?sysparm_query=' + conditions;
+    var url = '/' + g_form.getValue(tableField) + '_list.do?sysparm_query=' + conditions;
+    window.open(url, 'condTable');
+}
+
+function openTable(fieldName) {
+    var url = '/' + g_form.getValue(fieldName) + '_list.do';
     window.open(url, 'condTable');
 }
 
@@ -397,8 +450,11 @@ function addTechnicalNames() {
                     var reftable = g_form.getGlideUIElement(elm).reference;
                     elm = ' <a onclick="openReference(\'' + reftable + '\',\'' + elm + '\');"  title="Reference table: ' + reftable + '" target="_blank">' + elm + '</a>';
                 }
-                if (fieldType == 'conditions') {
+                else if (fieldType == 'conditions') {
                     elm = '<a onclick="openConditions(\'' + elm + '\');"  title="Preview condition in list" target="_blank">' + elm + '</a>';
+                }
+                else if (fieldType == 'table_name') {
+                    elm = '<a onclick="openTable(\'' + elm + '\');"  title="Open table in list" target="_blank">' + elm + '</a>';
                 }
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
             });
@@ -917,7 +973,7 @@ function startBackgroundScript(script, callback) {
  * @return {undefined}
  */
 function showAlert(msg, type, timeout) {
-    msg = 'ServiceNow Utils (Chrome Extension): ' + msg;
+    msg = '<a href="javascript:hideAlert()">[x]</a> ServiceNow Utils (Chrome Extension): ' + msg;
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
     jQuery('header .service-now-util-alert>div>span').html(msg);
@@ -929,6 +985,9 @@ function showAlert(msg, type, timeout) {
     }, timeout);
 }
 
+function hideAlert(){
+    jQuery('header .service-now-util-alert').removeClass('visible');
+}
 
 
 function postRequestToScriptSync(requestType) {
