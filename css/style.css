@@ -207,7 +207,7 @@ table.dataTable thead .sorting_desc_disabled {
 }
 
 img.halfwidth{
-    width:50%;
+    width:30%;
 }
 
 img.ytthumbnail{
@@ -236,6 +236,14 @@ img.ytthumbnail{
     font-size:10pt; 
     height:290px !important; 
     margin-top:20px; 
+    margin-right:4px;
+}
+
+#txtslash{
+    font-family: Consolas, Lucida Console, monospace; 
+    font-size:9pt; 
+    min-height:50px !important; 
+    width:99%;
     margin-right:4px;
 }
 .wdth{

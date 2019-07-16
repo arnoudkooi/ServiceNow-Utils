@@ -204,9 +204,10 @@ function setBrowserVariables(obj) {
         });
     });
 
-    $('input.snu-setting').change(function() {
+    $('.snu-setting').change(function() {
         setSettings();
     });
+
     
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
@@ -347,19 +348,28 @@ function setInfoMessage(html) {
 function getSettings(){
     bgPage.getFromSyncStorageGlobal("snusettings", function(settings){
         for (var setting in settings){
-            document.getElementById(setting).checked = settings[setting];
+            
+            if (typeof settings[setting] == "boolean")
+                document.getElementById(setting).checked = settings[setting];
+            else
+                document.getElementById(setting).value = settings[setting];
         };
     })
 }
 
 function setSettings(){
     var snusettings = {};
-    $('input.snu-setting').each(function (index, item) {
-        snusettings[this.id] = this.checked;
+    $('.snu-setting').each(function (index, item) {
+        if (this.type == 'checkbox'){
+            snusettings[this.id] = this.checked;
+        }
+        else {
+            snusettings[this.id] = this.value;
+        }
+
     });
     bgPage.setToChromeSyncStorageGlobal("snusettings",snusettings);
 }
-
 
 function getGRQuery() {
 

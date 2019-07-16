@@ -2,9 +2,29 @@ var fields = [];
 var mySysId = '';
 var atfMode = false;
 var atfChannel;
+var snuslashcommands;
 
 
 if (typeof jQuery != "undefined") {
+
+    snuslashcommands = {
+        "acl" : "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
+        "br" : "sys_script_list.do?sysparm_query=nameLIKE$0",
+        "si" : "sys_script_include_list.do?sysparm_query=nameLIKE$0",
+        "cs" : "sys_script_client_list.do?sysparm_query=nameLIKE$0",
+        "ua" : "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
+        "up" : "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0",
+        "p" : "sys_properties_list.do?sysparm_query=nameLIKE$0",
+        "log" : "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
+        "trans" : "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
+        "u" : "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
+        "me" : "sys_user.do?sys_id=javascript:gs.getUserID()",
+        "docs" : "https://docs.servicenow.com/search?q=$0&labels=4",
+        "comm" : "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
+        "dev" : "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1",
+        "tweets" : "https://twitter.com/sn_utils"
+    }
+
     jQuery(function () {
         if (typeof angular != "undefined")
             setTimeout(getListV3Fields, 2000);
@@ -22,33 +42,36 @@ if (typeof jQuery != "undefined") {
                     searchSysIdTables(e.currentTarget.value);
                 }
                 else if (e.currentTarget.value.startsWith("/")){
-
-                    var shortcuts = {
-                        "br" : "sys_script_list.do?sysparm_query=nameLIKE$0",
-                        "si" : "sys_script_include_list.do?sysparm_query=nameLIKE$0",
-                        "cs" : "sys_script_client_list.do?sysparm_query=nameLIKE$0",
-                        "ua" : "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
-                        "up" : "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0",
-                        "p" : "sys_properties_list.do?sysparm_query=nameLIKE$0",
-                        "sl" : "syslog_list.do?sysparm_query=sys_created_onONToday%40javascript%3Ags.daysAgoStart(0)%40javascript%3Ags.daysAgoEnd(0)%5EmessageLIKE$0",
-                        "tl" : "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
-                        "u" : "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0"
-                    }
                     var filter = e.currentTarget.value.substr(1);
-                    var i = filter.indexOf(' ') 
-                    if (i == -1) i = filter.length;
-                    var shortcut = filter.slice(0,i).toLowerCase();
+                    var idx = filter.indexOf(' ') 
+                    if (idx == -1) idx = filter.length;
+                    var shortcut = filter.slice(0,idx).toLowerCase();
                     if (shortcut == "help"){
-                        showAlert("This is a BETA feature!<br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />Current commands:<pre>" + 
-                        JSON.stringify(shortcuts,0,4) + "</pre>","info",100000);
+                        var outp = "";
+                        for (cmd in snuslashcommands){
+                            outp += cmd + ";" + snuslashcommands[cmd] + "\n";
+                        }
+
+
+                        showAlert("This is a BETA feature! <a href='https://www.youtube.com/watch?v=ma-AizlEkmk' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />"+
+                        "Go to settings tab in popup to add custom / commands <br />Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>","info",100000);
                         return;
                     }
-                    if (!shortcuts.hasOwnProperty(shortcut)){
+                    if (!snuslashcommands.hasOwnProperty(shortcut)){
                         showAlert("Shortcut not defined: /" + shortcut,"warning");
                         return;
                     }
-                    var url = shortcuts[shortcut].replace(/\$0/g, filter.slice(i+1));
-                    var inIFrame = (shortcut == filter.slice(0,i));
+                    var query = filter.slice(idx+1);
+                    var url = snuslashcommands[shortcut].replace(/\$0/g, query);
+                    if (query.split(" ").length > 0){  //replace $1,$2 for Xth word in string
+                        var queryArr = query.split(" ");
+                        for (var i = 0; i<= queryArr.length; i++){
+                            var re = new RegExp("\\$" + (i+1),"g");
+                            url = url.replace(re, queryArr[i] || "");
+                        }
+                    }
+                    console.log(filter.slice(0,idx))
+                    var inIFrame = (shortcut == filter.slice(0,idx)) && !url.startsWith("http");
 
                     if (inIFrame){
                         jQuery('#gsft_main').attr('src', url);
@@ -89,6 +112,17 @@ function snuSettingsAdded() {
         });;
         jQuery('#update_set_picker_select').select2({'dropdownAutoWidth':true});
 
+    }
+
+    if(snusettings.slashcommands != 'undefined'){
+        if (!snusettings.slashcommands) return;
+        var cmdArr = snusettings.slashcommands.split('\n');
+        for (var i = 0; i< cmdArr.length; i++){
+            var cmdSplit = cmdArr[i].split(";");
+            if (cmdSplit.length == 2){
+                snuslashcommands[cmdSplit[0]] = cmdSplit[1];
+            }
+        }
     }
 
     if (snusettings.addtechnicalnames == true)
@@ -153,7 +187,7 @@ function doubleClickToSetQueryListV2() {
         } else {
 
             var qry = GlideList2.get(jQuery('#sys_target').val());
-            var newValue = prompt('Filter condition:', qry.filter);
+            var newValue = prompt('Filter condition: ', qry.filter);
             if (newValue !== qry.filter && newValue !== null) {
                 qry.setFilterAndRefresh(newValue);
             }
@@ -973,7 +1007,7 @@ function startBackgroundScript(script, callback) {
  * @return {undefined}
  */
 function showAlert(msg, type, timeout) {
-    msg = '<a href="javascript:hideAlert()">[x]</a> ServiceNow Utils (Chrome Extension): ' + msg;
+    msg = '<a href="javascript:hideAlert()">[x]</a> SN Utils: ' + msg;
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
     jQuery('header .service-now-util-alert>div>span').html(msg);
