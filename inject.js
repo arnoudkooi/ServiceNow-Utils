@@ -53,7 +53,7 @@ if (typeof jQuery != "undefined") {
                         }
 
 
-                        showAlert("This is a BETA feature! <a href='https://www.youtube.com/watch?v=ma-AizlEkmk' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />"+
+                        showAlert("This is a BETA feature! <a href='https://youtu.be/X6HLCV_ptQM' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />"+
                         "Go to settings tab in popup to add custom / commands <br />Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>","info",100000);
                         return;
                     }
