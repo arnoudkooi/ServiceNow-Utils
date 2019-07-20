@@ -1,7 +1,5 @@
 var fields = [];
 var mySysId = '';
-var atfMode = false;
-var atfChannel;
 var snuslashcommands;
 
 
@@ -131,34 +129,6 @@ function snuSettingsAdded() {
 }
 
 
-
-
-
-//used to communicate between browser tabs when recording ATF steps
-function startMessageChannel() {
-    if (typeof g_form != 'undefined') {
-
-        if (g_form.tableName == "sys_atf_step" || window.name == "atfMode") {
-            atfChannel = new BroadcastChannel(g_ck);
-
-            if (g_form.tableName == "sys_atf_step") {
-                atfChannel.postMessage(getStepDetails(g_form.getValue("step_config")));
-            }
-            atfChannel.onmessage = function (ev) {
-                if (ev.data.step != "undefined") {
-                    delQry();
-                    g_form.addInfoMessage(ev.data.step);
-                    //console.log(ev);
-                } else {
-                    g_form.setValue(getStepDetails(g_form.getValue("step_config")).return.read_only, ev.data.set.read_only);
-
-                }
-            };
-        }
-    }
-}
-
-
 function doubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("dblclick", function (event) {
@@ -212,10 +182,6 @@ function clickToList() {
         document.addEventListener("click", function (event) {
 
             if ((event.ctrlKey || event.metaKey)) {
-                if (atfMode) {
-                    generateATFValues(event);
-                    return;
-                }
                 var tpe = '';
                 var tbl = g_form.getTableName();
                 var elm = '';
@@ -607,10 +573,6 @@ function searchLargeSelects() {
 }
 
 
-
-
-
-
 function setShortCuts() {
 
     document.addEventListener("keydown", function (event) {
@@ -644,40 +606,10 @@ function setShortCuts() {
                 return false;
             }
 
-
-
-
         }
-
 
     }, false);
 
-    //Helper for ATF show ui action sys_id 
-    jQuery('.action_context').on('mouseover', function (event) {
-        if (event.ctrlKey || event.metaKey) {
-            event.stopImmediatePropagation();
-            prompt("UI Action:" + jQuery(this).text() + "\nsys_id", jQuery(this).attr('gsft_id'));
-        }
-
-    });
-
-}
-
-
-function toggleATFMode() {
-    if (typeof jQuery == 'undefined') return;
-
-    if (jQuery('#header_atf_image').length) {
-        jQuery('#header_atf_image').remove();
-        atfMode = false;
-        window.name = "";
-    } else {
-        jQuery('.navbar-title-display-value').append(' <span style="color:red" id="header_atf_image" class="icon icon-alert-triangle"> ATF Helper Active</span>');
-        window.name = "atfMode";
-        atfMode = true;
-        delQry();
-        startMessageChannel();
-    }
 }
 
 function splitContainsToAnd() {
@@ -1454,88 +1386,3 @@ var getParents = function (elem, selector) {
     }
     return parents;
 };
-
-
-
-function getStepDetails(step) {
-    var steps = {
-        "071ee5b253331200040729cac2dc348d": {
-            "step": "Impersonate a user",
-            "return": {
-                "user": "inputs.var__m_atf_input_variable_071ee5b253331200040729cac2dc348d.user"
-            }
-        },
-        "05317cd10b10220050192f15d6673af8": {
-            "step": "Open a form",
-            "input": {
-                "table": "inputs.var__m_atf_input_variable_05317cd10b10220050192f15d6673af8.table"
-            },
-            "return": {
-                "view": "inputs.var__m_atf_input_variable_05317cd10b10220050192f15d6673af8.view"
-            }
-        },
-        "fcae4a935332120028bc29cac2dc340e": {
-            "step": "Set field values",
-            "input": {
-                "table": "inputs.var__m_atf_input_variable_fcae4a935332120028bc29cac2dc340e.table"
-            },
-            "return": {
-                "field_values": "inputs.var__m_atf_input_variable_fcae4a935332120028bc29cac2dc340e.field_values"
-            }
-        },
-        "1b97cd31872022008182c9ded0e3ece5": {
-            "step": "Field Values Validation",
-            "input": {
-                "table": "inputs.var__m_atf_input_variable_1b97cd31872022008182c9ded0e3ece5.table"
-            },
-            "return": {
-                "conditions": "inputs.var__m_atf_input_variable_1b97cd31872022008182c9ded0e3ece5.conditions"
-            }
-        },
-        "1dfece935332120028bc29cac2dc3478": {
-            "step": "Field State Validation",
-            "input": {
-                "table": "inputs.var__m_atf_input_variable_1dfece935332120028bc29cac2dc3478.table"
-            },
-            "return": {
-                "visible": "inputs.var__m_atf_input_variable_1dfece935332120028bc29cac2dc3478.visible",
-                "not_visible": "inputs.var__m_atf_input_variable_1dfece935332120028bc29cac2dc3478.not_visible",
-                "read_only": "inputs.var__m_atf_input_variable_1dfece935332120028bc29cac2dc3478.read_only",
-                "not_read_only": "inputs.var__m_atf_input_variable_1dfece935332120028bc29cac2dc3478.not_read_only",
-                "mandatory": "inputs.var__m_atf_input_variable_1dfece935332120028bc29cac2dc3478.mandatory",
-                "not_mandatory": "inputs.var__m_atf_input_variable_1dfece935332120028bc29cac2dc3478.not_mandatory"
-            }
-        },
-        "d8fdf5e10b1022009cfdc71437673adc": {
-            "step": "UI Action Visibility",
-            "input": {
-                "table": "inputs.var__m_atf_input_variable_d8fdf5e10b1022009cfdc71437673adc.table"
-            },
-            "return": {
-                "visible": "inputs.var__m_atf_input_variable_d8fdf5e10b1022009cfdc71437673adc.visible",
-                "not_visible": "inputs.var__m_atf_input_variable_d8fdf5e10b1022009cfdc71437673adc.not_visible"
-            }
-        },
-        "0f4a128297202200abe4bb7503ac4af0": {
-            "step": "Click UI action",
-            "input": {
-                "table": "inputs.var__m_atf_input_variable_0f4a128297202200abe4bb7503ac4af0.table"
-            },
-            "return": {
-                "ui_action": "inputs.var__m_atf_input_variable_0f4a128297202200abe4bb7503ac4af0.ui_action",
-                "assert_type": "inputs.var__m_atf_input_variable_0f4a128297202200abe4bb7503ac4af0.assert_type"
-            }
-        },
-        "be8e0a935332120028bc29cac2dc34e4": {
-            "step": "Submit a form",
-            "input": {
-                "table": ""
-            },
-            "return": {
-                "assert_type": "inputs.var__m_atf_input_variable_be8e0a935332120028bc29cac2dc34e4.assert_type"
-            }
-        }
-    };
-
-    return steps[step];
-}
