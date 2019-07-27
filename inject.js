@@ -121,7 +121,7 @@ function snuSettingsAdded() {
     }
 
     if (snusettings.slashcommands != 'undefined') {
-        if (snusettings.slashcommands.length > 10) {
+        if (("" + snusettings.slashcommands).length > 10) {
             var cmdArr = snusettings.slashcommands.split('\n');
             for (var i = 0; i < cmdArr.length; i++) {
                 var cmdSplit = cmdArr[i].split(";");
