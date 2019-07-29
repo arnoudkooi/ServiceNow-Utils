@@ -103,24 +103,24 @@ function snuSettingsAdded() {
         addStudioSearch();
         addSgStudioPlatformLink();
 
-        if (typeof Select2 != 'undefined') {
-            //convert the updatset and application picker to select2
-            jQuery('#application_picker_select').select2({ 'dropdownAutoWidth': true })
-            jQuery('#application_picker_select').on('change', function (e) {
-                setTimeout(function () {
-                    jQuery('#update_set_picker_select').trigger('change.select2');
-                }, 5000);
+        // if (typeof Select2 != 'undefined') {
+        //     //convert the updatset and application picker to select2
+        //     jQuery('#application_picker_select').select2({ 'dropdownAutoWidth': true })
+        //     jQuery('#application_picker_select').on('change', function (e) {
+        //         setTimeout(function () {
+        //             jQuery('#update_set_picker_select').trigger('change.select2');
+        //         }, 5000);
 
-            });;
-            jQuery('#update_set_picker_select').select2({ 'dropdownAutoWidth': true });
-            jQuery('#update_set_picker_select').on('change', function (e) {
-                jQuery('#update_set_picker_select').trigger('change.select2');
-            });
-        }
+        //     });;
+        //     jQuery('#update_set_picker_select').select2({ 'dropdownAutoWidth': true });
+        //     jQuery('#update_set_picker_select').on('change', function (e) {
+        //         jQuery('#update_set_picker_select').trigger('change.select2');
+        //     });
+        // }
 
     }
 
-    if (snusettings.slashcommands != 'undefined') {
+    if (snusettings.hasOwnProperty("slashcommands")) {
         if (("" + snusettings.slashcommands).length > 10) {
             var cmdArr = snusettings.slashcommands.split('\n');
             for (var i = 0; i < cmdArr.length; i++) {
