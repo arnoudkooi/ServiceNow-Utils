@@ -23,6 +23,7 @@ if (typeof jQuery != "undefined") {
         "fd": "/$flow-designer.do",
         "va": "/$conversation-builder.do",
         "st": "/$studio.do",
+        "sp": "/sp",
         "tweets": "https://twitter.com/sn_utils"
     }
 
@@ -47,6 +48,8 @@ if (typeof jQuery != "undefined") {
                     var idx = filter.indexOf(' ')
                     if (idx == -1) idx = filter.length;
                     var shortcut = filter.slice(0, idx).toLowerCase();
+                    var query = filter.slice(idx + 1);
+
                     if (shortcut == "help") {
                         var outp = "";
                         for (cmd in snuslashcommands) {
@@ -59,12 +62,26 @@ if (typeof jQuery != "undefined") {
                         return;
                     }
                     if (!snuslashcommands.hasOwnProperty(shortcut)) {
-
-                        showAlert("Shortcut not defined: /" + shortcut, "warning");
-                        return;
+                        if (shortcut.length > 4){ //try to open table list if shortcut nnot defined and 5+ charaters
+                            showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
+                            var url = shortcut + "_list.do?sysparm_query=GOTO123TEXTQUERY321=" + query;
+                            var inIFrame = (shortcut == filter.slice(0, idx));
+                            if (inIFrame) {
+                                jQuery('#gsft_main').attr('src', url);
+                            }
+                            else {
+                                window.open(url, '_blank');
+                            }
+                            return;
+                        }
+                        else{
+                            showAlert("Shortcut not defined: /" + shortcut, "warning");
+                            return;
+                        }
                     }
-                    var query = filter.slice(idx + 1);
                     var url = snuslashcommands[shortcut].replace(/\$0/g, query);
+                    var inIFrame = (shortcut == filter.slice(0, idx)) && !url.startsWith("http") && !url.startsWith("/");
+
                     if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
                         var queryArr = query.split(" ");
                         for (var i = 0; i <= queryArr.length; i++) {
@@ -72,8 +89,6 @@ if (typeof jQuery != "undefined") {
                             url = url.replace(re, queryArr[i] || "");
                         }
                     }
-                    console.log(filter.slice(0, idx))
-                    var inIFrame = (shortcut == filter.slice(0, idx)) && !url.startsWith("http") && !url.startsWith("/");
 
                     if (inIFrame) {
                         jQuery('#gsft_main').attr('src', url);
@@ -102,6 +117,8 @@ function snuSettingsAdded() {
         if (typeof addStudioLink != 'undefined') addStudioLink();
         addStudioSearch();
         addSgStudioPlatformLink();
+        enhanceNotFound();
+
 
         // if (typeof Select2 != 'undefined') {
         //     //convert the updatset and application picker to select2
@@ -121,14 +138,20 @@ function snuSettingsAdded() {
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
-        if (("" + snusettings.slashcommands).length > 10) {
-            var cmdArr = snusettings.slashcommands.split('\n');
-            for (var i = 0; i < cmdArr.length; i++) {
-                var cmdSplit = cmdArr[i].split(";");
-                if (cmdSplit.length == 2) {
-                    snuslashcommands[cmdSplit[0]] = cmdSplit[1];
+
+        try {
+            if (("" + snusettings.slashcommands).length > 10) {
+                var cmdArr = snusettings.slashcommands.split('\n');
+                for (var i = 0; i < cmdArr.length; i++) {
+                    var cmdSplit = cmdArr[i].split(";");
+                    if (cmdSplit.length == 2) {
+                        snuslashcommands[cmdSplit[0]] = cmdSplit[1];
+                    }
                 }
             }
+        }
+        catch(e){
+            console.log("error while parsing slashcommands:" + snusettings.slashcommands )
         }
     }
 
@@ -264,6 +287,52 @@ function clickToList() {
             }
         }, true);
     }
+}
+
+function enhanceNotFound(advanced){
+
+    if (!jQuery('#not_the_droids').length) return;
+    jQuery('#snutils-suggestions').remove();
+
+
+    var not_the_droids = jQuery('#not_the_droids').val();
+    var query = not_the_droids.split('_list.do');
+    var addedQuery = '_list.do' + ((query.length > 1) ? query[1] : '');
+    var html = '<div id="snutils-suggestions" style="margin-top:20px"><h4>SN Utils \'did you mean\' table suggestions</h4>';
+    if (advanced) 
+        html += 'Mode: <a href="javascript:enhanceNotFound(0)">starts with: ' + query[0] + '</a> | contains: ' + query[0].replace(/_/g, ' & ') + '<br />';
+    else
+        html += 'Mode: starts with: ' + query[0] + ' | <a title="splits by underscore and does a contains for each word" href="javascript:enhanceNotFound(1)">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
+
+    html += '<br /><ul>';
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^EORDERBYlabel^nameSTARTSWITH' + query[0];
+    
+    
+    if (advanced){
+        var queryWords = query[0].split('_');
+        myurl += '^NQsys_update_nameISNOTEMPTY^nameNOT LIKE00';
+        for (var i = 0; i < queryWords.length; i++){
+            myurl +=  '^nameLIKE' + queryWords[i];
+        }
+    }
+
+    
+    loadXMLDoc(g_ck, myurl, null, function (jsn) {
+        var results = jsn.result;
+        if (results.length == 0) html += '<li>None found...</li>'
+        for (var i = 0; i < results.length; i++){
+            html += '<li style="font-size:11pt"><a href="'+ results[i].name + addedQuery + '">' + results[i].label + ' [' + results[i].name +  ']</a></li>';
+        }
+        html += '</ul></div>';
+        jQuery('.notfound_message').append(html);
+        
+    });
+
+
+
+
+    
+
 }
 
 function generateATFValues(event) {
