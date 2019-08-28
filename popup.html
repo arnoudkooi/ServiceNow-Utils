@@ -150,7 +150,8 @@
                             placeholder="Search tables...                           >> Select dataset: Default, Advanced or Custom Tables >>">
 
                         <span class="input-group-append">
-                            <select name="slctdataset" id="slctdataset" class="form-control form-control-sm sync wdth" title="Select dataset: Default, Advanced or Custom Tables">
+                            <select name="slctdataset" id="slctdataset" class="form-control form-control-sm sync wdth"
+                                title="Select dataset: Default, Advanced or Custom Tables">
                                 <option value="default">Default</option>
                                 <option value="advanced">Advanced</option>
                                 <option value="customtables">Custom Tables</option>
@@ -229,18 +230,31 @@
                     <div class="form-group">
                         <label for="tbxgrtemplate">Template for fields: ({0} = variable like gr, {1} = field name like
                             sys_created_on)</label>
-                        <select class="form-control form-control-sm" name="tbxgrtemplate" id="tbxgrtemplate">
-                            <option>gs.info('{1}: ' + {0}.getValue('{1}'));</option>
-                            <option>{0}.getValue('{1}');</option>
-                            <option>{0}.setValue('{1}','');</option>
-                            <option>gs.addInfoMessage('{1}: ' + {0}.{1});</option>
-                            <option>{0}.{1}</option>
-                            <option>{0}.{1} = '';</option>
-                            <option value=''>- none -</option>
-                        </select>
-                    </div>
-                    <textarea class="form-control form-control-sm grtemplate" autocomplete="off" autocapitalize="off"
-                        spellcheck="false" id="txtgrquery"></textarea>
+                        <div class="input-group">
+
+                            <select class="form-control form-control-sm" name="tbxgrtemplate" id="tbxgrtemplate">
+                                <option>gs.info('{1}: ' + {0}.getValue('{1}'));</option>
+                                <option>{0}.getValue('{1}');</option>
+                                <option>{0}.setValue('{1}','');</option>
+                                <option>gs.addInfoMessage('{1}: ' + {0}.{1});</option>
+                                <option>{0}.{1}</option>
+                                <option>{0}.{1} = '';</option>
+                                <option value=''>- none -</option>
+                            </select>
+                            <div class="input-group-append">&nbsp;&nbsp;</div>
+                            <div class="input-group-append">
+                                <div class="form-check">
+                                    <input class="form-check-input sync" type="checkbox" id="cbxtemplatelines"
+                                        name="cbxtemplatelines">
+                                    <label class="form-check-label" for="cbxtemplatelines"
+                                        title="Adds commented lines to the template for like .update() .insert() ">
+                                        Helper lines.
+                                    </label></input>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <textarea class="form-control form-control-sm grtemplate" autocomplete="off"
+                        autocapitalize="off" spellcheck="false" id="txtgrquery"></textarea>
 
 
                     <!-- <div class="btns">
@@ -295,9 +309,12 @@
 
                     <hr />
                     <h5>Slash Commands</h5>
-                    Add custom / commands, type /help{enter} in the navigator filter to show all commands. Per line: shortcut;url
+                    Add custom / commands, type /help{enter} in the navigator filter to show all commands. Per
+                    line:
+                    shortcut;url
                     <textarea class="form-control form-control-sm snu-setting" autocomplete="off" autocapitalize="off"
-                        spellcheck="false" id="slashcommands" placeholder="i;incident_list.do?sysparm_query=short_description=$0"></textarea>
+                        spellcheck="false" id="slashcommands"
+                        placeholder="i;incident_list.do?sysparm_query=short_description=$0"></textarea>
 
                     <hr />
                     <h5>Shortcuts</h5>
@@ -313,7 +330,8 @@
                         </a>
                     </div>
                     <div class="hide-in-browser show-in-firefox">
-                        Go to <a class="popuplinks" target="_blank" id="firefoxoptions">Options page</a> in Firefox.
+                        Go to <a class="popuplinks" target="_blank" id="firefoxoptions">Options page</a> in
+                        Firefox.
                     </div>
 
                 </div>
@@ -343,9 +361,11 @@
                         target="_blank">GitHub</a>
                     for review purposes.
                     <br />This tools comes as is, with no warranty.
-                    <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is not
+                    <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is
+                    not
                     allowed)
-                    <br /> Also reach out if you have feedback or feature requests, or good snippets to integrate.
+                    <br /> Also reach out if you have feedback or feature requests, or good snippets to
+                    integrate.
                     <div id="livemessage"></div>
 
                 </div>

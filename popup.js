@@ -231,7 +231,7 @@ function setBrowserVariables(obj) {
             getGRQuery();
         }
     });
-    $('#tbxgrtemplate').change(function (e) {
+    $('#tbxgrtemplate, #cbxtemplatelines').change(function (e) {
         getGRQuery();
     });
 
@@ -375,10 +375,10 @@ function getGRQuery() {
 
     var newHref = myFrameHref || urlFull;
     if ((newHref.split('?')[0]).indexOf('_list.do') > 1) {
-        bgPage.getGRQuery($('#tbxgrname').val(),$('#tbxgrtemplate').val());
+        bgPage.getGRQuery($('#tbxgrname').val(),$('#tbxgrtemplate').val(), document.getElementById('cbxtemplatelines').checked);
     }
     else {
-        bgPage.getGRQueryForm($('#tbxgrname').val(),$('#tbxgrtemplate').val());
+        bgPage.getGRQueryForm($('#tbxgrname').val(),$('#tbxgrtemplate').val(),document.getElementById('cbxtemplatelines').checked);
     }
 }
 

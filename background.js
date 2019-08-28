@@ -57,6 +57,8 @@ chrome.commands.onCommand.addListener(function (command) {
     else if (command == "toggle-scriptsync")
         createScriptSyncTab();
 
+    return true;
+
 });
 
 // chrome.runtime.onMessageExternal.addListener(
@@ -667,7 +669,7 @@ function getRecordVariables() {
     });
 }
 
-function getGRQuery(varName, template) {
+function getGRQuery(varName, template, templatelines) {
 
     popup = chrome.extension.getViews({
         type: "popup"
@@ -698,23 +700,31 @@ function getGRQuery(varName, template) {
             queryStr += varName + ".setLimit(" + rowsPerPage + ");\n";
             queryStr += varName + ".query();\n";
             queryStr += "while (" + varName + ".next()) {\n";
-            queryStr += "    //" + varName + ".initialize();\n";
+            if (templatelines) {
+                queryStr += "    //" + varName + ".initialize();\n";
+            }
             if (template) {
                 for (var i = 0; i < fields.length; i++) {
                     queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
                 }
             } else
                 queryStr += "\n\n    //todo: code ;)\n\n";
-            queryStr += "    //" + varName + ".update();\n";
-            queryStr += "    //" + varName + ".insert();\n";
-            queryStr += "    //" + varName + ".deleteRecord();\n";
+            if (templatelines) {
+
+                queryStr += "    //" + varName + ".autoSysFields(false);\n";
+                queryStr += "    //" + varName + ".setWorkflow(false);\n";
+                queryStr += "    //" + varName + ".update();\n";
+                queryStr += "    //" + varName + ".insert();\n";
+                queryStr += "    //" + varName + ".deleteRecord();\n";
+            }
             queryStr += "}";
+            
             popup.setGRQuery(queryStr);
         });
     });
 }
 
-function getGRQueryForm(varName, template) {
+function getGRQueryForm(varName, template, templatelines) {
 
     popup = chrome.extension.getViews({
         type: "popup"
@@ -730,17 +740,24 @@ function getGRQueryForm(varName, template) {
         var fields = ('' + response.myVars.elNames).split(',');
         var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
         queryStr += "if (" + varName + ".get('" + sysId + "')) {\n";
-        queryStr += "    //" + varName + ".initialize();\n";
+        if (templatelines) {
+            queryStr += "    //" + varName + ".initialize();\n";
+        }
         if (template) {
             for (var i = 0; i < fields.length; i++) {
                 queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
             }
         } else
             queryStr += "\n\n    //todo: code ;)\n\n";
-        queryStr += "    //" + varName + ".update();\n";
-        queryStr += "    //" + varName + ".insert();\n";
-        queryStr += "    //" + varName + ".deleteRecord();\n";
+        if (templatelines) {
+            queryStr += "    //" + varName + ".autoSysFields(false);\n";
+            queryStr += "    //" + varName + ".setWorkflow(false);\n";
+            queryStr += "    //" + varName + ".update();\n";
+            queryStr += "    //" + varName + ".insert();\n";
+            queryStr += "    //" + varName + ".deleteRecord();\n";
+        }
         queryStr += "}";
+
         popup.setGRQuery(queryStr);
     });
 
@@ -779,34 +796,34 @@ function getUserDetails(userName) {
 
 //Query ServiceNow for tables, pass JSON back to popup
 function getTables(dataset) {
-    
+
     var fields = 'name,label';
     var query = 'sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel';
 
-    if (dataset == 'advanced'){
-         fields = 'name,label,super_class.name,sys_scope.scope';
-    }
-    else 
-    if (dataset == 'customtables') {
+    if (dataset == 'advanced') {
         fields = 'name,label,super_class.name,sys_scope.scope';
-        var query = 
-        "nameSTARTSWITHu_^ORnameSTARTSWITHx_^nameNOT LIKE_cmdb^super_class.name!=scheduled_data_import^super_class.name!=sys_portal_page"+
-        "^super_class.name!=cmn_location^super_class.name!=sf_state_flow^super_class.name!=sys_report_import_table_parent"+
-        "^super_class.name!=cmn_schedule_condition^super_class.name!=sys_auth_profile^super_class.name!=sys_transform_script"+
-        "^super_class.name!=dl_definition^super_class.name!=sys_dictionary^super_class.name!=sys_transform_map"+
-        "^super_class.name!=dl_matcher^super_class.name!=sys_filter^super_class.name!=sys_user_preference"+
-        "^super_class.name!=kb_knowledge^super_class.name!=sys_hub_action_type_base^super_class.name!=sysauto sc_cat_item_delivery_task"+
-        "^super_class.name!=sys_import_set_row^super_class.name!=syslog^NQnameSTARTSWITHu_^ORnameSTARTSWITHx_^super_classISEMPTY" +
-        "^sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel";
     }
+    else
+        if (dataset == 'customtables') {
+            fields = 'name,label,super_class.name,sys_scope.scope';
+            var query =
+                "nameSTARTSWITHu_^ORnameSTARTSWITHx_^nameNOT LIKE_cmdb^super_class.name!=scheduled_data_import^super_class.name!=sys_portal_page" +
+                "^super_class.name!=cmn_location^super_class.name!=sf_state_flow^super_class.name!=sys_report_import_table_parent" +
+                "^super_class.name!=cmn_schedule_condition^super_class.name!=sys_auth_profile^super_class.name!=sys_transform_script" +
+                "^super_class.name!=dl_definition^super_class.name!=sys_dictionary^super_class.name!=sys_transform_map" +
+                "^super_class.name!=dl_matcher^super_class.name!=sys_filter^super_class.name!=sys_user_preference" +
+                "^super_class.name!=kb_knowledge^super_class.name!=sys_hub_action_type_base^super_class.name!=sysauto sc_cat_item_delivery_task" +
+                "^super_class.name!=sys_import_set_row^super_class.name!=syslog^NQnameSTARTSWITHu_^ORnameSTARTSWITHx_^super_classISEMPTY" +
+                "^sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel";
+        }
 
 
     var myurl = url + '/api/now/table/sys_db_object?sysparm_fields=' + fields + '&sysparm_query=' + query;
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
         var res = JSON.stringify(jsn.result).
-                                replace(/super_class.name/g,'super_classname').
-                                replace(/sys_scope.scope/g,'sys_scopescope'); //hack to get rid of . in object key names
-        popup.setTables(dataset, JSON.parse(res)); 
+            replace(/super_class.name/g, 'super_classname').
+            replace(/sys_scope.scope/g, 'sys_scopescope'); //hack to get rid of . in object key names
+        popup.setTables(dataset, JSON.parse(res));
     });
 }
 
@@ -870,7 +887,7 @@ function getFromSyncStorageGlobal(theName, callback) {
 }
 
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     createScriptSyncTab();
 });
 

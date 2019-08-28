@@ -41,6 +41,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 document.addEventListener("scriptsync", function(data) {
     chrome.runtime.sendMessage("scriptsync");
+    return true;
 })
 
 

@@ -312,7 +312,7 @@ function enhanceNotFound(advanced){
         var queryWords = query[0].split('_');
         myurl += '^NQsys_update_nameISNOTEMPTY^nameNOT LIKE00';
         for (var i = 0; i < queryWords.length; i++){
-            myurl +=  '^nameLIKE' + queryWords[i];
+            myurl +=  '^nameLIKE' + queryWords[i] + '^OR' + queryWords[i];
         }
     }
 
