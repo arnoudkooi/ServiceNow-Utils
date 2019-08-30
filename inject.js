@@ -45,6 +45,9 @@ if (typeof jQuery != "undefined") {
                 }
                 else if (e.currentTarget.value.startsWith("/")) {
                     var filter = e.currentTarget.value.substr(1);
+                    var thisUrl = window.location.href;
+                    var thisInstance = window.location.host.split('.')[0];
+                    var thisHost = window.location.host;
                     var idx = filter.indexOf(' ')
                     if (idx == -1) idx = filter.length;
                     var shortcut = filter.slice(0, idx).toLowerCase();
@@ -61,7 +64,14 @@ if (typeof jQuery != "undefined") {
                             "Go to settings tab in popup to add custom / commands <br />Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
                         return;
                     }
-                    if (!snuslashcommands.hasOwnProperty(shortcut)) {
+                    else if (shortcut == "env") {
+                        if (query){
+                            thisUrl = thisUrl.replace(thisHost, query + ".service-now.com" );
+                        }
+                        window.open(thisUrl, '_blank');
+                        return;
+                    }
+                    else if (!snuslashcommands.hasOwnProperty(shortcut)) {
                         if (shortcut.length > 4){ //try to open table list if shortcut nnot defined and 5+ charaters
                             showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
                             var url = shortcut + "_list.do?sysparm_query=GOTO123TEXTQUERY321=" + query;
