@@ -1,17 +1,17 @@
-if (typeof jQuery != "undefined") {
+
+//document.addEventListener("DOMContentLoaded", function () {
+    //Initialize Alert
+    var parent = document.querySelector('body');
+    var alertContainer = document.createElement('div');
+    alertContainer.innerHTML = '<div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>';
+    parent.insertBefore(alertContainer, parent.firstChild);
+//});
 
 
-    jQuery(function () {
-        //Initialize Alert
-        var alertContainer = '<div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>';
-        jQuery('header').prepend(alertContainer);
-
-    });
-}
 
 function addStudioLink() {
 
-    waitForEl('#concourse_application_tree li', function() {
+    waitForEl('#concourse_application_tree li', function () {
 
         var addStudio = jQuery('a[href*="$studio.do"]').length;
 
@@ -20,7 +20,7 @@ function addStudioLink() {
 
         var contextMenu = '<ul class="dropdown-menu" role="menu" style="z-index: 10000; display: block; position: absolute; ">' +
             '<li><a href="#" >View Current</a></li>' +
-            '<li class="divider"></li>'+
+            '<li class="divider"></li>' +
             '<li><a href="#" target="">Import from Remote</a></li></ul>';
 
         var widgetHtml;
@@ -39,13 +39,13 @@ function addStudioLink() {
 }
 
 
-function waitForEl (selector, callback) {
+function waitForEl(selector, callback) {
     if (jQuery(selector).length) {
-      callback();
+        callback();
     } else {
-      setTimeout(function() {
-        waitForEl(selector, callback);
-      }, 300);
+        setTimeout(function () {
+            waitForEl(selector, callback);
+        }, 300);
     }
 };
 
@@ -82,7 +82,7 @@ function searchSysIdTables(sysId) {
         showAlert(error, 'danger');
     }
 }
-  
-  
+
+
 
 

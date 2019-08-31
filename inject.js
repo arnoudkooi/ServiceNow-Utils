@@ -1,31 +1,38 @@
 var fields = [];
 var mySysId = '';
-var snuslashcommands;
+
+
+var snuslashcommands = {
+    "start" : "nav_to.do",
+    "db" : "$pa_dashboard.do",
+    "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
+    "br": "sys_script_list.do?sysparm_query=nameLIKE$0",
+    "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
+    "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
+    "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
+    "up": "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0",
+    "p": "sys_properties_list.do?sysparm_query=nameLIKE$0",
+    "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
+    "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
+    "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
+    "me": "sys_user.do?sys_id=javascript:gs.getUserID()",
+    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=madrid",
+    "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
+    "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1",
+    "fd": "/$flow-designer.do",
+    "va": "/$conversation-builder.do",
+    "st": "/$studio.do",
+    "sp": "/sp",
+    "tweets": "https://twitter.com/sn_utils"
+}
+
+setShortCuts();
+addSlashCommandListener();
 
 
 if (typeof jQuery != "undefined") {
 
-    snuslashcommands = {
-        "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
-        "br": "sys_script_list.do?sysparm_query=nameLIKE$0",
-        "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
-        "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
-        "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
-        "up": "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0",
-        "p": "sys_properties_list.do?sysparm_query=nameLIKE$0",
-        "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
-        "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
-        "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
-        "me": "sys_user.do?sys_id=javascript:gs.getUserID()",
-        "docs": "https://docs.servicenow.com/search?q=$0&labelkey=madrid",
-        "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
-        "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1",
-        "fd": "/$flow-designer.do",
-        "va": "/$conversation-builder.do",
-        "st": "/$studio.do",
-        "sp": "/sp",
-        "tweets": "https://twitter.com/sn_utils"
-    }
+
 
     jQuery(function () {
         if (typeof angular != "undefined")
@@ -35,81 +42,112 @@ if (typeof jQuery != "undefined") {
 
         doubleClickToShowFieldOrReload();
         clickToList();
-        setShortCuts();
+
         makeReadOnlyContentCopyable();
-        jQuery('input#filter').on('keypress', function (e) {
-            if (e.which == 13) {
-                if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
-                    e.preventDefault();
-                    searchSysIdTables(e.currentTarget.value);
+
+
+    });
+}
+
+function addSlashCommandListener() {
+    if (document.getElementById('filter') == null) return;
+    document.getElementById('filter').addEventListener('keydown', function (e) {
+        if (e.key == 'Escape' || (e.currentTarget.value == '/' && e.key == 'Backspace')) hideSlashCommand();
+        if (e.key == 'Enter') {
+
+            if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
+                e.preventDefault();
+                searchSysIdTables(e.currentTarget.value);
+            }
+            else if (e.currentTarget.value.startsWith("/")) {
+                var filter = e.currentTarget.value.substr(1);
+                var thisUrl = window.location.href;
+                var thisInstance = window.location.host.split('.')[0];
+                var thisHost = window.location.host;
+                var idx = filter.indexOf(' ')
+                if (idx == -1) idx = filter.length;
+                var shortcut = filter.slice(0, idx).toLowerCase();
+                var query = filter.slice(idx + 1);
+
+                if (shortcut == "help") {
+                    var outp = "";
+                    for (cmd in snuslashcommands) {
+                        outp += cmd + ";" + snuslashcommands[cmd] + "\n";
+                    }
+
+                    showAlert("This is a BETA feature! <a href='https://youtu.be/X6HLCV_ptQM' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
+                        "Go to settings tab in popup to add custom / commands <br />Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
+                    return;
                 }
-                else if (e.currentTarget.value.startsWith("/")) {
-                    var filter = e.currentTarget.value.substr(1);
-                    var thisUrl = window.location.href;
-                    var thisInstance = window.location.host.split('.')[0];
-                    var thisHost = window.location.host;
-                    var idx = filter.indexOf(' ')
-                    if (idx == -1) idx = filter.length;
-                    var shortcut = filter.slice(0, idx).toLowerCase();
-                    var query = filter.slice(idx + 1);
-
-                    if (shortcut == "help") {
-                        var outp = "";
-                        for (cmd in snuslashcommands) {
-                            outp += cmd + ";" + snuslashcommands[cmd] + "\n";
+                else if (shortcut == "tn"){
+                    var iframes = document.querySelectorAll("iframe");
+                    iframes.forEach((iframe) => {
+                        if (typeof iframe.contentWindow.addTechnicalNames != 'undefined')
+                            iframe.contentWindow.addTechnicalNames();
+                    });
+                    addTechnicalNames();
+                    document.getElementById('filter').value = '';
+                    hideSlashCommand();
+                    return;
+                }
+                else if (shortcut == "uh"){
+                    var iframes = document.querySelectorAll("iframe");
+                    iframes.forEach((iframe) => {
+                        if (typeof iframe.contentWindow.unhideFields != 'undefined')
+                            iframe.contentWindow.unhideFields();
+                    });
+                    unhideFields();
+                    document.getElementById('filter').value = '';
+                    hideSlashCommand();
+                    return;
+                }
+                else if (shortcut == "env") {
+                    if (query) {
+                        thisUrl = thisUrl.replace(thisHost, query + ".service-now.com");
+                    }
+                    window.open(thisUrl, '_blank');
+                    return;
+                }
+                else if (!snuslashcommands.hasOwnProperty(shortcut)) {
+                    if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
+                        showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
+                        var url = shortcut + "_list.do?sysparm_query=GOTO123TEXTQUERY321=" + query;
+                        var inIFrame = (shortcut == filter.slice(0, idx))
+                        if (e.target.className == "snutils") inIFrame = false;
+                        if (inIFrame) {
+                            jQuery('#gsft_main').attr('src', url);
                         }
-
-
-                        showAlert("This is a BETA feature! <a href='https://youtu.be/X6HLCV_ptQM' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                            "Go to settings tab in popup to add custom / commands <br />Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
+                        else {
+                            window.open(url, '_blank');
+                        }
                         return;
-                    }
-                    else if (shortcut == "env") {
-                        if (query){
-                            thisUrl = thisUrl.replace(thisHost, query + ".service-now.com" );
-                        }
-                        window.open(thisUrl, '_blank');
-                        return;
-                    }
-                    else if (!snuslashcommands.hasOwnProperty(shortcut)) {
-                        if (shortcut.length > 4){ //try to open table list if shortcut nnot defined and 5+ charaters
-                            showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
-                            var url = shortcut + "_list.do?sysparm_query=GOTO123TEXTQUERY321=" + query;
-                            var inIFrame = (shortcut == filter.slice(0, idx));
-                            if (inIFrame) {
-                                jQuery('#gsft_main').attr('src', url);
-                            }
-                            else {
-                                window.open(url, '_blank');
-                            }
-                            return;
-                        }
-                        else{
-                            showAlert("Shortcut not defined: /" + shortcut, "warning");
-                            return;
-                        }
-                    }
-                    var url = snuslashcommands[shortcut].replace(/\$0/g, query);
-                    var inIFrame = (shortcut == filter.slice(0, idx)) && !url.startsWith("http") && !url.startsWith("/");
-
-                    if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
-                        var queryArr = query.split(" ");
-                        for (var i = 0; i <= queryArr.length; i++) {
-                            var re = new RegExp("\\$" + (i + 1), "g");
-                            url = url.replace(re, queryArr[i] || "");
-                        }
-                    }
-
-                    if (inIFrame) {
-                        jQuery('#gsft_main').attr('src', url);
                     }
                     else {
-                        window.open(url, '_blank');
+                        showAlert("Shortcut not defined: /" + shortcut, "warning");
+                        return;
                     }
                 }
-            }
-        });
+                var url = snuslashcommands[shortcut].replace(/\$0/g, query);
+                var inIFrame = (shortcut == filter.slice(0, idx)) && !url.startsWith("http") && !url.startsWith("/");
+                if (e.target.className == "snutils") inIFrame = false;
 
+                if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
+                    var queryArr = query.split(" ");
+                    for (var i = 0; i <= queryArr.length; i++) {
+                        var re = new RegExp("\\$" + (i + 1), "g");
+                        url = url.replace(re, queryArr[i] || "");
+                    }
+                }
+
+                if (inIFrame) {
+                    jQuery('#gsft_main').attr('src', url);
+                }
+                else {
+                    window.open(url, '_blank');
+                }
+                hideSlashCommand();
+            }
+        }
     });
 }
 
@@ -160,8 +198,8 @@ function snuSettingsAdded() {
                 }
             }
         }
-        catch(e){
-            console.log("error while parsing slashcommands:" + snusettings.slashcommands )
+        catch (e) {
+            console.log("error while parsing slashcommands:" + snusettings.slashcommands)
         }
     }
 
@@ -299,8 +337,9 @@ function clickToList() {
     }
 }
 
-function enhanceNotFound(advanced){
+function enhanceNotFound(advanced) {
 
+    if (typeof jQuery == 'undefined') return;
     if (!jQuery('#not_the_droids').length) return;
     jQuery('#snutils-suggestions').remove();
 
@@ -309,39 +348,39 @@ function enhanceNotFound(advanced){
     var query = not_the_droids.split('_list.do');
     var addedQuery = '_list.do' + ((query.length > 1) ? query[1] : '');
     var html = '<div id="snutils-suggestions" style="margin-top:20px"><h4>SN Utils \'did you mean\' table suggestions</h4>';
-    if (advanced) 
+    if (advanced)
         html += 'Mode: <a href="javascript:enhanceNotFound(0)">starts with: ' + query[0] + '</a> | contains: ' + query[0].replace(/_/g, ' & ') + '<br />';
     else
         html += 'Mode: starts with: ' + query[0] + ' | <a title="splits by underscore and does a contains for each word" href="javascript:enhanceNotFound(1)">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
 
     html += '<br /><ul>';
     var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^EORDERBYlabel^nameSTARTSWITH' + query[0];
-    
-    
-    if (advanced){
+
+
+    if (advanced) {
         var queryWords = query[0].split('_');
         myurl += '^NQsys_update_nameISNOTEMPTY^nameNOT LIKE00';
-        for (var i = 0; i < queryWords.length; i++){
-            myurl +=  '^nameLIKE' + queryWords[i] + '^OR' + queryWords[i];
+        for (var i = 0; i < queryWords.length; i++) {
+            myurl += '^nameLIKE' + queryWords[i] + '^OR' + queryWords[i];
         }
     }
 
-    
+
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
         var results = jsn.result;
         if (results.length == 0) html += '<li>None found...</li>'
-        for (var i = 0; i < results.length; i++){
-            html += '<li style="font-size:11pt"><a href="'+ results[i].name + addedQuery + '">' + results[i].label + ' [' + results[i].name +  ']</a></li>';
+        for (var i = 0; i < results.length; i++) {
+            html += '<li style="font-size:11pt"><a href="' + results[i].name + addedQuery + '">' + results[i].label + ' [' + results[i].name + ']</a></li>';
         }
         html += '</ul></div>';
         jQuery('.notfound_message').append(html);
-        
+
     });
 
 
 
 
-    
+
 
 }
 
@@ -665,6 +704,37 @@ function searchLargeSelects() {
 function setShortCuts() {
 
     document.addEventListener("keydown", function (event) {
+
+        if (event.key == '/') {
+            if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) || event.ctrlKey || event.metaKey) { //not whe form element active
+
+                event.preventDefault();
+                if (window.top.document.getElementById('filter') != null) {
+                    activateSlashFilter();
+                }
+                else {
+
+                    var htmlFilter = document.createElement('div')
+                    htmlFilter.className = 'snutils';
+                    htmlFilter.style = 'z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:white;';
+                    htmlFilter.innerHTML = `<a href="javascript:hideSlashCommand()">[x]</a>SN Utils Slashcommand<br />
+                        <input id="filter" name="filter" class="snutils" type="search" style="width:150px; border: 1px solid #E5E5E5" id="filter" name="filter" placeholder='SN Utils Slashcommand' > </input>
+                    `
+                    window.top.document.body.appendChild(htmlFilter);
+                    addSlashCommandListener();
+                    activateSlashFilter();
+                }
+
+                function activateSlashFilter() {
+                    showSlashCommand();
+                    window.top.document.getElementById('filter').value = '/';
+                    window.top.document.getElementById('filter').focus();
+                    setTimeout(function () { window.top.document.getElementById('filter').setSelectionRange(2, 2); }, 10);
+                }
+
+            }
+        }
+
 
         //a few specific for forms
         if (typeof g_form != 'undefined') {
@@ -1028,20 +1098,39 @@ function startBackgroundScript(script, callback) {
  * @return {undefined}
  */
 function showAlert(msg, type, timeout) {
-    msg = '<a href="javascript:hideAlert()">[x]</a> SN Utils: ' + msg;
+
+    if (document.querySelectorAll('input.snutils').length) {
+        alert("FALLBACK MESSAGE GO TO CLASSIC UI FOR FORMATTED MESSAGE\n\n" + msg.replace(/<br \/>/g, "\n"));
+        return false;
+    }
+
+
+    msg = '<a href="javascript:hideAlert()">[x] </a> SN Utils: ' + msg;
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
-    jQuery('header .service-now-util-alert>div>span').html(msg);
-    jQuery('header .service-now-util-alert').addClass('visible');
-    jQuery('header .service-now-util-alert>.notification').addClass('notification-' + type);
+    jQuery('.service-now-util-alert>div>span').html(msg);
+    jQuery('.service-now-util-alert').addClass('visible');
+    jQuery('.service-now-util-alert>.notification').addClass('notification-' + type);
     setTimeout(function () {
-        jQuery('header .service-now-util-alert').removeClass('visible');
-        jQuery('header .service-now-util-alert>.notification').removeClass('notification-' + type);
+        jQuery('.service-now-util-alert').removeClass('visible');
+        jQuery('.service-now-util-alert>.notification').removeClass('notification-' + type);
     }, timeout);
 }
 
 function hideAlert() {
-    jQuery('header .service-now-util-alert').removeClass('visible');
+    jQuery('.service-now-util-alert').removeClass('visible');
+}
+function hideSlashCommand() {
+    if (document.querySelector('div.snutils') != null) {
+        document.querySelector('div.snutils').style.display = 'none';
+    }
+    return true;
+}
+
+function showSlashCommand() {
+    if (document.querySelector('div.snutils') != null) {
+        document.querySelector('div.snutils').style.display = '';
+    }
 }
 
 

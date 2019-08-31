@@ -127,14 +127,14 @@ var menuItems = [{
 {
     "id": "shownames",
     "parentId": "tools",
-    "title": "Show technical names",
+    "title": "Show technical names (/tn)",
     "contexts": ["all"],
     "onclick": addTechnicalNames
 },
 {
     "id": "unhidefields",
     "parentId": "tools",
-    "title": "Show hidden fields and sections",
+    "title": "Show hidden fields and sections (/uh)",
     "contexts": ["all"],
     "onclick": unhideFields
 },
