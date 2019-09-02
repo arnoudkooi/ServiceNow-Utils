@@ -705,7 +705,7 @@ function setShortCuts() {
 
     document.addEventListener("keydown", function (event) {
 
-        if (event.key == '/') {
+        if (event.key == '/' && (location.host.includes("service-now.com") || event.ctrlKey || event.metaKey)) {
             if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) || event.ctrlKey || event.metaKey) { //not whe form element active
 
                 event.preventDefault();
