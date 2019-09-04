@@ -720,7 +720,7 @@ function setShortCuts() {
             if (snusettings.slashoption == 'off') return;
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
-                if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) || !event.srcElement.hasAttribute('contenteditable') ||
+                if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') ||
                     event.ctrlKey || event.metaKey) { //not when form element active
                     
                     event.preventDefault();
