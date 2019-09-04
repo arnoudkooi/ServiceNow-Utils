@@ -706,8 +706,8 @@ function setShortCuts() {
     document.addEventListener("keydown", function (event) {
 
         if (event.key == '/' && (location.host.includes("service-now.com") || event.ctrlKey || event.metaKey)) {
-            if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) || event.ctrlKey || event.metaKey) { //not whe form element active
-
+            if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) || event.ctrlKey || event.metaKey) { //not when form element active
+                if(event.srcElement.hasAttribute('contenteditable')) return; // not on editable elements
                 event.preventDefault();
                 if (window.top.document.getElementById('filter') != null) {
                     activateSlashFilter();
