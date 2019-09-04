@@ -3,8 +3,8 @@ var mySysId = '';
 
 
 var snuslashcommands = {
-    "start" : "nav_to.do",
-    "db" : "$pa_dashboard.do",
+    "start": "nav_to.do",
+    "db": "$pa_dashboard.do",
     "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
     "br": "sys_script_list.do?sysparm_query=nameLIKE$0",
     "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
@@ -27,7 +27,7 @@ var snuslashcommands = {
 }
 
 setShortCuts();
-addSlashCommandListener();
+
 
 
 if (typeof jQuery != "undefined") {
@@ -79,7 +79,7 @@ function addSlashCommandListener() {
                         "Go to settings tab in popup to add custom / commands <br />Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
                     return;
                 }
-                else if (shortcut == "tn"){
+                else if (shortcut == "tn") {
                     var iframes = document.querySelectorAll("iframe");
                     iframes.forEach((iframe) => {
                         if (typeof iframe.contentWindow.addTechnicalNames != 'undefined')
@@ -90,7 +90,7 @@ function addSlashCommandListener() {
                     hideSlashCommand();
                     return;
                 }
-                else if (shortcut == "uh"){
+                else if (shortcut == "uh") {
                     var iframes = document.querySelectorAll("iframe");
                     iframes.forEach((iframe) => {
                         if (typeof iframe.contentWindow.unhideFields != 'undefined')
@@ -154,14 +154,25 @@ function addSlashCommandListener() {
 
 function snuSettingsAdded() {
 
-    bindPaste(typeof snusettings.nouielements == 'undefined' || snusettings.nouielements == false);
+    if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
+    if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
+    if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
+
+
+    bindPaste(snusettings.nouielements == false);
 
     if (snusettings.vsscriptsync == true) {
         addFieldSyncButtons();
         addStudioScriptSync();
     }
 
-    if (typeof snusettings.nouielements == 'undefined' || snusettings.nouielements == false) {
+    if (snusettings.slashoption != "off") {
+        addSlashCommandListener();
+    }
+
+
+
+    if (snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
         addStudioSearch();
         addSgStudioPlatformLink();
@@ -705,33 +716,37 @@ function setShortCuts() {
 
     document.addEventListener("keydown", function (event) {
 
-        if (event.key == '/' && (location.host.includes("service-now.com") || event.ctrlKey || event.metaKey)) {
-            if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) || event.ctrlKey || event.metaKey) { //not when form element active
-                if(event.srcElement.hasAttribute('contenteditable')) return; // not on editable elements
-                event.preventDefault();
-                if (window.top.document.getElementById('filter') != null) {
-                    activateSlashFilter();
-                }
-                else {
+        if (event.key == '/') {
+            if (snusettings.slashoption == 'off') return;
+            var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
+            if (isActive) {
+                if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) || !event.srcElement.hasAttribute('contenteditable') ||
+                    event.ctrlKey || event.metaKey) { //not when form element active
+                    
+                    event.preventDefault();
+                    if (window.top.document.getElementById('filter') != null) {
+                        activateSlashFilter();
+                    }
+                    else {
 
-                    var htmlFilter = document.createElement('div')
-                    htmlFilter.className = 'snutils';
-                    htmlFilter.style = 'z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:white;';
-                    htmlFilter.innerHTML = `<a href="javascript:hideSlashCommand()">[x]</a>SN Utils Slashcommand<br />
+                        var htmlFilter = document.createElement('div')
+                        htmlFilter.className = 'snutils';
+                        htmlFilter.style = 'z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:white;';
+                        htmlFilter.innerHTML = `<a href="javascript:hideSlashCommand()">[x]</a>SN Utils Slashcommand<br />
                         <input id="filter" name="filter" class="snutils" type="search" style="width:150px; border: 1px solid #E5E5E5" id="filter" name="filter" placeholder='SN Utils Slashcommand' > </input>
                     `
-                    window.top.document.body.appendChild(htmlFilter);
-                    addSlashCommandListener();
-                    activateSlashFilter();
-                }
+                        window.top.document.body.appendChild(htmlFilter);
+                        addSlashCommandListener();
+                        activateSlashFilter();
+                    }
 
-                function activateSlashFilter() {
-                    showSlashCommand();
-                    window.top.document.getElementById('filter').value = '/';
-                    window.top.document.getElementById('filter').focus();
-                    setTimeout(function () { window.top.document.getElementById('filter').setSelectionRange(2, 2); }, 10);
+                    function activateSlashFilter() {
+                        showSlashCommand();
+                        window.top.document.getElementById('filter').value = '/';
+                        window.top.document.getElementById('filter').focus();
+                        setTimeout(function () { window.top.document.getElementById('filter').setSelectionRange(2, 2); }, 10);
+                    }
                 }
-
             }
         }
 

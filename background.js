@@ -653,7 +653,11 @@ function grVarName(tableName) {
     grVar = tableName.replace(/[-_]([a-z])/g, function (g) {
         return g[1].toUpperCase();
     });
-    return 'gr' + grVar.charAt(0).toUpperCase() + grVar.slice(1);
+
+    var varName = grVar.charAt(0).toUpperCase() + grVar.slice(1);
+    if (varName.length >= 10)
+        varName = varName.replace(/[a-z]/g,'');
+    return 'gr' + varName;
 }
 
 //Try to retrieve current table and syid from browser tab, passing them back to popup

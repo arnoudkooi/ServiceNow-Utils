@@ -232,7 +232,7 @@
                             sys_created_on)</label>
                         <div class="input-group">
 
-                            <select class="form-control form-control-sm" name="tbxgrtemplate" id="tbxgrtemplate">
+                            <select class="form-control form-control-sm sync" name="tbxgrtemplate" id="tbxgrtemplate">
                                 <option>gs.info('{1}: ' + {0}.getValue('{1}'));</option>
                                 <option>{0}.getValue('{1}');</option>
                                 <option>{0}.setValue('{1}','');</option>
@@ -281,30 +281,49 @@
 
                 <div class="tab-pane" id="tabsettings">
                     <h5>Settings</h5>
-                    <div class="col-12" id='settingsdiv'>
-                        <form>
-                            <div class="form-check">
-                                <input class="form-check-input snu-setting" type="checkbox" id="vsscriptsync"
-                                    name="scriptsyncactive">
-                                <label class="form-check-label" for="vsscriptsync">
-                                    Enable VS ScriptSync
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input snu-setting" type="checkbox" id="addtechnicalnames"
-                                    name="addtechnicalnames">
-                                <label class="form-check-label" for="addtechnicalnames">
-                                    Show Technical names on page load
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input snu-setting" type="checkbox" id="nouielements"
-                                    name="nouielements">
-                                <label class="form-check-label" for="nouielements">
-                                    Don't add UI elements to browser
-                                </label>
-                            </div>
-                        </form>
+                    <div class="row">
+                        <div class="col-6" id='settingsdiv'>
+                            <form>
+                                <div class="form-check">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="vsscriptsync"
+                                        name="scriptsyncactive">
+                                    <label class="form-check-label" for="vsscriptsync">
+                                        Enable VS ScriptSync
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="addtechnicalnames"
+                                        name="addtechnicalnames">
+                                    <label class="form-check-label" for="addtechnicalnames">
+                                        Show Technical names on page load
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="nouielements"
+                                        name="nouielements">
+                                    <label class="form-check-label" for="nouielements">
+                                        Don't add UI elements to browser
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-6" id='settingsdiv'>
+                            <form>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="slashoption">
+                                        Slashcommands:
+                                    </label>
+                                    <select class="snu-setting form-control form-control-sm" name="slashoption"
+                                        id="slashoption">
+                                        <option value="on">On - Activate on / or CTRL-/</option>
+                                        <option value="ctrl">On -Activate on CTRL-/</option>
+                                        <option value="off">Off</option>
+                                    </select>
+                                </div>
+
+                            </form>
+                        </div>
                     </div>
 
                     <hr />
