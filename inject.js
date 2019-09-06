@@ -54,7 +54,7 @@ function addSlashCommandListener() {
     document.getElementById('filter').addEventListener('keydown', function (e) {
         if (e.key == 'Escape' || (e.currentTarget.value == '/' && e.key == 'Backspace')) hideSlashCommand();
         if (e.key == 'Enter') {
-
+            var sameWindow = !(e.metaKey || e.ctrlKey);
             if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
                 e.preventDefault();
                 searchSysIdTables(e.currentTarget.value);
@@ -75,8 +75,9 @@ function addSlashCommandListener() {
                         outp += cmd + ";" + snuslashcommands[cmd] + "\n";
                     }
 
-                    showAlert("This is a BETA feature! <a href='https://youtu.be/X6HLCV_ptQM' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                        "Go to settings tab in popup to add custom / commands <br />Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
+                    showAlert("Slashcommands <a href='https://youtu.be/X6HLCV_ptQM' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
+                        "Go to settings tab in popup to add custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance <br />" + 
+                        "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
                     return;
                 }
                 else if (shortcut == "tn") {
@@ -112,7 +113,7 @@ function addSlashCommandListener() {
                     if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
                         showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
                         var url = shortcut + "_list.do?sysparm_query=GOTO123TEXTQUERY321=" + query;
-                        var inIFrame = (shortcut == filter.slice(0, idx))
+                        var inIFrame = (shortcut == filter.slice(0, idx) && sameWindow)
                         if (e.target.className == "snutils") inIFrame = false;
                         if (inIFrame) {
                             jQuery('#gsft_main').attr('src', url);
@@ -128,7 +129,7 @@ function addSlashCommandListener() {
                     }
                 }
                 var url = snuslashcommands[shortcut].replace(/\$0/g, query);
-                var inIFrame = (shortcut == filter.slice(0, idx)) && !url.startsWith("http") && !url.startsWith("/");
+                var inIFrame = (shortcut == filter.slice(0, idx)) && !url.startsWith("http") && !url.startsWith("/") && sameWindow;
                 if (e.target.className == "snutils") inIFrame = false;
 
                 if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
