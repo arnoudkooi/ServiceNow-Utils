@@ -69,8 +69,11 @@ $(document).ready(function () {
         ws.onmessage = function (evt) {
             msgCnt++;
             var wsObj = JSON.parse(evt.data);
-            if ('liveupdate' in wsObj) {
+            if (wsObj.hasOwnProperty('liveupdate')) {
                 updateRealtimeBrowser(wsObj);
+            }
+            else if (wsObj.hasOwnProperty('refreshtoken')) {
+                refreshToken(wsObj);
             }
             else {
                 realTimeUpdating = false;
@@ -256,6 +259,32 @@ function updateRealtimeBrowser(scriptObj) {
 
 }
 
+function refreshToken(instanceObj) {
+
+    t.row.add([
+        new Date(), 'WebSocket', "Invalid token, trying to get new g_ck token from instance: " + instanceObj.name
+    ]).draw(false);
+    
+
+    chrome.tabs.query({
+        url: instanceObj.url + "/*"
+    }, function (arrayOfTabs) {
+        if (arrayOfTabs.length) {
+            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": "document.getElementById('sn_gck').value" }, 
+            function (g_ck){ 
+                console.log(g_ck) 
+            });
+        }
+        else{
+            t.row.add([
+                new Date(), 'WebSocket', "Request g_ck failed, please open a new session " + instanceObj.name
+            ]).draw(false);           
+        }
+    });
+
+}
+
+
 
 function updateRecord(scriptObj) {
     var client = new XMLHttpRequest();
@@ -296,6 +325,17 @@ function updateRecord(scriptObj) {
 
 
             } else {
+
+                // var resp = JSON.parse(this.response);
+
+                // if (resp.hasOwnProperty('error')){
+                //     if (resp.error.hasOwnProperty('message')){
+                //         if (resp.error.message == "User Not Authenticated"){
+                //             refreshToken(scriptObj.instance);
+                //         }
+                //     }
+                // }
+
                 t.row.add([
                     new Date(), 'VS Code', this.response
                 ]).draw(false);

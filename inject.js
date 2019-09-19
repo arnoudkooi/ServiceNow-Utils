@@ -16,7 +16,7 @@ var snuslashcommands = {
     "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
     "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
     "me": "sys_user.do?sys_id=javascript:gs.getUserID()",
-    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=madrid",
+    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=newyork",
     "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
     "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1",
     "fd": "/$flow-designer.do",
@@ -68,6 +68,16 @@ function addSlashCommandListener() {
                 if (idx == -1) idx = filter.length;
                 var shortcut = filter.slice(0, idx).toLowerCase();
                 var query = filter.slice(idx + 1);
+                var targeturl = (snuslashcommands[shortcut] || "").replace(/\$0/g, query);
+
+                if (targeturl.startsWith("//")){ //enable to use ie '/dev' as a shortcut for '/env acmedev'
+                    filter = targeturl.substr(2);
+                    var idx = filter.indexOf(' ')
+                    if (idx == -1) idx = filter.length;
+                    shortcut = filter.slice(0, idx).toLowerCase();
+                    query = filter.slice(idx + 1);
+                    targeturl = (snuslashcommands[shortcut] || "").replace(/\$0/g, query);
+                }
 
                 if (shortcut == "help") {
                     var outp = "";
@@ -76,8 +86,29 @@ function addSlashCommandListener() {
                     }
 
                     showAlert("Slashcommands <a href='https://youtu.be/X6HLCV_ptQM' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                        "Go to settings tab in popup to add custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance <br />" + 
+                        "Go to settings tab in popup to add custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance <br />" +
                         "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
+                    return;
+                }
+                else if (shortcut == "add") {
+
+                    query = query.trim();
+
+                    if (query.split(" ").length != 1 || query == "") {
+                        alert("Please define one word command name to /add example:\n/add mycommand");
+                        return;
+                    }
+
+
+
+                    var url;
+                    if (typeof jQuery != "undefined")
+                        url = jQuery('#gsft_main').attr('src');
+
+                    url = url || thisUrl;
+
+                    prompt("NOT WORKING AS OF NOW :( Set Slashcommand for \n /" + query, url);
+
                     return;
                 }
                 else if (shortcut == "tn") {
@@ -128,23 +159,24 @@ function addSlashCommandListener() {
                         return;
                     }
                 }
-                var url = snuslashcommands[shortcut].replace(/\$0/g, query);
-                var inIFrame = (shortcut == filter.slice(0, idx)) && !url.startsWith("http") && !url.startsWith("/") && sameWindow;
+
+
+                var inIFrame = (shortcut == filter.slice(0, idx)) && !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
                 if (e.target.className == "snutils") inIFrame = false;
 
                 if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
                     var queryArr = query.split(" ");
                     for (var i = 0; i <= queryArr.length; i++) {
                         var re = new RegExp("\\$" + (i + 1), "g");
-                        url = url.replace(re, queryArr[i] || "");
+                        targeturl = targeturl.replace(re, queryArr[i] || "");
                     }
                 }
 
                 if (inIFrame) {
-                    jQuery('#gsft_main').attr('src', url);
+                    jQuery('#gsft_main').attr('src', targeturl);
                 }
                 else {
-                    window.open(url, '_blank');
+                    window.open(targeturl, '_blank');
                 }
                 hideSlashCommand();
             }
@@ -598,9 +630,20 @@ function addTechnicalNames() {
                 }
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
             });
+
+
+
         } catch (error) {
 
         }
+    }
+
+    if (jQuery('.snuiaction').length == 0) {
+        jQuery('.action_context').each(function () {
+            var si = jQuery(this).attr('gsft_id');
+            if (si)
+                jQuery("<a classs='snuiaction' onclick='snuUiActionInfo(event, \"" + si + "\")' title='SN Utils: Click to open UI Action\nCTRL/CMD Click to view sys_id' style='margin-left:-2px'>? </a>").insertAfter(this);
+        });
     }
 
     jQuery('th.list_hdr, th.table-column-header').each(function (index) {
@@ -616,6 +659,17 @@ function addTechnicalNames() {
 
     showSelectFieldValues();
     searchLargeSelects();
+}
+
+function snuUiActionInfo(event, si) {
+
+    if (event.ctrlKey || event.metaKey) {
+        event.stopImmediatePropagation();
+        prompt("UI Action sys_id", si);
+    }
+    else {
+        window.open('/sys_ui_action.do?sys_id=' + si, 'uiaction');
+    }
 }
 
 function openReference(refTable, refField) {
@@ -723,7 +777,7 @@ function setShortCuts() {
             if (isActive) {
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') ||
                     event.ctrlKey || event.metaKey) { //not when form element active
-                    
+
                     event.preventDefault();
                     if (window.top.document.getElementById('filter') != null) {
                         activateSlashFilter();
