@@ -642,7 +642,7 @@ function addTechnicalNames() {
         jQuery('.action_context').each(function () {
             var si = jQuery(this).attr('gsft_id');
             if (si)
-                jQuery("<a classs='snuiaction' onclick='snuUiActionInfo(event, \"" + si + "\")' title='SN Utils: Click to open UI Action\nCTRL/CMD Click to view sys_id' style='margin-left:-2px'>? </a>").insertAfter(this);
+                jQuery("<a class='snuiaction' onclick='snuUiActionInfo(event, \"" + si + "\")' title='SN Utils: Click to open UI Action\nCTRL/CMD Click to view sys_id' style='margin-left:-2px'>? </a>").insertAfter(this);
         });
     }
 
