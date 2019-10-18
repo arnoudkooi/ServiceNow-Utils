@@ -50,11 +50,13 @@ if (typeof jQuery != "undefined") {
 }
 
 function addSlashCommandListener() {
-    if (document.getElementById('filter') == null) return;
-    document.getElementById('filter').addEventListener('keydown', function (e) {
+    if (window.top.document.getElementById('filter') == null) return;
+    if (window.top.document.getElementById('filter').classList.contains('snu-slashcommand')) return;
+    window.top.document.getElementById('filter').classList.add('snu-slashcommand');
+    window.top.document.getElementById('filter').addEventListener('keydown', function (e) {
         if (e.key == 'Escape' || (e.currentTarget.value == '/' && e.key == 'Backspace')) hideSlashCommand();
         if (e.key == 'Enter') {
-            var sameWindow = !(e.metaKey || e.ctrlKey);
+            var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
             if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
                 e.preventDefault();
                 searchSysIdTables(e.currentTarget.value);
@@ -112,24 +114,24 @@ function addSlashCommandListener() {
                     return;
                 }
                 else if (shortcut == "tn") {
-                    var iframes = document.querySelectorAll("iframe");
+                    var iframes = window.top.document.querySelectorAll("iframe");
                     iframes.forEach((iframe) => {
                         if (typeof iframe.contentWindow.addTechnicalNames != 'undefined')
                             iframe.contentWindow.addTechnicalNames();
                     });
                     addTechnicalNames();
-                    document.getElementById('filter').value = '';
+                    window.top.document.getElementById('filter').value = '';
                     hideSlashCommand();
                     return;
                 }
                 else if (shortcut == "uh") {
-                    var iframes = document.querySelectorAll("iframe");
+                    var iframes = window.top.document.querySelectorAll("iframe");
                     iframes.forEach((iframe) => {
                         if (typeof iframe.contentWindow.unhideFields != 'undefined')
                             iframe.contentWindow.unhideFields();
                     });
                     unhideFields();
-                    document.getElementById('filter').value = '';
+                    window.top.document.getElementById('filter').value = '';
                     hideSlashCommand();
                     return;
                 }
@@ -1191,15 +1193,15 @@ function hideAlert() {
     jQuery('.service-now-util-alert').removeClass('visible');
 }
 function hideSlashCommand() {
-    if (document.querySelector('div.snutils') != null) {
-        document.querySelector('div.snutils').style.display = 'none';
+    if (window.top.document.querySelector('div.snutils') != null) {
+        window.top.document.querySelector('div.snutils').style.display = 'none';
     }
     return true;
 }
 
 function showSlashCommand() {
-    if (document.querySelector('div.snutils') != null) {
-        document.querySelector('div.snutils').style.display = '';
+    if (window.top.document.querySelector('div.snutils') != null) {
+        window.top.document.querySelector('div.snutils').style.display = '';
     }
 }
 
