@@ -892,7 +892,29 @@ function getFromSyncStorageGlobal(theName, callback) {
 
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-    createScriptSyncTab();
+    if (message.event == "scriptsync"){
+        createScriptSyncTab();
+    }
+    else if (message.event == "addslashcommand"){
+        getFromSyncStorageGlobal("snusettings", function(settings){
+            if ( settings["slashcommands"].length == 0){
+                settings["slashcommands"] = message.command;
+            }
+            else{
+                settings["slashcommands"] = settings["slashcommands"] + "\n" + message.command;
+            }
+            setToChromeSyncStorageGlobal("snusettings", settings);
+
+            // chrome.tabs.query({ //todo automaticly push new slashcommands to open tabs
+            //     url : "https://*.service-now.com/*"
+            // }, function (arrayOfTabs) {
+            //     for (var i = 0; i < arrayOfTabs.length; i++){
+            //         chrome.tabs.executeScript(arrayOfTabs[i].id, { "code": "var tt = 2 " });
+            //     }
+            // });
+        })
+
+    }
 });
 
 
@@ -949,13 +971,7 @@ function setActiveNode(nodeId, nodeName) {
                 });
             });
         });
-
-
-
-
     });
-
-
 }
 
 

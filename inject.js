@@ -92,6 +92,11 @@ function addSlashCommandListener() {
                         "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
                     return;
                 }
+                if (shortcut == "token") {
+                    postRequestToScriptSync();
+                    showAlert("Trying to send current token to VS Code", "info");
+                    return;
+                }
                 else if (shortcut == "add") {
 
                     query = query.trim();
@@ -101,15 +106,19 @@ function addSlashCommandListener() {
                         return;
                     }
 
-
-
                     var url;
                     if (typeof jQuery != "undefined")
                         url = jQuery('#gsft_main').attr('src');
 
-                    url = url || thisUrl;
+                    url = url || window.location.href.replace(window.location.origin,"");
 
-                    prompt("NOT WORKING AS OF NOW :( Set Slashcommand for \n /" + query, url);
+                    var cmd = prompt("Set new Slashcommand (takes affect after reloading tab)\nCommand: /" + query, url);
+                    if (cmd != null){
+                        cmd = query + ";" + cmd;
+                        snuAddSlashCommand(cmd);
+                    }
+
+                    hideSlashCommand();
 
                     return;
                 }
@@ -184,6 +193,20 @@ function addSlashCommandListener() {
             }
         }
     });
+}
+
+function snuAddSlashCommand(cmd) {
+    var event = new CustomEvent(
+        "snutils-event", 
+        {
+            detail: {
+                event: "addslashcommand",
+                command: cmd
+            }
+        }
+    );
+    document.dispatchEvent(event);
+    sncWait();
 }
 
 
@@ -1234,17 +1257,19 @@ function postRequestToScriptSync(requestType) {
             if (data.widget.data_table.hasOwnProperty('choices'))
                 data.widget.data_table.choices = []; //skip useless data
 
-        var client = new XMLHttpRequest();
-        client.open("post", "http://127.0.0.1:1977");
-        client.onreadystatechange = function (m) {
-            if (client.readyState == 4 && client.status != 200)
-                g_form.addErrorMessage(client.responseText);
-        };
-        client.onerror = function (e) {
-            alert("Error, please check if VS Code with SN SriptSync is running");
-        };
-        client.send(JSON.stringify(data));
+
     }
+
+    var client = new XMLHttpRequest();
+    client.open("post", "http://127.0.0.1:1977");
+    client.onreadystatechange = function (m) {
+        if (client.readyState == 4 && client.status != 200)
+            g_form.addErrorMessage(client.responseText);
+    };
+    client.onerror = function (e) {
+        alert("Error, please check if VS Code with SN SriptSync is running");
+    };
+    client.send(JSON.stringify(data));
 }
 
 function postToScriptSync(field) {
@@ -1585,8 +1610,15 @@ function doGroupSearch(search) {
 
 
 function snuScriptSync() {
-    var event = document.createEvent('Event');
-    event.initEvent('scriptsync');
+    var event = new CustomEvent(
+        "snutils-event", 
+        {
+            detail: {
+                event: "scriptsync",
+                command: ""
+            }
+        }
+    );
     document.dispatchEvent(event);
     sncWait();
 }

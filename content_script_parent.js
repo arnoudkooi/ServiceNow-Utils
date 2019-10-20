@@ -39,8 +39,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 });
 
 
-document.addEventListener("scriptsync", function(data) {
-    chrome.runtime.sendMessage("scriptsync");
+document.addEventListener("snutils-event", function(data) {
+    chrome.runtime.sendMessage(data.detail); //forward the customevent message to the bg script.
     return true;
 })
 
@@ -126,7 +126,6 @@ function getVars(varstring) {
     else if (jQuery('div.tab-pane.active').length == 1) {
 
         ret.g_ck = jQuery('input#sysparm_ck').val();
-        ret.arnoud = 'kooi';
         jQuery('iframe').removeClass('activetab');
         jQuery('div.tab-pane.active iframe').addClass('activetab');
         doc = jQuery('iframe.activetab')[0].contentWindow.document;
