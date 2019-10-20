@@ -87,8 +87,9 @@ function addSlashCommandListener() {
                         outp += cmd + ";" + snuslashcommands[cmd] + "\n";
                     }
 
-                    showAlert("Slashcommands <a href='https://youtu.be/X6HLCV_ptQM' target='_blank'>Demo on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                        "Go to settings tab in popup to add custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance <br />" +
+                    showAlert("Slashcommands <a href='https://www.youtube.com/watch?v=X6HLCV_ptQM&list=PLTyELlWS-zjSIPIs4ukRCrqc4LRHva6-L' target='_blank'>Playlist on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
+                        "Go to settings tab in popup to manage custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance; <br />" + 
+                        "/add <name> Add current page as slashcommand; /token Send token to VS Code, when VS Code token is expired <br />" +
                         "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
                     return;
                 }
@@ -1619,7 +1620,7 @@ function snuScriptSync() {
             }
         }
     );
-    document.dispatchEvent(event);
+    window.top.document.dispatchEvent(event);
     sncWait();
 }
 
