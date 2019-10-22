@@ -3,27 +3,33 @@ var mySysId = '';
 
 
 var snuslashcommands = {
-    "start": "nav_to.do",
-    "db": "$pa_dashboard.do",
-    "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
-    "br": "sys_script_list.do?sysparm_query=nameLIKE$0",
-    "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
-    "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
-    "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
-    "up": "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0",
-    "p": "sys_properties_list.do?sysparm_query=nameLIKE$0",
-    "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
-    "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
-    "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
-    "me": "sys_user.do?sys_id=javascript:gs.getUserID()",
-    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=newyork",
-    "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
-    "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1",
-    "fd": "/$flow-designer.do",
-    "va": "/$conversation-builder.do",
-    "st": "/$studio.do",
-    "sp": "/sp",
-    "tweets": "https://twitter.com/sn_utils"
+    "help": "* Show help",
+    "add": "* Add or overwrite slashcommand",
+    "tn": "* Show technical names",
+    "uh": "* Show hidden fields",
+    "env": "* Open this age in <instance>",
+    "token": "* Send g_ck token to VS Code",
+    "start": "/nav_to.do New tab",
+    "db": "$pa_dashboard.do Dashboards",
+    "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2 Open ACL list <table> <operation>",
+    "br": "sys_script_list.do?sysparm_query=nameLIKE$0 Business Rules",
+    "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0 Script Includes",
+    "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0 Client Scripts",
+    "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0 UI Actions",
+    "up": "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0 UI Policies",
+    "p": "sys_properties_list.do?sysparm_query=nameLIKE$0 Properties",
+    "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0 System log",
+    "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0 Transaction Log",
+    "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0 Users",
+    "me": "sys_user.do?sys_id=javascript:gs.getUserID() My User profile",
+    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=newyork Search Docs",
+    "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1 Search Community",
+    "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1 Search developer portal",
+    "fd": "/$flow-designer.do Open Flow Designer",
+    "va": "/$conversation-builder.do Open Virtual Agent",
+    "st": "/$studio.do Open Studio",
+    "sp": "/sp Open Service Portal",
+    "tweets": "https://twitter.com/sn_utils Show @sn_utils Tweets"
 }
 
 setShortCuts();
@@ -31,9 +37,6 @@ setShortCuts();
 
 
 if (typeof jQuery != "undefined") {
-
-
-
     jQuery(function () {
         if (typeof angular != "undefined")
             setTimeout(getListV3Fields, 2000);
@@ -42,60 +45,76 @@ if (typeof jQuery != "undefined") {
 
         doubleClickToShowFieldOrReload();
         clickToList();
-
         makeReadOnlyContentCopyable();
+    });
+}
 
-
+function addFilterListener(){
+    if (document.getElementById('filter') == null) return;
+    document.getElementById('filter').addEventListener('keyup', function (e) {
+        if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') {//is a sys_id
+            searchSysIdTables(e.currentTarget.value);
+        }
+        else if (e.currentTarget.value == "/"){
+            e.preventDefault();
+            e.currentTarget.value = "";
+            showSlashCommand();
+        }
     });
 }
 
 function addSlashCommandListener() {
-    if (window.top.document.getElementById('filter') == null) return;
-    if (window.top.document.getElementById('filter').classList.contains('snu-slashcommand')) return;
-    window.top.document.getElementById('filter').classList.add('snu-slashcommand');
-    window.top.document.getElementById('filter').addEventListener('keydown', function (e) {
-        if (e.key == 'Escape' || (e.currentTarget.value == '/' && e.key == 'Backspace')) hideSlashCommand();
-        if (e.key == 'Enter') {
-            var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
-            if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
-                e.preventDefault();
-                searchSysIdTables(e.currentTarget.value);
+    if (window.top.document.getElementById('snufilter') == null) return;
+    if (window.top.document.getElementById('snufilter').classList.contains('snu-slashcommand')) return;
+    window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
+    window.top.document.getElementById('snufilter').addEventListener('keyup', function (e) {
+        if (e.key == 'Escape' || (e.currentTarget.value == '' && e.key == 'Backspace')) hideSlashCommand();
+        var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
+        if (e.currentTarget.value.startsWith("/")) {
+            var snufilter = e.currentTarget.value.substr(1);
+            var thisUrl = window.location.href;
+            var thisInstance = window.location.host.split('.')[0];
+            var thisHost = window.location.host;
+            var idx = snufilter.indexOf(' ')
+            if (idx == -1) idx = snufilter.length;
+            var shortcut = snufilter.slice(0, idx).toLowerCase();
+            var query = snufilter.slice(idx + 1);
+            var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0].replace(/\$0/g, query);
+
+            if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
+                snufilter = targeturl.substr(2);
+                var idx = snufilter.indexOf(' ')
+                if (idx == -1) idx = snufilter.length;
+                shortcut = snufilter.slice(0, idx).toLowerCase();
+                query = snufilter.slice(idx + 1);
+                targeturl = (snuslashcommands[shortcut] || "").replace(/\$0/g, query);
             }
-            else if (e.currentTarget.value.startsWith("/")) {
-                var filter = e.currentTarget.value.substr(1);
-                var thisUrl = window.location.href;
-                var thisInstance = window.location.host.split('.')[0];
-                var thisHost = window.location.host;
-                var idx = filter.indexOf(' ')
-                if (idx == -1) idx = filter.length;
-                var shortcut = filter.slice(0, idx).toLowerCase();
-                var query = filter.slice(idx + 1);
-                var targeturl = (snuslashcommands[shortcut] || "").replace(/\$0/g, query);
 
-                if (targeturl.startsWith("//")){ //enable to use ie '/dev' as a shortcut for '/env acmedev'
-                    filter = targeturl.substr(2);
-                    var idx = filter.indexOf(' ')
-                    if (idx == -1) idx = filter.length;
-                    shortcut = filter.slice(0, idx).toLowerCase();
-                    query = filter.slice(idx + 1);
-                    targeturl = (snuslashcommands[shortcut] || "").replace(/\$0/g, query);
+            if (e.key == 'Enter') {
+                if (e.currentTarget.value.match(/^\/[0-9a-f]{32}$/) != null) {//is a sys_id
+                    e.preventDefault();
+                    searchSysIdTables(e.currentTarget.value.substr(1));
+                    hideSlashCommand();
+                    return;
                 }
-
-                if (shortcut == "help") {
+                else if (shortcut == "help") {
                     var outp = "";
                     for (cmd in snuslashcommands) {
                         outp += cmd + ";" + snuslashcommands[cmd] + "\n";
                     }
 
                     showAlert("Slashcommands <a href='https://www.youtube.com/watch?v=X6HLCV_ptQM&list=PLTyELlWS-zjSIPIs4ukRCrqc4LRHva6-L' target='_blank'>Playlist on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                        "Go to settings tab in popup to manage custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance; <br />" + 
+                        "Go to settings tab in popup to manage custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance; <br />" +
                         "/add <name> Add current page as slashcommand; /token Send token to VS Code, when VS Code token is expired <br />" +
                         "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
+
+                    hideSlashCommand();
                     return;
                 }
                 if (shortcut == "token") {
                     postRequestToScriptSync();
                     showAlert("Trying to send current token to VS Code", "info");
+                    hideSlashCommand();
                     return;
                 }
                 else if (shortcut == "add") {
@@ -111,10 +130,10 @@ function addSlashCommandListener() {
                     if (typeof jQuery != "undefined")
                         url = jQuery('#gsft_main').attr('src');
 
-                    url = url || window.location.href.replace(window.location.origin,"");
+                    url = url || window.location.href.replace(window.location.origin, "");
 
                     var cmd = prompt("Set new Slashcommand (takes affect after reloading tab)\nCommand: /" + query, url);
-                    if (cmd != null){
+                    if (cmd != null) {
                         cmd = query + ";" + cmd;
                         snuAddSlashCommand(cmd);
                     }
@@ -130,7 +149,7 @@ function addSlashCommandListener() {
                             iframe.contentWindow.addTechnicalNames();
                     });
                     addTechnicalNames();
-                    window.top.document.getElementById('filter').value = '';
+                    window.top.document.getElementById('snufilter').value = '';
                     hideSlashCommand();
                     return;
                 }
@@ -141,7 +160,7 @@ function addSlashCommandListener() {
                             iframe.contentWindow.unhideFields();
                     });
                     unhideFields();
-                    window.top.document.getElementById('filter').value = '';
+                    window.top.document.getElementById('snufilter').value = '';
                     hideSlashCommand();
                     return;
                 }
@@ -156,7 +175,7 @@ function addSlashCommandListener() {
                     if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
                         showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
                         var url = shortcut + "_list.do?sysparm_query=GOTO123TEXTQUERY321=" + query;
-                        var inIFrame = (shortcut == filter.slice(0, idx) && sameWindow)
+                        var inIFrame = (shortcut == snufilter.slice(0, idx) && sameWindow)
                         if (e.target.className == "snutils") inIFrame = false;
                         if (inIFrame) {
                             jQuery('#gsft_main').attr('src', url);
@@ -164,6 +183,7 @@ function addSlashCommandListener() {
                         else {
                             window.open(url, '_blank');
                         }
+                        hideSlashCommand();
                         return;
                     }
                     else {
@@ -173,7 +193,7 @@ function addSlashCommandListener() {
                 }
 
 
-                var inIFrame = (shortcut == filter.slice(0, idx)) && !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
+                var inIFrame = (shortcut == snufilter.slice(0, idx)) && !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
                 if (e.target.className == "snutils") inIFrame = false;
 
                 if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
@@ -192,13 +212,39 @@ function addSlashCommandListener() {
                 }
                 hideSlashCommand();
             }
+            else {
+                snuShowSlashCommandHints(shortcut);
+            }
         }
+
     });
+}
+
+function snuShowSlashCommandHints(shortcut){
+    var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
+        return propertyName.indexOf(shortcut) === 0;
+    });
+    var html = "";
+    for(i=0;i< propertyNames.length && i < 5;i++){
+        html += "<li><span class='cmdkey'>/" + propertyNames[i] + "</span> - "  +
+        "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;') + "</span></li>"
+    }
+    if (!html && shortcut.replace(/ /g, '').length == 32){
+        html += "<li><span class='cmdkey'>/sys_id</span> - "  +
+        "<span class='cmdlabel'>Instance search</span></li>"
+    }
+    if (!html && shortcut.length > 5){
+        html += "<li><span class='cmdkey'>/" + shortcut + "</span> - "  +
+        "<span class='cmdlabel'>Table search</span></li>"
+    }
+    window.top.document.getElementById('snuhelper').innerHTML = html;
 }
 
 function snuAddSlashCommand(cmd) {
     var event = new CustomEvent(
-        "snutils-event", 
+        "snutils-event",
         {
             detail: {
                 event: "addslashcommand",
@@ -226,6 +272,7 @@ function snuSettingsAdded() {
     }
 
     if (snusettings.slashoption != "off") {
+        addFilterListener();
         addSlashCommandListener();
     }
 
@@ -267,6 +314,14 @@ function snuSettingsAdded() {
                     }
                 }
             }
+
+            var sco = {}; //order the object
+            Object.keys(snuslashcommands).sort().forEach(function(key) {
+                sco[key] = snuslashcommands[key];
+            });
+
+            snuslashcommands = sco;
+              
         }
         catch (e) {
             console.log("error while parsing slashcommands:" + snusettings.slashcommands)
@@ -795,42 +850,38 @@ function searchLargeSelects() {
 
 function setShortCuts() {
 
+    var htmlFilter = document.createElement('div')
+    htmlFilter.className = 'snutils';
+    htmlFilter.style = 'z-index:10000; display:none; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:white;';
+    htmlFilter.innerHTML = `<style>
+    ul#snuhelper { list-style-type: none; padding-left: 2px; } 
+    ul#snuhelper li {margin-top:2px}
+    span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3 }
+    input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; width:100%; border: 1px solid #E5E5E5; margin:4px 2px; }
+    span.cmdlabel { color: black;}
+    </style>
+    <span style="font-size:10pt; font-weight:bold"><a href="javascript:hideSlashCommand()">[x]</a> SN Utils Slashcommands<br /></span>
+    <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="search" placeholder='SN Utils Slashcommand' > </input>
+    <ul id="snuhelper"></ul>
+`
+    window.top.document.body.appendChild(htmlFilter);
+    addSlashCommandListener();
+
     document.addEventListener("keydown", function (event) {
 
+
+        
         if (event.key == '/') {
             if (snusettings.slashoption == 'off') return;
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') ||
                     event.ctrlKey || event.metaKey) { //not when form element active
-
                     event.preventDefault();
-                    if (window.top.document.getElementById('filter') != null) {
-                        activateSlashFilter();
-                    }
-                    else {
-
-                        var htmlFilter = document.createElement('div')
-                        htmlFilter.className = 'snutils';
-                        htmlFilter.style = 'z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:white;';
-                        htmlFilter.innerHTML = `<a href="javascript:hideSlashCommand()">[x]</a>SN Utils Slashcommand<br />
-                        <input id="filter" name="filter" class="snutils" type="search" style="width:150px; border: 1px solid #E5E5E5" id="filter" name="filter" placeholder='SN Utils Slashcommand' > </input>
-                    `
-                        window.top.document.body.appendChild(htmlFilter);
-                        addSlashCommandListener();
-                        activateSlashFilter();
-                    }
-
-                    function activateSlashFilter() {
-                        showSlashCommand();
-                        window.top.document.getElementById('filter').value = '/';
-                        window.top.document.getElementById('filter').focus();
-                        setTimeout(function () { window.top.document.getElementById('filter').setSelectionRange(2, 2); }, 10);
-                    }
+                    showSlashCommand();
                 }
             }
         }
-
 
         //a few specific for forms
         if (typeof g_form != 'undefined') {
@@ -1195,7 +1246,7 @@ function startBackgroundScript(script, callback) {
  */
 function showAlert(msg, type, timeout) {
 
-    if (document.querySelectorAll('input.snutils').length) {
+    if ( window.top.document.getElementById('filter') == null || typeof jQuery == 'undefined') {
         alert("FALLBACK MESSAGE GO TO CLASSIC UI FOR FORMATTED MESSAGE\n\n" + msg.replace(/<br \/>/g, "\n"));
         return false;
     }
@@ -1204,12 +1255,12 @@ function showAlert(msg, type, timeout) {
     msg = '<a href="javascript:hideAlert()">[x] </a> SN Utils: ' + msg;
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
-    jQuery('.service-now-util-alert>div>span').html(msg);
-    jQuery('.service-now-util-alert').addClass('visible');
-    jQuery('.service-now-util-alert>.notification').addClass('notification-' + type);
-    setTimeout(function () {
-        jQuery('.service-now-util-alert').removeClass('visible');
-        jQuery('.service-now-util-alert>.notification').removeClass('notification-' + type);
+    window.top.jQuery('.service-now-util-alert>div>span').html(msg);
+    window.top.jQuery('.service-now-util-alert').addClass('visible');
+    window.top.jQuery('.service-now-util-alert>.notification').addClass('notification-' + type);
+    window.top.setTimeout(function () {
+        window.top.jQuery('.service-now-util-alert').removeClass('visible');
+        window.top.jQuery('.service-now-util-alert>.notification').removeClass('notification-' + type);
     }, timeout);
 }
 
@@ -1219,6 +1270,9 @@ function hideAlert() {
 function hideSlashCommand() {
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
+        if ( window.top.document.getElementById('filter') != null){
+            window.top.document.getElementById('filter').focus();
+        }
     }
     return true;
 }
@@ -1226,6 +1280,13 @@ function hideSlashCommand() {
 function showSlashCommand() {
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
+        window.top.document.getElementById('snufilter').value = '/';
+        window.top.document.getElementById('snufilter').focus();
+        snuShowSlashCommandHints("");
+        setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
+    }
+    else{
+
     }
 }
 
@@ -1612,7 +1673,7 @@ function doGroupSearch(search) {
 
 function snuScriptSync() {
     var event = new CustomEvent(
-        "snutils-event", 
+        "snutils-event",
         {
             detail: {
                 event: "scriptsync",
