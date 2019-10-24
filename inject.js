@@ -7,7 +7,7 @@ var snuslashcommands = {
     "add": "* Add or overwrite slashcommand",
     "tn": "* Show technical names",
     "uh": "* Show hidden fields",
-    "env": "* Open this age in <instance>",
+    "env": "* Open this page in <instance>",
     "token": "* Send g_ck token to VS Code",
     "start": "/nav_to.do New tab",
     "db": "$pa_dashboard.do Dashboards",
@@ -49,13 +49,13 @@ if (typeof jQuery != "undefined") {
     });
 }
 
-function addFilterListener(){
+function addFilterListener() {
     if (document.getElementById('filter') == null) return;
     document.getElementById('filter').addEventListener('keyup', function (e) {
         if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') {//is a sys_id
             searchSysIdTables(e.currentTarget.value);
         }
-        else if (e.currentTarget.value == "/"){
+        else if (e.currentTarget.value == "/") {
             e.preventDefault();
             e.currentTarget.value = "";
             showSlashCommand();
@@ -220,24 +220,24 @@ function addSlashCommandListener() {
     });
 }
 
-function snuShowSlashCommandHints(shortcut){
+function snuShowSlashCommandHints(shortcut) {
     var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         return propertyName.indexOf(shortcut) === 0;
     });
     var html = "";
-    for(i=0;i< propertyNames.length && i < 5;i++){
-        html += "<li><span class='cmdkey'>/" + propertyNames[i] + "</span> - "  +
-        "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;') + "</span></li>"
+    for (i = 0; i < propertyNames.length && i < 5; i++) {
+        html += "<li><span class='cmdkey'>/" + propertyNames[i] + "</span> - " +
+            "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;') + "</span></li>"
     }
-    if (!html && shortcut.replace(/ /g, '').length == 32){
-        html += "<li><span class='cmdkey'>/sys_id</span> - "  +
-        "<span class='cmdlabel'>Instance search</span></li>"
+    if (!html && shortcut.replace(/ /g, '').length == 32) {
+        html += "<li><span class='cmdkey'>/sys_id</span> - " +
+            "<span class='cmdlabel'>Instance search</span></li>"
     }
-    if (!html && shortcut.length > 5){
-        html += "<li><span class='cmdkey'>/" + shortcut + "</span> - "  +
-        "<span class='cmdlabel'>Table search</span></li>"
+    if (!html && shortcut.length > 5) {
+        html += "<li><span class='cmdkey'>/" + shortcut + "</span> - " +
+            "<span class='cmdlabel'>Table search</span></li>"
     }
     window.top.document.getElementById('snuhelper').innerHTML = html;
 }
@@ -316,12 +316,12 @@ function snuSettingsAdded() {
             }
 
             var sco = {}; //order the object
-            Object.keys(snuslashcommands).sort().forEach(function(key) {
+            Object.keys(snuslashcommands).sort().forEach(function (key) {
                 sco[key] = snuslashcommands[key];
             });
 
             snuslashcommands = sco;
-              
+
         }
         catch (e) {
             console.log("error while parsing slashcommands:" + snusettings.slashcommands)
@@ -341,9 +341,14 @@ function doubleClickToShowFieldOrReload() {
             if (jQuery(event.target).hasClass('label-text')) {
                 var elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var val = g_form.getValue(elm);
-                var newValue = prompt('Value of ' + elm, val);
-                if (newValue !== null)
-                    g_form.setValue(elm, newValue);
+                if (NOW.user.roles.includes('admin')) { //only allow "admin" ti change fields
+                    var newValue = prompt('Value of ' + elm, val);
+                    if (newValue !== null)
+                        g_form.setValue(elm, newValue);
+                }
+                else {
+                    alert('Value of ' + elm + "\n\n" + val); 
+                }
             }
 
             else if (jQuery(event.target).hasClass('container-fluid')) {
@@ -870,7 +875,7 @@ function setShortCuts() {
     document.addEventListener("keydown", function (event) {
 
 
-        
+
         if (event.key == '/') {
             if (snusettings.slashoption == 'off') return;
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
@@ -1246,7 +1251,7 @@ function startBackgroundScript(script, callback) {
  */
 function showAlert(msg, type, timeout) {
 
-    if ( window.top.document.getElementById('filter') == null || typeof jQuery == 'undefined') {
+    if (window.top.document.getElementById('filter') == null || typeof jQuery == 'undefined') {
         alert("FALLBACK MESSAGE GO TO CLASSIC UI FOR FORMATTED MESSAGE\n\n" + msg.replace(/<br \/>/g, "\n"));
         return false;
     }
@@ -1270,7 +1275,7 @@ function hideAlert() {
 function hideSlashCommand() {
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
-        if ( window.top.document.getElementById('filter') != null){
+        if (window.top.document.getElementById('filter') != null) {
             window.top.document.getElementById('filter').focus();
         }
     }
@@ -1285,7 +1290,7 @@ function showSlashCommand() {
         snuShowSlashCommandHints("");
         setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
     }
-    else{
+    else {
 
     }
 }
