@@ -4,27 +4,28 @@ var mySysId = '';
 
 var snuslashcommands = {
     "help": "* Show help",
-    "add": "* Add or overwrite slashcommand",
+    "add": "* Add or overwrite slashcommand <cmd> <My Desc>",
     "tn": "* Show technical names",
     "uh": "* Show hidden fields",
     "env": "* Open this page in <instance>",
     "token": "* Send g_ck token to VS Code",
+    "pop": "* Pop in/out classic UI",
     "start": "/nav_to.do New tab",
     "db": "$pa_dashboard.do Dashboards",
     "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2 Open ACL list <table> <operation>",
-    "br": "sys_script_list.do?sysparm_query=nameLIKE$0 Business Rules",
-    "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0 Script Includes",
-    "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0 Client Scripts",
-    "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0 UI Actions",
-    "up": "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0 UI Policies",
-    "p": "sys_properties_list.do?sysparm_query=nameLIKE$0 Properties",
-    "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0 System log",
-    "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0 Transaction Log",
-    "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0 Users",
+    "br": "sys_script_list.do?sysparm_query=nameLIKE$0 Business Rules <name>",
+    "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0 Script Includes <name>",
+    "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0 Client Scripts <name>",
+    "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0 UI Actions <name>",
+    "up": "sys_ui_policy_list_list.do?sysparm_query=nameLIKE$0 UI Policies <name>",
+    "p": "sys_properties_list.do?sysparm_query=nameLIKE$0 Properties <name>",
+    "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0 System log <search>",
+    "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0 Transaction Log <search>",
+    "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0 Users <search>",
     "me": "sys_user.do?sys_id=javascript:gs.getUserID() My User profile",
-    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=newyork Search Docs",
-    "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1 Search Community",
-    "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1 Search developer portal",
+    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=newyork Search Docs <search>",
+    "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1 Search Community <search>",
+    "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1 Search developer portal <search>",
     "fd": "/$flow-designer.do Open Flow Designer",
     "va": "/$conversation-builder.do Open Virtual Agent",
     "st": "/$studio.do Open Studio",
@@ -117,12 +118,26 @@ function addSlashCommandListener() {
                     hideSlashCommand();
                     return;
                 }
+                if (shortcut == "pop") {
+                    var event = new CustomEvent(
+                        "snutils-event",
+                        {
+                            detail: {
+                                event: "pop",
+                                command: ""
+                            }
+                        }
+                    );
+                    window.top.document.dispatchEvent(event);
+                    hideSlashCommand();
+                    return;
+                }
                 else if (shortcut == "add") {
 
                     query = query.trim();
 
-                    if (query.split(" ").length != 1 || query == "") {
-                        alert("Please define one word command name to /add example:\n/add mycommand");
+                    if (query.length < 1 || query == "") {
+                        alert("Please define one word command name followed by a short description\nexample:\n/add mycommand My Description");
                         return;
                     }
 
@@ -130,16 +145,14 @@ function addSlashCommandListener() {
                     if (typeof jQuery != "undefined")
                         url = jQuery('#gsft_main').attr('src');
 
-                    url = url || window.location.href.replace(window.location.origin, "");
+                    url = (url || window.location.href.replace(window.location.origin, "")) + " " + query.split(" ").slice(1).join(" ") ;
 
-                    var cmd = prompt("Set new Slashcommand (takes affect after reloading tab)\nCommand: /" + query, url);
+                    var cmd = prompt("Set new Slashcommand (takes affect after reloading tab)\nCommand: /" + query.split(" ")[0], url);
                     if (cmd != null) {
-                        cmd = query + ";" + cmd;
+                        cmd = query.split(" ")[0].toLowerCase() + ";" + cmd;
                         snuAddSlashCommand(cmd);
                     }
-
                     hideSlashCommand();
-
                     return;
                 }
                 else if (shortcut == "tn") {
@@ -226,21 +239,28 @@ function snuShowSlashCommandHints(shortcut) {
     });
     var html = "";
     for (i = 0; i < propertyNames.length && i < 5; i++) {
-        html += "<li><span class='cmdkey'>/" + propertyNames[i] + "</span> - " +
+        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + propertyNames[i] + "</span> - " +
             "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;') + "</span></li>"
     }
     if (!html && shortcut.replace(/ /g, '').length == 32) {
-        html += "<li><span class='cmdkey'>/sys_id</span> - " +
+        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/sys_id</span> - " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
     if (!html && shortcut.length > 5) {
-        html += "<li><span class='cmdkey'>/" + shortcut + "</span> - " +
+        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + shortcut + "</span> - " +
             "<span class='cmdlabel'>Table search</span></li>"
     }
     window.top.document.getElementById('snuhelper').innerHTML = html;
 }
+function setSnuFilter(elm) {
+    if (elm.innerText.length > window.top.document.getElementById('snufilter').value.length) {
+        window.top.document.getElementById('snufilter').focus();
+        window.top.document.getElementById('snufilter').value = elm.innerText + ' ';
+    }
+}
+
 
 function snuAddSlashCommand(cmd) {
     var event = new CustomEvent(
@@ -283,22 +303,6 @@ function snuSettingsAdded() {
         addStudioSearch();
         addSgStudioPlatformLink();
         enhanceNotFound();
-
-
-        // if (typeof Select2 != 'undefined') {
-        //     //convert the updatset and application picker to select2
-        //     jQuery('#application_picker_select').select2({ 'dropdownAutoWidth': true })
-        //     jQuery('#application_picker_select').on('change', function (e) {
-        //         setTimeout(function () {
-        //             jQuery('#update_set_picker_select').trigger('change.select2');
-        //         }, 5000);
-
-        //     });;
-        //     jQuery('#update_set_picker_select').select2({ 'dropdownAutoWidth': true });
-        //     jQuery('#update_set_picker_select').on('change', function (e) {
-        //         jQuery('#update_set_picker_select').trigger('change.select2');
-        //     });
-        // }
 
     }
 
@@ -818,7 +822,7 @@ function searchLargeSelects() {
 
     var minItems = 25;
 
-    jQuery('select:not(.searchified, .select2, .select2-offscreen)').each(function (i, el) {
+    jQuery('select:not(.searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
         if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
             var input = document.createElement("input");
             input.type = "text";
@@ -861,7 +865,7 @@ function setShortCuts() {
     htmlFilter.innerHTML = `<style>
     ul#snuhelper { list-style-type: none; padding-left: 2px; } 
     ul#snuhelper li {margin-top:2px}
-    span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3 }
+    span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; cursor:pointer}
     input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; width:100%; border: 1px solid #E5E5E5; margin:4px 2px; }
     span.cmdlabel { color: black;}
     </style>

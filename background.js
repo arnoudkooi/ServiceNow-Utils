@@ -120,7 +120,7 @@ var menuItems = [{
 {
     "id": "popinout",
     "parentId": "tools",
-    "title": "PopIn / PopOut",
+    "title": "PopIn / PopOut (/pop)",
     "contexts": ["all"],
     "onclick": togglePop
 },
@@ -163,7 +163,7 @@ var menuItems = [{
 {
     "id": "props",
     "parentId": "tools",
-    "title": "Properties",
+    "title": "Properties (/p)",
     "contexts": ["all"],
     "onclick": function (e, f) {
         openUrl(e, f, '/sys_properties_list.do');
@@ -894,6 +894,9 @@ function getFromSyncStorageGlobal(theName, callback) {
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.event == "scriptsync"){
         createScriptSyncTab();
+    }
+    if (message.event == "pop"){
+        pop();
     }
     else if (message.event == "addslashcommand"){
         getFromSyncStorageGlobal("snusettings", function(settings){

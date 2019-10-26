@@ -14,28 +14,52 @@ function addStudioLink() {
     waitForEl('#concourse_application_tree li', function () {
 
         var addStudio = jQuery('a[href*="$studio.do"]').length;
-
         var isUI16 = jQuery('.navpage-header-content').length > 0;
-        var title = "Open Studio IDE (Link by SN Utils)";
-
-        var contextMenu = '<ul class="dropdown-menu" role="menu" style="z-index: 10000; display: block; position: absolute; ">' +
-            '<li><a href="#" >View Current</a></li>' +
-            '<li class="divider"></li>' +
-            '<li><a href="#" target="">Import from Remote</a></li></ul>';
-
         var widgetHtml;
+        if (!isUI16) return;
 
         if (addStudio) {
-            if (isUI16) {
                 widgetHtml = '<div class="navpage-header-content">' +
                     '<button data-placement="auto" class="btn btn-icon icon-script"' +
-                    ' title="' + title + '" data-original-title="Studio" onclick="window.open(\'/$studio.do\', \'_blank\');">' +
+                    ' title="Open Studio IDE (Link by SN Utils)" data-original-title="Studio" onclick="window.open(\'/$studio.do\', \'_blank\');">' +
                     '<span class="sr-only">Studio</span>' +
-                    '</button></div>' //+ contextMenu;
+                    '</button></div>';
                 jQuery('#sysparm_search').parents('div.navpage-header-content').first().after(widgetHtml);
-            }
+            
         }
+
+        // if (typeof Select2 != 'undefined') {
+        //     //convert the updatset and application picker to select2
+        //     var s2ify = 
+        //     '<span data-placement="auto" onclick="snS2Ify(this)" style="position: absolute; top: 10px; margin-left: -11px;" class="icon icon-ellipsis-vertical" title="Toggle App select normal / enhanced" />';
+        //     jQuery('#update_set_picker_select').after(s2ify);
+        //     jQuery('#application_picker_select').after(s2ify);
+
+        //     // jQuery('#application_picker_select').select2({ 'dropdownAutoWidth': true })
+        //     // jQuery('#application_picker_select').on('change', function (e) {
+        //     //     setTimeout(function () {
+        //     //         jQuery('#update_set_picker_select').trigger('change.select2');
+        //     //     }, 5000);
+
+        //     // }); 
+
+        //     // jQuery('#update_set_picker_select').select2({ 'dropdownAutoWidth': true });
+        //     // jQuery('#update_set_picker_select').on('change', function (e) {
+        //     //     jQuery('#update_set_picker_select').trigger('change.select2');
+        //     // });
+        // }
+
+
+
     });
+}
+
+function snS2Ify(elm){
+console.log(elm);
+
+jQuery('#application_picker_select').select2({ 'dropdownAutoWidth': true })
+jQuery('#update_set_picker_select').select2({ 'dropdownAutoWidth': true });
+
 }
 
 
