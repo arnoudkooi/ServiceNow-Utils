@@ -802,7 +802,7 @@ function getUserDetails(userName) {
 function getTables(dataset) {
 
     var fields = 'name,label';
-    var query = 'sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel';
+    var query = 'sys_update_nameISNOTEMPTY^nameNOT LIKElog00^nameNOT LIKEevent00%5EORDERBYlabel';
 
     if (dataset == 'advanced') {
         fields = 'name,label,super_class.name,sys_scope.scope';
@@ -818,7 +818,7 @@ function getTables(dataset) {
                 "^super_class.name!=dl_matcher^super_class.name!=sys_filter^super_class.name!=sys_user_preference" +
                 "^super_class.name!=kb_knowledge^super_class.name!=sys_hub_action_type_base^super_class.name!=sysauto sc_cat_item_delivery_task" +
                 "^super_class.name!=sys_import_set_row^super_class.name!=syslog^NQnameSTARTSWITHu_^ORnameSTARTSWITHx_^super_classISEMPTY" +
-                "^sys_update_nameISNOTEMPTY^nameNOT LIKE00%5EORDERBYlabel";
+                "^sys_update_nameISNOTEMPTY^nameNOT LIKElog00^nameNOT LIKEevent00%5EORDERBYlabel";
         }
 
 

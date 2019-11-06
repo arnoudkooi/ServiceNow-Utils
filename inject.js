@@ -10,8 +10,10 @@ var snuslashcommands = {
     "env": "* Open this page in <instance>",
     "token": "* Send g_ck token to VS Code",
     "pop": "* Pop in/out classic UI",
+    "s2": "* Toggle Select2 for Application and Updateset picker",
     "start": "/nav_to.do New tab",
     "db": "$pa_dashboard.do Dashboards",
+    "plug":"v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0 Plugins",
     "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2 Open ACL list <table> <operation>",
     "br": "sys_script_list.do?sysparm_query=nameLIKE$0 Business Rules <name>",
     "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0 Script Includes <name>",
@@ -63,14 +65,22 @@ function addFilterListener() {
         }
     });
 }
-
 function addSlashCommandListener() {
     if (window.top.document.getElementById('snufilter') == null) return;
     if (window.top.document.getElementById('snufilter').classList.contains('snu-slashcommand')) return;
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
+
     window.top.document.getElementById('snufilter').addEventListener('keyup', function (e) {
-        if (e.key == 'Escape' || (e.currentTarget.value == '' && e.key == 'Backspace')) hideSlashCommand();
-        var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
+        //this needs to be keyup, rest needs to be keydown to capture cmd key in macos
+        snuShowSlashCommandHints();
+        if (e.key == "\\"){
+           // e.currentTarget.value = e.currentTarget.value.replace("\\", snuSelection);
+        }
+    });
+
+    window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
+        if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
+        var sameWindow = !(e.metaKey || e.ctrlKey ) && (window.top.document.getElementById('gsft_main') != null);
         if (e.currentTarget.value.startsWith("/")) {
             var snufilter = e.currentTarget.value.substr(1);
             var thisUrl = window.location.href;
@@ -78,6 +88,7 @@ function addSlashCommandListener() {
             var thisHost = window.location.host;
             var idx = snufilter.indexOf(' ')
             if (idx == -1) idx = snufilter.length;
+            originalShortcut = snufilter.slice(0, idx).toLowerCase();
             var shortcut = snufilter.slice(0, idx).toLowerCase();
             var query = snufilter.slice(idx + 1);
             var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0].replace(/\$0/g, query);
@@ -118,6 +129,11 @@ function addSlashCommandListener() {
                     hideSlashCommand();
                     return;
                 }
+                if (shortcut == "s2") {
+                    if (typeof snuS2Ify != 'undefined') snuS2Ify();
+                    hideSlashCommand();
+                    return;
+                }
                 if (shortcut == "pop") {
                     var event = new CustomEvent(
                         "snutils-event",
@@ -130,6 +146,13 @@ function addSlashCommandListener() {
                     );
                     window.top.document.dispatchEvent(event);
                     hideSlashCommand();
+                    return;
+                }
+                else if (shortcut == "env") {
+                    if (query) {
+                        thisUrl = thisUrl.replace(thisHost, query + ".service-now.com");
+                    }
+                    window.open(thisUrl, '_blank');
                     return;
                 }
                 else if (shortcut == "add") {
@@ -177,13 +200,6 @@ function addSlashCommandListener() {
                     hideSlashCommand();
                     return;
                 }
-                else if (shortcut == "env") {
-                    if (query) {
-                        thisUrl = thisUrl.replace(thisHost, query + ".service-now.com");
-                    }
-                    window.open(thisUrl, '_blank');
-                    return;
-                }
                 else if (!snuslashcommands.hasOwnProperty(shortcut)) {
                     if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
                         showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
@@ -225,15 +241,14 @@ function addSlashCommandListener() {
                 }
                 hideSlashCommand();
             }
-            else {
-                snuShowSlashCommandHints(shortcut);
-            }
+
         }
 
     });
 }
 
-function snuShowSlashCommandHints(shortcut) {
+function snuShowSlashCommandHints() {
+    var shortcut = window.top.document.getElementById('snufilter').value.substr(1).split(" ")[0].toLowerCase();
     var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         return propertyName.indexOf(shortcut) === 0;
     });
@@ -254,6 +269,7 @@ function snuShowSlashCommandHints(shortcut) {
     }
     window.top.document.getElementById('snuhelper').innerHTML = html;
 }
+
 function setSnuFilter(elm) {
     if (elm.innerText.length > window.top.document.getElementById('snufilter').value.length) {
         window.top.document.getElementById('snufilter').focus();
@@ -1291,12 +1307,22 @@ function showSlashCommand() {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints("");
+        snuShowSlashCommandHints();
         setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
     }
     else {
 
     }
+}
+
+function getSelectionText() {
+    var text = "";
+    if (window.getSelection) {
+        text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type != "Control") {
+        text = document.selection.createRange().text;
+    }
+    return text;
 }
 
 
