@@ -82,6 +82,7 @@ function addSlashCommandListener() {
             var thisKey = (e.key.length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
             if (idx == -1) idx = snufilter.length;
             var originalShortcut = (snufilter.slice(0, idx) + ((idx == -1) ? thisKey : "")).toLowerCase();
+            if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
             var shortcut = snufilter.slice(0, idx).toLowerCase();
             var query = snufilter.slice(idx + 1);
             var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0].replace(/\$0/g, query);
