@@ -231,7 +231,7 @@ function setBrowserVariables(obj) {
             getGRQuery();
         }
     });
-    $('#tbxgrtemplate, #cbxtemplatelines').change(function (e) {
+    $('#tbxgrtemplate, #cbxtemplatelines, #cbxfullvarname').change(function (e) {
         getGRQuery();
     });
 
@@ -375,10 +375,14 @@ function getGRQuery() {
 
     var newHref = myFrameHref || urlFull;
     if ((newHref.split('?')[0]).indexOf('_list.do') > 1) {
-        bgPage.getGRQuery($('#tbxgrname').val(),$('#tbxgrtemplate').val(), document.getElementById('cbxtemplatelines').checked);
+        bgPage.getGRQuery($('#tbxgrname').val(),$('#tbxgrtemplate').val(), 
+        document.getElementById('cbxtemplatelines').checked,
+        document.getElementById('cbxfullvarname').checked);
     }
     else {
-        bgPage.getGRQueryForm($('#tbxgrname').val(),$('#tbxgrtemplate').val(),document.getElementById('cbxtemplatelines').checked);
+        bgPage.getGRQueryForm($('#tbxgrname').val(),$('#tbxgrtemplate').val(),
+        document.getElementById('cbxtemplatelines').checked,
+        document.getElementById('cbxfullvarname').checked);
     }
 }
 

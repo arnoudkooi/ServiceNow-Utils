@@ -653,16 +653,17 @@ function getGck(callback) {
     }
 }
 
-function grVarName(tableName) {
+function grVarName(tableName, fullvarname) {
     grVar = tableName.replace(/[-_]([a-z])/g, function (g) {
         return g[1].toUpperCase();
     });
 
     var varName = grVar.charAt(0).toUpperCase() + grVar.slice(1);
-    if (varName.length >= 10)
+    if (varName.length >= 10 && !fullvarname)
         varName = varName.replace(/[a-z]/g,'');
     return 'gr' + varName;
 }
+
 
 //Try to retrieve current table and syid from browser tab, passing them back to popup
 function getRecordVariables() {
@@ -677,7 +678,7 @@ function getRecordVariables() {
     });
 }
 
-function getGRQuery(varName, template, templatelines) {
+function getGRQuery(varName, template, templatelines, fullvarname) {
 
     popup = chrome.extension.getViews({
         type: "popup"
@@ -693,7 +694,7 @@ function getGRQuery(varName, template, templatelines) {
             myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
         }, function (response) {
             var tableName = response.myVars.g_listtableName;
-            varName = varName || grVarName(tableName);
+            varName = varName || grVarName(tableName, fullvarname);
             var encQuery = response.myVars.g_listfilter;
             var orderBy = response.myVars.g_listsortBy;
             var isDesc = (response.myVars.g_listsortDir == "DESC");
@@ -732,7 +733,7 @@ function getGRQuery(varName, template, templatelines) {
     });
 }
 
-function getGRQueryForm(varName, template, templatelines) {
+function getGRQueryForm(varName, template, templatelines, fullvarname) {
 
     popup = chrome.extension.getViews({
         type: "popup"
@@ -743,7 +744,7 @@ function getGRQueryForm(varName, template, templatelines) {
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
         var tableName = response.myVars.g_formtableName;
-        varName = varName || grVarName(tableName);
+        varName = varName || grVarName(tableName, fullvarname);
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
         var fields = ('' + response.myVars.elNames).split(',');
         var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
