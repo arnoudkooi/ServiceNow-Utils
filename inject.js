@@ -34,7 +34,7 @@ var snuslashcommands = {
     "sp": "/sp Open Service Portal",
     "tweets": "https://twitter.com/sn_utils Show @sn_utils Tweets",
     "wf": "/workflow_ide.do?sysparm_nostack=true Open Workflow Editor",
-    "app": "/sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application"
+    "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application"
 }
 
 setShortCuts();
@@ -82,7 +82,7 @@ function addSlashCommandListener() {
             var thisHost = window.location.host;
             var idx = snufilter.indexOf(' ')
             var noSpace = (snufilter.indexOf(' ') == -1);
-            var thisKey = (e.key.length == 1) ? e.key.replace(" ","") : ""; //we may need to add this as we are capturing keydown
+            var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
             if (noSpace) idx = snufilter.length;
             var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : "" ))).toLowerCase();
 
