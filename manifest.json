@@ -3,7 +3,7 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "3.5.1.6",
+    "version": "3.5.2.0",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -82,6 +82,9 @@
                 "mac": "Command+4"
             },
             "description": "Open VS Code ScriptSync tab"
+        },
+        "slashcommand": {
+            "description": "Open slashcommand popup"
         }
     },
     "page_action": {

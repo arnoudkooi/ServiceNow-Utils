@@ -70,14 +70,6 @@ function addSlashCommandListener() {
     if (window.top.document.getElementById('snufilter').classList.contains('snu-slashcommand')) return;
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
-    window.top.document.getElementById('snufilter').addEventListener('keyup', function (e) {
-        //this needs to be keyup, rest needs to be keydown to capture cmd key in macos
-        snuShowSlashCommandHints();
-        if (e.key == "\\"){
-           // e.currentTarget.value = e.currentTarget.value.replace("\\", snuSelection);
-        }
-    });
-
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey ) && (window.top.document.getElementById('gsft_main') != null);
@@ -87,8 +79,9 @@ function addSlashCommandListener() {
             var thisInstance = window.location.host.split('.')[0];
             var thisHost = window.location.host;
             var idx = snufilter.indexOf(' ')
+            var thisKey = (e.key.length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
             if (idx == -1) idx = snufilter.length;
-            originalShortcut = snufilter.slice(0, idx).toLowerCase();
+            var originalShortcut = (snufilter.slice(0, idx) + ((idx == -1) ? thisKey : "")).toLowerCase();
             var shortcut = snufilter.slice(0, idx).toLowerCase();
             var query = snufilter.slice(idx + 1);
             var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0].replace(/\$0/g, query);
@@ -241,14 +234,17 @@ function addSlashCommandListener() {
                 }
                 hideSlashCommand();
             }
+            else{
+                
+                snuShowSlashCommandHints(originalShortcut);
+            }
 
         }
 
     });
 }
 
-function snuShowSlashCommandHints() {
-    var shortcut = window.top.document.getElementById('snufilter').value.substr(1).split(" ")[0].toLowerCase();
+function snuShowSlashCommandHints(shortcut) {
     var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         return propertyName.indexOf(shortcut) === 0;
     });
@@ -1307,7 +1303,7 @@ function showSlashCommand() {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints();
+        snuShowSlashCommandHints("");
         setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
     }
     else {

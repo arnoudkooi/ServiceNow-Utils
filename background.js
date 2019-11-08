@@ -56,23 +56,12 @@ chrome.commands.onCommand.addListener(function (command) {
         sendToggleAtfHelper();
     else if (command == "toggle-scriptsync")
         createScriptSyncTab();
+    else if (command == "slashcommand")
+        slashCommand();
 
     return true;
 
 });
-
-// chrome.runtime.onMessageExternal.addListener(
-//     function (request, sender, sendResponse) {
-//         g_ck = request.g_ck;
-//         url = sender.url.split('/').slice(0, 3).join('/');
-
-//         if (updateSetTables.length ==0){
-//             setUpdateSetTables() 
-//             sendResponse({ "answer": "unkowmn"});
-//         }
-//         else
-//             sendResponse({ "answer": (updateSetTables.indexOf(request.table) > -1)});
-// });
 
 
 var menuItems = [{
@@ -339,6 +328,21 @@ function addTechnicalNames() {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
                 myVars: "addTechnicalNames()"
+            });
+        });
+
+}
+
+function slashCommand() {
+
+    chrome.tabs.query({
+        currentWindow: true,
+        active: true
+    },
+        function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                method: "runFunction",
+                myVars: "showSlashCommand()"
             });
         });
 

@@ -254,3 +254,8 @@ img.ytthumbnail{
     table-layout: fixed;
     word-wrap:break-word;  
 }
+
+h5 i {
+    font-weight: normal;
+    font-size: 8pt;
+}
