@@ -32,7 +32,9 @@ var snuslashcommands = {
     "va": "/$conversation-builder.do Open Virtual Agent",
     "st": "/$studio.do Open Studio",
     "sp": "/sp Open Service Portal",
-    "tweets": "https://twitter.com/sn_utils Show @sn_utils Tweets"
+    "tweets": "https://twitter.com/sn_utils Show @sn_utils Tweets",
+    "wf": "/workflow_ide.do?sysparm_nostack=true Open Workflow Editor",
+    "app": "/sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application"
 }
 
 setShortCuts();
