@@ -79,9 +79,11 @@ function addSlashCommandListener() {
             var thisInstance = window.location.host.split('.')[0];
             var thisHost = window.location.host;
             var idx = snufilter.indexOf(' ')
-            var thisKey = (e.key.length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
-            if (idx == -1) idx = snufilter.length;
-            var originalShortcut = (snufilter.slice(0, idx) + ((idx == -1) ? thisKey : "")).toLowerCase();
+            var noSpace = (snufilter.indexOf(' ') == -1);
+            var thisKey = (e.key.length == 1) ? e.key.replace(" ","") : ""; //we may need to add this as we are capturing keydown
+            if (noSpace) idx = snufilter.length;
+            var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : "" ))).toLowerCase();
+
             if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
             var shortcut = snufilter.slice(0, idx).toLowerCase();
             var query = snufilter.slice(idx + 1);
@@ -236,7 +238,6 @@ function addSlashCommandListener() {
                 hideSlashCommand();
             }
             else{
-                
                 snuShowSlashCommandHints(originalShortcut);
             }
 
@@ -250,7 +251,7 @@ function snuShowSlashCommandHints(shortcut) {
         return propertyName.indexOf(shortcut) === 0;
     });
     var html = "";
-    for (i = 0; i < propertyNames.length && i < 5; i++) {
+    for (i = 0; i < propertyNames.length && i < 7; i++) {
         html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + propertyNames[i] + "</span> - " +
             "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
                 .replace(/</g, '&lt;')
