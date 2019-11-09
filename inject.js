@@ -9,7 +9,7 @@ var snuslashcommands = {
     "uh": "* Show hidden fields",
     "env": "* Open this page in <instance>",
     "token": "* Send g_ck token to VS Code",
-    "code": "* Code search <search>",
+    "code": "* Beta <search>",
     "pop": "* Pop in/out classic UI",
     "search" : "text_search_exact_match.do?sysparm_search=$0 Global search <search>",
     "s2": "* Toggle Select2 for Application and Updateset picker",
