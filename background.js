@@ -390,6 +390,27 @@ function sendToggleAtfHelper() {
         });
 }
 
+function codeSearch(message) {
+    var url = chrome.runtime.getURL("codesearch.html");
+    chrome.tabs.create(
+        { 
+            'url': url,
+            'active': true
+        },
+        function(tab) {
+          var handler = function(tabId, changeInfo) {
+            if(tabId === tab.id && changeInfo.status === "complete"){
+              chrome.tabs.onUpdated.removeListener(handler);
+              chrome.tabs.sendMessage(tabId, {message});
+            }
+          };
+          chrome.tabs.onUpdated.addListener(handler);
+          chrome.tabs.sendMessage(tab.id, {message});
+        }
+      ); 
+}
+
+
 function createScriptSyncTab() {
 
     getFromSyncStorageGlobal("synctab", function (tid) {
@@ -902,6 +923,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
     if (message.event == "pop"){
         pop();
+    }
+    else if (message.event == "codesearch"){
+        codeSearch(message);
     }
     else if (message.event == "addslashcommand"){
         getFromSyncStorageGlobal("snusettings", function(settings){

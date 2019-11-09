@@ -28,13 +28,17 @@
     },
     "content_scripts": [
         {
-            "matches": ["*://*/*"],
+            "matches": [
+                "*://*/*"
+            ],
             "js": [
                 "content_script_parent.js"
             ]
         },
         {
-            "matches": ["*://*/*"],
+            "matches": [
+                "*://*/*"
+            ],
             "js": [
                 "js/jquery.js",
                 "content_script_all_frames.js"
@@ -70,6 +74,9 @@
                 "mac": "Command+4"
             },
             "description": "Open VS Code ScriptSync tab"
+        },
+        "slashcommand": {
+            "description": "Open slashcommand popup"
         }
     },
     "page_action": {
@@ -81,7 +88,9 @@
             "48": "images/icon48.png",
             "128": "images/icon128.png"
         },
-        "show_matches": ["*://*/*"]
+        "show_matches": [
+            "*://*/*"
+        ]
     },
     "options_ui": {
         "page": "options.html",

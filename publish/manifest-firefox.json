@@ -83,6 +83,9 @@
                 "mac": "Command+4"
             },
             "description": "Open VS Code ScriptSync tab"
+        },
+        "slashcommand": {
+            "description": "Open slashcommand popup"
         }
     },
     "page_action": {

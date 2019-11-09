@@ -9,7 +9,9 @@ var snuslashcommands = {
     "uh": "* Show hidden fields",
     "env": "* Open this page in <instance>",
     "token": "* Send g_ck token to VS Code",
+    "code": "* Code search <search>",
     "pop": "* Pop in/out classic UI",
+    "search" : "text_search_exact_match.do?sysparm_search=$0 Global search <search>",
     "s2": "* Toggle Select2 for Application and Updateset picker",
     "start": "/nav_to.do New tab",
     "db": "$pa_dashboard.do Dashboards",
@@ -121,18 +123,39 @@ function addSlashCommandListener() {
                     hideSlashCommand();
                     return;
                 }
-                if (shortcut == "token") {
+                else if (shortcut == "token") {
                     postRequestToScriptSync();
                     showAlert("Trying to send current token to VS Code", "info");
                     hideSlashCommand();
                     return;
                 }
-                if (shortcut == "s2") {
+                else if (shortcut == "code") {
+                    
+                    var data = {};
+                    data.instance = window.location.host.split('.')[0];
+                    data.url = window.location.origin;
+                    data.g_ck = g_ck;
+                    data.query = query;
+
+                    var event = new CustomEvent(
+                        "snutils-event",
+                        {
+                            detail: {
+                                event: "codesearch",
+                                command: data
+                            }
+                        }
+                    );
+                    window.top.document.dispatchEvent(event);
+                    hideSlashCommand();
+                    return;
+                }
+                else if (shortcut == "s2") {
                     if (typeof snuS2Ify != 'undefined') snuS2Ify();
                     hideSlashCommand();
                     return;
                 }
-                if (shortcut == "pop") {
+                else if (shortcut == "pop") {
                     var event = new CustomEvent(
                         "snutils-event",
                         {
@@ -353,6 +376,8 @@ function snuSettingsAdded() {
     }
 
 }
+
+
 
 
 function doubleClickToShowFieldOrReload() {

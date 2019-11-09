@@ -1,0 +1,44 @@
+.card{
+    border-radius: 0;
+}
+.card-header {
+    padding: 0;
+}
+
+.card-body {
+    padding: 6px;
+}
+
+.card-body ul.record {
+    background-color: #e7e9eb;;
+}
+
+.card-body ul.record li {
+    list-style: none;
+    padding: 6px;
+    margin: 0;
+}
+
+.card-body ul.record pre {
+    background-color: #FFFFFF;
+    line-height: 1.42857;
+    word-break: break-all;
+    word-wrap: break-word;
+    color: #485563;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.card-body ul.record pre strong {
+    background-color: #fff1b2;
+    border: 1px solid #ffe366;
+}
+
+.record {
+    margin:5px;
+    padding: 3px;
+}
+
+.smaller{
+    font-size:8pt;
+}
