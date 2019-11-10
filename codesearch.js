@@ -14,9 +14,10 @@
 
         jQuery('#spnInstance').text(command["instance"]);
 
-        window.title = command["instance"] + " - Codesearch"
-
-        executeCodeSearch(command.url, command.g_ck, command.query, "");
+        window.title = command["instance"] + " - Codesearch";
+        if (command["g_ck"]){
+            executeCodeSearch(command.url, command.g_ck, command.query, "");
+        }
       });
 
       jQuery('#btnSearch').on('click', doSearch);
@@ -120,6 +121,13 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
 
 
 function executeCodeSearch(url, gck, searchTerm, table) {
+
+    if (searchTerm.length < 4){
+        jQuery('#searchcontent').html("Searchterm must be 4 characters or more");
+        return;
+    }
+    jQuery('#searchcontent').html("Searching, please wait...");
+
 	var endpoint = url + '/api/sn_codesearch/code_search/search?term=' + searchTerm + '&search_all_scopes=true&search_group=sn_devstudio.Studio Search Group';
 	var locations = [];
 	if(typeof table != 'string' || (typeof table == 'string' && table.trim() == '')) {

@@ -84,6 +84,7 @@ function addSlashCommandListener() {
             var thisHost = window.location.host;
             var idx = snufilter.indexOf(' ')
             var noSpace = (snufilter.indexOf(' ') == -1);
+            var selectFirst = (e.key == " " || e.key == "Tab") && !snufilter.includes(" ");
             var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
             if (noSpace) idx = snufilter.length;
             var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : "" ))).toLowerCase();
@@ -263,7 +264,7 @@ function addSlashCommandListener() {
                 hideSlashCommand();
             }
             else{
-                snuShowSlashCommandHints(originalShortcut);
+                snuShowSlashCommandHints(originalShortcut, selectFirst, e);
             }
 
         }
@@ -271,10 +272,21 @@ function addSlashCommandListener() {
     });
 }
 
-function snuShowSlashCommandHints(shortcut) {
+function snuShowSlashCommandHints(shortcut, selectFirst, e) {
     var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         return propertyName.indexOf(shortcut) === 0;
     });
+
+    if (propertyNames.length > 0 && selectFirst){ //select first hit when tap or space pressed
+        if (e) e.preventDefault();
+        shortcut = propertyNames[0];
+        propertyNames.splice(1);
+        var fltr  = window.top.document.getElementById('snufilter');
+        if (!fltr.value.includes(" ")){
+            fltr.value = "/" + shortcut + ' ';
+        }
+    }
+
     var html = "";
     for (i = 0; i < propertyNames.length && i < 7; i++) {
         html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + propertyNames[i] + "</span> - " +
@@ -1332,7 +1344,7 @@ function showSlashCommand() {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints("");
+        snuShowSlashCommandHints("", false, false);
         setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
     }
     else {
