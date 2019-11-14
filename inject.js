@@ -117,8 +117,7 @@ function addSlashCommandListener() {
                     }
 
                     showAlert("Slashcommands <a href='https://www.youtube.com/watch?v=X6HLCV_ptQM&list=PLTyELlWS-zjSIPIs4ukRCrqc4LRHva6-L' target='_blank'>Playlist on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                        "Go to settings tab in popup to manage custom / commands <br />Built in commands: /tn - technical names;  /uh UnHide all fields; /env [instancenname] Open page in other instance; <br />" +
-                        "/add <name> Add current page as slashcommand; /token Send token to VS Code, when VS Code token is expired <br />" +
+                        "Go to settings tab in popup to manage custom / commands <br />" +
                         "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
 
                     hideSlashCommand();
@@ -1333,7 +1332,9 @@ function hideSlashCommand() {
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
         if (window.top.document.getElementById('filter') != null) {
-            window.top.document.getElementById('filter').focus();
+             if (event.currentTarget.value.length <= 1){
+                window.top.document.getElementById('filter').focus();
+             }
         }
     }
     return true;

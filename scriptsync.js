@@ -94,7 +94,7 @@ $(document).ready(function () {
                 } else if (wsObj.action == 'linkAppToVSCode') {
                     // no need to log more..
                 } else if ('instance' in wsObj) {
-                    updateRecord(wsObj);
+                    updateRecord(wsObj, true);
                 } else {
                     t.row.add([
                         new Date(), 'WebSocket', JSON.parse(evt.data)                        
@@ -160,6 +160,47 @@ function requestRecord(requestJson) {
     };
     client.send();
 }
+
+function requestToken(scriptObj) {
+    t.row.add([
+        new Date(), 'WebSocket', 'Trying to acquire new token from instance'
+    ]).draw(false);
+
+    var client = new XMLHttpRequest();
+    client.open("get", scriptObj.instance.url + '/sn_devstudio_/v1/get_publish_info.do');
+    client.setRequestHeader('Accept', 'application/json');
+    client.setRequestHeader('Content-Type', 'application/json');
+    client.setRequestHeader("Authorization" , "BasicCustom");
+    
+    client.onreadystatechange = function () {
+        if (this.readyState == this.DONE) {
+            var resp = JSON.parse(this.response);
+            if (resp.hasOwnProperty('ck')) {
+                scriptObj.instance.g_ck = resp.ck;
+
+                var data = {
+                    "action" : "writeInstanceSettings",
+                    "instance" : scriptObj.instance
+                }
+                increaseTitlecounter();
+                ws.send(JSON.stringify(data));
+
+                t.row.add([
+                    new Date(), 'WebSocket', 'New token acquired from: ' + scriptObj.instance.name
+                ]).draw(false);
+                updateRecord(scriptObj,false)
+            }
+            else{
+                t.row.add([
+                    new Date(), 'WebSocket', 'Error: ' + JSON.stringify(this.response)
+                ]).draw(false);
+            }
+        }
+    };
+    client.send();
+}
+
+
 
 function requestRecords(requestJson) {
     var client = new XMLHttpRequest();
@@ -281,12 +322,11 @@ function refreshToken(instanceObj) {
             ]).draw(false);           
         }
     });
-
 }
 
 
 
-function updateRecord(scriptObj) {
+function updateRecord(scriptObj, canRefreshToken) {
     var client = new XMLHttpRequest();
     client.open("put", scriptObj.instance.url + '/api/now/table/' +
         scriptObj.tableName + '/' + scriptObj.sys_id +
@@ -326,15 +366,18 @@ function updateRecord(scriptObj) {
 
             } else {
 
-                // var resp = JSON.parse(this.response);
+                var resp = JSON.parse(this.response);
 
-                // if (resp.hasOwnProperty('error')){
-                //     if (resp.error.hasOwnProperty('message')){
-                //         if (resp.error.message == "User Not Authenticated"){
-                //             refreshToken(scriptObj.instance);
-                //         }
-                //     }
-                // }
+                if (resp.hasOwnProperty('error')){
+                    if (resp.error.hasOwnProperty('message')){
+                        // if (resp.error.message == "User Not Authenticated"){
+                        //     if (canRefreshToken){
+                        //         requestToken(scriptObj);
+                        //         return;
+                        //     }
+                        // }
+                    }
+                }
 
                 t.row.add([
                     new Date(), 'VS Code', this.response
