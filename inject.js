@@ -841,7 +841,7 @@ function snuPaFormulaLinks(){
 
     if (typeof jQuery == 'undefined') return; 
     if (jQuery('#pa_indicators\\.formula').length){
-        setInterval(snuPaFormulaLinks,4000);
+        setTimeout(snuPaFormulaLinks,4000);
         
     }
     else{
@@ -851,10 +851,14 @@ function snuPaFormulaLinks(){
     jQuery('#snupaformulalinks').remove();
 
     var snuFormulas = [];
-    g_form.getValue('formula').match(/(?<=\[\[)(.*?)(?=\]\])|(?<=\{\{)(.*?)(?=\}\})/g).forEach((elm) => {
-        snuFormulas.push("> <a href='/pa_indicators.do?sysparm_refkey=name&sys_id=" + encodeURI(elm.split(/ \/ | > /)[0]) 
-        + "' target='formula'>" + elm.split(/ \/ | > /)[0] + "</a>");
-    });
+
+    var matches = g_form.getValue('formula').match(/(?<=\[\[)(.*?)(?=\]\])|(?<=\{\{)(.*?)(?=\}\})/g);
+    if (matches){
+        matches.forEach((elm) => {
+            snuFormulas.push("> <a href='/pa_indicators.do?sysparm_refkey=name&sys_id=" + encodeURI(elm.split(/ \/ | > /)[0]) 
+            + "' target='formula'>" + elm.split(/ \/ | > /)[0] + "</a>");
+        });
+    }
     snuFormulas = Array.from(new Set(snuFormulas));
     var formulaHtml = snuFormulas.length ? snuFormulas.join("<br />\n") : "> No Indicators found in formula...<br />";
     jQuery('#pa_indicators\\.formula').after(
