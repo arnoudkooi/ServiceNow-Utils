@@ -353,6 +353,7 @@ function snuSettingsAdded() {
         addStudioSearch();
         addSgStudioPlatformLink();
         enhanceNotFound();
+        snuPaFormulaLinks();
 
     }
 
@@ -835,6 +836,32 @@ function showSelectFieldValues() {
         jqEl.html(el.text + ' | ' + el.name);
     });
 }
+
+function snuPaFormulaLinks(){
+
+    if (typeof jQuery == 'undefined') return; 
+    if (jQuery('#pa_indicators\\.formula').length){
+        setInterval(snuPaFormulaLinks,4000);
+        
+    }
+    else{
+        return false;
+    }
+
+    jQuery('#snupaformulalinks').remove();
+
+    var snuFormulas = [];
+    g_form.getValue('formula').match(/(?<=\[\[)(.*?)(?=\]\])|(?<=\{\{)(.*?)(?=\}\})/g).forEach((elm) => {
+        snuFormulas.push("> <a href='/pa_indicators.do?sysparm_refkey=name&sys_id=" + encodeURI(elm.split(/ \/ | > /)[0]) 
+        + "' target='formula'>" + elm.split(/ \/ | > /)[0] + "</a>");
+    });
+    snuFormulas = Array.from(new Set(snuFormulas));
+    var formulaHtml = snuFormulas.length ? snuFormulas.join("<br />\n") : "> No Indicators found in formula...<br />";
+    jQuery('#pa_indicators\\.formula').after(
+        "<div id='snupaformulalinks' style='border:1px solid #e5e5e5; padding:8px;' >Indicators in formula (Shown by SN Utils)<br />" +
+        formulaHtml + "</div>");
+}
+
 
 function searchLargeSelects() {
 
