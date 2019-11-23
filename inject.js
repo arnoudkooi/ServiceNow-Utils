@@ -45,8 +45,13 @@ setShortCuts();
 
 if (typeof jQuery != "undefined") {
     jQuery(function () {
-        if (typeof angular != "undefined")
-            setTimeout(getListV3Fields, 2000);
+        if (typeof angular != "undefined"){
+            setTimeout(function(){
+                getListV3Fields();
+                updateReportDesignerQuery();
+            }, 2000);
+            
+        }
         else
             doubleClickToSetQueryListV2();
 
@@ -1207,6 +1212,24 @@ function getListV3Fields() {
         console.log(err);
 
     }
+}
+
+
+function updateReportDesignerQuery(){
+    
+    if(location.pathname != "/sys_report_template.do") return; 
+    jQuery('div.breadcrumb-container').on("dblclick", function (event) {
+        var qry =  angular.element('#run-report').scope().main.report.sysparm_query;
+        var newValue = prompt('Filter condition:', qry);
+    
+        if (newValue !== qry && newValue !== null) {
+            angular.element('#run-report').scope().main.report.sysparm_query = newValue || '';
+            setTimeout(function () {
+                angular.element('#run-report').scope().main.runReport(true,'run');
+                angular.element('#run-report').scope().$broadcast('snfilter:initialize_query', newValue);
+            }, 300);
+        }
+    });
 }
 
 function loadIframe(url) {
