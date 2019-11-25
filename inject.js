@@ -857,11 +857,12 @@ function snuPaFormulaLinks(){
 
     var snuFormulas = [];
 
-    var matches = g_form.getValue('formula').match(/(?<=\[\[)(.*?)(?=\]\])|(?<=\{\{)(.*?)(?=\}\})/g);
+    var matches = g_form.getValue('formula').match(/\[\[(.*?)\]\]|\{\{(.*?)\}\}/g);
     if (matches){
         matches.forEach((elm) => {
-            snuFormulas.push("> <a href='/pa_indicators.do?sysparm_refkey=name&sys_id=" + encodeURI(elm.split(/ \/ | > /)[0]) 
-            + "' target='formula'>" + elm.split(/ \/ | > /)[0] + "</a>");
+            var nme = elm.replace(/\[\[|\]\]|\{\{|\}\}/g,"").split(/ \/ | > /)[0]
+            snuFormulas.push("> <a href='/pa_indicators.do?sysparm_refkey=name&sys_id=" + encodeURI(nme) 
+            + "' target='formula'>" + nme + "</a>");
         });
     }
     snuFormulas = Array.from(new Set(snuFormulas));
