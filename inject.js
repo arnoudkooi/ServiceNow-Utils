@@ -1074,13 +1074,12 @@ function newFromPopupToTab() {
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
-        if (g_form.getViewName() == "sys_ref_list"){
-            var newUrl = window.location.href.replace("sysparm_view=sys_ref_list","sysparm_view=default");
-            var html = "<span title='Helper links by SN Utils' style='margin-left:5px; font-weight:lighter !important'><a href='"+newUrl+"' >Default view</a> | <a href='"+newUrl+"' target='_blank'>New tab</a></span>"
-            
+
+        if (window.opener && window.opener !== window && !window.location.href.includes("snutils=true")) {
+            var newUrl = window.location.href.replace("sysparm_view=sys_ref_list","sysparm_view=default") + "&snutils=true";
+            var html = "<span title='Helper link by SN Utils' style='margin-left:5px;'><a href='"+newUrl+"' style='font-weight:lighter' target='_blank'>Open in new tab</a></span>"
             jQuery('.navbar-header').after(html);
         }
-
     }
 }
 
