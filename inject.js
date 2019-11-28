@@ -1632,19 +1632,27 @@ function addSgStudioPlatformLink() {
             "button": "sys_sg_button",
             "smartButton": "sys_sg_button",
             "navigation": "sys_sg_button",
-            "dataItem": "sys_sg_data_item"
+            "dataItem": "sys_sg_data_item",
+            "appletLauncherPage": "sys_sg_applet_launcher"
         }
 
         var arr = location.hash.split("/");
         if (match.hasOwnProperty(arr[1])) {
-            var elm = document.querySelector("[class^='titlebar__title_'], .titlebar__title");
-            if (elm)
-                elm.innerHTML = "<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + arr[2] + "'>" + elm.innerText + "</a>";
 
-            //add link to enable sluchbucket doubleclick 
-            if (arr[1] == "applet")
-                $("div[class^='FieldMappingBucket__field']").find('div:first p:first')
-                    .append('<span class="snu-add-dblclick"><a href="javascript:snuAddDblClick()" title="Try to add doubleclick to toggle field slushbucket (Added by SN Utils)">Add doubleblclick</a></span>');
+            var sysId = arr[2];
+            console.log(arr)
+            if (sysId.includes("{")){
+                try{
+                sysId = JSON.parse(decodeURIComponent(sysId))['sysId'];
+                } catch(e){
+                    console.log(e);
+                };
+            }
+
+            var elm = document.querySelector("h1");
+            if (elm)
+                elm.innerHTML = "<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + sysId + "'>" + elm.innerText + "</a>";
+
         }
 
         if (!document.querySelector('.snu-platformlink'))
