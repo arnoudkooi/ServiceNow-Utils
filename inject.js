@@ -100,11 +100,11 @@ function addSlashCommandListener() {
             var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0].replace(/\$0/g, query);
 
             if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
-                snufilter = targeturl.substr(2);
+                snufilter = snuslashcommands[shortcut].substr(2);
                 var idx = snufilter.indexOf(' ')
                 if (idx == -1) idx = snufilter.length;
                 shortcut = snufilter.slice(0, idx).toLowerCase();
-                query = snufilter.slice(idx + 1);
+                query = snufilter.slice(idx + 1).replace(/ .*/,'');;
                 targeturl = (snuslashcommands[shortcut] || "").replace(/\$0/g, query);
             }
 
