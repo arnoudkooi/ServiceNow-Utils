@@ -359,6 +359,7 @@ function snuSettingsAdded() {
         addSgStudioPlatformLink();
         enhanceNotFound();
         snuPaFormulaLinks();
+        snuTableCollectionLink();
         newFromPopupToTab();
 
     }
@@ -872,6 +873,16 @@ function snuPaFormulaLinks(){
         "<div id='snupaformulalinks' style='border:1px solid #e5e5e5; padding:8px;' >Indicators in formula (Shown by SN Utils)<br />" +
         formulaHtml + "</div>");
 }
+
+function snuTableCollectionLink(){
+    if (location.pathname != "/sys_db_object.do") return;
+    if (typeof jQuery == 'undefined') return; 
+    var tbl = g_form.getValue('name');
+    jQuery('.related_links_container').append("<li style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='sys_dictionary.do?sysparm_query=name=" + 
+        tbl + "^internal_type=collection^' title='Link added by SN Utils (This is NOT a UI Action!)' >Collection Dictionary Entry</a></li>");
+    
+}
+
 
 
 function searchLargeSelects() {
