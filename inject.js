@@ -279,7 +279,9 @@ function addSlashCommandListener() {
 function snuShowSlashCommandHints(shortcut, selectFirst, e) {
     var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         return propertyName.indexOf(shortcut) === 0;
-    });
+    }).sort();
+
+
 
     if (propertyNames.length > 0 && selectFirst){ //select first hit when tap or space pressed
         if (e) e.preventDefault();
