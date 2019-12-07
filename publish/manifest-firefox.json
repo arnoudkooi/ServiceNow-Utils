@@ -1,5 +1,5 @@
 {
-    "name": "SN Utils",
+    "name": "SN Utils - Tools for ServiceNow",
     "short_name": "SN Utils",
     "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
@@ -8,6 +8,7 @@
         "activeTab",
         "https://*.service-now.com/*",
         "declarativeContent",
+        "contextualIdentities",
         "tabs",
         "storage",
         "contextMenus",
@@ -89,7 +90,7 @@
         }
     },
     "page_action": {
-        "default_title": "ServiceNow Utils",
+        "default_title": "SN Utils",
         "default_popup": "popup.html",
         "default_icon": {
             "16": "images/icon16.png",

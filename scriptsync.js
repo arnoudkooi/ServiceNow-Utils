@@ -419,7 +419,7 @@ function setIntervalX(callback, delay, repetitions) {
 var eventCount = 0;
 
 function increaseTitlecounter() {
-    document.title = "[" + (++eventCount) + "] Scriptsync ServiceNow Utils by arnoudkooi.com";
+    document.title = "[" + (++eventCount) + "] Scriptsync SN Utils by arnoudkooi.com";
 }
 
 function changeFavicon(src) {

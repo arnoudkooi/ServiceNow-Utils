@@ -28,11 +28,10 @@ var isNoRecord = true;
 document.addEventListener('DOMContentLoaded', function () {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabid = tabs[0].id;
+        var cookieStoreId = tabs[0].cookieStoreId || '';
         urlFull = tabs[0].url;
         bgPage = chrome.extension.getBackgroundPage();
-        bgPage.getBrowserVariables(tabid);
-
-
+        bgPage.getBrowserVariables(tabid, cookieStoreId);
     });
     document.querySelector('#firefoxoptions').href = chrome.runtime.getURL("options.html");
 
@@ -142,9 +141,6 @@ function prepareJsonNodes() {
     });
 }
 
-
-
-
 function getParameterByName(name, url) {
     if (!url) url = window.location.href.toLowerCase();
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -154,8 +150,6 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
-
-
 
 //Set variables, called by BG page after calling getBrowserVariables
 //Also attach event handlers.
@@ -748,7 +742,6 @@ function setDataExplore(nme) {
         event.preventDefault();
         chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
     });
-
 
     $('#waitingdataexplore').hide();
 

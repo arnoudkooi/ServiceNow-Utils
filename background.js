@@ -2,6 +2,7 @@ var onprem = false;
 //set onprem true if publishing on prem version, KEEP the onprem var on line 1!!
 var popup;
 var tabid;
+var cookieStoreId;
 var g_ck;
 var sysId;
 var url;
@@ -390,13 +391,14 @@ function sendToggleAtfHelper() {
         });
 }
 
-function codeSearch(message) {
+function codeSearch(message, cookieStoreId) {
     var url = chrome.runtime.getURL("codesearch.html");
-    chrome.tabs.create(
-        { 
-            'url': url,
-            'active': true
-        },
+    var createObj = {
+        'url': url,
+        'active': true
+    }
+    if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    chrome.tabs.create(createObj,
         function(tab) {
           var handler = function(tabId, changeInfo) {
             if(tabId === tab.id && changeInfo.status === "complete"){
@@ -411,17 +413,19 @@ function codeSearch(message) {
 }
 
 
-function createScriptSyncTab() {
+function createScriptSyncTab(cookieStoreId) {
 
     getFromSyncStorageGlobal("synctab", function (tid) {
         if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
             chrome.tabs.get(tid, function () {
                 if (chrome.runtime.lastError) {
                     var url = chrome.runtime.getURL("scriptsync.html");
-                    chrome.tabs.create({
+                    var createObj = {
                         'url': url,
                         'active': false
-                    }, function (t) {
+                    }
+                    if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+                    chrome.tabs.create(createObj, function (t) {
                         setToChromeSyncStorageGlobal("synctab", t.id);
                     });
                 } else {
@@ -432,11 +436,14 @@ function createScriptSyncTab() {
             });
         } else {
             var url = chrome.runtime.getURL("scriptsync.html");
-            chrome.tabs.create({
+            var createObj = {
                 'url': url,
                 'active': false
-            }, function (t) {
-                setToChromeSyncStorageGlobal("synctab", t.id);
+            }
+            if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+            chrome.tabs.create(createObj,
+                function (t) {
+                    setToChromeSyncStorageGlobal("synctab", t.id);
             });
         }
     });
@@ -446,6 +453,10 @@ function createScriptSyncTab() {
 function openVersions(e, f) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var baseurl = tokens.join('/');
+    var cookieStoreId = '';
+    if (f.hasOwnProperty('cookieStoreId')){
+        cookieStoreId = f.cookieStoreId;
+    }
 
     var url = e.frameUrl || e.pageUrl;
     var urlParts = url.split((/[?/&]+/));
@@ -464,7 +475,7 @@ function openVersions(e, f) {
 
     if (sys_id) {
 
-        getGck(function () {
+        getGck(cookieStoreId, function () {
             sys_id = sysId || sys_id;
             loadXMLDoc(g_ck,
                 baseurl + "/api/now/stats/sys_update_version?sysparm_count=true&sysparm_query=name=" + updateName + sys_id,
@@ -472,10 +483,15 @@ function openVersions(e, f) {
                 function (jsn) {
                     if (typeof jsn == "undefined" || jsn == "error")
                         alert("No access to Update Versions");
-                    else if (Number(jsn.result.stats.count))
-                        chrome.tabs.create({
-                            "url": baseurl + "/sys_update_version_list.do?sysparm_query=name=" + updateName + sys_id + "^ORDERBYDESCsys_recorded_at"
-                        });
+                    else if (Number(jsn.result.stats.count)){
+                        var createObj = {
+                            'url': baseurl + "/sys_update_version_list.do?sysparm_query=name=" + updateName + sys_id + "^ORDERBYDESCsys_recorded_at"
+                        }
+                        if (cookieStoreId){
+                            createObj.cookieStoreId =cookieStoreId; 
+                        }
+                        chrome.tabs.create(createObj);
+                    }
                     else
                         alert("No Update versions found for record: " + updateName + sys_id);
                 });
@@ -538,57 +554,77 @@ function clearCookies(e, tabid, target) {
 
 function openUrl(e, f, u) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
-    var url = tokens.join('/') + u;
-    chrome.tabs.create({
-        "url": url
-    });
+    var createObj = {
+        'url': tokens.join('/') + u
+    }
+    if (f.hasOwnProperty('cookieStoreId')){
+        createObj.cookieStoreId = f.cookieStoreId;
+    }
+    chrome.tabs.create(createObj);
 }
 
-function openSearch(e) {
-    var tokens = e.pageUrl.split('/').slice(0, 3),
-        URL = tokens.join('/');
-
+function openSearch(e, f) {
+    var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
-    if (srch.length < 100)
-        chrome.tabs.create({
-            url: URL + "/textsearch.do?sysparm_search=" + srch
-        });
+    var createObj = {
+        'url': tokens.join('/') + "/textsearch.do?sysparm_search=" + srch
+    }
+    if (f.hasOwnProperty('cookieStoreId')){
+        createObj.cookieStoreId = f.cookieStoreId;
+    }
+    if (srch.length < 100){
+        chrome.tabs.create(createObj);
+    }
+        
 }
 
-function openScriptInclude(e) {
-    var tokens = e.pageUrl.split('/').slice(0, 3),
-        URL = tokens.join('/');
+function openScriptInclude(e,f) {
+    var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
-    if (srch.length < 40)
-        chrome.tabs.create({
-            url: URL + "/sys_script_include.do?sysparm_refkey=name&sys_id=" + srch
-        });
+    var createObj = {
+        'url': tokens.join('/') + "/sys_script_include.do?sysparm_refkey=name&sys_id=" + srch
+    }
+    if (f.hasOwnProperty('cookieStoreId')){
+        createObj.cookieStoreId = f.cookieStoreId;
+    }
+    if (srch.length < 100){
+        chrome.tabs.create(createObj);
+    }
 }
 
 function openTableList(e) {
-    var tokens = e.pageUrl.split('/').slice(0, 3),
-        URL = tokens.join('/');
+
+    var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
-    if (srch.length < 40)
-        chrome.tabs.create({
-            url: URL + "/" + srch + "_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)"
-        });
+    var createObj = {
+        'url': tokens.join('/') + "/" + srch + "_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)"
+    }
+    if (f.hasOwnProperty('cookieStoreId')){
+        createObj.cookieStoreId = f.cookieStoreId;
+    }
+    if (srch.length < 50){
+        chrome.tabs.create(createObj);
+    }
+
 }
 
 function openPropertie(e) {
-    var tokens = e.pageUrl.split('/').slice(0, 3),
-        URL = tokens.join('/');
+
+    var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
-    if (srch.length < 100)
-        chrome.tabs.create({
-            url: URL + "/sys_properties_list.do?sysparm_query=name=" + srch
-        });
+    var createObj = {
+        'url': tokens.join('/') +  "/sys_properties_list.do?sysparm_query=name=" + srch
+    }
+    if (f.hasOwnProperty('cookieStoreId')){
+        createObj.cookieStoreId = f.cookieStoreId;
+    }
+    if (srch.length < 50){
+        chrome.tabs.create(createObj);
+    }
+
 }
 
-
 function pop() {
-
-
     chrome.tabs.query({
         active: true,
         currentWindow: true
@@ -610,7 +646,6 @@ function pop() {
             });
         }
     });
-
 }
 
 
@@ -636,7 +671,23 @@ chrome.runtime.onMessageExternal.addListener(
 
 
 //Retrieve variables from browser tab, passing them back to popup
-function getBrowserVariables(tid) {
+function getBrowserVariables(tid, cStoreId) {
+    
+    // if (cStoreId){ //firefox only, rewrite the cookie to the one of the current container
+    //     cookieStoreId = cStoreId;
+    //     browser.contextualIdentities.get(cookieStoreId).then(function(r){
+    //         console.log(r)
+    //         browser.cookies.getAll({"storeId" : cookieStoreId, "url" : url}).then(
+    //             function(c){
+
+    //                 console.log(c);
+    //                 cookie = c;
+    //             }
+    //         )
+            
+    //     })
+    // }
+
     tabid = tid;
     popup = chrome.extension.getViews({
         type: "popup"
@@ -654,14 +705,17 @@ function getBrowserVariables(tid) {
 }
 
 //get g_ck token from browser, incase it didnt load via popup
-function getGck(callback) {
+function getGck(cookieStoreId, callback) {
     if (g_ck && sysId)
         callback();
     else {
-        chrome.tabs.query({
-            active: true,
-            currentWindow: true
-        }, function (tabs) {
+        var queryObj = {
+            "active": true,
+            "currentWindow": true
+        }
+        if (cookieStoreId) queryObj.cookieStoreId = cookieStoreId;
+        chrome.tabs.query(queryObj, 
+            function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "getVars",
                 myVars: "g_ck,NOW.sysId"
@@ -919,13 +973,17 @@ function getFromSyncStorageGlobal(theName, callback) {
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.event == "scriptsync"){
-        createScriptSyncTab();
+        var cookieStoreId = '';
+        if (sender.tab.hasOwnProperty('cookieStoreId')){
+            cookieStoreId = sender.tab.cookieStoreId;
+        }
+        createScriptSyncTab(cookieStoreId);
     }
     if (message.event == "pop"){
         pop();
     }
-    else if (message.event == "codesearch"){
-        codeSearch(message);
+    else if (message.event == "codesearch"){      
+        codeSearch(message, cookieStoreId);
     }
     else if (message.event == "addslashcommand"){
         getFromSyncStorageGlobal("snusettings", function(settings){

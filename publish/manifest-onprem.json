@@ -80,7 +80,7 @@
         }
     },
     "page_action": {
-        "default_title": "ServiceNow Utils",
+        "default_title": "SN Utils",
         "default_popup": "popup.html",
         "default_icon": {
             "16": "images/icon16.png",
