@@ -567,7 +567,7 @@ function openSearch(e, f) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
     var createObj = {
-        'url': tokens.join('/') + "/textsearch.do?sysparm_search=" + srch
+        'url': tokens.join('/') + "/text_search_exact_match.do?sysparm_search=" + srch
     }
     if (f.hasOwnProperty('cookieStoreId')){
         createObj.cookieStoreId = f.cookieStoreId;
@@ -592,7 +592,7 @@ function openScriptInclude(e,f) {
     }
 }
 
-function openTableList(e) {
+function openTableList(e,f) {
 
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
@@ -608,7 +608,7 @@ function openTableList(e) {
 
 }
 
-function openPropertie(e) {
+function openPropertie(e,f) {
 
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
