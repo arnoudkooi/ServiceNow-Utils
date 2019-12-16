@@ -765,8 +765,11 @@ function addTechnicalNames() {
             jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
                 jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
-
-                var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                try{
+                    var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                } catch(e){
+                    return true; //issue #42
+                }
                 jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var btn = '';
