@@ -295,17 +295,17 @@ function snuShowSlashCommandHints(shortcut, selectFirst, e) {
 
     var html = "";
     for (i = 0; i < propertyNames.length && i < 7; i++) {
-        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + propertyNames[i] + "</span> - " +
+        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + propertyNames[i] + "</span> " +
             "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;') + "</span></li>"
     }
     if (!html && shortcut.replace(/ /g, '').length == 32) {
-        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/sys_id</span> - " +
+        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/sys_id</span> " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
     if (!html && shortcut.length > 5) {
-        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + shortcut + "</span> - " +
+        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + shortcut + "</span> " +
             "<span class='cmdlabel'>Table search</span></li>"
     }
     window.top.document.getElementById('snuhelper').innerHTML = html;
@@ -967,15 +967,15 @@ function setShortCuts() {
 
     var htmlFilter = document.createElement('div')
     htmlFilter.className = 'snutils';
-    htmlFilter.style = 'z-index:10000; display:none; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:white;';
+    htmlFilter.style = 'font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; display:none; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px;';
     htmlFilter.innerHTML = `<style>
     ul#snuhelper { list-style-type: none; padding-left: 2px; } 
     ul#snuhelper li {margin-top:2px}
-    span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; cursor:pointer}
-    input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; width:100%; border: 1px solid #E5E5E5; margin:4px 2px; }
-    span.cmdlabel { color: black;}
+    span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; min-width: 40px; cursor: pointer; display: inline-block;}
+    input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; font-weight:bold; width:100%; border: 1px solid #E5E5E5; margin:4px 2px; }
+    span.cmdlabel { color: #222222;}
     </style>
-    <span style="font-size:10pt; font-weight:bold"><a href="javascript:hideSlashCommand()">[x]</a> SN Utils Slashcommands<br /></span>
+    <span style="font-weight:bold"><a style="font-size:10pt; color: #1f8476;" href="javascript:hideSlashCommand()">[x]</a> SN Utils Slashcommands<br /></span>
     <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="search" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
 `

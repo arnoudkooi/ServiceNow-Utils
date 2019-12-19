@@ -98,7 +98,7 @@ var menuItems = [{
 {
     "id": "propertie",
     "parentId": "goto",
-    "title": "Propertie: %s",
+    "title": "Property: %s",
     contexts: ["selection"],
     "onclick": openPropertie
 },
