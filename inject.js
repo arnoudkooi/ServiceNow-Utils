@@ -39,10 +39,6 @@ var snuslashcommands = {
     "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application"
 }
 
-setShortCuts();
-
-
-
 if (typeof jQuery != "undefined") {
     jQuery(function () {
         if (typeof angular != "undefined"){
@@ -339,6 +335,9 @@ function snuSettingsAdded() {
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
+    if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
+
+    setShortCuts();
 
 
     bindPaste(snusettings.nouielements == false);
@@ -965,20 +964,42 @@ function searchLargeSelects() {
 
 function setShortCuts() {
 
-    var htmlFilter = document.createElement('div')
-    htmlFilter.className = 'snutils';
-    htmlFilter.style = 'font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; display:none; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px;';
-    htmlFilter.innerHTML = `<style>
-    ul#snuhelper { list-style-type: none; padding-left: 2px; } 
-    ul#snuhelper li {margin-top:2px}
-    span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; min-width: 40px; cursor: pointer; display: inline-block;}
-    input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; font-weight:bold; width:100%; border: 1px solid #E5E5E5; margin:4px 2px; }
-    span.cmdlabel { color: #222222;}
-    </style>
-    <span style="font-weight:bold"><a style="font-size:10pt; color: #1f8476;" href="javascript:hideSlashCommand()">[x]</a> SN Utils Slashcommands<br /></span>
-    <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="search" placeholder='SN Utils Slashcommand' > </input>
-    <ul id="snuhelper"></ul>
-`
+
+    var divstyle;
+
+    if (snusettings.slashtheme == 'light'){
+        divstyle = `<style>
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
+        div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
+        ul#snuhelper { list-style-type: none; padding-left: 2px; } 
+        ul#snuhelper li {margin-top:2px}
+        span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; min-width: 40px; cursor: pointer; display: inline-block;}
+        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; font-weight:bold; width:99%; border: 1px solid #ffffff; margin:8px 2px 4px 2px; background-color:#ffffff }
+        span.cmdlabel { color: #222222; font-size:7pt; font-family:verdana, arial }
+        a.cmdlink { font-size:10pt; color: #1f8476; }
+        </style>`;
+    }
+    else {
+        divstyle = `<style>
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
+        div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
+        ul#snuhelper { list-style-type: none; padding-left: 2px; } 
+        ul#snuhelper li {margin-top:2px}
+        span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
+        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:100%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
+        span.cmdlabel { color: #FFFFFF; font-size:7pt; }
+        a.cmdlink { font-size:10pt; color: #1f8476; }
+        </style>`;
+    }
+
+
+
+    var htmlFilter = document.createElement('div');
+    htmlFilter.innerHTML = divstyle + 
+    `<div class="snutils" style="display:none;"><div class="snuheader"><a class='cmdlink'  href="javascript:hideSlashCommand()">
+    <svg height="16" width="16"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands<br /></div>
+    <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
+    <ul id="snuhelper"></ul></div>`
     window.top.document.body.appendChild(htmlFilter);
     addSlashCommandListener();
 
