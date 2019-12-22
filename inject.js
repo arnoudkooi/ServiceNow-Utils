@@ -36,8 +36,23 @@ var snuslashcommands = {
     "sp": "/sp Open Service Portal",
     "tweets": "https://twitter.com/sn_utils Show @sn_utils Tweets",
     "wf": "/workflow_ide.do?sysparm_nostack=true Open Workflow Editor",
-    "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application"
+    "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application <name>"
 }
+
+var snuslashswitches = {
+    "s" : {"description" : "Current Scope", "value" : "^sys_scope=javascript:gs.getCurrentApplicationId()" },
+    "ut" : {"description" : "Updated Today", "value" : "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
+    "ct" : {"description" : "Created Today", "value" : "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
+    "um" : {"description" : "Updated by Me", "value" : "^sys_updated_by=javascript:gs.getUserName()" },
+    "cm" : {"description" : "Created by Me", "value" : "^sys_created_by=javascript:gs.getUserName()" },
+    "m" : {"description" : "Updated or Createdby Me", "value" : "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()" },
+    "ou" : {"description" : "Order by Updated Descending", "value" : "^ORDERBYDESCsys_updated_on" },
+    "oc" : {"description" : "Order by Created Descending", "value" : "^ORDERBYDESCsys_created_on" },
+    
+    
+}
+
+
 
 if (typeof jQuery != "undefined") {
     jQuery(function () {
@@ -93,7 +108,9 @@ function addSlashCommandListener() {
             if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
             var shortcut = snufilter.slice(0, idx).toLowerCase();
             var query = snufilter.slice(idx + 1);
-            var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0].replace(/\$0/g, query);
+
+
+            var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0];
 
             if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
                 snufilter = snuslashcommands[shortcut].substr(2);
@@ -101,8 +118,25 @@ function addSlashCommandListener() {
                 if (idx == -1) idx = snufilter.length;
                 shortcut = snufilter.slice(0, idx).toLowerCase();
                 query = snufilter.slice(idx + 1).replace(/ .*/,'');;
-                targeturl = (snuslashcommands[shortcut] || "").replace(/\$0/g, query);
+                targeturl = (snuslashcommands[shortcut] || "");
             }
+            var switchText = '<br /> Options:<br />';
+            if (targeturl.includes('sysparm_query=')){
+
+                var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
+                if (switches){
+                    Object.entries(switches).forEach(([key, val]) => {
+                        var prop = val.replace(/\s|\-/g,'');
+                        if (snuslashswitches.hasOwnProperty(prop)){
+                            query = query.replace(val,"");
+                            targeturl += snuslashswitches[prop].value;
+                            switchText += snuslashswitches[prop].description + '<br />';
+                        }
+                    });
+                }
+            }
+
+            targeturl = targeturl.replace(/\$0/g, query);
 
             if (e.key == 'Enter') {
                 if (e.currentTarget.value.match(/^\/[0-9a-f]{32}$/) != null) {//is a sys_id
@@ -174,7 +208,13 @@ function addSlashCommandListener() {
                     if (query) {
                         thisUrl = thisUrl.replace(thisHost, query + ".service-now.com");
                     }
-                    window.open(thisUrl, '_blank');
+                    if ((e.ctrlKey || e.metaKey) && e.shiftKey ){
+                        e.preventDefault();
+                        window.location = thisUrl;
+                    }
+                    else {
+                        window.open(thisUrl, '_blank');
+                    }
                     return;
                 }
                 else if (shortcut == "add") {
@@ -232,7 +272,13 @@ function addSlashCommandListener() {
                             jQuery('#gsft_main').attr('src', url);
                         }
                         else {
-                            window.open(url, '_blank');
+                            if ((e.ctrlKey || e.metaKey) && e.shiftKey ){
+                                e.preventDefault();
+                                window.location = url;
+                            }
+                            else {
+                                window.open(url, '_blank');
+                            }
                         }
                         hideSlashCommand();
                         return;
@@ -259,12 +305,18 @@ function addSlashCommandListener() {
                     jQuery('#gsft_main').attr('src', targeturl);
                 }
                 else {
-                    window.open(targeturl, '_blank');
+                    if ((e.ctrlKey || e.metaKey) && e.shiftKey ){
+                        e.preventDefault();
+                        window.location = targeturl;
+                    }
+                    else {
+                        window.open(targeturl, '_blank');
+                    }
                 }
                 hideSlashCommand();
             }
             else{
-                snuShowSlashCommandHints(originalShortcut, selectFirst, e);
+                snuShowSlashCommandHints(originalShortcut, selectFirst, switchText, e);
             }
 
         }
@@ -272,7 +324,7 @@ function addSlashCommandListener() {
     });
 }
 
-function snuShowSlashCommandHints(shortcut, selectFirst, e) {
+function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         return propertyName.indexOf(shortcut) === 0;
     }).sort();
@@ -304,7 +356,8 @@ function snuShowSlashCommandHints(shortcut, selectFirst, e) {
         html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + shortcut + "</span> " +
             "<span class='cmdlabel'>Table search</span></li>"
     }
-    window.top.document.getElementById('snuhelper').innerHTML = html;
+    switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
+    window.top.document.getElementById('snuhelper').innerHTML = html + switchText;
 }
 
 function setSnuFilter(elm) {
@@ -360,6 +413,7 @@ function snuSettingsAdded() {
         addSgStudioPlatformLink();
         enhanceNotFound();
         snuPaFormulaLinks();
+        snuRemoveLinkLess();
         snuTableCollectionLink();
         newFromPopupToTab();
 
@@ -877,6 +931,15 @@ function snuPaFormulaLinks(){
         "<div id='snupaformulalinks' style='border:1px solid #e5e5e5; padding:8px;' >Indicators in formula (Shown by SN Utils)<br />" +
         formulaHtml + "</div>");
 }
+
+function snuRemoveLinkLess(){
+    if (!location.search.includes("&sysparm_link_less=true")) return;
+    if (typeof jQuery == 'undefined') return; 
+    var newUrl = location.href.replace("&sysparm_link_less=true","");
+    jQuery('.form_action_button_container').append("<span style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='" +
+    newUrl +"' title='Link added by SN Utils (This is NOT a UI Action!)' >Show Related links</a></span>");
+}
+         
 
 function snuTableCollectionLink(){
     if (location.pathname != "/sys_db_object.do") return;
@@ -1455,7 +1518,7 @@ function showSlashCommand() {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints("", false, false);
+        snuShowSlashCommandHints("", false, "",false);
         setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
     }
     else {
