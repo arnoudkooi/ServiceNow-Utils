@@ -40,16 +40,15 @@ var snuslashcommands = {
 }
 
 var snuslashswitches = {
+    "a" : {"description" : "Active is True", "value" : "^active=true" },
     "s" : {"description" : "Current Scope", "value" : "^sys_scope=javascript:gs.getCurrentApplicationId()" },
     "ut" : {"description" : "Updated Today", "value" : "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
     "ct" : {"description" : "Created Today", "value" : "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
     "um" : {"description" : "Updated by Me", "value" : "^sys_updated_by=javascript:gs.getUserName()" },
     "cm" : {"description" : "Created by Me", "value" : "^sys_created_by=javascript:gs.getUserName()" },
-    "m" : {"description" : "Updated or Createdby Me", "value" : "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()" },
+    "m" : {"description" : "Updated or Created by Me", "value" : "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()" },
     "ou" : {"description" : "Order by Updated Descending", "value" : "^ORDERBYDESCsys_updated_on" },
     "oc" : {"description" : "Order by Created Descending", "value" : "^ORDERBYDESCsys_created_on" },
-    
-    
 }
 
 
@@ -122,7 +121,7 @@ function addSlashCommandListener() {
             }
             var switchText = '<br /> Options:<br />';
             if (targeturl.includes('sysparm_query=')){
-
+                var unusedSwitches = Object.assign({}, snuslashswitches); 
                 var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
                 if (switches){
                     Object.entries(switches).forEach(([key, val]) => {
@@ -130,10 +129,16 @@ function addSlashCommandListener() {
                         if (snuslashswitches.hasOwnProperty(prop)){
                             query = query.replace(val,"");
                             targeturl += snuslashswitches[prop].value;
-                            switchText += snuslashswitches[prop].description + '<br />';
+                            switchText += "<div class='cmdlabel'>-" + prop + ": " + snuslashswitches[prop].description + '</div>';
+                            delete unusedSwitches[prop];
                         }
                     });
                 }
+
+                Object.entries(unusedSwitches).forEach(([key, val]) => {
+                    switchText += "<div class='cmdlabel' style='color:#777777'>-" + key + ": " + val.description + '</div>';
+                });
+
             }
 
             targeturl = targeturl.replace(/\$0/g, query);
