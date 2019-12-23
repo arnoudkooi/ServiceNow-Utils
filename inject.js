@@ -90,6 +90,7 @@ function addSlashCommandListener() {
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
+        if (e.key == 'Meta' || e.key == 'Control') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey ) && (window.top.document.getElementById('gsft_main') != null);
         if (e.currentTarget.value.startsWith("/")) {
@@ -144,9 +145,9 @@ function addSlashCommandListener() {
             targeturl = targeturl.replace(/\$0/g, query);
 
             if (e.key == 'Enter') {
-                if (e.currentTarget.value.match(/^\/[0-9a-f]{32}$/) != null) {//is a sys_id
+                if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
                     e.preventDefault();
-                    searchSysIdTables(e.currentTarget.value.substr(1));
+                    searchSysIdTables(shortcut);
                     hideSlashCommand();
                     return;
                 }
@@ -330,28 +331,36 @@ function addSlashCommandListener() {
 }
 
 function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
+
+    if ((e.ctrlKey || e.metaKey) && e.key == 'v' && shortcut == 'v'){
+        //asume a sys_id when pasting for correct 'autocomplete'
+        shortcut = "00000000000000000000000000000000";
+    }
+
     var propertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         return propertyName.indexOf(shortcut) === 0;
     }).sort();
 
-
+    var fltr  = window.top.document.getElementById('snufilter');
 
     if (propertyNames.length > 0 && selectFirst){ //select first hit when tap or space pressed
         if (e) e.preventDefault();
         shortcut = propertyNames[0];
         propertyNames.splice(1);
-        var fltr  = window.top.document.getElementById('snufilter');
         if (!fltr.value.includes(" ")){
             fltr.value = "/" + shortcut + ' ';
         }
     }
 
     var html = "";
-    for (i = 0; i < propertyNames.length && i < 7; i++) {
+    for (i = 0; i < propertyNames.length && i < 10; i++) {
         html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + propertyNames[i] + "</span> " +
             "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;') + "</span></li>"
+        if (fltr.value.includes(" ")){
+            break;
+        }
     }
     if (!html && shortcut.replace(/ /g, '').length == 32) {
         html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/sys_id</span> " +
