@@ -1679,7 +1679,8 @@ function addFieldSyncButtons() {
 
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
-                if (this.innerText.toLowerCase() == 'script') {
+                var txt = this.innerText.toLowerCase();
+                if (txt == 'script' || txt == 'css') {
                     jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
                     return true;
                 }
