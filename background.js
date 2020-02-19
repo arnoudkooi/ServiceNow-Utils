@@ -82,6 +82,13 @@ var menuItems = [{
     "onclick": openSearch
 },
 {
+    "id": "codesearch",
+    "parentId": "goto",
+    "title": "SN Utils Code Search: %s",
+    contexts: ["selection"],
+    "onclick": contextCodeSearch
+},
+{
     "id": "openscript",
     "parentId": "goto",
     "title": "Script Include: %s",
@@ -576,6 +583,46 @@ function openSearch(e, f) {
         chrome.tabs.create(createObj);
     }
         
+}
+
+function contextCodeSearch(e, f) {
+
+
+
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function (tabs) {
+        var tid = tabs[0].id;
+
+        chrome.tabs.sendMessage(tid, {
+            method: "getVars",
+            myVars: "g_ck"
+        }, 
+        function (response) {
+            g_ck = response.myVars.g_ck || '';
+            url = response.url;
+            instance = (new URL(url)).host.replace(".service-now.com", "");
+    
+            var cookieStoreId;
+            if (f.hasOwnProperty('cookieStoreId')){
+                cookieStoreId = f.cookieStoreId;
+            }
+            var message = {
+                "event" : "codesearch",
+                "command" : {
+                    "query" : e.selectionText,
+                    "instance" : instance,
+                    "url" : url,
+                    "g_ck" : g_ck
+                }
+            };
+            codeSearch(message,cookieStoreId);  
+        });
+
+    });
+
+
 }
 
 function openScriptInclude(e,f) {
