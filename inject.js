@@ -9,6 +9,7 @@ var snuslashcommands = {
     "uh": "* Show hidden fields",
     "env": "* Open this page in <instance>",
     "token": "* Send g_ck token to VS Code",
+    "lang": "* Switch language <lng>",
     "code": "* Beta <search>",
     "pop": "* Pop in/out classic UI",
     "search": "text_search_exact_match.do?sysparm_search=$0 Global search <search>",
@@ -274,12 +275,38 @@ function addSlashCommandListener() {
                         var xhttp = new XMLHttpRequest();
                         xhttp.onreadystatechange = function () {
                             if (this.readyState == 4) {
-                                alert(JSON.stringify(this))
+                                location.reload();
                             }
                         };
                         xhttp.open("POST", "sys_unimpersonate.do", true);
                         xhttp.setRequestHeader("X-UserToken", g_ck);
                         xhttp.send();
+                    }
+                }
+                else if (shortcut == "lang") {
+                    {
+                        
+                        if (query.length != 2){
+                            alert("Please provide a 2 character language code like 'en'");
+                            return;
+                        }
+                        var payload = {"current": query};
+                        
+                        var xhttp = new XMLHttpRequest();
+                        xhttp.onreadystatechange = function () {
+                            if (this.readyState == 4 ) {
+                                location.reload();
+                            }
+                        };
+                        xhttp.open("PUT", "/api/now/ui/concoursepicker/language", true);
+                        xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
+                        xhttp.setRequestHeader("Cache-Control", "no-cache");
+                        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                        xhttp.setRequestHeader("X-UserToken", g_ck);
+                        xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
+                        xhttp.send(JSON.stringify(payload));
+
+                        return;
                     }
                 }
                 else if (!snuslashcommands.hasOwnProperty(shortcut)) {
