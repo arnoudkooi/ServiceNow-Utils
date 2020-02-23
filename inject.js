@@ -441,14 +441,16 @@ function snuAddSlashCommand(cmd) {
 function snuSettingsAdded() {
 
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
+    if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
 
     setShortCuts();
 
-
-    bindPaste(snusettings.nouielements == false);
+    if (!snusettings.nopasteimage){
+        bindPaste(snusettings.nouielements == false);
+    }
 
     if (snusettings.vsscriptsync == true) {
         addFieldSyncButtons();
