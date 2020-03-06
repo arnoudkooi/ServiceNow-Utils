@@ -172,12 +172,11 @@
                         </thead>
                     </table>
                     <select class="form-control form-control-sm sync mtfive" id="slctlistquery" name="slctlistquery">
+                        <option value="&sysparm_filter_only=true&sysparm_filter_pinned=true">Listview query: None (filter only)</option>
                         <option
                             value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on">
                             Listview
                             query: Updated on Today / Order by Updated desc.</option>
-                        <option value="sys_id=-1">Listview query: Empty list (sys_id=-1)</option>
-                        <option value="">Listview query: None (all records)</option>
                     </select>
                     <!--<a href='/snutils.html' target='_blank' >Open this table list in new tab.</a>-->
                 </div>

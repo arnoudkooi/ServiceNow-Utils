@@ -23,6 +23,7 @@ var snuslashcommands = {
     "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0 Client Scripts <name>",
     "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0 UI Actions <name>",
     "up": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0 UI Policies <name>",
+    "uis": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0 UI Script <name>",
     "p": "sys_properties_list.do?sysparm_query=nameLIKE$0 Properties <name>",
     "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0 System log <search>",
     "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0 Transaction Log <search>",
@@ -95,7 +96,9 @@ function addSlashCommandListener() {
         if (e.key == 'Meta' || e.key == 'Control') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
-        if (e.currentTarget.value.startsWith("/")) {
+        if (!e.currentTarget.value.startsWith("/")) {
+            e.currentTarget.value = "/" + e.currentTarget.value
+        }
             var snufilter = e.currentTarget.value.substr(1);
             var thisUrl = window.location.href;
             var thisInstance = window.location.host.split('.')[0];
@@ -312,7 +315,7 @@ function addSlashCommandListener() {
                 else if (!snuslashcommands.hasOwnProperty(shortcut)) {
                     if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
                         showAlert("Shortcut not defined, trying to open table: /" + shortcut, "info");
-                        var url = shortcut + "_list.do?sysparm_query=GOTO123TEXTQUERY321=" + query;
+                        var url = shortcut + "_list.do?sysparm_filter_only=true&sysparm_filter_pinned=true&sysparm_query=name" + query;
                         var inIFrame = (shortcut == snufilter.slice(0, idx) && sameWindow)
                         if (e.target.className == "snutils") inIFrame = false;
                         if (inIFrame) {
@@ -366,9 +369,7 @@ function addSlashCommandListener() {
                 snuShowSlashCommandHints(originalShortcut, selectFirst, switchText, e);
             }
 
-        }
-
-    });
+        });
 }
 
 function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
