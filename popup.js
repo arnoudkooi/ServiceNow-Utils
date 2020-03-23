@@ -319,6 +319,8 @@ function setBrowserVariables(obj) {
                     jQuery(".hide-in-chrome").css('display','inline');
                 }
                 getSettings();
+            case "#tabwhitelist":
+                getSettings();
                 break;
         }
 

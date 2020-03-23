@@ -29,9 +29,9 @@ var snuslashcommands = {
     "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0 Transaction Log <search>",
     "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0 Users <search>",
     "me": "sys_user.do?sys_id=javascript:gs.getUserID() My User profile",
-    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=newyork Search Docs <search>",
+    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=orlando Search Docs <search>",
     "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1 Search Community <search>",
-    "dev": "https://developer.servicenow.com/app.do#!/search?category=All&v=madrid&q=$0&page=1 Search developer portal <search>",
+    "dev": "https://developer.servicenow.com/dev.do#!/search/orlando/All/$0 Search developer portal <search>",
     "fd": "/$flow-designer.do Open Flow Designer",
     "va": "/$conversation-builder.do Open Virtual Agent",
     "st": "/$studio.do Open Studio",
@@ -1099,6 +1099,18 @@ function setShortCuts() {
         span.cmdlabel { color: #222222; font-size:7pt; font-family:verdana, arial }
         a.cmdlink { font-size:10pt; color: #1f8476; }
         </style>`;
+    }
+    else if (snusettings.slashtheme == 'stealth'){
+        divstyle = `<style>
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
+        div.snuheader {display:none}
+        ul#snuhelper { display:none } 
+        ul#snuhelper li {display:none}
+        span.cmdkey {display:none}
+        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; background: transparent; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; width:100%; border: 0px; margin:8px 2px 4px 2px; }
+        span.cmdlabel { display:none }
+        a.cmdlink { display:none }
+        </style>`; 
     }
     else {
         divstyle = `<style>

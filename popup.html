@@ -72,6 +72,9 @@
                 <li class='nav-item'>
                     <a class="nav-link" data-target="#tabsettings" data-toggle="tab">Settings</a>
                 </li>
+                <!-- <li class='nav-item'>
+                    <a class="nav-link" data-target="#tabwhitelist" data-toggle="tab">Whitelist</a>
+                </li> -->
                 <li class='nav-item'>
                     <a class="nav-link active" data-target="#tababout" data-toggle="tab">About</a>
                 </li>
@@ -172,7 +175,8 @@
                         </thead>
                     </table>
                     <select class="form-control form-control-sm sync mtfive" id="slctlistquery" name="slctlistquery">
-                        <option value="&sysparm_filter_only=true&sysparm_filter_pinned=true">Listview query: None (filter only)</option>
+                        <option value="&sysparm_filter_only=true&sysparm_filter_pinned=true">Listview query: None
+                            (filter only)</option>
                         <option
                             value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on">
                             Listview
@@ -243,7 +247,7 @@
                             <div class="input-group-append">&nbsp;&nbsp;</div>
                             <div class="input-group-append">
                                 <div class="form-check push5up">
-                                    
+
                                     <input class="form-check-input sync" type="checkbox" id="cbxtemplatelines"
                                         name="cbxtemplatelines">
                                     <label class="form-check-label" for="cbxtemplatelines"
@@ -251,11 +255,11 @@
                                         Helper lines.
                                     </label></input><br />
                                     <input class="form-check-input sync" type="checkbox" id="cbxfullvarname"
-                                    name="cbxtemplatelines">
-                                <label class="form-check-label" for="cbxfullvarname"
-                                    title="Use full varname for long table names like grMyLongTableName instead of grMLTN">
-                                    Full var name.
-                                </label></input>
+                                        name="cbxtemplatelines">
+                                    <label class="form-check-label" for="cbxfullvarname"
+                                        title="Use full varname for long table names like grMyLongTableName instead of grMLTN">
+                                        Full var name.
+                                    </label></input>
                                 </div>
                             </div>
                         </div>
@@ -287,7 +291,7 @@
 
                 <div class="tab-pane" id="tabsettings">
                     <h5>Settings <i>(Reload browser after changing settings to take affect)</i></h5>
-                    
+
                     <div class="row">
                         <div class="col-6" id='settingsdiv'>
                             <form>
@@ -332,7 +336,8 @@
                                         id="slashoption">
                                         <option value="on">On - Activate on / or CTRL-/</option>
                                         <option value="ctrl">On - Activate on CTRL-/</option>
-                                        <option value="off" title="Off or Configure via Extensions Shortcuts settings">Off - Can set custom shortcut</option>
+                                        <option value="off" title="Off or Configure via Extensions Shortcuts settings">
+                                            Off - Can set custom shortcut</option>
                                     </select>
                                 </div>
                                 <div class="form-check">
@@ -343,6 +348,7 @@
                                         id="slashtheme">
                                         <option value="dark">Dark</option>
                                         <option value="light">Light</option>
+                                        <option value="stealth">Stealth (almost invisible)</option>
                                     </select>
                                 </div>
 
@@ -354,7 +360,7 @@
                     <h5>Slash Commands</h5>
                     Add custom / commands, type /help{enter} in the navigator filter to show all commands. Per
                     line:
-                    shortcut;url
+                    shortcut;url Description
                     <textarea class="form-control form-control-sm snu-setting" autocomplete="off" autocapitalize="off"
                         spellcheck="false" id="slashcommands"
                         placeholder="i;incident_list.do?sysparm_query=short_description=$0"></textarea>
@@ -378,6 +384,16 @@
                     </div>
 
                 </div>
+
+
+                <div class="tab-pane" id="tabwhitelist">
+                    <h5>Whitelist <i>(Reload browser after changing settings to take affect)</i></h5>
+
+                    <textarea class="form-control form-control-sm whitelist snu-setting" autocomplete="off" autocapitalize="off"
+                        spellcheck="false" id="txtwhitelist"></textarea>
+
+                </div>
+
 
 
                 <div class="tab-pane active" id="tababout">
@@ -404,7 +420,8 @@
                         target="_blank">GitHub</a>
                     for review purposes.
                     <br />This tools comes as is, with no warranty.
-                    <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is not allowed)
+                    <br /> Please connect with me if you want to contribute. (Redistribution to Chrome Store is not
+                    allowed)
                     <br /> Also reach out if you have feedback or feature requests, or good snippets to
                     integrate.
                     <div id="livemessage"></div>

@@ -97,7 +97,7 @@ function searchSysIdTables(sysId) {
         showAlert('Searching for sys_id. This could take some seconds...')
         var script = `      
             function findSysID(sysId) {
-                var tbls = ['sys_metadata', 'task', 'cmdb_ci'];
+                var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
                 var rtrn;
                 var i = 0;
                 while (tbls[i]) {
@@ -111,7 +111,7 @@ function searchSysIdTables(sysId) {
                 }
 
                 var tblsGr = new GlideRecord("sys_db_object");
-                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEsysx_^nameNOT LIKE00^nameNOT LIKEv_^nameNOT LIKEsys_rollback_^nameNOT LIKEpa_^nameNOT INsys_metadata,task,cmdb_ci")
+                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEsysx_^nameNOT LIKE00^nameNOT LIKEv_^nameNOT LIKEsys_rollback_^nameNOT LIKEpa_^nameNOT INsys_metadata,task,cmdb_ci,sys_user")
                 tblsGr.query();
                 while (tblsGr.next()) {
                     rtrn = findClass(tblsGr.getValue('name'), sysId);

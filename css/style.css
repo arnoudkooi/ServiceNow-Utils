@@ -239,6 +239,14 @@ img.ytthumbnail{
     margin-right:4px;
 }
 
+.whitelist{
+    font-family: Consolas, Lucida Console, monospace; 
+    font-size:10pt; 
+    height:290px !important; 
+    margin-top:20px; 
+    margin-right:4px;
+}
+
 #txtslash{
     font-family: Consolas, Lucida Console, monospace; 
     font-size:9pt; 
