@@ -218,7 +218,10 @@ function addSlashCommandListener() {
                 }
                 else if (shortcut == "env") {
                     if (query) {
-                        thisUrl = thisUrl.replace(thisHost, query + ".service-now.com");
+                        // this allows logic to work with on-premise instances as well
+                        if (query.indexOf('.') === -1)
+                            query += '.service-now.com';
+                        thisUrl = thisUrl.replace(thisHost, query);
                     }
                     if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
                         e.preventDefault();
