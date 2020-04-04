@@ -39,7 +39,8 @@ var snuslashcommands = {
     "tweets": "https://twitter.com/sn_utils Show @sn_utils Tweets",
     "unimpersonate": "* Stop impersonating and reload page",
     "wf": "/workflow_ide.do?sysparm_nostack=true Open Workflow Editor",
-    "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application <name>"
+    "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application <name>",
+    "imp": "impersonate_dialog.do Impersonate User page",
 }
 
 var snuslashswitches = {
