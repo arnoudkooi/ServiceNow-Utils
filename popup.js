@@ -11,6 +11,10 @@ var dtUpdates;
 var dtNodes;
 var dtTables;
 var dtDataExplore;
+var dtSlashcommands;
+var objCustomCommands = {};
+
+var objSettings;
 var tablesloaded = false;
 var nodesloaded = false;
 var dataexploreloaded = false;
@@ -37,10 +41,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-function setIcon(icon){
+function setIcon(icon) {
     chrome.pageAction.setIcon({
-    tabId: tabid,
-    path : icon
+        tabId: tabid,
+        path: icon
     });
 }
 
@@ -54,18 +58,18 @@ function setRecordVariables(obj) {
     if (!table)
         table = (myFrameHref || urlFull).match(/com\/(.*).do/)[1].replace('_list', '');
     if (!sys_id)
-        sys_id = (getParameterByName('sys_id',myFrameHref || urlFull));
+        sys_id = (getParameterByName('sys_id', myFrameHref || urlFull));
 
 
     var xmllink = url + '/' + obj.myVars.NOWtargetTable + '.do?sys_id=' + obj.myVars.NOWsysId + '&sys_target=&XML';
     $('#btnviewxml').click(function () {
-        chrome.tabs.create({ "url" : xmllink , "active": false});
+        chrome.tabs.create({ "url": xmllink, "active": false });
     }).prop('disabled', isNoRecord);
 
 
 
     $('#btnupdatesets').click(function () {
-        chrome.tabs.create({ "url" : url + '/sys_update_set_list.do?sysparm_query=state%3Din%20progress' , "active": false});
+        chrome.tabs.create({ "url": url + '/sys_update_set_list.do?sysparm_query=state%3Din%20progress', "active": false });
     });
 
 
@@ -107,7 +111,7 @@ function setFormFromSyncStorage(callback) {
 //Try to get json with servicenow tables, first from chrome storage, else via REST api
 function prepareJsonTable() {
     var dataset = $('#slctdataset').val();
-    var query = [instance + "-tables-" + dataset , instance + "-tables-" + dataset+ "-date"];
+    var query = [instance + "-tables-" + dataset, instance + "-tables-" + dataset + "-date"];
     chrome.storage.local.get(query, function (result) {
         try {
             var thedate = new Date().toDateString();
@@ -145,7 +149,7 @@ function getParameterByName(name, url) {
     if (!url) url = window.location.href.toLowerCase();
     name = name.replace(/[\[\]]/g, "\\$&");
     var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-    results = regex.exec(url);
+        results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
@@ -154,7 +158,7 @@ function getParameterByName(name, url) {
 //Set variables, called by BG page after calling getBrowserVariables
 //Also attach event handlers.
 function setBrowserVariables(obj) {
-    
+
     g_ck = obj.myVars.g_ck || '';
     url = obj.url;
     instance = (new URL(url)).host.replace(".service-now.com", "");
@@ -185,24 +189,24 @@ function setBrowserVariables(obj) {
         $('#waitingtables').show();
         bgPage.getTables($('#slctdataset').val());
     });
-    $('#slctdataset').on('change', function() {
+    $('#slctdataset').on('change', function () {
         $('#waitingtables').show();
         bgPage.getTables(this.value);
         console.log(this.value);
     });
     $('#btnSendXplore').click(function () {
         var script = $('#txtgrquery').val();
-        var win = chrome.tabs.create({ "url" : url + "/snd_xplore.do"  , "active" : !(event.ctrlKey||event.metaKey) }); //window.open('');
-        jQuery(win).bind('load', function(){
+        var win = chrome.tabs.create({ "url": url + "/snd_xplore.do", "active": !(event.ctrlKey || event.metaKey) }); //window.open('');
+        jQuery(win).bind('load', function () {
             win.snd_xplore_editor.setValue(script);
         });
     });
 
-    $('.snu-setting').change(function() {
+    $('.snu-setting').change(function () {
         setSettings();
     });
 
-    
+
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
         bgPage.getNodes();
@@ -231,8 +235,12 @@ function setBrowserVariables(obj) {
 
     $('a.popuplinks').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
+        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
+
+    $('#slashcommands').on('dblclick',function(){
+        $(this).prop('readonly','');
+    })
 
 
     $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
@@ -275,7 +283,7 @@ function setBrowserVariables(obj) {
                 $('#tbxnodes').focus(function () {
                     $(this).select();
                 });
-                break;   
+                break;
             case "#tabtables":
                 $('#tbxtables').focus(function () {
                     $(this).select();
@@ -290,20 +298,20 @@ function setBrowserVariables(obj) {
             case "#tabdataexplore":
                 if (!dataexploreloaded) {
                     $('#waitingdataexplore').show();
-                     bgPage.getExploreData();
-                     dataexploreloaded = true;
+                    bgPage.getExploreData();
+                    dataexploreloaded = true;
                 }
                 $('#tbxdataexplore').focus(function () {
                     $(this).select();
                 });
-                break;        
+                break;
             case "#tablink":
                 $('#waitinglink').show();
                 bgPage.getRecordVariables();
                 break;
             case "#tabgr":
                 getGRQuery();
-                break;         
+                break;
             case "#tabuser":
                 if (!userloaded) {
                     if ($('#tbxname').val().length > 0)
@@ -315,16 +323,24 @@ function setBrowserVariables(obj) {
                 });
                 break;
             case "#tabsettings":
-                if (typeof InstallTrigger !== 'undefined'){
-                    jQuery(".hide-in-chrome").css('display','inline');
+                if (typeof InstallTrigger !== 'undefined') {
+                    jQuery(".hide-in-chrome").css('display', 'inline');
                 }
                 getSettings();
+                break;
+            case "#tabslashcommands":
+                getSlashcommands();
+                break;
             case "#tabwhitelist":
                 getSettings();
                 break;
         }
 
     });
+
+    $('#helperslashcommands').on('click', function () {
+        $('#navslashcommands').click();
+    })
 
     chrome.tabs.sendMessage(tabid, { method: "getSelection" }, function (selresponse) {
         var selectedText = ('' + selresponse.selectedText).trim();
@@ -336,27 +352,32 @@ function setBrowserVariables(obj) {
 
 }
 
+
+
+
 //Set message, on about tab, callback from getInfoMessage
 function setInfoMessage(html) {
     $('#livemessage').html(html);
 }
 
-function getSettings(){
-    bgPage.getFromSyncStorageGlobal("snusettings", function(settings){
-        for (var setting in settings){
-            
+function getSettings(callback) {
+    bgPage.getFromSyncStorageGlobal("snusettings", function (settings) {
+        objSettings = settings;
+        for (var setting in settings) {
+
             if (typeof settings[setting] == "boolean")
                 document.getElementById(setting).checked = settings[setting];
             else
                 document.getElementById(setting).value = settings[setting];
         };
+        callback();
     })
 }
 
-function setSettings(){
+function setSettings() {
     var snusettings = {};
     $('.snu-setting').each(function (index, item) {
-        if (this.type == 'checkbox'){
+        if (this.type == 'checkbox') {
             snusettings[this.id] = this.checked;
         }
         else {
@@ -364,27 +385,27 @@ function setSettings(){
         }
 
     });
-    bgPage.setToChromeSyncStorageGlobal("snusettings",snusettings);
+    bgPage.setToChromeSyncStorageGlobal("snusettings", snusettings);
 }
 
 function getGRQuery() {
 
     var newHref = myFrameHref || urlFull;
     if ((newHref.split('?')[0]).indexOf('_list.do') > 1) {
-        bgPage.getGRQuery($('#tbxgrname').val(),$('#tbxgrtemplate').val(), 
-        document.getElementById('cbxtemplatelines').checked,
-        document.getElementById('cbxfullvarname').checked);
+        bgPage.getGRQuery($('#tbxgrname').val(), $('#tbxgrtemplate').val(),
+            document.getElementById('cbxtemplatelines').checked,
+            document.getElementById('cbxfullvarname').checked);
     }
     else {
-        bgPage.getGRQueryForm($('#tbxgrname').val(),$('#tbxgrtemplate').val(),
-        document.getElementById('cbxtemplatelines').checked,
-        document.getElementById('cbxfullvarname').checked);
+        bgPage.getGRQueryForm($('#tbxgrname').val(), $('#tbxgrtemplate').val(),
+            document.getElementById('cbxtemplatelines').checked,
+            document.getElementById('cbxfullvarname').checked);
     }
 }
 
 function setGRQuery(gr) {
-    if (gr.indexOf("GlideRecord('undefined')")  > -1) gr = "This only works in forms and lists.";
-        $('#txtgrquery').val(gr).select();
+    if (gr.indexOf("GlideRecord('undefined')") > -1) gr = "This only works in forms and lists.";
+    $('#txtgrquery').val(gr).select();
 }
 
 
@@ -424,7 +445,7 @@ function setUserDetails(html) {
 //set or refresh datatable with ServiceNow updatesets
 function setDataTableUpdateSets(nme) {
 
-    if (nme == 'error'){
+    if (nme == 'error') {
         $('#updatesets').hide().after('<br /><div class="alert alert-danger">Data can not be retrieved, are you Admin?</div>');
         $('#waitingupdatesets').hide();
         return false;
@@ -442,9 +463,10 @@ function setDataTableUpdateSets(nme) {
                 mRender: function (data, type, row) {
                     var iscurrent = "";
                     if (row.sysId == nme.result.current.sysId) iscurrent = "iscurrent";
-                    return "<a class='updatesetlist' href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + row.sysId + "' title='Table definition' ><i class='fa fa-list' aria-hidden='true'></i></a> " +
-                        "<a class='setcurrent " + iscurrent + "' data-post='{name: \"" + row.name + "\", sysId: \"" + row.sysId + "\"}' href='#" + row.sysId + "' title='Set current updateset'><i class='fa fa-dot-circle-o' aria-hidden='true'></i></a> ";
+                    return "<a class='updatesetlist' href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + row.sysId + "' title='Table definition' ><i class='fas fa-list' aria-hidden='true'></i></a> " +
+                        "<a class='setcurrent " + iscurrent + "' data-post='{name: \"" + row.name + "\", sysId: \"" + row.sysId + "\"}' href='#" + row.sysId + "' title='Set current updateset'><i class='far fa-dot-circle' aria-hidden='true'></i></a> ";
                 },
+                "width": "7%",
                 "searchable": false
             }
         ],
@@ -471,7 +493,7 @@ function setDataTableUpdateSets(nme) {
 
     $('a.updatesetlist').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
+        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
     $('a.setcurrent').click(function () {
@@ -486,7 +508,7 @@ function setDataTableUpdateSets(nme) {
 
 function setNodes(jsn) {
 
-    if (typeof jsn == "undefined" || jsn == "error"){
+    if (typeof jsn == "undefined" || jsn == "error") {
         $('#instancenodes').hide().after('<br /><div class="alert alert-danger">Nodes data can not be retrieved, are you Admin?</div>');
         $('#waitingnodes').hide();
         return false;
@@ -512,8 +534,8 @@ function setDataTableNodes(nme, node) {
             { "mDataProp": "node.display_value" },
             {
                 mRender: function (data, type, row) {
-                    var iscurrent =  (row.node.value == node); 
-                    return "<a class='setnode " + (iscurrent ? "iscurrent" : "")+ "' data-node='" + row.node.display_value + "' href='#' id='" + row.node.value + "' title='Switch to Node'><i class='fa fa-dot-circle-o' aria-hidden='true'></i>"+ (iscurrent ? " Active Node" : " Set Active")+"</a> ";
+                    var iscurrent = (row.node.value == node);
+                    return "<a class='setnode " + (iscurrent ? "iscurrent" : "") + "' data-node='" + row.node.display_value + "' href='#' id='" + row.node.value + "' title='Switch to Node'><i class='far fa-dot-circle' aria-hidden='true'></i>" + (iscurrent ? " Active Node" : " Set Active") + "</a> ";
                 },
                 "searchable": false
             }
@@ -530,7 +552,7 @@ function setDataTableNodes(nme, node) {
         dtNodes.search($(this).val()).draw();
     }).focus().trigger('keyup');
 
-    $('a.setnode').click(function () {  
+    $('a.setnode').click(function () {
         bgPage.setActiveNode(this.id, $(this).attr('data-node'));
     });
 
@@ -541,7 +563,7 @@ function setDataTableNodes(nme, node) {
 //set or refresh datatable with ServiceNow tables
 function setDataTableUpdates(nme) {
 
-    if (nme == 'error'){
+    if (nme == 'error') {
         $('#updts').hide().after('<br /><div class="alert alert-danger">Data can not be retrieved, are you Admin?</div>');
         $('#waitingupdates').hide();
         return false;
@@ -559,9 +581,10 @@ function setDataTableUpdates(nme) {
             {
                 mRender: function (data, type, row) {
                     var i = row.name.lastIndexOf("_");
-                    return "<a class='updatetarget' href='" + url + "/" + row.name.substr(0, i) + ".do?sys_id=" + row.name.substr(i + 1) + "' title='Open related record' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></a> " +
-                        "<a class='updatetarget' href='" + url + "/sys_update_xml.do?sys_id=" + row.sys_id + "' title='View update' ><i class='fa fa-history' aria-hidden='true'></i></a> ";
+                    return "<a class='updatetarget' href='" + url + "/" + row.name.substr(0, i) + ".do?sys_id=" + row.name.substr(i + 1) + "' title='Open related record' ><i class='fas fa-edit' aria-hidden='true'></i></a> " +
+                        "<a class='updatetarget' href='" + url + "/sys_update_xml.do?sys_id=" + row.sys_id + "' title='View update' ><i class='fas fa-history' aria-hidden='true'></i></a> ";
                 },
+                "width": "7%",
                 "searchable": false
             }
         ],
@@ -582,7 +605,7 @@ function setDataTableUpdates(nme) {
 
     $('a.updatetarget').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
+        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
     $('#tbxupdates').keyup(function () {
@@ -611,38 +634,38 @@ function setDataTableTables(nme) {
         $('#tbls tbody tr').remove();
     }
 
-    var columnDefs =  [
+    var columnDefs = [
         { "width": "46%", "targets": 0 },
-        { "width": "47%", "targets": 1 },
-        { "width": "7%", "targets": 2 }
-      ];
+        { "width": "46%", "targets": 1 },
+        { "width": "8%", "targets": 2 }
+    ];
 
     var aoColumns = [
         { "mDataProp": "label" },
         { "mDataProp": "name" },
         {
             mRender: function (data, type, row) {
-                return "<a class='tabletargetlist' href='" + url + '/' + row.name + "_list.do' title='Go to List (Using query selected below)' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
-                    "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fa fa-cog' aria-hidden='true'></i></a> " +
-                    "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
+                return "<a class='tabletargetlist' href='" + url + '/' + row.name + "_list.do' title='Go to List (Using query selected below)' ><i class='fas fa-table' aria-hidden='true'></i></a> " +
+                    "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fas fa-cog' aria-hidden='true'></i></a> " +
+                    "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fas fa-sitemap' aria-hidden='true'></i></a>";
             },
             "searchable": false
         }
     ]
 
-    if (nme.length){
-        if (nme[0].hasOwnProperty("super_classname")){
+    if (nme.length) {
+        if (nme[0].hasOwnProperty("super_classname")) {
             aoColumns.splice(2, 0, { "mDataProp": "super_classname" });
             aoColumns.splice(3, 0, { "mDataProp": "sys_scopescope" });
             $('th#thaction').after('<th class="dyna">Extends</th><th class="dyna">Scope</th>');
 
-            var columnDefs =  [
+            var columnDefs = [
                 { "width": "25%", "targets": 0 },
-                { "width": "25%", "targets": 1 },
-                { "width": "25%", "targets": 2 },
+                { "width": "24%", "targets": 1 },
+                { "width": "24%", "targets": 2 },
                 { "width": "18%", "targets": 3 },
-                { "width": "7%", "targets": 4 }
-              ];
+                { "width": "9%", "targets": 4 }
+            ];
 
         }
     }
@@ -665,27 +688,27 @@ function setDataTableTables(nme) {
         //"paging": false,
         "dom": 'rti<"btns"B>',
         "buttons": [
-        "copyHtml5"
+            "copyHtml5"
         ]
 
     });
 
-    dtTables.on( 'draw.dt', function () {
+    dtTables.on('draw.dt', function () {
         $('a.tabletargetlist:not(.evented)').click(function () {
             event.preventDefault();
             var url = $(this).attr('href') + "?sysparm_query=" + $('#slctlistquery').val();
-            if (url.indexOf("syslog") > 1){
+            if (url.indexOf("syslog") > 1) {
                 url = url.replace(/sys_updated_on/g, 'sys_created_on'); //syslog tables have no updated columnn.
             }
-            chrome.tabs.create({ "url" : url  , "active" : !(event.ctrlKey||event.metaKey) });
+            chrome.tabs.create({ "url": url, "active": !(event.ctrlKey || event.metaKey) });
         }).addClass('evented');
-    
+
         $('a.tabletarget:not(.evented)').click(function () {
             event.preventDefault();
-            chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
+            chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
         }).addClass('evented');
-    } );
-    
+    });
+
 
     $('#tbxtables').keyup(function () {
         dtTables.search($(this).val()).draw();
@@ -695,21 +718,155 @@ function setDataTableTables(nme) {
     $('#waitingtables').hide();
 }
 
+var dataslashcommands;
+function getSlashcommands() {
+
+    getSettings(function () { //sorry for throwing this in callback, not a star in async stuff :(
+
+        dataslashcommands = Object.keys(snuslashcommands).map(function (key) {
+            var source = "2builtin";
+            var url = snuslashcommands[key].url;
+            if (url.startsWith('*')) {
+                source = "3script";
+                url = 'Built in scripted command, cannot be overwritten';
+            };
+            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "source": source };
+        });
+
+        try {
+            objCustomCommands = JSON.parse(objSettings.slashcommands);
+        } catch (e) { };
+
+        Object.keys(objCustomCommands).forEach(function (key) {
+            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "source": "1custom" });
+        });
+
+
+        if (dtSlashcommands) dtSlashcommands.destroy();
+        dtSlashcommands = $('#tblslashcommands').DataTable({
+            "aaData": dataslashcommands,
+            "aoColumns": [
+                {
+                    mRender: function (data, type, row) {
+                        var icon = '<span class="hidden">' + row.source + '</span><i title="Built in command" class="fas fa-chevron-circle-right"></i>';
+                        if (row.source == '1custom') icon = '<span class="hidden">' + row.source + '</span><i title="Custom command" class="fas fa-user-circle"></i>';
+                        if (row.source == '3script') {
+                            icon = '<span class="hidden">' + row.source + '</span><i title="Built in read-only" class="fas fa-stop-circle"></i>';
+                        };
+                        return "<div>" + icon + "</div>";
+                    },
+                    "width": "3%",
+                    "bSearchable": true,
+                    "mDataProp": "source"
+
+                },
+                { "mDataProp": "command" },
+                {
+                    mRender: function (data, type, row) {
+                        return "<div>" + row.hint + "</div><div class='snucmdurl'>" + row.url + "</div>";
+                    }
+                },
+                {
+                    mRender: function (data, type, row) {
+
+                        var html = ''
+                        if (row.source == "1custom" || row.source == "2builtin") {
+                            html += "<a href='#'><i class='fas fa-edit' aria-hidden='true'></i></a> "
+                        }
+                        if (row.source == "1custom") {
+                            html += "<a class='deletecmd' href='#' data-cmd='"+ row.command +"' ><i class='far fa-trash-alt ' aria-hidden='true'></i></a>"
+                        }
+
+                        return html;
+                    },
+                    "width": "10%",
+                    "searchable": false
+                }
+
+            ],
+            "language": {
+                "info": "Matched: _TOTAL_ of _MAX_ slashcommands",
+                "infoFiltered": "",
+                "infoEmpty": "No matches found"
+            },
+            "rowCallback": function (row, data) {
+
+                if (data.source != '3script') $(row).addClass('snucmdtitle');
+
+            },
+            "bLengthChange": false,
+            "bSortClasses": false,
+            "scrollY": "200px",
+            "scrollCollapse": true,
+            "paging": false
+
+        });
+
+        $('#tbxslashcommands').keyup(function () {
+            dtSlashcommands.search($(this).val()).draw();
+        }).focus().trigger('keyup');
+
+        $('#tblslashcommands tr.snucmdtitle').on('click', function (e) {
+            var row = dtSlashcommands.row(this).data();
+            $('#tbxslashcmd').val(row.command);
+            $('#tbxslashurl').val(row.url);
+            $('#tbxslashhint').val(snuDecodeHtml(row.hint));
+        });
+
+        $('a.deletecmd').on('click', function (e) {
+
+            event.preventDefault();
+            var cmd = $(this).data('cmd');
+            if (!confirm("Delete command " + cmd + "?")) return;
+            delete objCustomCommands[cmd];
+            $('#slashcommands').val(JSON.stringify(objCustomCommands));
+            setSettings();
+            getSlashcommands();
+        
+        });
+
+        $('button#btnsaveslashcommand').click(function () {
+
+            event.preventDefault();
+            var cmds = {};
+            try {
+                cmds = JSON.parse($('#slashcommands').val());
+            } catch (e) { };
+            cmds[$('#tbxslashcmd').val()] = {
+                "url": $('#tbxslashurl').val(),
+                "hint": $('#tbxslashhint').val()
+            };
+            $('#slashcommands').val(JSON.stringify(cmds));
+            objSettings.slashcommands = cmds;
+            setSettings();
+            getSlashcommands();
+
+        });
+
+
+
+
+    });
+
+
+
+}
+
 
 //set or refresh datatable with ServiceNow tables
 function setDataExplore(nme) {
 
     if (dtDataExplore) dtTables.destroy();
-//$('#dataexplore').html(nme);
+    //$('#dataexplore').html(nme);
     dtDataExplore = $('#dataexplore').DataTable({
         "aaData": nme,
         "aoColumns": [
 
-            { "mDataProp": "meta.label"},
-            { "mDataProp": "name"},
-            { "mDataProp": "meta.type"},
-            { "mDataProp": "value"},
-            { "mDataProp": "display_value"}
+            { "mDataProp": "meta.label" },
+            { "mDataProp": "name" },
+            { "mDataProp": "meta.type" },
+            { "mDataProp": "value" },
+            { "mDataProp": "display_value" }
         ],
         "language": {
             "info": "Matched: _TOTAL_ of _MAX_ fields | Hold down CMD or CTRL to keep window open after clicking a link",
@@ -723,10 +880,10 @@ function setDataExplore(nme) {
         "paging": false,
         "dom": 'rti<"btns"B>',
         "buttons": [
-        "copyHtml5",  
+            "copyHtml5",
             {
                 text: 'Toggle Type',
-                action: function ( e, dt, node, config ) {
+                action: function (e, dt, node, config) {
                     var vis = !dtDataExplore.column(2).visible();
                     dtDataExplore.column(2).visible(vis);
 
@@ -742,7 +899,7 @@ function setDataExplore(nme) {
 
     $('a.referencelink').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
+        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
     $('#waitingdataexplore').hide();

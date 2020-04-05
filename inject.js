@@ -1,45 +1,154 @@
 var fields = [];
 var mySysId = '';
+var snuMaxHints = 10;
 
 
 var snuslashcommands = {
-    "help": "* Show help",
-    "add": "* Add or overwrite slashcommand <cmd> <My Desc>",
-    "tn": "* Show technical names",
-    "uh": "* Show hidden fields",
-    "env": "* Open this page in <instance>",
-    "token": "* Send g_ck token to VS Code",
-    "lang": "* Switch language <lng>",
-    "code": "* Beta <search>",
-    "pop": "* Pop in/out classic UI",
-    "search": "text_search_exact_match.do?sysparm_search=$0 Global search <search>",
-    "s2": "* Toggle Select2 for Application and Updateset picker",
-    "start": "/nav_to.do New tab",
-    "db": "$pa_dashboard.do Dashboards",
-    "plug": "v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0 Plugins",
-    "acl": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2 Open ACL list <table> <operation>",
-    "br": "sys_script_list.do?sysparm_query=nameLIKE$0 Business Rules <name>",
-    "si": "sys_script_include_list.do?sysparm_query=nameLIKE$0 Script Includes <name>",
-    "cs": "sys_script_client_list.do?sysparm_query=nameLIKE$0 Client Scripts <name>",
-    "ua": "sys_ui_action_list.do?sysparm_query=nameLIKE$0 UI Actions <name>",
-    "up": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0 UI Policies <name>",
-    "uis": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0 UI Script <name>",
-    "p": "sys_properties_list.do?sysparm_query=nameLIKE$0 Properties <name>",
-    "log": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0 System log <search>",
-    "trans": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0 Transaction Log <search>",
-    "u": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0 Users <search>",
-    "me": "sys_user.do?sys_id=javascript:gs.getUserID() My User profile",
-    "docs": "https://docs.servicenow.com/search?q=$0&labelkey=orlando Search Docs <search>",
-    "comm": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1 Search Community <search>",
-    "dev": "https://developer.servicenow.com/dev.do#!/search/orlando/All/$0 Search developer portal <search>",
-    "fd": "/$flow-designer.do Open Flow Designer",
-    "va": "/$conversation-builder.do Open Virtual Agent",
-    "st": "/$studio.do Open Studio",
-    "sp": "/sp Open Service Portal",
-    "tweets": "https://twitter.com/sn_utils Show @sn_utils Tweets",
-    "unimpersonate": "* Stop impersonating and reload page",
-    "wf": "/workflow_ide.do?sysparm_nostack=true Open Workflow Editor",
-    "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application <name>"
+        "acl": {
+            "url": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
+            "hint": "Open ACL list <table> <operation>"
+        },
+        "app": {
+            "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0",
+            "hint": "Search Application <name>"
+        },
+        "br": {
+            "url": "sys_script_list.do?sysparm_query=nameLIKE$0",
+            "hint": "Business Rules <name>"
+        },
+        "code": {
+            "url": "*",
+            "hint": "Beta <search>"
+        },
+        "comm": {
+            "url": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
+            "hint": "Search Community <search>"
+        },
+        "cs": {
+            "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
+            "hint": "Client Scripts <name>"
+        },
+        "db": {
+            "url": "$pa_dashboard.do",
+            "hint": "Dashboards"
+        },
+        "dev": {
+            "url": "https://developer.servicenow.com/dev.do#!/search/orlando/All/$0",
+            "hint": "Search developer portal <search>"
+        },
+        "docs": {
+            "url": "https://docs.servicenow.com/search?q=$0&labelkey=orlando",
+            "hint": "Search Docs <search>"
+        },
+        "env": {
+            "url": "*",
+            "hint": "Open this page in <instance>"
+        },
+        "fd": {
+            "url": "/$flow-designer.do",
+            "hint": "Open Flow Designer"
+        },
+        "help": {
+            "url": "*",
+            "hint": "Show help"
+        },
+        "lang": {
+            "url": "*",
+            "hint": "Switch language <lng>"
+        },
+        "log": {
+            "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
+            "hint": "System log <search>"
+        },
+        "me": {
+            "url": "sys_user.do?sys_id=javascript:gs.getUserID()",
+            "hint": "My User profile"
+        },
+        "p": {
+            "url": "sys_properties_list.do?sysparm_query=nameLIKE$0",
+            "hint": "Properties <name>"
+        },
+        "plug": {
+            "url": "v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0",
+            "hint": "Plugins"
+        },
+        "pop": {
+            "url": "*",
+            "hint": "Pop in/out classic UI"
+        },
+        "s2": {
+            "url": "*",
+            "hint": "Toggle Select2 for Application and Updateset picker"
+        },
+        "search": {
+            "url": "text_search_exact_match.do?sysparm_search=$0",
+            "hint": "Global search <search>"
+        },
+        "si": {
+            "url": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
+            "hint": "Script Includes <name>"
+        },
+        "sp": {
+            "url": "/sp",
+            "hint": "Open Service Portal"
+        },
+        "st": {
+            "url": "/$studio.do",
+            "hint": "Open Studio"
+        },
+        "start": {
+            "url": "/nav_to.do",
+            "hint": "New tab"
+        },
+        "tn": {
+            "url": "*",
+            "hint": "Show technical names"
+        },
+        "token": {
+            "url": "*",
+            "hint": "Send g_ck token to VS Code"
+        },
+        "trans": {
+            "url": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
+            "hint": "Transaction Log <search>"
+        },
+        "tweets": {
+            "url": "https://twitter.com/sn_utils",
+            "hint": "Show @sn_utils Tweets"
+        },
+        "u": {
+            "url": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
+            "hint": "Users <search>"
+        },
+        "ua": {
+            "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
+            "hint": "UI Actions <name>"
+        },
+        "uh": {
+            "url": "*",
+            "hint": "Show hidden fields"
+        },
+        "uis": {
+            "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0",
+            "hint": "UI Script <name>"
+        },
+        "unimpersonate": {
+            "url": "*",
+            "hint": "Stop impersonating and reload page"
+        },
+        "up": {
+            "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0",
+            "hint": "UI Policies <name>"
+        },
+        "va": {
+            "url": "/$conversation-builder.do",
+            "hint": "Open Virtual Agent"
+        },
+        "wf": {
+            "url": "/workflow_ide.do?sysparm_nostack=true",
+            "hint": "Open Workflow Editor"
+        }
+    
 }
 
 var snuslashswitches = {
@@ -74,6 +183,17 @@ if (typeof jQuery != "undefined") {
     });
 }
 
+function snuEncodeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function snuDecodeHtml(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
+
+
 function addFilterListener() {
     if (document.getElementById('filter') == null) return;
     document.getElementById('filter').addEventListener('keyup', function (e) {
@@ -93,6 +213,8 @@ function addSlashCommandListener() {
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
+        if (e.key == 'ArrowDown') {e.preventDefault(); snuMaxHints = 1000; };
+        if (e.key == 'ArrowUp') {e.preventDefault(); snuMaxHints = 10;}
         if (e.key == 'Meta' || e.key == 'Control') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
@@ -115,7 +237,7 @@ function addSlashCommandListener() {
             var query = snufilter.slice(idx + 1);
 
 
-            var targeturl = (snuslashcommands[shortcut] || "").split(" ")[0];
+            var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
 
             if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
                 snufilter = snuslashcommands[shortcut].substr(2);
@@ -123,7 +245,7 @@ function addSlashCommandListener() {
                 if (idx == -1) idx = snufilter.length;
                 shortcut = snufilter.slice(0, idx).toLowerCase();
                 query = snufilter.slice(idx + 1).replace(/ .*/, '');;
-                targeturl = (snuslashcommands[shortcut] || "");
+                targeturl = (snuslashcommands[shortcut].url || "");
             }
             var switchText = '<br /> Options:<br />';
             if (targeturl.includes('sysparm_query=')) {
@@ -157,10 +279,8 @@ function addSlashCommandListener() {
                     return;
                 }
                 else if (shortcut == "help") {
-                    var outp = "";
-                    for (cmd in snuslashcommands) {
-                        outp += cmd + ";" + snuslashcommands[cmd] + "\n";
-                    }
+                    var outp = "Please review in the new Slaschcommands tab in the popup";
+
 
                     showAlert("Slashcommands <a href='https://www.youtube.com/watch?v=X6HLCV_ptQM&list=PLTyELlWS-zjSIPIs4ukRCrqc4LRHva6-L' target='_blank'>Playlist on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
                         "Go to settings tab in popup to manage custom / commands <br />" +
@@ -374,6 +494,8 @@ function addSlashCommandListener() {
 
 function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
 
+
+
     if ((e.ctrlKey || e.metaKey) && e.key == 'v' && shortcut == 'v') {
         //asume a sys_id when pasting for correct 'autocomplete'
         shortcut = "00000000000000000000000000000000";
@@ -395,21 +517,24 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     }
 
     var html = "";
-    for (i = 0; i < propertyNames.length && i < 10; i++) {
-        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + propertyNames[i] + "</span> " +
-            "<span class='cmdlabel'>" + snuslashcommands[propertyNames[i]].split(" ").slice(1).join(" ")
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;') + "</span></li>"
+    for (i = 0; i < propertyNames.length && i < snuMaxHints; i++) {
+        html += "<li onclick='setSnuFilter(this)' ><span class='cmdkey'>/" + propertyNames[i] + "</span> " +
+            "<span class='cmdlabel'>" + snuEncodeHtml(snuslashcommands[propertyNames[i]].hint) + "</span></li>"
         if (fltr.value.includes(" ")) {
             break;
         }
     }
+
+    if (propertyNames.length > snuMaxHints){
+        html += "<li onclick='snuExpandHints(\"" + shortcut+ "\")'><span  class='cmdkey'>+" + (propertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
+    }
+
     if (!html && shortcut.replace(/ /g, '').length == 32) {
-        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/sys_id</span> " +
+        html += "<li onclick='setSnuFilter(this)' ><span class='cmdkey'>/sys_id</span> " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
     if (!html && shortcut.length > 5) {
-        html += "<li><span onclick='setSnuFilter(this)' class='cmdkey'>/" + shortcut + "</span> " +
+        html += "<li onclick='setSnuFilter(this)' ><span class='cmdkey'>/" + shortcut + "</span> " +
             "<span class='cmdlabel'>Table search</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
@@ -419,10 +544,18 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
 function setSnuFilter(elm) {
     if (elm.innerText.length > window.top.document.getElementById('snufilter').value.length) {
         window.top.document.getElementById('snufilter').focus();
-        window.top.document.getElementById('snufilter').value = elm.innerText + ' ';
+        window.top.document.getElementById('snufilter').value = elm.querySelector('.cmdkey').innerText + ' ';
     }
 }
 
+function snuExpandHints(shortcut){
+    snuMaxHints = 1000;
+    var e = new KeyboardEvent('keypress',{'key':'KeyDown'});
+    snuShowSlashCommandHints(shortcut, false, '', e);
+    var elm = window.top.document.getElementById('snufilter');
+    elm.focus();
+    elm.selectionStart = elm.selectionEnd = elm.value.length;
+}
 
 function snuAddSlashCommand(cmd) {
     var event = new CustomEvent(
@@ -480,15 +613,11 @@ function snuSettingsAdded() {
     if (snusettings.hasOwnProperty("slashcommands")) {
 
         try {
-            if (("" + snusettings.slashcommands).length > 10) {
-                var cmdArr = snusettings.slashcommands.split('\n');
-                for (var i = 0; i < cmdArr.length; i++) {
-                    var cmdSplit = cmdArr[i].split(";");
-                    if (cmdSplit.length == 2) {
-                        snuslashcommands[cmdSplit[0]] = cmdSplit[1];
-                    }
-                }
-            }
+
+            var customCommands = JSON.parse(snusettings.slashcommands);
+            Object.keys(customCommands).forEach(function (key) {
+                snuslashcommands[key] = customCommands[key];
+            });
 
             var sco = {}; //order the object
             Object.keys(snuslashcommands).sort().forEach(function (key) {
@@ -1092,7 +1221,7 @@ function setShortCuts() {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
-        ul#snuhelper { list-style-type: none; padding-left: 2px; } 
+        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
         ul#snuhelper li {margin-top:2px}
         span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; min-width: 40px; cursor: pointer; display: inline-block;}
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; font-weight:bold; width:99%; border: 1px solid #ffffff; margin:8px 2px 4px 2px; background-color:#ffffff }
@@ -1116,7 +1245,7 @@ function setShortCuts() {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
-        ul#snuhelper { list-style-type: none; padding-left: 2px; } 
+        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
         ul#snuhelper li {margin-top:2px}
         span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:100%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }

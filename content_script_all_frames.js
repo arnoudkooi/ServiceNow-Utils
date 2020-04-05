@@ -15,6 +15,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     s.src = chrome.runtime.getURL('inject.js');
     s.onload = function () {
         getFromSyncStorageGlobal("snusettings", function (settings) {
+
+            settings = convertSlashCommands(settings);
+
             if (!settings) settings = {};
             var script = document.createElement('script');
             script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
@@ -25,6 +28,40 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     (document.head || document.documentElement).appendChild(s);
 
 })();
+
+
+//temporary check, to convert slashcommands
+// var settings = {
+//     "slashcommands" : ["i;incdent.do incdentjes hier", "chg;chg.do chamges hier", "prb;prob.do"].join('\n')
+// }
+function convertSlashCommands(settings){
+
+    if (! settings.hasOwnProperty('slashcommands')) return settings;
+    if (settings.slashcommands.trim().startsWith('{')) return settings;
+
+    var cmds = {}
+    if ((settings.slashcommands).length > 7) {
+        var cmdArr = settings.slashcommands.split('\n');
+        for (var i = 0; i < cmdArr.length; i++) {
+            var cmdSplit = cmdArr[i].split(";");
+            if (cmdSplit.length == 2) {
+                cmds[cmdSplit[0]] = {
+                    "url" : cmdSplit[1].split(" ")[0],
+                    "hint" : cmdSplit[1].split(" ").slice(1).join(" ")
+
+                }
+            }
+        }
+
+        settings.slashcommands = JSON.stringify(cmds);
+        setToChromeSyncStorageGlobal("snusettings", settings);
+    }
+    return settings;
+
+}
+
+
+
 
 function runFunction(f, context) {
     var doc;
@@ -47,6 +84,15 @@ function runFunction(f, context) {
 function getFromSyncStorageGlobal(theName, callback) {
     chrome.storage.sync.get(theName, function (result) {
         callback(result[theName]);
+    });
+}
+
+//set an instance independent sync parameter
+function setToChromeSyncStorageGlobal(theName, theValue) {
+    var myobj = {};
+    myobj[theName] = theValue;
+    chrome.storage.sync.set(myobj, function () {
+
     });
 }
 

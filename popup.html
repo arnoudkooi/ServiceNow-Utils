@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/datatables.min.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/style.css">
+    
 
     <script src="js/jquery.js"></script>
     <script src="js/jquery.deserialize.js"></script>
@@ -15,6 +16,7 @@
     <script src="js/moment.js"></script>
     <script src="js/datatables.min.js"></script>
     <script src="js/datetime-moment.js"></script>
+    <script src="inject.js"></script>
 
     <script src="popup.js"></script>
 </head>
@@ -27,48 +29,51 @@
                 <li class='nav-item onlyadmin'>
                     <a class="nav-link" data-target="#tabupdatesets" data-toggle="tab">Update Set
                         <span id="waitingupdatesets" class="waiting">
-                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                            <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
                     <a class="nav-link" data-target="#tabupdates" data-toggle="tab">Updates
                         <span id="waitingupdates" class="waiting">
-                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                            <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
                     <a class="nav-link" data-target="#tabnodes" data-toggle="tab">Nodes
                         <span id="waitingnodes" class="waiting">
-                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                            <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
                     <a class="nav-link" data-target="#tabtables" data-toggle="tab">Tables
                         <span id="waitingtables" class="waiting">
-                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                            <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
                     <a class="nav-link" data-target="#tabdataexplore" data-toggle="tab">View Data
                         <span id="waitingdataexplore" class="waiting">
-                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                            <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
                     <a class="nav-link" data-target="#tabuser" data-toggle="tab">User
                         <span id="waitinguser" class="waiting">
-                            <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                            <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
                     <a class="nav-link" data-target="#tabgr" data-toggle="tab">GlideRecord</a>
                 </li>
+                <li class='nav-item'>
+                    <a class="nav-link" data-target="#tabslashcommands" data-toggle="tab" id='navslashcommands'>Slashcommands</a>
+                </li>               
                 <li class='nav-item'>
                     <a class="nav-link" data-target="#tabsettings" data-toggle="tab">Settings</a>
                 </li>
@@ -358,10 +363,8 @@
 
                     <hr />
                     <h5>Slash Commands</h5>
-                    Add custom / commands, type /help{enter} in the navigator filter to show all commands. Per
-                    line:
-                    shortcut;url Description
-                    <textarea class="form-control form-control-sm snu-setting" autocomplete="off" autocapitalize="off"
+                    Advanced, please use the <a id="helperslashcommands" href='#tabslashcommands'>Slashcommands</a> tab to manage custom commands
+                    <textarea class="form-control form-control-sm snu-setting" readonly="readonly" autocomplete="off" autocapitalize="off"
                         spellcheck="false" id="slashcommands"
                         placeholder="i;incident_list.do?sysparm_query=short_description=$0"></textarea>
 
@@ -383,6 +386,49 @@
                         Firefox.
                     </div>
 
+                </div>
+
+                <div class="tab-pane" id="tabslashcommands">
+                    <div class="input-group">
+                        <input type="search" id="tbxslashcommands" name="tbxslashcommands"
+                            class="form-control form-control-sm sync"
+                            placeholder="Search existing slashcommands..." />
+                        <span class="input-group-append">
+                            <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
+                        </span>
+                    </div>
+
+                    <form>
+                        <div class="form-row" id="cmdform">
+                          <div class="form-group col-md-2">
+                            <label for="tbxslashcmd">Command</label>
+                            <input type="text" size="12" class="form-control form-control-sm" id="tbxslashcmd" />
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label for="tbxslashurl">URL</label>
+                            <textarea class="form-control form-control-sm" id="tbxslashurl" ></textarea>
+                          </div>
+                          <div class="form-group col-md-4">
+                            <label for="tbxslashhint">Hint</label>
+                            <input type="text" class="form-control form-control-sm" id="tbxslashhint" />
+                            <button id="btnsaveslashcommand" class="btn btn-primary btn-sm float-right" >Save</button>
+                          </div>
+                        </div>
+                    </form>               
+                    
+                    <table id="tblslashcommands" class="display table-condensed">
+                        <thead>
+                            <tr>
+                                <th>*</th>
+                                <th>Command</th>
+                                <th>Details</th>
+                                <th>*</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <span class="fonteight">
+
+                    </span>
                 </div>
 
 
