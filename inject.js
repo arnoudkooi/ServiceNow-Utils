@@ -41,6 +41,9 @@ var snuslashcommands = {
     "wf": "/workflow_ide.do?sysparm_nostack=true Open Workflow Editor",
     "app": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0 Open Application <name>",
     "imp": "impersonate_dialog.do Impersonate User page",
+    "xml": "/$table.do?XML&sys_id=$sysid Open current record's XML view",
+    "xmlsrc": "* Open current record's XML view with Browser's View Source",
+    "json": "/$table.do?JSONv2&sysparm_action=get&sysparm_sys_id=$sysid Open current record's JSONv2 view",
 }
 
 var snuslashswitches = {
@@ -104,6 +107,7 @@ function addSlashCommandListener() {
             var thisUrl = window.location.href;
             var thisInstance = window.location.host.split('.')[0];
             var thisHost = window.location.host;
+            var thisOrigin = window.location.origin;
             var idx = snufilter.indexOf(' ')
             var noSpace = (snufilter.indexOf(' ') == -1);
             var selectFirst = (e.key == " " || e.key == "Tab") && !snufilter.includes(" ");
@@ -149,6 +153,11 @@ function addSlashCommandListener() {
             }
 
             targeturl = targeturl.replace(/\$0/g, query);
+
+            if (typeof g_form !== 'undefined') {
+                targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
+                targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
+            }
 
             if (e.key == 'Enter') {
                 if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
@@ -315,6 +324,27 @@ function addSlashCommandListener() {
 
                         return;
                     }
+                }
+                else if (shortcut === 'xmlsrc') {
+                    // prefix URL with 'view-source:' so that browsers are forced to show the actual XML
+                    // some addons (on Firefox at least) break the XML style when not viewed in Source
+                    thisUrl = 'view-source:' + thisOrigin + '/' + g_form.getTableName() + '.do?XML&' +
+                        'sys_id=' + g_form.getUniqueValue();
+                    if (query)
+                        thisUrl += '&sys_target='+query;
+
+                    var event = new CustomEvent(
+                        "snutils-event",
+                        {
+                            detail: {
+                                event: "viewxml",
+                                command: thisUrl
+                            }
+                        }
+                    );
+                    window.top.document.dispatchEvent(event);
+                    hideSlashCommand();
+                    return;
                 }
                 else if (!snuslashcommands.hasOwnProperty(shortcut)) {
                     if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters

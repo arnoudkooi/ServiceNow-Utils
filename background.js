@@ -1052,6 +1052,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         })
 
     }
+    else if (message.event == "viewxml") {
+        var createObj = {
+            'url': message.command,
+        }
+        if (sender.tab.hasOwnProperty('cookieStoreId')){
+            createObj.cookieStoreId = sender.tab.cookieStoreId;
+        }
+        chrome.tabs.create(createObj);
+    }
 });
 
 
