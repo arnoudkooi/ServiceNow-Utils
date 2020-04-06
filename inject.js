@@ -147,6 +147,22 @@ var snuslashcommands = {
         "wf": {
             "url": "/workflow_ide.do?sysparm_nostack=true",
             "hint": "Open Workflow Editor"
+        },
+        "imp": {
+            "url": "impersonate_dialog.do",
+            "hint": "Impersonate User page"
+        },
+        "xml": {
+            "url": "/$table.do?XML&sys_id=$sysid ",
+            "hint": "Open current record's XML view"
+        },
+        "xmlsrc": {
+            "url": "*",
+            "hint": "Open current record's XML view with Browser's View Source"
+        },
+        "json": {
+            "url": "/$table.do?JSONv2&sysparm_action=get&sysparm_sys_id=$sysid",
+            "hint": "Open current record's JSONv2 view"
         }
     
 }
@@ -225,6 +241,7 @@ function addSlashCommandListener() {
             var thisUrl = window.location.href;
             var thisInstance = window.location.host.split('.')[0];
             var thisHost = window.location.host;
+            var thisOrigin = window.location.origin;
             var idx = snufilter.indexOf(' ')
             var noSpace = (snufilter.indexOf(' ') == -1);
             var selectFirst = (e.key == " " || e.key == "Tab") && !snufilter.includes(" ");
@@ -238,6 +255,18 @@ function addSlashCommandListener() {
 
 
             var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
+
+            if (typeof g_form == 'undefined') {
+                try{ //get if in iframe
+                    g_form = document.getElementById('gsft_main').contentWindow.g_form;
+                 } catch(e){}
+            }
+            if (typeof g_form !== 'undefined') {
+                g_form = document.getElementById('gsft_main').contentWindow.g_form;
+                targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
+                targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
+            }
+
 
             if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
                 snufilter = snuslashcommands[shortcut].substr(2);
@@ -337,7 +366,9 @@ function addSlashCommandListener() {
                 }
                 else if (shortcut == "env") {
                     if (query) {
-                        thisUrl = thisUrl.replace(thisHost, query + ".service-now.com");
+                        // this allows logic to work with on-premise instances as well
+                        if (query.indexOf('.') === -1) query += '.service-now.com';
+                        thisUrl = thisUrl.replace(thisHost, query);
                     }
                     if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
                         e.preventDefault();
@@ -348,26 +379,30 @@ function addSlashCommandListener() {
                     }
                     return;
                 }
-                else if (shortcut == "add") {
+                else if (shortcut === 'xmlsrc') {
 
-                    query = query.trim();
-
-                    if (query.length < 1 || query == "") {
-                        alert("Please define one word command name followed by a short description\nexample:\n/add mycommand My Description");
+                    if (typeof g_form == 'undefined'){
+                        showAlert("No form found","warning",2000)
+                        hideSlashCommand();
                         return;
                     }
+                    // prefix URL with 'view-source:' so that browsers are forced to show the actual XML
+                    // some addons (on Firefox at least) break the XML style when not viewed in Source
+                    thisUrl = 'view-source:' + thisOrigin + '/' + g_form.getTableName() + '.do?XML&' +
+                        'sys_id=' + g_form.getUniqueValue();
+                    if (query)
+                        thisUrl += '&sys_target='+query;
 
-                    var url;
-                    if (typeof jQuery != "undefined")
-                        url = jQuery('#gsft_main').attr('src');
-
-                    url = (url || window.location.href.replace(window.location.origin, "")) + " " + query.split(" ").slice(1).join(" ");
-
-                    var cmd = prompt("Set new Slashcommand (takes affect after reloading tab)\nCommand: /" + query.split(" ")[0], url);
-                    if (cmd != null) {
-                        cmd = query.split(" ")[0].toLowerCase() + ";" + cmd;
-                        snuAddSlashCommand(cmd);
-                    }
+                    var event = new CustomEvent(
+                        "snutils-event",
+                        {
+                            detail: {
+                                event: "viewxml",
+                                command: thisUrl
+                            }
+                        }
+                    );
+                    window.top.document.dispatchEvent(event);
                     hideSlashCommand();
                     return;
                 }
