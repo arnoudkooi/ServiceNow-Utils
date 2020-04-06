@@ -269,7 +269,7 @@ function addSlashCommandListener() {
 
 
             if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
-                snufilter = snuslashcommands[shortcut].substr(2);
+                snufilter = snuslashcommands[shortcut].url.substr(2);
                 var idx = snufilter.indexOf(' ')
                 if (idx == -1) idx = snufilter.length;
                 shortcut = snufilter.slice(0, idx).toLowerCase();
