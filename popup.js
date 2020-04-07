@@ -27,7 +27,7 @@ var table;
 var sys_id;
 var isNoRecord = true;
 
-
+$.fn.dataTable.ext.errMode = 'none';
 
 document.addEventListener('DOMContentLoaded', function () {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {

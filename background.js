@@ -1144,8 +1144,20 @@ function getExploreData() {
         method: "getVars",
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
-        var tableName = response.myVars.g_formtableName;
-        var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
+        var tableName = response.myVars.g_formtableName || getParameterByName("table",response.frameHref);
+        var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id",response.frameHref);
+
+        if (!tableName){ //try to find table and sys_id in workspace
+            var myurl = new URL(response.frameHref)
+            var parts = myurl.pathname.split("/");
+            var idx = parts.indexOf("sub") // show subrecord if available
+            if (idx != -1) parts = parts.slice(idx);
+            idx = parts.indexOf("record")
+            if (idx > -1 && parts.length >= idx+2 ){
+                tableName = parts[idx+1];
+                sysId = parts[idx+2];               
+            }
+        }
 
 
         if (!(tableName && sysId)) {
@@ -1202,6 +1214,16 @@ function getExploreData() {
         });
     });
 
+}
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href.toLowerCase();
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 

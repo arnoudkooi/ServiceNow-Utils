@@ -262,7 +262,6 @@ function addSlashCommandListener() {
                  } catch(e){}
             }
             if (typeof g_form !== 'undefined') {
-                g_form = document.getElementById('gsft_main').contentWindow.g_form;
                 targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
                 targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
             }

@@ -80,7 +80,12 @@ function getFrameHref() {
     if (jQuery('#gsft_main').length)
         frameHref = document.getElementById("gsft_main").contentWindow.location.href;
     else if (jQuery('div.tab-pane.active').length == 1) {
-        frameHref = jQuery('iframe.activetab')[0].contentWindow.location.href;
+        try{
+            frameHref = jQuery('iframe.activetab')[0].contentWindow.location.href;
+        }
+        catch (e){
+            frameHref = document.location.href;
+        }
     }
     else
         frameHref = document.location.href;
@@ -125,10 +130,15 @@ function getVars(varstring) {
         doc = jQuery('#gsft_main')[0].contentWindow.document;
     else if (jQuery('div.tab-pane.active').length == 1) {
 
+        try{
         ret.g_ck = jQuery('input#sysparm_ck').val();
         jQuery('iframe').removeClass('activetab');
         jQuery('div.tab-pane.active iframe').addClass('activetab');
         doc = jQuery('iframe.activetab')[0].contentWindow.document;
+        }
+        catch(ex){
+            doc = document;
+        }
 
     }
     else
@@ -139,7 +149,7 @@ function getVars(varstring) {
     var scriptContent = "";
     for (var i = 0; i < variables.length; i++) {
         var currVariable = variables[i];
-        scriptContent += "try{ if (typeof window." + currVariable + " !== 'undefined') jQuery('body').attr('tmp_" + currVariable.replace(/\./g, "") + "', window." + currVariable + "); } catch(err){console.log(err);}\n"
+        scriptContent += "try{ if (typeof window." + currVariable + " !== 'undefined') document.body.setAttribute('tmp_" + currVariable.replace(/\./g, "") + "', window." + currVariable + "); } catch(err){console.log(err);}\n"
     }
 
 
