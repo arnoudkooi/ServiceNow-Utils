@@ -169,6 +169,7 @@ var snuslashcommands = {
 
 var snuslashswitches = {
     "a": { "description": "Active is True", "value": "^active=true" },
+    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true&" },
     "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()" },
     "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
     "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
@@ -207,6 +208,34 @@ function snuDecodeHtml(html) {
     var txt = document.createElement("textarea");
     txt.innerHTML = html;
     return txt.value;
+}
+
+function snuGetTables(shortcut){
+
+    Object.entries(snuslashcommands).forEach(([key, val]) => {
+        if (snuslashcommands[key].hasOwnProperty("type")){ //remove old matches
+            delete snuslashcommands[key];
+        }
+    });
+
+    if (shortcut.length < 3) return; 
+
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^EORDERBYlabel^nameSTARTSWITH' + shortcut;
+    loadXMLDoc(g_ck, myurl, null, function (jsn) {
+        var results = jsn.result;
+
+        Object.entries(results).forEach(([key, val]) => {
+            snuslashcommands[val.name] = {
+                "url" : val.name + "_list.do?sysparm_query=",
+                "hint": val.label,
+                "type" : "table"
+            };
+        });
+
+        snuExpandHints(shortcut)
+
+    });
+
 }
 
 
@@ -252,6 +281,7 @@ function addSlashCommandListener() {
             if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
             var shortcut = snufilter.slice(0, idx).toLowerCase();
             var query = snufilter.slice(idx + 1);
+            if (e.key == 'ArrowRight') { snuGetTables(shortcut)};
 
 
             var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -277,6 +307,7 @@ function addSlashCommandListener() {
             }
             var switchText = '<br /> Options:<br />';
             if (targeturl.includes('sysparm_query=')) {
+                var extraParams = "";
                 var unusedSwitches = Object.assign({}, snuslashswitches);
                 var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
                 if (switches) {
@@ -284,11 +315,17 @@ function addSlashCommandListener() {
                         var prop = val.replace(/\s|\-/g, '');
                         if (snuslashswitches.hasOwnProperty(prop)) {
                             query = query.replace(val, "");
-                            targeturl += snuslashswitches[prop].value;
+                            if (snuslashswitches[prop].value.startsWith("^")){
+                                targeturl += snuslashswitches[prop].value;
+                            }
+                            else {
+                                extraParams += snuslashswitches[prop].value;
+                            }
                             switchText += "<div class='cmdlabel'>-" + prop + ": " + snuslashswitches[prop].description + '</div>';
                             delete unusedSwitches[prop];
                         }
                     });
+                    targeturl += extraParams;
                 }
 
                 Object.entries(unusedSwitches).forEach(([key, val]) => {
@@ -529,7 +566,6 @@ function addSlashCommandListener() {
 function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
 
 
-
     if ((e.ctrlKey || e.metaKey) && e.key == 'v' && shortcut == 'v') {
         //asume a sys_id when pasting for correct 'autocomplete'
         shortcut = "00000000000000000000000000000000";
@@ -569,7 +605,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     }
     if (!html && shortcut.length > 5) {
         html += "<li onclick='setSnuFilter(this)' ><span class='cmdkey'>/" + shortcut + "</span> " +
-            "<span class='cmdlabel'>Table search</span></li>"
+            "<span class='cmdlabel'>Table search (hit ► to search tables)</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
     window.top.document.getElementById('snuhelper').innerHTML = html + switchText;
@@ -1747,6 +1783,7 @@ function hideSlashCommand() {
 }
 
 function showSlashCommand() {
+
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = '/';
