@@ -419,6 +419,15 @@ function codeSearch(message, cookieStoreId) {
       ); 
 }
 
+function openFile(link) {
+    var url = chrome.runtime.getURL(link);
+    var createObj = {
+    'url': url,
+    'active': true
+    }
+    chrome.tabs.create(createObj);
+}
+
 
 function createScriptSyncTab(cookieStoreId) {
 
@@ -1031,6 +1040,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
     else if (message.event == "codesearch"){      
         codeSearch(message, cookieStoreId);
+    }
+    else if (message.event == "openfile"){
+        openFile(message.command);
     }
     else if (message.event == "addslashcommand"){
         getFromSyncStorageGlobal("snusettings", function(settings){
