@@ -170,7 +170,7 @@ var snuslashcommands = {
 
 var snuslashswitches = {
     "a": { "description": "Active is True", "value": "^active=true" },
-    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true&" },
+    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true" },
     "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()" },
     "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
     "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
@@ -221,13 +221,18 @@ function snuGetTables(shortcut){
 
     if (shortcut.length < 3) return; 
 
-    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^EORDERBYlabel^nameSTARTSWITH' + shortcut;
+    var qry = '^nameSTARTSWITH' + shortcut;
+    if (shortcut.includes('*')){
+        qry = '^nameLIKE' + shortcut.replace(/\*/g, '');
+    }
+
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00' + qry + '^EORDERBYname';
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
         var results = jsn.result;
 
         Object.entries(results).forEach(([key, val]) => {
             snuslashcommands[val.name] = {
-                "url" : val.name + "_list.do?sysparm_query=",
+                "url" : val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
                 "hint": val.label,
                 "type" : "table"
             };
@@ -280,17 +285,17 @@ function addSlashCommandListener() {
             var thisOrigin = window.location.origin;
             var idx = snufilter.indexOf(' ')
             var noSpace = (snufilter.indexOf(' ') == -1);
-            var selectFirst = (e.key == " " || e.key == "Tab") && !snufilter.includes(" ");
+            var selectFirst = (e.key == " " || e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
             var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
             if (noSpace) idx = snufilter.length;
             var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : ""))).toLowerCase();
 
             if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
             var shortcut = snufilter.slice(0, idx).toLowerCase();
-            if (snuPropertyNames.length > 1 && snuIndex > 0 && ["ArrowDown", "ArrowUp", "Enter" ,"Tab"," "].includes(e.key)){
+            if (snuPropertyNames.length > 1 && snuIndex >= 0 && ["ArrowDown", "ArrowUp", "Enter" ,"Tab"," "].includes(e.key)){
                 shortcut = snuPropertyNames[snuIndex];
                 snufilter = shortcut;
-                idx = snufilter.indexOf(' ')
+                idx = snufilter.indexOf(' ');
             }
             var query = snufilter.slice(idx + 1);
             if (e.key == 'ArrowRight') { snuGetTables(shortcut)};
@@ -346,9 +351,16 @@ function addSlashCommandListener() {
 
             }
 
-            targeturl = targeturl.replace(/\$0/g, query);
-
+        
+            
             if (e.key == 'Enter') {
+                shortcut = shortcut.replace(/\*/g, '');
+                snufilter = snufilter.replace(/\*/g, '');
+                idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
+                query = snufilter.slice(idx + 1);
+                
+                targeturl = targeturl.replace(/\$0/g, query);
+
 
                 if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
                     e.preventDefault();
@@ -548,7 +560,7 @@ function addSlashCommandListener() {
                         return;
                     }
                     else if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
-                        var url = shortcut + "_list.do?sysparm_filter_only=true&sysparm_filter_pinned=true&sysparm_query=name" + query;
+                        var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=name" + query;
 
                         if (inIFrame) {
                             jQuery('#gsft_main').attr('src', url);
@@ -615,8 +627,16 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
         shortcut = "00000000000000000000000000000000";
     }
 
+    var startswith = true;
+    if (shortcut.includes('*')){ //wildcardsearch when includes *
+        shortcut = shortcut.replace(/\*/g, '');
+        startswith = false;
+    }
+
      snuPropertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
-        return propertyName.indexOf(shortcut) === 0;
+        if (startswith)
+            return propertyName.indexOf(shortcut) === 0;
+        return propertyName.indexOf(shortcut) > -1;
     }).sort();
 
 
