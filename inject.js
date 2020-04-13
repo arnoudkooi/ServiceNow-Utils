@@ -294,7 +294,6 @@ function addSlashCommandListener() {
             var shortcut = snufilter.slice(0, idx).toLowerCase();
             if (snuPropertyNames.length > 1 && snuIndex >= 0 && ["ArrowDown", "ArrowUp", "Enter" ,"Tab"," "].includes(e.key)){
                 shortcut = snuPropertyNames[snuIndex];
-                snufilter = shortcut;
                 idx = snufilter.indexOf(' ');
             }
             var query = snufilter.slice(idx + 1);
@@ -351,7 +350,7 @@ function addSlashCommandListener() {
 
             }
 
-        
+            targeturl = targeturl.replace(/\$0/g, query);
             
             if (e.key == 'Enter') {
                 shortcut = shortcut.replace(/\*/g, '');
@@ -359,7 +358,7 @@ function addSlashCommandListener() {
                 idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
                 query = snufilter.slice(idx + 1);
                 
-                targeturl = targeturl.replace(/\$0/g, query);
+              
 
 
                 if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
@@ -453,7 +452,7 @@ function addSlashCommandListener() {
                 else if (shortcut === 'xmlsrc') {
 
                     if (typeof g_form == 'undefined'){
-                        showAlert("No form found","warning",2000)
+                        //showAlert("No form found","warning",2000)
                         hideSlashCommand();
                         return;
                     }
@@ -578,13 +577,13 @@ function addSlashCommandListener() {
                         return;
                     }
                     else {
-                        showAlert("Shortcut not defined: /" + shortcut, "warning");
+                        //showAlert("Shortcut not defined: /" + shortcut, "warning");
                         return;
                     }
                 }
 
 
-                var inIFrame = (shortcut == snufilter.slice(0, idx)) && !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
+                var inIFrame =  !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
                 if (e.target.className == "snutils") inIFrame = false;
 
                 if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
@@ -1771,11 +1770,11 @@ function loadXMLDoc(token, url, post, callback) {
         }).success(function (rspns, s) {
             callback(rspns, s);
         }).fail(function (jqXHR, textStatus) {
-            showAlert('Server Request failed (' + jqXHR.statusText + ')', 'danger');
+            console.log('Server Request failed (' + jqXHR.statusText + ')');
             callback(textStatus);
         });
     } catch (error) {
-        showAlert('Server Request failed (' + error + ')', 'danger');
+        console.log('Server Request failed (' + error + ')');
     }
 }
 
