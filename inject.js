@@ -170,15 +170,18 @@ var snuslashcommands = {
 
 var snuslashswitches = {
     "a": { "description": "Active is True", "value": "^active=true" },
-    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true" },
-    "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()" },
-    "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
-    "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" },
-    "um": { "description": "Updated by Me", "value": "^sys_updated_by=javascript:gs.getUserName()" },
-    "cm": { "description": "Created by Me", "value": "^sys_created_by=javascript:gs.getUserName()" },
-    "m": { "description": "Updated or Created by Me", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()" },
-    "ou": { "description": "Order by Updated Descending", "value": "^ORDERBYDESCsys_updated_on" },
-    "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on" },
+    "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name" , "type" : "link"},
+    "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
+
+    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true" , "type" : "querypart"},
+    "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()" , "type" : "encodedquerypart"},
+    "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" , "type" : "encodedquerypart"},
+    "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" , "type" : "encodedquerypart"},
+    "um": { "description": "Updated by Me", "value": "^sys_updated_by=javascript:gs.getUserName()" , "type" : "encodedquerypart"},
+    "cm": { "description": "Created by Me", "value": "^sys_created_by=javascript:gs.getUserName()" , "type" : "encodedquerypart"},
+    "m": { "description": "Updated or Created by Me", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()" , "type" : "encodedquerypart"},
+    "ou": { "description": "Order by Updated Descending", "value": "^ORDERBYDESCsys_updated_on" , "type" : "encodedquerypart"},
+    "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on" , "type" : "encodedquerypart"},
 }
 
 
@@ -326,12 +329,20 @@ function addSlashCommandListener() {
                 var extraParams = "";
                 var unusedSwitches = Object.assign({}, snuslashswitches);
                 var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
+                var linkSwitch = false; //determine if this is a switch that converts the entire hyperlink
                 if (switches) {
                     Object.entries(switches).forEach(([key, val]) => {
                         var prop = val.replace(/\s|\-/g, '');
-                        if (snuslashswitches.hasOwnProperty(prop)) {
-                            query = query.replace(val, "");
-                            if (snuslashswitches[prop].value.startsWith("^")){
+                        if (snuslashswitches.hasOwnProperty(prop) && !linkSwitch) {
+                            query = query.replace(val, "");                            
+                            if (snuslashswitches[prop].type == "link"){
+                                var tableName = targeturl.split("_list.do")[0] || "";
+                                targeturl = snuslashswitches[prop].value.replace(/\$0/,tableName);
+                                linkSwitch = true;
+                                unusedSwitches = {};
+                                switchText = '<br /> Options:<br />'; //reset switchtext
+                            }
+                            else if (snuslashswitches[prop].value.startsWith("^")){
                                 targeturl += snuslashswitches[prop].value;
                             }
                             else {
@@ -1847,9 +1858,11 @@ function hideSlashCommand() {
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
         if (window.top.document.getElementById('filter') != null) {
-            if (event.currentTarget.value.length <= 1) {
-                window.top.document.getElementById('filter').focus();
-            }
+            try {
+                if (event.currentTarget.value.length <= 1) {
+                    window.top.document.getElementById('filter').focus();
+                }
+            } catch(e){}
         }
     }
     return true;

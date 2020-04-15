@@ -36,7 +36,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 // }
 function convertSlashCommands(settings){
 
-    if (! settings.hasOwnProperty('slashcommands')) return settings;
+    if (typeof settings == 'undefined') return {};
+    if (!settings.hasOwnProperty('slashcommands')) return settings;
     if (settings.slashcommands.trim().startsWith('{')) return settings;
 
     var cmds = {}
