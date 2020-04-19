@@ -3,185 +3,201 @@ var mySysId = '';
 var snuMaxHints = 10;
 var snuPropertyNames = [];
 var snuIndex = 0;
+var snuNav = {
+    'loading': 'mustload',
+    'loadedLastTime' : 0
+};
 
 var snuslashcommands = {
-        "acl": {
-            "url": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
-            "hint": "Filter ACL list <table> <operation>"
-        },
-        "app": {
-            "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0",
-            "hint": "Filter Applications <name>"
-        },
-        "br": {
-            "url": "sys_script_list.do?sysparm_query=nameLIKE$0",
-            "hint": "Filter Business Rules <name>"
-        },
-        "code": {
-            "url": "*",
-            "hint": "Code Search (beta) <search>"
-        },
-        "comm": {
-            "url": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
-            "hint": "Search Community <search>"
-        },
-        "cs": {
-            "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
-            "hint": "Filter Client Scripts <name>"
-        },
-        "db": {
-            "url": "$pa_dashboard.do",
-            "hint": "Dashboards"
-        },
-        "dev": {
-            "url": "https://developer.servicenow.com/dev.do#!/search/orlando/All/$0",
-            "hint": "Search developer portal <search>"
-        },
-        "docs": {
-            "url": "https://docs.servicenow.com/search?q=$0&labelkey=orlando",
-            "hint": "Search Docs <search>"
-        },
-        "env": {
-            "url": "*",
-            "hint": "Open this page in <instance>"
-        },
-        "fd": {
-            "url": "/$flow-designer.do",
-            "hint": "Open Flow Designer"
-        },
-        "help": {
-            "url": "*",
-            "hint": "Open slashcommand help PDF"
-        },
-        "lang": {
-            "url": "*",
-            "hint": "Switch language <lng>"
-        },
-        "log": {
-            "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
-            "hint": "Filter System Log Created Today <search>"
-        },
-        "me": {
-            "url": "sys_user.do?sys_id=javascript:gs.getUserID()",
-            "hint": "Open My User profile"
-        },
-        "p": {
-            "url": "sys_properties_list.do?sysparm_query=nameLIKE$0",
-            "hint": "Filter Properties <name>"
-        },
-        "plug": {
-            "url": "v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0",
-            "hint": "Filter Plugins <search>"
-        },
-        "pop": {
-            "url": "*",
-            "hint": "Pop in/out classic UI"
-        },
-        "s2": {
-            "url": "*",
-            "hint": "Toggle Select2 for Application and Updateset picker"
-        },
-        "search": {
-            "url": "text_search_exact_match.do?sysparm_search=$0",
-            "hint": "Global Instance Search <search>"
-        },
-        "si": {
-            "url": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
-            "hint": "Filter Script Includes <name>"
-        },
-        "sp": {
-            "url": "/sp",
-            "hint": "Open Service Portal"
-        },
-        "st": {
-            "url": "/$studio.do",
-            "hint": "Open Studio"
-        },
-        "start": {
-            "url": "/nav_to.do",
-            "hint": "New tab"
-        },
-        "tn": {
-            "url": "*",
-            "hint": "Show Technical Names"
-        },
-        "token": {
-            "url": "*",
-            "hint": "Send g_ck token to VS Code"
-        },
-        "trans": {
-            "url": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
-            "hint": "Filter Transaction Log <search>"
-        },
-        "tweets": {
-            "url": "https://twitter.com/sn_utils",
-            "hint": "Show @sn_utils Tweets"
-        },
-        "u": {
-            "url": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
-            "hint": "Filter Users <search>"
-        },
-        "ua": {
-            "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
-            "hint": "Filter UI Actions <name>"
-        },
-        "uh": {
-            "url": "*",
-            "hint": "Show Hidden Fields"
-        },
-        "uis": {
-            "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0",
-            "hint": "Filter UI Scripts <name>"
-        },
-        "unimp": {
-            "url": "*",
-            "hint": "Stop impersonating and reload page"
-        },
-        "up": {
-            "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0",
-            "hint": "UI Policies <name>"
-        },
-        "va": {
-            "url": "/$conversation-builder.do",
-            "hint": "Open Virtual Agent"
-        },
-        "wf": {
-            "url": "/workflow_ide.do?sysparm_nostack=true",
-            "hint": "Open Workflow Editor"
-        },
-        "imp": {
-            "url": "impersonate_dialog.do",
-            "hint": "Open Impersonate Form"
-        },
-        "xml": {
-            "url": "/$table.do?XML&sys_id=$sysid ",
-            "hint": "Open current record's XML view"
-        },
-        "xmlsrc": {
-            "url": "*",
-            "hint": "Open current record's XML view with Browser's View Source"
-        },
-        "json": {
-            "url": "/$table.do?JSONv2&sysparm_action=get&sysparm_sys_id=$sysid",
-            "hint": "Open current record's JSONv2 view"
-        }
-    
+    "acl": {
+        "url": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
+        "hint": "Filter ACL list <table> <operation>"
+    },
+    "app": {
+        "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0",
+        "hint": "Filter Applications <name>"
+    },
+    "br": {
+        "url": "sys_script_list.do?sysparm_query=nameLIKE$0",
+        "hint": "Filter Business Rules <name>"
+    },
+    "code": {
+        "url": "*",
+        "hint": "Code Search (beta) <search>"
+    },
+    "nav": {
+        "url": "*",
+        "hint": "Navigator <search> or <application,item>"
+    },
+    "fav": {
+        "url": "*",
+        "hint": "Favorites <search>"
+    },
+    "hist": {
+        "url": "*",
+        "hint": "History <search>"
+    },
+    "comm": {
+        "url": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
+        "hint": "Search Community <search>"
+    },
+    "cs": {
+        "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
+        "hint": "Filter Client Scripts <name>"
+    },
+    "db": {
+        "url": "$pa_dashboard.do",
+        "hint": "Dashboards"
+    },
+    "dev": {
+        "url": "https://developer.servicenow.com/dev.do#!/search/orlando/All/$0",
+        "hint": "Search developer portal <search>"
+    },
+    "docs": {
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=orlando",
+        "hint": "Search Docs <search>"
+    },
+    "env": {
+        "url": "*",
+        "hint": "Open this page in <instance>"
+    },
+    "fd": {
+        "url": "/$flow-designer.do",
+        "hint": "Open Flow Designer"
+    },
+    "help": {
+        "url": "*",
+        "hint": "Open slashcommand help PDF"
+    },
+    "lang": {
+        "url": "*",
+        "hint": "Switch language <lng>"
+    },
+    "log": {
+        "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
+        "hint": "Filter System Log Created Today <search>"
+    },
+    "me": {
+        "url": "sys_user.do?sys_id=javascript:gs.getUserID()",
+        "hint": "Open My User profile"
+    },
+    "p": {
+        "url": "sys_properties_list.do?sysparm_query=nameLIKE$0",
+        "hint": "Filter Properties <name>"
+    },
+    "plug": {
+        "url": "v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0",
+        "hint": "Filter Plugins <search>"
+    },
+    "pop": {
+        "url": "*",
+        "hint": "Pop in/out classic UI"
+    },
+    "s2": {
+        "url": "*",
+        "hint": "Toggle Select2 for Application and Updateset picker"
+    },
+    "search": {
+        "url": "text_search_exact_match.do?sysparm_search=$0",
+        "hint": "Global Instance Search <search>"
+    },
+    "si": {
+        "url": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
+        "hint": "Filter Script Includes <name>"
+    },
+    "sp": {
+        "url": "/sp",
+        "hint": "Open Service Portal"
+    },
+    "st": {
+        "url": "/$studio.do",
+        "hint": "Open Studio"
+    },
+    "start": {
+        "url": "/nav_to.do",
+        "hint": "New tab"
+    },
+    "tn": {
+        "url": "*",
+        "hint": "Show Technical Names"
+    },
+    "token": {
+        "url": "*",
+        "hint": "Send g_ck token to VS Code"
+    },
+    "trans": {
+        "url": "syslog_transaction_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^urlLIKE$0",
+        "hint": "Filter Transaction Log <search>"
+    },
+    "tweets": {
+        "url": "https://twitter.com/sn_utils",
+        "hint": "Show @sn_utils Tweets"
+    },
+    "u": {
+        "url": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
+        "hint": "Filter Users <search>"
+    },
+    "ua": {
+        "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
+        "hint": "Filter UI Actions <name>"
+    },
+    "uh": {
+        "url": "*",
+        "hint": "Show Hidden Fields"
+    },
+    "uis": {
+        "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0",
+        "hint": "Filter UI Scripts <name>"
+    },
+    "unimp": {
+        "url": "*",
+        "hint": "Stop impersonating and reload page"
+    },
+    "up": {
+        "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0",
+        "hint": "UI Policies <name>"
+    },
+    "va": {
+        "url": "/$conversation-builder.do",
+        "hint": "Open Virtual Agent"
+    },
+    "wf": {
+        "url": "/workflow_ide.do?sysparm_nostack=true",
+        "hint": "Open Workflow Editor"
+    },
+    "imp": {
+        "url": "impersonate_dialog.do",
+        "hint": "Open Impersonate Form"
+    },
+    "xml": {
+        "url": "/$table.do?XML&sys_id=$sysid ",
+        "hint": "Open current record's XML view"
+    },
+    "xmlsrc": {
+        "url": "*",
+        "hint": "Open current record's XML view with Browser's View Source"
+    },
+    "json": {
+        "url": "/$table.do?JSONv2&sysparm_action=get&sysparm_sys_id=$sysid",
+        "hint": "Open current record's JSONv2 view"
+    }
+
 }
 
 var snuslashswitches = {
     "a": { "description": "Active is True", "value": "^active=true" },
-    "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name" , "type" : "link"},
+    "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
 
-    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true" , "type" : "querypart"},
-    "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()" , "type" : "encodedquerypart"},
-    "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" , "type" : "encodedquerypart"},
-    "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()" , "type" : "encodedquerypart"},
-    "um": { "description": "Updated by Me", "value": "^sys_updated_by=javascript:gs.getUserName()" , "type" : "encodedquerypart"},
-    "cm": { "description": "Created by Me", "value": "^sys_created_by=javascript:gs.getUserName()" , "type" : "encodedquerypart"},
-    "m": { "description": "Updated or Created by Me", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()" , "type" : "encodedquerypart"},
-    "ou": { "description": "Order by Updated Descending", "value": "^ORDERBYDESCsys_updated_on" , "type" : "encodedquerypart"},
-    "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on" , "type" : "encodedquerypart"},
+    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
+    "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
+    "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
+    "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
+    "um": { "description": "Updated by Me", "value": "^sys_updated_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
+    "cm": { "description": "Created by Me", "value": "^sys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
+    "m": { "description": "Updated or Created by Me", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
+    "ou": { "description": "Order by Updated Descending", "value": "^ORDERBYDESCsys_updated_on", "type": "encodedquerypart" },
+    "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on", "type": "encodedquerypart" },
 }
 
 
@@ -214,18 +230,18 @@ function snuDecodeHtml(html) {
     return txt.value;
 }
 
-function snuGetTables(shortcut){
+function snuGetTables(shortcut) {
 
     Object.entries(snuslashcommands).forEach(([key, val]) => {
-        if (snuslashcommands[key].hasOwnProperty("type")){ //remove old matches
+        if (snuslashcommands[key].hasOwnProperty("type")) { //remove old matches
             delete snuslashcommands[key];
         }
     });
 
-    if (shortcut.length < 3) return; 
+    if (shortcut.length < 3) return;
 
     var qry = '^nameSTARTSWITH' + shortcut;
-    if (shortcut.includes('*')){
+    if (shortcut.includes('*')) {
         qry = '^nameLIKE' + shortcut.replace(/\*/g, '');
     }
 
@@ -235,9 +251,9 @@ function snuGetTables(shortcut){
 
         Object.entries(results).forEach(([key, val]) => {
             snuslashcommands[val.name] = {
-                "url" : val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
+                "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
                 "hint": val.label,
-                "type" : "table"
+                "type": "table"
             };
         });
 
@@ -269,366 +285,372 @@ function addSlashCommandListener() {
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
         if (e.key == 'ArrowDown') { e.preventDefault(); snuMaxHints = 1000; snuIndex++; };
         if (e.key == 'ArrowUp') {
-            e.preventDefault(); 
+            e.preventDefault();
             if (snuIndex == 0)
                 snuMaxHints = 10;
             else
                 snuIndex--;
-        } 
+        }
         if (e.key == 'Meta' || e.key == 'Control') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
         if (!e.currentTarget.value.startsWith("/")) {
             e.currentTarget.value = "/" + e.currentTarget.value
         }
-            var snufilter = e.currentTarget.value.substr(1);
-            var thisUrl = window.location.href;
-            var thisInstance = window.location.host.split('.')[0];
-            var thisHost = window.location.host;
-            var thisOrigin = window.location.origin;
+        var snufilter = e.currentTarget.value.substr(1);
+        var thisUrl = window.location.href;
+        var thisInstance = window.location.host.split('.')[0];
+        var thisHost = window.location.host;
+        var thisOrigin = window.location.origin;
+        var idx = snufilter.indexOf(' ')
+        var noSpace = (snufilter.indexOf(' ') == -1);
+        var selectFirst = (e.key == " " || e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
+        var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
+        if (noSpace) idx = snufilter.length;
+        var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : ""))).toLowerCase();
+
+        if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
+        var shortcut = snufilter.slice(0, idx).toLowerCase();
+        if (snuPropertyNames.length > 1 && snuIndex >= 0 && ["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key)) {
+            shortcut = snuPropertyNames[snuIndex];
+            idx = snufilter.indexOf(' ');
+        }
+        var query = snufilter.slice(idx + 1);
+        if (e.key == 'ArrowRight') { snuGetTables(shortcut) };
+
+
+        var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
+
+        if (typeof g_form == 'undefined') {
+            try { //get if in iframe
+                g_form = document.getElementById('gsft_main').contentWindow.g_form;
+            } catch (e) { }
+        }
+        if (typeof g_form !== 'undefined') {
+            targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
+            targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
+        }
+
+
+        if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
+            snufilter = snuslashcommands[shortcut].url.substr(2);
             var idx = snufilter.indexOf(' ')
-            var noSpace = (snufilter.indexOf(' ') == -1);
-            var selectFirst = (e.key == " " || e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
-            var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
-            if (noSpace) idx = snufilter.length;
-            var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : ""))).toLowerCase();
+            if (idx == -1) idx = snufilter.length;
+            shortcut = snufilter.slice(0, idx).toLowerCase();
+            query = snufilter.slice(idx + 1).replace(/ .*/, '');;
+            targeturl = (snuslashcommands[shortcut].url || "");
+        }
 
-            if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
-            var shortcut = snufilter.slice(0, idx).toLowerCase();
-            if (snuPropertyNames.length > 1 && snuIndex >= 0 && ["ArrowDown", "ArrowUp", "Enter" ,"Tab"," "].includes(e.key)){
-                shortcut = snuPropertyNames[snuIndex];
-                idx = snufilter.indexOf(' ');
-            }
-            var query = snufilter.slice(idx + 1);
-            if (e.key == 'ArrowRight') { snuGetTables(shortcut)};
-
-
-            var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
-
-            if (typeof g_form == 'undefined') {
-                try{ //get if in iframe
-                    g_form = document.getElementById('gsft_main').contentWindow.g_form;
-                 } catch(e){}
-            }
-            if (typeof g_form !== 'undefined') {
-                targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
-                targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
-            }
-
-
-            if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
-                snufilter = snuslashcommands[shortcut].url.substr(2);
-                var idx = snufilter.indexOf(' ')
-                if (idx == -1) idx = snufilter.length;
-                shortcut = snufilter.slice(0, idx).toLowerCase();
-                query = snufilter.slice(idx + 1).replace(/ .*/, '');;
-                targeturl = (snuslashcommands[shortcut].url || "");
-            }
-            var switchText = '<br /> Options:<br />';
-            if (targeturl.includes('sysparm_query=')) {
-                var extraParams = "";
-                var unusedSwitches = Object.assign({}, snuslashswitches);
-                var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
-                var linkSwitch = false; //determine if this is a switch that converts the entire hyperlink
-                if (switches) {
-                    Object.entries(switches).forEach(([key, val]) => {
-                        var prop = val.replace(/\s|\-/g, '');
-                        if (snuslashswitches.hasOwnProperty(prop) && !linkSwitch) {
-                            query = query.replace(val, "");                            
-                            if (snuslashswitches[prop].type == "link"){
-                                var tableName = targeturl.split("_list.do")[0] || "";
-                                targeturl = snuslashswitches[prop].value.replace(/\$0/,tableName);
-                                linkSwitch = true;
-                                unusedSwitches = {};
-                                switchText = '<br /> Options:<br />'; //reset switchtext
-                            }
-                            else if (snuslashswitches[prop].value.startsWith("^")){
-                                targeturl += snuslashswitches[prop].value;
-                            }
-                            else {
-                                extraParams += snuslashswitches[prop].value;
-                            }
-                            switchText += "<div class='cmdlabel'>-" + prop + ": " + snuslashswitches[prop].description + '</div>';
-                            delete unusedSwitches[prop];
-                        }
-                    });
-                    targeturl += extraParams;
-                }
-
-                Object.entries(unusedSwitches).forEach(([key, val]) => {
-                    switchText += "<div class='cmdlabel' style='color:#777777'>-" + key + ": " + val.description + '</div>';
-                });
-
-            }
-
-            targeturl = targeturl.replace(/\$0/g, query);
+        var switchText = '<br /> Options:<br />';
+        if (['nav', 'fav', 'hist'].includes(shortcut)) {
             
-            if (e.key == 'Enter') {
-                shortcut = shortcut.replace(/\*/g, '');
-                snufilter = snufilter.replace(/\*/g, '');
-                idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
-                query = snufilter.slice(idx + 1);
-                
-              
+            snuGetNav(shortcut);
+            switchText = snuGetNavHints(shortcut, query + thisKey);
+        }
+        if (targeturl.includes('sysparm_query=')) {
+            var extraParams = "";
+            var unusedSwitches = Object.assign({}, snuslashswitches);
+            var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
+            var linkSwitch = false; //determine if this is a switch that converts the entire hyperlink
+            if (switches) {
+                Object.entries(switches).forEach(([key, val]) => {
+                    var prop = val.replace(/\s|\-/g, '');
+                    if (snuslashswitches.hasOwnProperty(prop) && !linkSwitch) {
+                        query = query.replace(val, "");
+                        if (snuslashswitches[prop].type == "link") {
+                            var tableName = targeturl.split("_list.do")[0] || "";
+                            targeturl = snuslashswitches[prop].value.replace(/\$0/, tableName);
+                            linkSwitch = true;
+                            unusedSwitches = {};
+                            switchText = '<br /> Options:<br />'; //reset switchtext
+                        }
+                        else if (snuslashswitches[prop].value.startsWith("^")) {
+                            targeturl += snuslashswitches[prop].value;
+                        }
+                        else {
+                            extraParams += snuslashswitches[prop].value;
+                        }
+                        switchText += "<div class='cmdlabel'>-" + prop + ": " + snuslashswitches[prop].description + '</div>';
+                        delete unusedSwitches[prop];
+                    }
+                });
+                targeturl += extraParams;
+            }
+
+            Object.entries(unusedSwitches).forEach(([key, val]) => {
+                switchText += "<div class='cmdlabel' style='color:#777777'>-" + key + ": " + val.description + '</div>';
+            });
+
+        }
+
+        targeturl = targeturl.replace(/\$0/g, query);
+
+        if (e.key == 'Enter') {
+            shortcut = shortcut.replace(/\*/g, '');
+            snufilter = snufilter.replace(/\*/g, '');
+            idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
+            query = snufilter.slice(idx + 1);
 
 
-                if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
+
+
+            if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
+                e.preventDefault();
+                searchSysIdTables(shortcut);
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "help") {
+
+                var event = new CustomEvent(
+                    "snutils-event",
+                    {
+                        detail: {
+                            event: "openfile",
+                            command: "slashcommands.pdf"
+                        }
+                    }
+                );
+                document.dispatchEvent(event);
+                hideSlashCommand();
+                return;
+
+                // var outp = "Please review in the new Slaschcommands tab in the popup";
+                // showAlert("Slashcommands <a href='https://www.youtube.com/watch?v=X6HLCV_ptQM&list=PLTyELlWS-zjSIPIs4ukRCrqc4LRHva6-L' target='_blank'>Playlist on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
+                //     "Go to settings tab in popup to manage custom / commands <br />" +
+                //     "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
+
+            }
+            else if (shortcut == "token") {
+                postRequestToScriptSync();
+                showAlert("Trying to send current token to VS Code", "info");
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "code") {
+
+                var data = {};
+                data.instance = window.location.host.split('.')[0];
+                data.url = window.location.origin;
+                data.g_ck = g_ck;
+                data.query = query;
+
+                var event = new CustomEvent(
+                    "snutils-event",
+                    {
+                        detail: {
+                            event: "codesearch",
+                            command: data
+                        }
+                    }
+                );
+                window.top.document.dispatchEvent(event);
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "s2") {
+                if (typeof snuS2Ify != 'undefined') snuS2Ify();
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "pop") {
+                var event = new CustomEvent(
+                    "snutils-event",
+                    {
+                        detail: {
+                            event: "pop",
+                            command: ""
+                        }
+                    }
+                );
+                window.top.document.dispatchEvent(event);
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "env") {
+                if (query) {
+                    // this allows logic to work with on-premise instances as well
+                    if (query.indexOf('.') === -1) query += '.service-now.com';
+                    thisUrl = thisUrl.replace(thisHost, query);
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
                     e.preventDefault();
-                    searchSysIdTables(shortcut);
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "help") {
-
-                    var event = new CustomEvent(
-                        "snutils-event",
-                        {
-                            detail: {
-                                event: "openfile",
-                                command: "slashcommands.pdf"
-                            }
-                        }
-                    );
-                    document.dispatchEvent(event);
-                    hideSlashCommand();
-                    return;
-
-                    // var outp = "Please review in the new Slaschcommands tab in the popup";
-                    // showAlert("Slashcommands <a href='https://www.youtube.com/watch?v=X6HLCV_ptQM&list=PLTyELlWS-zjSIPIs4ukRCrqc4LRHva6-L' target='_blank'>Playlist on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                    //     "Go to settings tab in popup to manage custom / commands <br />" +
-                    //     "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
-
-                }
-                else if (shortcut == "token") {
-                    postRequestToScriptSync();
-                    showAlert("Trying to send current token to VS Code", "info");
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "code") {
-
-                    var data = {};
-                    data.instance = window.location.host.split('.')[0];
-                    data.url = window.location.origin;
-                    data.g_ck = g_ck;
-                    data.query = query;
-
-                    var event = new CustomEvent(
-                        "snutils-event",
-                        {
-                            detail: {
-                                event: "codesearch",
-                                command: data
-                            }
-                        }
-                    );
-                    window.top.document.dispatchEvent(event);
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "s2") {
-                    if (typeof snuS2Ify != 'undefined') snuS2Ify();
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "pop") {
-                    var event = new CustomEvent(
-                        "snutils-event",
-                        {
-                            detail: {
-                                event: "pop",
-                                command: ""
-                            }
-                        }
-                    );
-                    window.top.document.dispatchEvent(event);
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "env") {
-                    if (query) {
-                        // this allows logic to work with on-premise instances as well
-                        if (query.indexOf('.') === -1) query += '.service-now.com';
-                        thisUrl = thisUrl.replace(thisHost, query);
-                    }
-                    if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-                        e.preventDefault();
-                        window.location = thisUrl;
-                    }
-                    else {
-                        window.open(thisUrl, '_blank');
-                    }
-                    return;
-                }
-                else if (shortcut === 'xmlsrc') {
-
-                    if (typeof g_form == 'undefined'){
-                        //showAlert("No form found","warning",2000)
-                        hideSlashCommand();
-                        return;
-                    }
-                    // prefix URL with 'view-source:' so that browsers are forced to show the actual XML
-                    // some addons (on Firefox at least) break the XML style when not viewed in Source
-                    thisUrl = 'view-source:' + thisOrigin + '/' + g_form.getTableName() + '.do?XML&' +
-                        'sys_id=' + g_form.getUniqueValue();
-                    if (query)
-                        thisUrl += '&sys_target='+query;
-
-                    var event = new CustomEvent(
-                        "snutils-event",
-                        {
-                            detail: {
-                                event: "viewxml",
-                                command: thisUrl
-                            }
-                        }
-                    );
-                    window.top.document.dispatchEvent(event);
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "tn") {
-                    var iframes = window.top.document.querySelectorAll("iframe");
-                    iframes.forEach((iframe) => {
-                        if (typeof iframe.contentWindow.addTechnicalNames != 'undefined')
-                            iframe.contentWindow.addTechnicalNames();
-                    });
-                    addTechnicalNames();
-                    window.top.document.getElementById('snufilter').value = '';
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "uh") {
-                    var iframes = window.top.document.querySelectorAll("iframe");
-                    iframes.forEach((iframe) => {
-                        if (typeof iframe.contentWindow.unhideFields != 'undefined')
-                            iframe.contentWindow.unhideFields();
-                    });
-                    unhideFields();
-                    window.top.document.getElementById('snufilter').value = '';
-                    hideSlashCommand();
-                    return;
-                }
-                else if (shortcut == "unimp") {
-                    {
-                        var xhttp = new XMLHttpRequest();
-                        xhttp.onreadystatechange = function () {
-                            if (this.readyState == 4) {
-                                location.reload();
-                            }
-                        };
-                        xhttp.open("POST", "sys_unimpersonate.do", true);
-                        xhttp.setRequestHeader("X-UserToken", g_ck);
-                        xhttp.send();
-                    }
-                }
-                else if (shortcut == "lang") {
-                    {
-                        
-                        if (query.length != 2){
-                            alert("Please provide a 2 character language code like 'en'");
-                            return;
-                        }
-                        var payload = {"current": query};
-                        
-                        var xhttp = new XMLHttpRequest();
-                        xhttp.onreadystatechange = function () {
-                            if (this.readyState == 4 ) {
-                                location.reload();
-                            }
-                        };
-                        xhttp.open("PUT", "/api/now/ui/concoursepicker/language", true);
-                        xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
-                        xhttp.setRequestHeader("Cache-Control", "no-cache");
-                        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                        xhttp.setRequestHeader("X-UserToken", g_ck);
-                        xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
-                        xhttp.send(JSON.stringify(payload));
-
-                        return;
-                    }
-                }
-                else if (!snuslashcommands.hasOwnProperty(shortcut)) {
-
-                    var inIFrame = (shortcut == snufilter.slice(0, idx) && sameWindow)
-                    if (e.target.className == "snutils") inIFrame = false;
-
-                    if (shortcut.includes('.do')) {
-                        if (inIFrame) {
-                            jQuery('#gsft_main').attr('src', shortcut);
-                        }
-                        else {
-                            if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-                                e.preventDefault();
-                                window.location = shortcut;
-                            }
-                            else {
-                                window.open(shortcut, '_blank');
-                            }
-                        }
-                        hideSlashCommand();
-                        return;
-                    }
-                    else if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
-                        var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=name" + query;
-
-                        if (inIFrame) {
-                            jQuery('#gsft_main').attr('src', url);
-                        }
-                        else {
-                            if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-                                e.preventDefault();
-                                window.location = url;
-                            }
-                            else {
-                                window.open(url, '_blank');
-                            }
-                        }
-                        hideSlashCommand();
-                        return;
-                    }
-                    else {
-                        //showAlert("Shortcut not defined: /" + shortcut, "warning");
-                        return;
-                    }
-                }
-
-
-                var inIFrame =  !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
-                if (e.target.className == "snutils") inIFrame = false;
-
-                if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
-                    var queryArr = query.split(" ");
-                    for (var i = 0; i <= queryArr.length; i++) {
-                        var re = new RegExp("\\$" + (i + 1), "g");
-                        targeturl = targeturl.replace(re, queryArr[i] || "");
-                    }
-                }
-
-                if (inIFrame) {
-                    jQuery('#gsft_main').attr('src', targeturl);
+                    window.location = thisUrl;
                 }
                 else {
-                    if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-                        e.preventDefault();
-                        window.location = targeturl;
+                    window.open(thisUrl, '_blank');
+                }
+                return;
+            }
+            else if (shortcut === 'xmlsrc') {
+
+                if (typeof g_form == 'undefined') {
+                    //showAlert("No form found","warning",2000)
+                    hideSlashCommand();
+                    return;
+                }
+                // prefix URL with 'view-source:' so that browsers are forced to show the actual XML
+                // some addons (on Firefox at least) break the XML style when not viewed in Source
+                thisUrl = 'view-source:' + thisOrigin + '/' + g_form.getTableName() + '.do?XML&' +
+                    'sys_id=' + g_form.getUniqueValue();
+                if (query)
+                    thisUrl += '&sys_target=' + query;
+
+                var event = new CustomEvent(
+                    "snutils-event",
+                    {
+                        detail: {
+                            event: "viewxml",
+                            command: thisUrl
+                        }
+                    }
+                );
+                window.top.document.dispatchEvent(event);
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "tn") {
+                var iframes = window.top.document.querySelectorAll("iframe");
+                iframes.forEach((iframe) => {
+                    if (typeof iframe.contentWindow.addTechnicalNames != 'undefined')
+                        iframe.contentWindow.addTechnicalNames();
+                });
+                addTechnicalNames();
+                window.top.document.getElementById('snufilter').value = '';
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "uh") {
+                var iframes = window.top.document.querySelectorAll("iframe");
+                iframes.forEach((iframe) => {
+                    if (typeof iframe.contentWindow.unhideFields != 'undefined')
+                        iframe.contentWindow.unhideFields();
+                });
+                unhideFields();
+                window.top.document.getElementById('snufilter').value = '';
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "unimp") {
+                {
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4) {
+                            location.reload();
+                        }
+                    };
+                    xhttp.open("POST", "sys_unimpersonate.do", true);
+                    xhttp.setRequestHeader("X-UserToken", g_ck);
+                    xhttp.send();
+                }
+            }
+            else if (shortcut == "lang") {
+                {
+
+                    if (query.length != 2) {
+                        alert("Please provide a 2 character language code like 'en'");
+                        return;
+                    }
+                    var payload = { "current": query };
+
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4) {
+                            location.reload();
+                        }
+                    };
+                    xhttp.open("PUT", "/api/now/ui/concoursepicker/language", true);
+                    xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
+                    xhttp.setRequestHeader("Cache-Control", "no-cache");
+                    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    xhttp.setRequestHeader("X-UserToken", g_ck);
+                    xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
+                    xhttp.send(JSON.stringify(payload));
+
+                    return;
+                }
+            }
+            else if (!snuslashcommands.hasOwnProperty(shortcut)) {
+
+                var inIFrame = (shortcut == snufilter.slice(0, idx) && sameWindow)
+                if (e.target.className == "snutils") inIFrame = false;
+
+                if (shortcut.includes('.do')) {
+                    if (inIFrame) {
+                        jQuery('#gsft_main').attr('src', shortcut);
                     }
                     else {
-                        window.open(targeturl, '_blank');
+                        if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                            e.preventDefault();
+                            window.location = shortcut;
+                        }
+                        else {
+                            window.open(shortcut, '_blank');
+                        }
                     }
+                    hideSlashCommand();
+                    return;
                 }
-                hideSlashCommand();
-            }
-            else {
-                    snuShowSlashCommandHints(originalShortcut, selectFirst, switchText, e);
+                else if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
+                    var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=name" + query;
+
+                    if (inIFrame) {
+                        jQuery('#gsft_main').attr('src', url);
+                    }
+                    else {
+                        if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                            e.preventDefault();
+                            window.location = url;
+                        }
+                        else {
+                            window.open(url, '_blank');
+                        }
+                    }
+                    hideSlashCommand();
+                    return;
+                }
+                else {
+                    //showAlert("Shortcut not defined: /" + shortcut, "warning");
+                    return;
+                }
             }
 
-        });
+
+            var inIFrame = !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
+            if (e.target.className == "snutils") inIFrame = false;
+
+            if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
+                var queryArr = query.split(" ");
+                for (var i = 0; i <= queryArr.length; i++) {
+                    var re = new RegExp("\\$" + (i + 1), "g");
+                    targeturl = targeturl.replace(re, queryArr[i] || "");
+                }
+            }
+
+            if (inIFrame) {
+                jQuery('#gsft_main').attr('src', targeturl);
+            }
+            else {
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                    e.preventDefault();
+                    window.location = targeturl;
+                }
+                else {
+                    window.open(targeturl, '_blank');
+                }
+            }
+            hideSlashCommand();
+        }
+        else {
+            snuShowSlashCommandHints(originalShortcut, selectFirst, switchText, e);
+        }
+
+    });
 }
 
 function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
 
-    if (!["ArrowDown", "ArrowUp", "Enter" ,"Tab"," "].includes(e.key) || snuIndex > snuPropertyNames.length){
+    if (!["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key) || snuIndex > snuPropertyNames.length) {
         snuIndex = 0;
     }
 
@@ -638,12 +660,12 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     }
 
     var startswith = true;
-    if (shortcut.includes('*')){ //wildcardsearch when includes *
+    if (shortcut.includes('*')) { //wildcardsearch when includes *
         shortcut = shortcut.replace(/\*/g, '');
         startswith = false;
     }
 
-     snuPropertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
+    snuPropertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
         if (startswith)
             return propertyName.indexOf(shortcut) === 0;
         return propertyName.indexOf(shortcut) > -1;
@@ -651,6 +673,12 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
 
 
     var fltr = window.top.document.getElementById('snufilter');
+
+    if (snuPropertyNames.length == 0 && fltr.value.includes(" ")){
+        snuPropertyNames = ["nav"];
+        shortcut = "nav"
+        fltr.value = "/nav " + fltr.value.replace("/","");
+    }
 
     if (snuPropertyNames.length > 0 && selectFirst) { //select first hit when tap or space pressed
         if (e) e.preventDefault();
@@ -664,15 +692,15 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     var html = "";
     for (i = 0; i < snuPropertyNames.length && i < snuMaxHints; i++) {
         var cssclass = (snuIndex == i) ? 'active' : '';
-        html += "<li id='cmd" +  snuPropertyNames[i] + "' onclick='setSnuFilter(this)' class='" + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
+        html += "<li id='cmd" + snuPropertyNames[i] + "' onclick='setSnuFilter(this)' class='" + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
             "<span class='cmdlabel'>" + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]].hint) + "</span></li>"
         if (fltr.value.includes(" ")) {
             break;
         }
     }
 
-    if (snuPropertyNames.length > snuMaxHints){
-        html += "<li onclick='snuExpandHints(\"" + shortcut+ "\")'><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
+    if (snuPropertyNames.length > snuMaxHints) {
+        html += "<li onclick='snuExpandHints(\"" + shortcut + "\")'><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
     }
 
     if (!html && shortcut.replace(/ /g, '').length == 32) {
@@ -698,9 +726,9 @@ function setSnuFilter(elm) {
     }
 }
 
-function snuExpandHints(shortcut){
+function snuExpandHints(shortcut) {
     snuMaxHints = 1000;
-    var e = new KeyboardEvent('keypress',{'key':'KeyDown'});
+    var e = new KeyboardEvent('keypress', { 'key': 'KeyDown' });
     snuShowSlashCommandHints(shortcut, false, '', e);
     var elm = window.top.document.getElementById('snufilter');
     elm.focus();
@@ -732,7 +760,7 @@ function snuSettingsAdded() {
 
     setShortCuts();
 
-    if (!snusettings.nopasteimage){
+    if (!snusettings.nopasteimage) {
         bindPaste(snusettings.nouielements == false);
     }
 
@@ -1381,7 +1409,7 @@ function setShortCuts() {
         ul#snuhelper li.active span.cmdlabel { color: black}
         </style>`;
     }
-    else if (snusettings.slashtheme == 'stealth'){
+    else if (snusettings.slashtheme == 'stealth') {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
         div.snuheader {display:none}
@@ -1391,7 +1419,7 @@ function setShortCuts() {
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; background: transparent; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; width:100%; border: 0px; margin:8px 2px 4px 2px; }
         span.cmdlabel { display:none }
         a.cmdlink { display:none }
-        </style>`; 
+        </style>`;
     }
     else {
         divstyle = `<style>
@@ -1862,7 +1890,7 @@ function hideSlashCommand() {
                 if (event.currentTarget.value.length <= 1) {
                     window.top.document.getElementById('filter').focus();
                 }
-            } catch(e){}
+            } catch (e) { }
         }
     }
     return true;
@@ -2341,3 +2369,86 @@ var getParents = function (elem, selector) {
     }
     return parents;
 };
+var xx;
+
+function snuGetNav(shortcut) {
+
+    if (shortcut == 'hist' && ((new Date()).getTime() - snuNav.loadedLastTime) > 60000) snuNav.loading = 'mustload';
+    snuNav.loadedLastTime = (new Date()).getTime(); //in case of history refresh every 60sec
+
+    if (snuNav.loading != 'mustload' || !g_ck) return;
+    snuNav.loading = 'loading';
+    var xhttp = new XMLHttpRequest();
+    xhttp.responseType = 'json';
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            var resp = this.response.result;
+            xx = resp;
+            var navArr = [];
+            Object.entries(resp['applications']).forEach(([key, val]) => {
+                Object.entries(val.modules).forEach(([key2, val2]) => {
+                    if (val2.type == "SEPARATOR") {
+                        Object.entries(val2.modules).forEach(([key3, val3]) => {
+                            navArr.push({ "app": (val.title + " - " + (val2.title || "")).replace("  ", " "), "item": val3.title, "uri": val3.uri })
+                        });
+                    }
+                    else {
+                        navArr.push({ "app": val.title, "item": val2.title, "uri": val2.uri })
+                    }
+                });
+            });
+            snuNav['applications'] = navArr;
+
+            navArr = [];
+            Object.entries(resp['favorites']).forEach(([key, val]) => {
+                Object.entries(val.favorites).forEach(([key2, val2]) => {
+                    if (val2.separator) {
+                        Object.entries(val2.favorites).forEach(([key3, val3]) => {
+                            navArr.push({ "app": (val.title + " - " + (val2.title || "")).replace("  ", " "), "item": val3.title, "uri": val3.url })
+                        });
+                    }
+                    else {
+                        navArr.push({ "app": val.title, "item": val2.title, "uri": val2.url })
+                    }
+                });
+            });
+            snuNav['favorites'] = navArr;
+
+            navArr = [];
+            Object.entries(resp['history']).forEach(([key, val]) => {
+
+                navArr.push({ "app": val.title, "item": val.description || val.title , "uri": val.url })
+
+            });
+            snuNav['history'] = navArr;
+            
+            snuNav.loading = 'loaded';
+
+        }
+    };
+    xhttp.open("GET", "api/now/ui/navigator/favorites", true);
+    xhttp.send();
+}
+
+function snuGetNavHints(shortcut, srch) {
+    var navObjName = ({ "nav": "applications", "hist": "history", "fav": "favorites" })[shortcut];
+    if (!snuNav.hasOwnProperty(navObjName)) return '';
+    var nav = snuNav[navObjName];
+    var html = "";
+    var lastApp = "";
+    var srchArr = srch.toLowerCase().split(","); srchArr.push(srchArr[0]);
+    var hits = 80; var hit =0// maximum results
+    for (var ix = 0; ix < nav.length && hit < hits; ix++) {
+        var srchApp = srchArr[0].trim(); var srchItem = srchArr[1].trim()
+        if ((srchArr.length == 3 && (nav[ix].app.toLowerCase().includes(srchApp) && nav[ix].item.toLowerCase().includes(srchItem))) ||
+            (srchArr.length == 2 && (nav[ix].app.toLowerCase().includes(srchApp) || nav[ix].item.toLowerCase().includes(srchItem)))) {
+            if (lastApp != nav[ix].app) {
+                html += "<div>" + nav[ix].app.replace(new RegExp(srchApp || "!", "gi"), (match) => `<u>${match}</u>`) + "</div>";
+            }
+            html += "- <a target='_blank' href='" + nav[ix].uri + "'>" + nav[ix].item.replace(new RegExp(srchItem || "!", "gi"), (match) => `<u>${match}</u>`) + "</a><br />"
+            lastApp = nav[ix].app;
+            hit++;
+        }
+    }
+    return '<br />' + hit +' Matches:<br />' + html;
+}
