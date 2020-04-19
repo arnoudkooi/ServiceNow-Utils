@@ -27,15 +27,15 @@ var snuslashcommands = {
     },
     "nav": {
         "url": "*",
-        "hint": "Navigator <search> or <application,item>"
+        "hint": "[Beta] Navigator <search> or <application,item>"
     },
     "fav": {
         "url": "*",
-        "hint": "Favorites <search>"
+        "hint": "[Beta] Favorites <search>"
     },
     "hist": {
         "url": "*",
-        "hint": "History <search>"
+        "hint": "[Beta] History <search>"
     },
     "comm": {
         "url": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
@@ -391,11 +391,12 @@ function addSlashCommandListener() {
             idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
             query = snufilter.slice(idx + 1);
 
-
-
-
-            if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
+            if (['nav', 'fav', 'hist'].includes(shortcut)) {
                 e.preventDefault();
+                return;
+            }
+            if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
+                
                 searchSysIdTables(shortcut);
                 hideSlashCommand();
                 return;
