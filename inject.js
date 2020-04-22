@@ -492,10 +492,10 @@ function addSlashCommandListener() {
                 }
                 // prefix URL with 'view-source:' so that browsers are forced to show the actual XML
                 // some addons (on Firefox at least) break the XML style when not viewed in Source
-                thisUrl = 'view-source:' + thisOrigin + '/' + g_form.getTableName() + '.do?XML&' +
-                    'sys_id=' + g_form.getUniqueValue();
+                thisUrl = 'view-source:' + thisOrigin + '/' + g_form.getTableName() + '.do?XML=&' +
+                    'sys_id=' + g_form.getUniqueValue() + '&sys_target=';
                 if (query)
-                    thisUrl += '&sys_target=' + query;
+                    thisUrl += query;
 
                 var event = new CustomEvent(
                     "snutils-event",
