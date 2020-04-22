@@ -170,7 +170,7 @@ var snuslashcommands = {
         "hint": "Open Impersonate Form"
     },
     "xml": {
-        "url": "/$table.do?XML&sys_id=$sysid ",
+        "url": "/$table.do?XML=&sys_id=$sysid ",
         "hint": "Open current record's XML view"
     },
     "xmlsrc": {
