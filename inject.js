@@ -408,7 +408,7 @@ function addSlashCommandListener() {
                     {
                         detail: {
                             event: "openfile",
-                            command: "slashcommands.pdf"
+                            command: "welcome.html"
                         }
                     }
                 );

@@ -20,8 +20,13 @@ if (onprem) {
 }
 
 //Attatch eventlistener, setting extension only active on matching urls
-chrome.runtime.onInstalled.addListener(function () {
+chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
+
+    if(details.reason == "install" || details.reason == "update"){
+        openFile("welcome.html");
+    }
+
     if (typeof chrome.declarativeContent === 'undefined')
         return;
 
