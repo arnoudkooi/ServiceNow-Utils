@@ -67,7 +67,7 @@ var snuslashcommands = {
     },
     "help": {
         "url": "*",
-        "hint": "Open slashcommand help PDF"
+        "hint": "Open info page"
     },
     "lang": {
         "url": "*",
@@ -1442,7 +1442,7 @@ function setShortCuts() {
     var htmlFilter = document.createElement('div');
     htmlFilter.innerHTML = divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a class='cmdlink'  href="javascript:hideSlashCommand()">
-    <svg height="16" width="16"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands<br /></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands<span style="float:right; font-size:6pt; line-height: 16pt;"><a href="https://twitter.com/sn_utils" target="_blank">@sn_utils</a>&nbsp;</span></div>
     <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul></div>`
     window.top.document.body.appendChild(htmlFilter);
