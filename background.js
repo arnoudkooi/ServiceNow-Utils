@@ -23,7 +23,7 @@ if (onprem) {
 chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
 
-    if((details.reason == "install" || details.reason == "update") && !details.previousVersion.startsWith("4") ){
+    if(details.reason == "install" || (details.reason == "update" && !details.previousVersion.startsWith("4")) ){
         openFile("welcome.html" );
     }
 
