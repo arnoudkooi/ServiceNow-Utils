@@ -362,7 +362,7 @@ function setInfoMessage(html) {
 
 function getSettings(callback) {
     bgPage.getFromSyncStorageGlobal("snusettings", function (settings) {
-        objSettings = settings;
+        objSettings = settings || {};
         for (var setting in settings) {
 
             if (typeof settings[setting] == "boolean")
@@ -837,6 +837,7 @@ function getSlashcommands() {
                 "hint": $('#tbxslashhint').val()
             };
             $('#slashcommands').val(JSON.stringify(cmds));
+
             objSettings.slashcommands = cmds;
             setSettings();
             getSlashcommands();
