@@ -37,6 +37,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "[Beta] History <search>"
     },
+    "aw": {
+        "url": "/now/workspace/agent/noc",
+        "hint": "Agent Workspace"
+    },
     "comm": {
         "url": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
         "hint": "Search Community <search>"
@@ -74,7 +78,7 @@ var snuslashcommands = {
         "hint": "Switch language <lng>"
     },
     "log": {
-        "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0",
+        "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0^ORsourceLIKE$0",
         "hint": "Filter System Log Created Today <search>"
     },
     "me": {
@@ -188,6 +192,7 @@ var snuslashswitches = {
     "a": { "description": "Active is True", "value": "^active=true" },
     "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
+    "s": { "description": "View Schema Map", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
 
     "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
     "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
@@ -1456,7 +1461,7 @@ function setShortCuts() {
             if (snusettings.slashoption == 'off') return;
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
-                if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') ||
+                if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') && !event.srcElement.tagName.includes("-") ||
                     event.ctrlKey || event.metaKey) { //not when form element active
                     event.preventDefault();
                     showSlashCommand();
@@ -2330,6 +2335,68 @@ function sncWait(ms) { //dirty. but just need to wait a sec...
         now = start;
     while (now - start < (ms || 1000)) {
         now = Date.now();
+    }
+}
+
+function searchSysIdTables(sysId) {
+    try {
+        showAlert('Searching for sys_id. This could take some seconds...')
+        var script = `      
+            function findSysID(sysId) {
+                var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
+                var rtrn;
+                var i = 0;
+                while (tbls[i]) {
+                    rtrn = findClass(tbls[i], sysId);
+                    i++;
+
+                    if (rtrn) {
+                        gs.print("###" + rtrn + "###")
+                        return
+                    };
+                }
+
+                var tblsGr = new GlideRecord("sys_db_object");
+                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEsysx_^nameNOT LIKE00^nameNOT LIKEv_^nameNOT LIKEsys_rollback_^nameNOT LIKEpa_^nameNOT INsys_metadata,task,cmdb_ci,sys_user")
+                tblsGr.query();
+                while (tblsGr.next()) {
+                    rtrn = findClass(tblsGr.getValue('name'), sysId);
+                    if (rtrn) {
+                        gs.print("###" + rtrn + "###")
+                        return
+                    };
+                }
+                function findClass(t, sysId) {
+                    var s = new GlideRecord(t);
+                    s.addQuery('sys_id', sysId);
+                    s.setLimit(1);
+                    s.queryNoDomain();
+                    s.query();
+                    if (s.hasNext()) {
+                        s.next();
+                        return s.getRecordClassName() + "^" 
+                        + s.getClassDisplayValue() + " - " 
+                        + s.getDisplayValue() ;
+                    }
+                    return false;
+                }
+            }
+
+            findSysID('`+ sysId +`')
+        `;
+        startBackgroundScript(script, function (rspns) {
+            answer = rspns.match(/###(.*)###/);
+            if (answer != null && answer[1]) {
+                showAlert('Opening in new tab: ' + answer[1].split('^')[1], 'success');
+                var table = answer[1].split('^')[0];
+                var url = table + '.do?sys_id=' + sysId;
+                window.open(url, '_blank');   
+            } else {
+                showAlert('sys_id was not found in the system.', 'warning');
+            }
+        });
+    } catch (error) {
+        showAlert(error, 'danger');
     }
 }
 

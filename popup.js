@@ -791,7 +791,16 @@ function getSlashcommands() {
             },
             "rowCallback": function (row, data) {
 
-                if (data.source != '3script') $(row).addClass('snucmdtitle');
+                if (data.source != '3script') {
+
+                    $(row).on('click', function (e) {
+                        var row = dtSlashcommands.row(this).data();
+                        $('#tbxslashcmd').val(row.command);
+                        $('#tbxslashurl').val(row.url);
+                        $('#tbxslashhint').val(snuDecodeHtml(row.hint));
+                    });
+
+                }
 
             },
             "bLengthChange": false,
@@ -805,13 +814,6 @@ function getSlashcommands() {
         $('#tbxslashcommands').keyup(function () {
             dtSlashcommands.search($(this).val()).draw();
         }).focus().trigger('keyup');
-
-        $('#tblslashcommands tr.snucmdtitle').on('click', function (e) {
-            var row = dtSlashcommands.row(this).data();
-            $('#tbxslashcmd').val(row.command);
-            $('#tbxslashurl').val(row.url);
-            $('#tbxslashhint').val(snuDecodeHtml(row.hint));
-        });
 
         $('a.deletecmd').on('click', function (e) {
 
