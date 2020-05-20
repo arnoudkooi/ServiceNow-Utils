@@ -189,13 +189,15 @@ var snuslashcommands = {
 }
 
 var snuslashswitches = {
-    "a": { "description": "Active is True", "value": "^active=true" },
+    "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
     "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
+    "n": { "description": "New Record", "value": "$0.do", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
-    "s": { "description": "View Schema Map", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
+    "erd": { "description": "View Schema Map", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
 
     "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
     "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
+    "t": { "description": "Updated or Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORsys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "um": { "description": "Updated by Me", "value": "^sys_updated_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
@@ -1462,7 +1464,7 @@ function setShortCuts() {
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') && !event.srcElement.tagName.includes("-") ||
-                    event.ctrlKey || event.metaKey) { //not when form element active
+                    (event.ctrlKey || event.metaKey) && !event.srcElement.hasAttribute('aria-describedby')) { //not when form element active
                     event.preventDefault();
                     showSlashCommand();
                 }
