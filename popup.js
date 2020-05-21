@@ -834,7 +834,7 @@ function getSlashcommands() {
             try {
                 cmds = JSON.parse($('#slashcommands').val());
             } catch (e) { };
-            cmds[$('#tbxslashcmd').val()] = {
+            cmds[$('#tbxslashcmd').val().replace(/[^a-zA-Z0-9]/gi, '').toLowerCase()] = {
                 "url": $('#tbxslashurl').val(),
                 "hint": $('#tbxslashhint').val()
             };
@@ -846,15 +846,9 @@ function getSlashcommands() {
 
         });
 
-
-
-
     });
 
-
-
 }
-
 
 //set or refresh datatable with ServiceNow tables
 function setDataExplore(nme) {
@@ -908,4 +902,3 @@ function setDataExplore(nme) {
     $('#waitingdataexplore').hide();
 
 }
-

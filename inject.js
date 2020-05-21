@@ -189,15 +189,15 @@ var snuslashcommands = {
 }
 
 var snuslashswitches = {
-    "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
     "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
     "n": { "description": "New Record", "value": "$0.do", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
     "erd": { "description": "View Schema Map", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
 
+    "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
     "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
     "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
-    "t": { "description": "Updated or Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORsys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
+    "uct": { "description": "Updated or Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORsys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "um": { "description": "Updated by Me", "value": "^sys_updated_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
@@ -252,18 +252,25 @@ function snuGetTables(shortcut) {
         qry = '^nameLIKE' + shortcut.replace(/\*/g, '');
     }
 
-    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00' + qry + '^EORDERBYname';
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00' + qry + '^EORDERBYname' + shortcut;
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
-        var results = jsn.result;
 
-        Object.entries(results).forEach(([key, val]) => {
-            snuslashcommands[val.name] = {
-                "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
-                "hint": val.label,
+        if (jsn.hasOwnProperty('result')){
+            var results = jsn.result;
+            Object.entries(results).forEach(([key, val]) => {
+                snuslashcommands[val.name] = {
+                    "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
+                    "hint": val.label,
+                    "type": "table"
+                };
+            });
+        } else {
+            snuslashcommands[shortcut] = {
+                "url": "",
+                "hint": "Could not load results",
                 "type": "table"
             };
-        });
-
+        }
         snuExpandHints(shortcut)
 
     });
@@ -540,17 +547,17 @@ function addSlashCommandListener() {
                 return;
             }
             else if (shortcut == "unimp") {
-                {
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4) {
-                            location.reload();
-                        }
-                    };
-                    xhttp.open("POST", "sys_unimpersonate.do", true);
-                    xhttp.setRequestHeader("X-UserToken", g_ck);
-                    xhttp.send();
-                }
+                e.preventDefault();
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4) {
+                        location.reload();
+                    }
+                };
+                xhttp.open("POST", "sys_unimpersonate.do", true);
+                xhttp.setRequestHeader("X-UserToken", g_ck);
+                xhttp.send();
+                return;
             }
             else if (shortcut == "lang") {
                 {
@@ -762,6 +769,7 @@ function snuSettingsAdded() {
 
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
+    if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
@@ -771,18 +779,17 @@ function snuSettingsAdded() {
     if (!snusettings.nopasteimage) {
         bindPaste(snusettings.nouielements == false);
     }
-
     if (snusettings.vsscriptsync == true) {
         addFieldSyncButtons();
         addStudioScriptSync();
     }
-
     if (snusettings.slashoption != "off") {
         addFilterListener();
         addSlashCommandListener();
     }
-
-
+    if (snusettings.s2ify){
+        if (typeof snuS2Ify != 'undefined') snuS2Ify();
+    }
 
     if (snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
@@ -1405,7 +1412,7 @@ function setShortCuts() {
 
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
         ul#snuhelper li {margin-top:2px}
@@ -1419,7 +1426,7 @@ function setShortCuts() {
     }
     else if (snusettings.slashtheme == 'stealth') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
         div.snuheader {display:none}
         ul#snuhelper { display:none } 
         ul#snuhelper li {display:none}
@@ -1431,7 +1438,7 @@ function setShortCuts() {
     }
     else {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:10000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
         ul#snuhelper li {margin-top:2px}
@@ -1763,69 +1770,35 @@ function getFormElementNames() {
 }
 getFormElementNames();
 
-// if (typeof g_form !== 'undefined') {
-//     // The ID of the extension we want to talk to.
-//     //var chUtilsId = "pebbidlifabkglkbebloodgglcpcljgb"; //dev
-//     var chUtilsId = "jgaodbdddndbaijmcljdbglhpdhnjobg"; //prod
-
-//     // Make a simple request:
-//     chrome.runtime.sendMessage(chUtilsId, { "table": g_form.tableName, "g_ck": g_ck },
-//         function (response) {
-//             console.log(response)
-//         });
-// }
-
-
-
-//Query ServiceNow for tables and set to chrome storage
-function setUpdateSetTables() {
-
-    var myurl = "/api/now/table/sys_dictionary?sysparm_fields=name&sysparm_query=" +
-        "name=javascript:new PAUtils().getTableDecendants('sys_metadata')^internal_type=collection^attributesNOT LIKEupdate_synch=false^NQattributesLIKEupdate_synch=true";
-    loadXMLDoc(g_ck, myurl, null, function (jsn) {
-
-        var tbls = [];
-        for (var t in jsn.result) {
-            if (jsn.result[t].name.length > 1)
-                tbls.push(jsn.result[t].name);
-        }
-        localStorage.setItem("updatesettables", JSON.stringify(tbls));
-        //updateSetTables = tbls;
-    });
-}
-
-//Function to query Servicenow API
 function loadXMLDoc(token, url, post, callback) {
     try {
-        var hdrs = {
-            'Cache-Control': 'no-cache',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        };
-
-        if (token) //only for instances with high security plugin enabled
-            hdrs['X-UserToken'] = token;
 
         var method = "GET";
         if (post) method = "PUT";
 
-        jQuery.ajax({
-            url: url,
-            method: method,
-            data: post,
-            headers: hdrs
-        }).success(function (rspns, s) {
-            callback(rspns, s);
-        }).fail(function (jqXHR, textStatus) {
-            console.log('Server Request failed (' + jqXHR.statusText + ')');
-            callback(textStatus);
-        });
+        var request = new XMLHttpRequest();
+        request.open(method, url, true);
+        request.setRequestHeader('Cache-Control','no-cache');
+        request.setRequestHeader('Accept','application/json');
+        request.setRequestHeader('Content-Type','application/json');
+        if (token) request.setRequestHeader('X-UserToken',  token);
+
+        request.onload = function () {
+            if (this.status >= 200 && this.status < 400) {
+                callback(JSON.parse(this.response));
+            } else {
+                callback(this);
+            }
+        };
+        request.onerror = function () {
+            // There was a connection error of some sort
+        };
+        request.send();
+
     } catch (error) {
         console.log('Server Request failed (' + error + ')');
     }
 }
-
-
 
 /**
  * @function startBackgroundScript

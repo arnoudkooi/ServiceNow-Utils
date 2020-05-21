@@ -328,6 +328,13 @@
                                         Disable CTRL/CMD-V to paste Clipboard image.
                                     </label>
                                 </div>
+                                <div class="form-check" title="May not update when updated from other tab. Use /s2 to toggle between default and s2 type">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="s2ify"
+                                        name="nopasteimage">
+                                    <label class="form-check-label" for="s2ify">
+                                        Enhance Application and Updateset picker at page load.
+                                    </label>
+                                </div>
                             </form>
                         </div>
 
@@ -363,10 +370,10 @@
 
                     <hr />
                     <h5>Slash Commands</h5>
-                    Advanced, please use the <a id="helperslashcommands" href='#tabslashcommands'>Slashcommands</a> tab to manage custom commands
+                    Advanced, please use the <a id="helperslashcommands" href='#tabslashcommands'>Slashcommands</a> tab to manage custom commands, or doubleclick textarea to remove readonly.
                     <textarea class="form-control form-control-sm snu-setting" readonly="readonly" autocomplete="off" autocapitalize="off"
                         spellcheck="false" id="slashcommands"
-                        placeholder="i;incident_list.do?sysparm_query=short_description=$0"></textarea>
+                        placeholder="Go to slashcommands tab to create custom commands"></textarea>
 
                     <hr />
                     <h5>Shortcuts</h5>
