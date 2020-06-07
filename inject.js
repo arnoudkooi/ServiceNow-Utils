@@ -11,15 +11,22 @@ var snuNav = {
 var snuslashcommands = {
     "acl": {
         "url": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
-        "hint": "Filter ACL list <table> <operation>"
+        "hint": "Filter ACL list <table> <operation>",
+        "fields" : "name"
     },
     "app": {
         "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0",
-        "hint": "Filter Applications <name>"
+        "hint": "Filter Applications <name>",
+        "fields" : "name"
     },
     "br": {
         "url": "sys_script_list.do?sysparm_query=nameLIKE$0",
-        "hint": "Filter Business Rules <name>"
+        "hint": "Filter Business Rules <name>",
+        "fields" : "name"
+    },
+    "cancel": {
+        "url": "/cancel_my_transactions.do",
+        "hint": "Cancel My Running Transactions"
     },
     "code": {
         "url": "*",
@@ -47,7 +54,8 @@ var snuslashcommands = {
     },
     "cs": {
         "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
-        "hint": "Filter Client Scripts <name>"
+        "hint": "Filter Client Scripts <name>",
+        "fields" : "name"
     },
     "db": {
         "url": "$pa_dashboard.do",
@@ -87,11 +95,13 @@ var snuslashcommands = {
     },
     "p": {
         "url": "sys_properties_list.do?sysparm_query=nameLIKE$0",
-        "hint": "Filter Properties <name>"
+        "hint": "Filter Properties <name>",
+        "fields" : "name"
     },
     "plug": {
         "url": "v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0",
-        "hint": "Filter Plugins <search>"
+        "hint": "Filter Plugins <search>",
+        "fields" : "id"
     },
     "pop": {
         "url": "*",
@@ -107,7 +117,8 @@ var snuslashcommands = {
     },
     "si": {
         "url": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
-        "hint": "Filter Script Includes <name>"
+        "hint": "Filter Script Includes <name>",
+        "fields" : "name"
     },
     "sp": {
         "url": "/sp",
@@ -139,11 +150,13 @@ var snuslashcommands = {
     },
     "u": {
         "url": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
-        "hint": "Filter Users <search>"
+        "hint": "Filter Users <search>",
+        "fields" : "user_name"
     },
     "ua": {
         "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
-        "hint": "Filter UI Actions <name>"
+        "hint": "Filter UI Actions <name>",
+        "fields" : "name"
     },
     "uh": {
         "url": "*",
@@ -151,7 +164,8 @@ var snuslashcommands = {
     },
     "uis": {
         "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0",
-        "hint": "Filter UI Scripts <name>"
+        "hint": "Filter UI Scripts <name>",
+        "fields" : "name"
     },
     "unimp": {
         "url": "*",
@@ -159,7 +173,8 @@ var snuslashcommands = {
     },
     "up": {
         "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0",
-        "hint": "UI Policies <name>"
+        "hint": "UI Policies <name>",
+        "fields" : "name"
     },
     "va": {
         "url": "/$conversation-builder.do",
@@ -260,7 +275,7 @@ function snuGetTables(shortcut) {
             Object.entries(results).forEach(([key, val]) => {
                 snuslashcommands[val.name] = {
                     "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
-                    "hint": val.label,
+                    "hint": "" + val.label,
                     "type": "table"
                 };
             });
@@ -275,6 +290,33 @@ function snuGetTables(shortcut) {
 
     });
 
+}
+
+function snuGetDirectLinks(targeturl, shortcut){
+
+    var fields = "";
+    try {
+    var fields = (snuslashcommands[shortcut].hasOwnProperty("fields")) ? snuslashcommands[shortcut].fields || "" : "";
+    } catch(e){}
+
+    if (fields){
+        snuslashcommands[shortcut].fields
+        var url = "api/now/table/" + targeturl.replace("_list.do","") + 
+        "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=10" +
+        "&sysparm_fields=sys_id," + fields;
+
+        var table = url.match(/.*\/(.*)\?/)[1]
+        loadXMLDoc(g_ck, url, null, function(jsn){
+            var directlinks = '';
+            var results = jsn.result;
+            if (jsn.hasOwnProperty('result')){
+                Object.entries(results).forEach(([key, val]) => {
+                    directlinks += '> <a target="gsft_main" onclick="hideSlashCommand()" href="'+ table + ".do?sys_id=" + val.sys_id+'">'+val[fields]+'</a><br />';
+                });
+            }
+            window.top.document.getElementById('snudirectlinks').innerHTML = directlinks;
+        })
+    } 
 }
 
 
@@ -330,7 +372,7 @@ function addSlashCommandListener() {
             idx = snufilter.indexOf(' ');
         }
         var query = snufilter.slice(idx + 1);
-        if (e.key == 'ArrowRight') { snuGetTables(shortcut) };
+        if (e.key == 'ArrowRight' & !query) { snuGetTables(shortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -396,8 +438,10 @@ function addSlashCommandListener() {
             });
 
         }
-
-        targeturl = targeturl.replace(/\$0/g, query);
+        query = query.trim();
+        targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
+        //if (e.key != 'Enter' && (query.length > 1 || e.key == 'ArrowRight' )) snuGetDirectLinks(targeturl, shortcut);
+        if (e.key == 'ArrowRight') snuGetDirectLinks(targeturl, shortcut);
 
         if (e.key == 'Enter') {
             shortcut = shortcut.replace(/\*/g, '');
@@ -689,11 +733,11 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
 
     var fltr = window.top.document.getElementById('snufilter');
 
-    if (snuPropertyNames.length == 0 && fltr.value.includes(" ")){
-        snuPropertyNames = ["nav"];
-        shortcut = "nav"
-        fltr.value = "/nav " + fltr.value.replace("/","");
-    }
+    // if (snuPropertyNames.length == 0 && fltr.value.includes(" ")){
+    //     snuPropertyNames = ["nav"];
+    //     shortcut = "nav"
+    //     fltr.value = "/nav " + fltr.value.replace("/","");
+    // }
 
     if (snuPropertyNames.length > 0 && selectFirst) { //select first hit when tap or space pressed
         if (e) e.preventDefault();
@@ -707,8 +751,9 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     var html = "";
     for (i = 0; i < snuPropertyNames.length && i < snuMaxHints; i++) {
         var cssclass = (snuIndex == i) ? 'active' : '';
+        var lbl = ((snuslashcommands[snuPropertyNames[i]].fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]].hint);
         html += "<li id='cmd" + snuPropertyNames[i] + "' onclick='setSnuFilter(this)' class='" + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
-            "<span class='cmdlabel'>" + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]].hint) + "</span></li>"
+            "<span class='cmdlabel'>" + lbl + "</span></li>"
         if (fltr.value.includes(" ")) {
             break;
         }
@@ -731,7 +776,9 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
             "<span class='cmdlabel'>Table search (hit ► to search tables)</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
-    window.top.document.getElementById('snuhelper').innerHTML = html + switchText;
+    window.top.document.getElementById('snuhelper').innerHTML = html ;
+    window.top.document.getElementById('snudirectlinks').innerHTML = '';
+    window.top.document.getElementById('snuswitches').innerHTML = switchText;
 }
 
 function setSnuFilter(elm) {
@@ -749,6 +796,7 @@ function snuExpandHints(shortcut) {
     elm.focus();
     elm.selectionStart = elm.selectionEnd = elm.value.length;
 }
+
 
 function snuAddSlashCommand(cmd) {
     var event = new CustomEvent(
@@ -782,6 +830,7 @@ function snuSettingsAdded() {
     if (snusettings.vsscriptsync == true) {
         addFieldSyncButtons();
         addStudioScriptSync();
+        addBGScriptButton();
     }
     if (snusettings.slashoption != "off") {
         addFilterListener();
@@ -807,7 +856,7 @@ function snuSettingsAdded() {
 
         try {
 
-            var customCommands = JSON.parse(snusettings.slashcommands);
+            var customCommands = JSON.parse(snusettings.slashcommands || "{}");
             Object.keys(customCommands).forEach(function (key) {
                 snuslashcommands[key] = customCommands[key];
             });
@@ -821,7 +870,7 @@ function snuSettingsAdded() {
 
         }
         catch (e) {
-            console.log("error while parsing slashcommands:" + snusettings.slashcommands)
+            console.log("error while parsing slashcommands:" + snusettings.slashcommands + " " + e)
         }
     }
 
@@ -1412,7 +1461,7 @@ function setShortCuts() {
 
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
         ul#snuhelper li {margin-top:2px}
@@ -1422,11 +1471,13 @@ function setShortCuts() {
         a.cmdlink { font-size:10pt; color: #1f8476; }
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey { border-color: #8BB3A2}
         ul#snuhelper li.active span.cmdlabel { color: black}
+        div#snudirectlinks {margin: -5px 10px;}
+        div#snudirectlinks a {color:#22885c;}
         </style>`;
     }
     else if (snusettings.slashtheme == 'stealth') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
         div.snuheader {display:none}
         ul#snuhelper { display:none } 
         ul#snuhelper li {display:none}
@@ -1434,11 +1485,12 @@ function setShortCuts() {
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; background: transparent; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; width:100%; border: 0px; margin:8px 2px 4px 2px; }
         span.cmdlabel { display:none }
         a.cmdlink { display:none }
+        div#snudirectlinks {display:none;}
         </style>`;
     }
     else {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
         ul#snuhelper li {margin-top:2px}
@@ -1448,6 +1500,8 @@ function setShortCuts() {
         a.cmdlink { font-size:10pt; color: #1f8476; }
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey  { border-color: yellow}
         ul#snuhelper li.active span.cmdlabel { color: yellow}
+        div#snudirectlinks {margin: -5px 10px;}
+        div#snudirectlinks a {color:#1cad6e;}
         </style>`;
     }
 
@@ -1458,7 +1512,10 @@ function setShortCuts() {
         `<div class="snutils" style="display:none;"><div class="snuheader"><a class='cmdlink'  href="javascript:hideSlashCommand()">
     <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands<span style="float:right; font-size:6pt; line-height: 16pt;"><a href="https://twitter.com/sn_utils" target="_blank">@sn_utils</a>&nbsp;</span></div>
     <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
-    <ul id="snuhelper"></ul></div>`
+    <ul id="snuhelper"></ul>
+    <div id="snudirectlinks"></div>
+    <div id="snuswitches"></div>
+    </div>`
     window.top.document.body.appendChild(htmlFilter);
     addSlashCommandListener();
 
@@ -1534,16 +1591,12 @@ function splitContainsToAnd() {
 
 function bindPaste(showIcon) {
 
-    if (typeof jQuery == 'undefined') return; //not in studio
-
     if (typeof g_form != 'undefined') {
 
-        if (showIcon)
+        if (showIcon && jQuery != 'undefined')
             jQuery('#header_add_attachment').after('<button id="header_paste_image" title="Paste screenshot as attachment" class="btn btn-icon glyphicon glyphicon-paste navbar-btn" aria-label="Paste Image as Attachments" data-original-title="Paste Image as Attachments" onclick="tryPaste()"></button>');
-
-
-        jQuery('body').bind('paste', function (e) {
-            if (e.originalEvent.clipboardData.items.length > 0 && e.originalEvent.clipboardData.items[0].kind == "file") {
+        document.querySelector('body').addEventListener('paste', (e) => {
+            if (e.clipboardData.items.length > 0 && e.clipboardData.items[0].kind == "file") {
                 if (g_form.isNewRecord()) {
                     g_form.clearMessages();
                     g_form.addWarningMessage('Please save record before pasting...');
@@ -1551,7 +1604,7 @@ function bindPaste(showIcon) {
                 }
                 g_form.addInfoMessage('<span class="icon icon-loading"></span> Pasted image being processed...');
 
-                var fileInfo = e.originalEvent.clipboardData.items[0].getAsFile();
+                var fileInfo = e.clipboardData.items[0].getAsFile();
                 var fr = new FileReader();
                 fr.onloadend = function () {
                     var imgData = getBlob(fr.result);
@@ -1560,7 +1613,6 @@ function bindPaste(showIcon) {
                 fr.readAsDataURL(fileInfo);
             }
         });
-
     }
 }
 
@@ -1945,25 +1997,40 @@ function postRequestToScriptSync(requestType) {
     client.send(JSON.stringify(data));
 }
 
+
 function postToScriptSync(field) {
 
     snuScriptSync();
+    var data = {};
 
-    g_form.clearMessages();
     var instance = {};
     instance.name = window.location.host.split('.')[0];
     instance.url = window.location.origin;
     instance.g_ck = g_ck;
 
-    var data = {};
     data.action = 'saveFieldAsFile';
     data.instance = instance;
-    data.table = g_form.getTableName();
-    data.sys_id = g_form.getUniqueValue();
-    data.field = field;
-    data.content = g_form.getValue(field);
-    data.fieldType = g_form.getGlideUIElement(field).type;
-    data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
+
+    if (field) {
+        g_form.clearMessages();
+        data.field = field;
+        data.table = g_form.getTableName();
+        data.sys_id = g_form.getUniqueValue();
+        data.content = g_form.getValue(field);
+        data.fieldType = g_form.getGlideUIElement(field).type;
+        data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
+    }
+    else{ //bgscript
+        let date = new Date();
+        let my_id = ( date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + '-' + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() ) );    
+        function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
+        data.field = 'bg';
+        data.table = 'background'
+        data.sys_id = my_id;
+        data.content = '// sn-scriptsync - Received from background script tab via SN Utils. (delete file after usage.)\n\n' + document.getElementById('runscript').value;
+        data.fieldType = 'script';
+        data.name = 'script'; //(new Date()).toISOString().slice(0,10).replace(/-/g,"");
+    }
 
     var client = new XMLHttpRequest();
     client.open("post", "http://127.0.0.1:1977");
@@ -1972,7 +2039,11 @@ function postToScriptSync(field) {
         //     g_form.addErrorMessage(client.responseText);
     };
     client.onerror = function (e) {
-        g_form.addErrorMessage("Error, please check if VS Code with SN SriptSync is running");
+        var msg = "Error, please check if VS Code with SN SriptSync is running";
+        try {
+        g_form.addErrorMessage(msg);
+        } catch(e) {alert(msg);}
+
     };
     client.send(JSON.stringify(data));
 
@@ -2067,6 +2138,15 @@ function addFieldSyncButtons() {
             }
         });
     }
+}
+
+
+function addBGScriptButton(){
+    if (!location.href.includes("/sys.scripts.do")) return; //only in bg script
+    g_ck = document.getElementsByName('sysparm_ck')[0].value;
+    document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:postToScriptSync();'>[Mirror in sn-scriptsync]</a>");
+    // var snuScriptSyncLink = '<a style="color:white; margin-left:10px;" href="javascript:postLinkRequestToScriptSync();"> <span class="icon icon-save"></span> Link VS Code via sn-scriptsync</a>'
+    // document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuScriptSyncLink);
 }
 
 function setAllMandatoryFieldsToFalse() {

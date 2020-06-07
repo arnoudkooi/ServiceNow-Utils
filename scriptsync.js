@@ -2,6 +2,7 @@ var t;
 var realTimeUpdating = false;
 var msgCnt = 0;
 var msgShown = false;
+var scriptTabCreated = false;
 
 $(document).ready(function () {
     t = $('#synclog').DataTable({
@@ -71,6 +72,9 @@ $(document).ready(function () {
             var wsObj = JSON.parse(evt.data);
             if (wsObj.hasOwnProperty('liveupdate')) {
                 updateRealtimeBrowser(wsObj);
+            }
+            if (wsObj.hasOwnProperty('mirrorbgscript')) {
+                mirrorBgScript(wsObj);
             }
             else if (wsObj.hasOwnProperty('refreshtoken')) {
                 refreshToken(wsObj);
@@ -297,6 +301,52 @@ function updateRealtimeBrowser(scriptObj) {
             });
         }
     }
+
+}
+
+function mirrorBgScript(scriptObj) {
+    if (!realTimeUpdating) {
+        t.row.add([
+            new Date(), 'VS Code', 'Realtime updating Background Script'
+        ]).draw(false);
+        realTimeUpdating = true;
+    }
+
+
+    chrome.tabs.query({ //in iframe
+        url: scriptObj.instance.url + "/*sys.scripts.do"
+    }, function (arrayOfTabs) {
+        if (arrayOfTabs.length){
+            scriptTabCreated = false;
+            var prefix = arrayOfTabs[0].url.includes("nav_to.do?uri=%2Fsys.scripts.do") ? "gsft_main." : "";
+            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": prefix + "document.getElementById('runscript').value = `" + scriptObj.content + "`" });
+        }
+        else if (!scriptTabCreated){
+            var createObj = {
+                'url': scriptObj.instance.url + "/sys.scripts.do",
+                'active': true
+            }
+            chrome.tabs.create(createObj,
+                function(tab) {
+                    chrome.tabs.executeScript(tab.id, { "code": "document.getElementById('runscript').value = `" + scriptObj.content + "`" });
+                }
+            );
+
+            t.row.add([
+                new Date(), 'VS Code', 'Opening new Background Script tab'
+            ]).draw(false);
+
+            scriptTabCreated = true;
+        }
+    });
+
+    // chrome.tabs.query({ //not in iframe
+    //     url: scriptObj.instance.url + "sys.scripts.do"
+    // }, function (arrayOfTabs) {
+    //     if (arrayOfTabs.length){
+    //         chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": "document.getElementById('runscript').value = `" + scriptObj.content + "`" });
+    //     }
+    // });
 
 }
 
