@@ -39,6 +39,7 @@ function snuS2Ify(){
 
     jQuery('#application_picker_select').select2('destroy'); 
     jQuery('#update_set_picker_select').select2('destroy'); 
+    jQuery('#domain_picker_select_header').select2('destroy'); 
 
     if (setOff) return;
     
@@ -54,6 +55,13 @@ function snuS2Ify(){
     jQuery('#update_set_picker_select').on('change', function (e) {
         jQuery('#update_set_picker_select').trigger('change.select2');
     });
+
+    
+    jQuery('#domain_picker_select_header').select2({ 'dropdownAutoWidth': true });
+    jQuery('#domain_picker_select_header').on('change', function (e) {
+        jQuery('#domain_picker_select_header').trigger('change.select2');
+    });
+
 
 }
 
