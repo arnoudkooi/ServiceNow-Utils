@@ -1237,13 +1237,19 @@ function unhideFields() {
     }
 }
 
+function snuShowScratchpad(){
+    event.preventDefault();
+	g_form.addInfoMessage("Scratchpad: <br/>" + JSON.stringify(g_scratchpad || {},null,'&emsp;').replace(/\n/g,'<br/>'));
+}
+
 function addTechnicalNames() {
 
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
         try {
-            jQuery(".navbar-title-display-value:not(:contains('|'))").append(' | <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + '</span>');
+            jQuery(".navbar-title-display-value:not(:contains('|'))").append(' | <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + 
+            ' <a onclick="snuShowScratchpad()">[show scratchpad]</a> </span>');
             jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
                 jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
@@ -1252,7 +1258,7 @@ function addTechnicalNames() {
                 } catch (e) {
                     return true; //issue #42
                 }
-                jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
+
                 var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var btn = '';
                 if (fieldType == 'reference' || fieldType == 'glide_list') {
@@ -1266,6 +1272,12 @@ function addTechnicalNames() {
                     elm = '<a onclick="openTable(\'' + elm + '\');"  title="Open table in list" target="_blank">' + elm + '</a>';
                 }
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
+                //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
+                jQuery(this).closest('a').replaceWith(function () { 
+                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = "↗"; hl.title = "-SN Utils Original hyperlink-\n" + hl.title;
+                    var wr = document.createElement('div');
+                    return hl.outerHTML + " " + cnt;
+                });
             });
 
 
