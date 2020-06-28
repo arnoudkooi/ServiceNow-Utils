@@ -1238,8 +1238,7 @@ function unhideFields() {
 }
 
 function snuShowScratchpad(){
-    event.preventDefault();
-	g_form.addInfoMessage("Scratchpad: <br/>" + JSON.stringify(g_scratchpad || {},null,'&emsp;').replace(/\n/g,'<br/>'));
+	g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {},2,2) + "</pre>");
 }
 
 function addTechnicalNames() {
@@ -1248,7 +1247,8 @@ function addTechnicalNames() {
 
     if (typeof g_form != 'undefined') {
         try {
-            jQuery(".navbar-title-display-value:not(:contains('|'))").append(' | <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + 
+            jQuery('h1.navbar-title div.pointerhand').css("float","left");
+            jQuery("h1.navbar-title:not(:contains('|'))").append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + 
             ' <a onclick="snuShowScratchpad()">[show scratchpad]</a> </span>');
             jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
                 jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
