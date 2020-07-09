@@ -890,7 +890,7 @@ function doubleClickToShowFieldOrReload() {
                 var elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var val = g_form.getValue(elm);
                 if (NOW.user.roles.includes('admin')) { //only allow "admin" ti change fields
-                    var newValue = prompt('Value of ' + elm, val);
+                    var newValue = prompt('[SN Utils]\nValue of ' + elm, val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
                 }
@@ -916,7 +916,7 @@ function doubleClickToSetQueryListV2() {
         } else {
 
             var qry = GlideList2.get(jQuery('#sys_target').val());
-            var newValue = prompt('Filter condition: ', qry.filter);
+            var newValue = prompt('[SN Utils]\nFilter condition: ', qry.filter);
             if (newValue !== qry.filter && newValue !== null) {
                 qry.setFilterAndRefresh(newValue);
             }
@@ -1314,7 +1314,7 @@ function snuUiActionInfo(event, si) {
 
     if (event.ctrlKey || event.metaKey) {
         event.stopImmediatePropagation();
-        prompt("UI Action sys_id", si);
+        prompt("[SN Utils]\nUI Action sys_id", si);
     }
     else {
         window.open('/sys_ui_action.do?sys_id=' + si, 'uiaction');
@@ -1778,7 +1778,7 @@ function getListV3Fields() {
         //dbl click to view and update filter condition
         jQuery('div.breadcrumb-container').on("dblclick", function (event) {
             var qry = angular.element('.list-container').scope().$parent.$parent.queryString;
-            var newValue = prompt('Filter condition:', qry);
+            var newValue = prompt('[SN Utils]\Filter condition:', qry);
             if (newValue !== qry && newValue !== null) {
                 qry = angular.element('.list-container').scope().$parent.$parent.queryString = newValue || '';
                 setTimeout(function () {
@@ -1799,7 +1799,7 @@ function updateReportDesignerQuery() {
     if (location.pathname != "/sys_report_template.do") return;
     jQuery('div.breadcrumb-container').on("dblclick", function (event) {
         var qry = angular.element('#run-report').scope().main.report.sysparm_query;
-        var newValue = prompt('Filter condition:', qry);
+        var newValue = prompt('[SN Utils]\Filter condition:', qry);
 
         if (newValue !== qry && newValue !== null) {
             angular.element('#run-report').scope().main.report.sysparm_query = newValue || '';

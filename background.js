@@ -534,14 +534,14 @@ function togglePop(clickData, tid) {
 
     var frameHref = clickData.frameUrl || '';
     var urlFull = '' + clickData.pageUrl.match(/([^;]*\/){3}/)[0];
-    if (frameHref.length > 10) {
-        chrome.tabs.update(tid, {
+    if (clickData.pageUrl.includes('nav_to.do')) {
+        chrome.tabs.update(tid.id, {
             url: frameHref
         });
     } else {
         var newHref = encodeURIComponent(clickData.pageUrl.replace(urlFull, ''));
         var newUrl = urlFull + '/nav_to.do?uri=' + newHref;
-        chrome.tabs.update(tid, {
+        chrome.tabs.update(tid.id, {
             url: newUrl
         });
     }
