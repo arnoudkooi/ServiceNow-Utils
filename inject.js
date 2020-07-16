@@ -5,24 +5,24 @@ var snuPropertyNames = [];
 var snuIndex = 0;
 var snuNav = {
     'loading': 'mustload',
-    'loadedLastTime' : 0
+    'loadedLastTime': 0
 };
 
 var snuslashcommands = {
     "acl": {
         "url": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
         "hint": "Filter ACL list <table> <operation>",
-        "fields" : "name"
+        "fields": "name"
     },
     "app": {
         "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0",
         "hint": "Filter Applications <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "br": {
         "url": "sys_script_list.do?sysparm_query=nameLIKE$0",
         "hint": "Filter Business Rules <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "cancel": {
         "url": "/cancel_my_transactions.do",
@@ -55,7 +55,7 @@ var snuslashcommands = {
     "cs": {
         "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
         "hint": "Filter Client Scripts <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "db": {
         "url": "$pa_dashboard.do",
@@ -96,12 +96,12 @@ var snuslashcommands = {
     "p": {
         "url": "sys_properties_list.do?sysparm_query=nameLIKE$0",
         "hint": "Filter Properties <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "plug": {
         "url": "v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0",
         "hint": "Filter Plugins <search>",
-        "fields" : "id"
+        "fields": "id"
     },
     "pop": {
         "url": "*",
@@ -118,7 +118,7 @@ var snuslashcommands = {
     "si": {
         "url": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
         "hint": "Filter Script Includes <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "sp": {
         "url": "/sp",
@@ -151,12 +151,12 @@ var snuslashcommands = {
     "u": {
         "url": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
         "hint": "Filter Users <search>",
-        "fields" : "user_name"
+        "fields": "user_name"
     },
     "ua": {
         "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
         "hint": "Filter UI Actions <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "uh": {
         "url": "*",
@@ -165,7 +165,7 @@ var snuslashcommands = {
     "uis": {
         "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0",
         "hint": "Filter UI Scripts <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "unimp": {
         "url": "*",
@@ -174,7 +174,7 @@ var snuslashcommands = {
     "up": {
         "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0",
         "hint": "UI Policies <name>",
-        "fields" : "name"
+        "fields": "name"
     },
     "va": {
         "url": "/$conversation-builder.do",
@@ -270,7 +270,7 @@ function snuGetTables(shortcut) {
     var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00' + qry + '^EORDERBYname' + shortcut;
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
 
-        if (jsn.hasOwnProperty('result')){
+        if (jsn.hasOwnProperty('result')) {
             var results = jsn.result;
             Object.entries(results).forEach(([key, val]) => {
                 snuslashcommands[val.name] = {
@@ -292,31 +292,31 @@ function snuGetTables(shortcut) {
 
 }
 
-function snuGetDirectLinks(targeturl, shortcut){
+function snuGetDirectLinks(targeturl, shortcut) {
 
     var fields = "";
     try {
-    var fields = (snuslashcommands[shortcut].hasOwnProperty("fields")) ? snuslashcommands[shortcut].fields || "" : "";
-    } catch(e){}
+        var fields = (snuslashcommands[shortcut].hasOwnProperty("fields")) ? snuslashcommands[shortcut].fields || "" : "";
+    } catch (e) { }
 
-    if (fields){
+    if (fields) {
         snuslashcommands[shortcut].fields
-        var url = "api/now/table/" + targeturl.replace("_list.do","") + 
-        "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=10" +
-        "&sysparm_fields=sys_id," + fields;
+        var url = "api/now/table/" + targeturl.replace("_list.do", "") +
+            "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=10" +
+            "&sysparm_fields=sys_id," + fields;
 
         var table = url.match(/.*\/(.*)\?/)[1]
-        loadXMLDoc(g_ck, url, null, function(jsn){
+        loadXMLDoc(g_ck, url, null, function (jsn) {
             var directlinks = '';
             var results = jsn.result;
-            if (jsn.hasOwnProperty('result')){
+            if (jsn.hasOwnProperty('result')) {
                 Object.entries(results).forEach(([key, val]) => {
-                    directlinks += '> <a target="gsft_main" onclick="hideSlashCommand()" href="'+ table + ".do?sys_id=" + val.sys_id+'">'+val[fields]+'</a><br />';
+                    directlinks += '> <a target="gsft_main" onclick="hideSlashCommand()" href="' + table + ".do?sys_id=" + val.sys_id + '">' + val[fields] + '</a><br />';
                 });
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = directlinks;
         })
-    } 
+    }
 }
 
 
@@ -399,7 +399,7 @@ function addSlashCommandListener() {
 
         var switchText = '<br /> Options:<br />';
         if (['nav', 'fav', 'hist'].includes(shortcut)) {
-            
+
             snuGetNav(shortcut);
             switchText = snuGetNavHints(shortcut, query + thisKey);
         }
@@ -454,7 +454,7 @@ function addSlashCommandListener() {
                 return;
             }
             if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
-                
+
                 searchSysIdTables(shortcut);
                 hideSlashCommand();
                 return;
@@ -776,7 +776,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
             "<span class='cmdlabel'>Table search (hit ► to search tables)</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
-    window.top.document.getElementById('snuhelper').innerHTML = html ;
+    window.top.document.getElementById('snuhelper').innerHTML = html;
     window.top.document.getElementById('snudirectlinks').innerHTML = '';
     window.top.document.getElementById('snuswitches').innerHTML = switchText;
 }
@@ -836,7 +836,7 @@ function snuSettingsAdded() {
         addFilterListener();
         addSlashCommandListener();
     }
-    if (snusettings.s2ify){
+    if (snusettings.s2ify) {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
     }
 
@@ -1237,8 +1237,8 @@ function unhideFields() {
     }
 }
 
-function snuShowScratchpad(){
-	g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {},2,2) + "</pre>");
+function snuShowScratchpad() {
+    g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {}, 2, 2) + "</pre>");
 }
 
 function addTechnicalNames() {
@@ -1247,9 +1247,9 @@ function addTechnicalNames() {
 
     if (typeof g_form != 'undefined') {
         try {
-            jQuery('h1.navbar-title div.pointerhand').css("float","left");
-            jQuery("h1.navbar-title:not(:contains('|'))").append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() + 
-            ' <a onclick="snuShowScratchpad()">[show scratchpad]</a> </span>');
+            jQuery('h1.navbar-title div.pointerhand').css("float", "left");
+            jQuery("h1.navbar-title:not(:contains('|'))").append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
+                ' <a onclick="snuShowScratchpad()">[show scratchpad]</a> </span>');
             jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
                 jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
@@ -1273,7 +1273,7 @@ function addTechnicalNames() {
                 }
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
-                jQuery(this).closest('a').replaceWith(function () { 
+                jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = "↗"; hl.title = "-SN Utils Original hyperlink-\n" + hl.title;
                     var wr = document.createElement('div');
                     return hl.outerHTML + " " + cnt;
@@ -1615,16 +1615,38 @@ function bindPaste(showIcon) {
                     return false;
                 }
                 g_form.addInfoMessage('<span class="icon icon-loading"></span> Pasted image being processed...');
+                snuDoPaste(e.clipboardData.items[0].getAsFile(),g_form.getTableName(),g_form.getUniqueValue());
 
-                var fileInfo = e.clipboardData.items[0].getAsFile();
-                var fr = new FileReader();
-                fr.onloadend = function () {
-                    var imgData = getBlob(fr.result);
-                    saveImage(imgData, fileInfo);
-                };
-                fr.readAsDataURL(fileInfo);
             }
         });
+    }
+    else { //try determine record in workspace
+        document.querySelector('body').addEventListener('paste', (e) => {
+            var tableName; var sysId;
+            var parts = document.location.pathname.split("/");
+            var idx = parts.indexOf("sub") // show subrecord if available
+            if (idx != -1) parts = parts.slice(idx);
+            idx = parts.indexOf("record")
+            if (idx > -1 && parts.length >= idx + 2) {
+                tableName = parts[idx + 1];
+                sysId = parts[idx + 2];
+            }
+            if (tableName && sysId) {
+                if (e.clipboardData.items.length > 0 && e.clipboardData.items[0].kind == "file") {
+                    snuDoPaste(e.clipboardData.items[0].getAsFile(),tableName, sysId);
+                }
+            }
+        });
+        
+    }
+
+    function snuDoPaste(fileInfo, tableName, sysId) {
+        var fr = new FileReader();
+        fr.onloadend = function () {
+            var imgData = getBlob(fr.result);
+            snuSaveImage(imgData, fileInfo, tableName, sysId);
+        };
+        fr.readAsDataURL(fileInfo);
     }
 }
 
@@ -1675,49 +1697,46 @@ function getBlob(encoded) {
     });
 }
 
-function saveImage(imgData, fileInfo) {
-
-    if (typeof jQuery == 'undefined') return; //not in studio
-
-    //var fileName = prompt("Filename to use:", fileInfo.name) || fileInfo.name;
-
+function snuSaveImage(imgData, fileInfo, tableName, sysId) {
 
     var URL = "/api/now/attachment/file?table_name=" +
-        g_form.getTableName() + "&table_sys_id=" + g_form.getUniqueValue() + "&file_name=" + fileInfo.name;
+        tableName + "&table_sys_id=" + sysId + "&file_name=" + fileInfo.name;
 
-    jQuery.ajax({
-        url: URL,
-        type: 'POST',
-        data: imgData,
-        processData: false,
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': fileInfo.type,
-            'Access-Control-Allow-Origin': '*',
-            'X-UserToken': (typeof g_ck === 'undefined') ? '' : g_ck
-        },
-        contentType: 'application/json; charset=utf-8',
-        success: function (r) {
-            g_form.clearMessages();
-            console.log(r);
-            g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" +
-                `<div class="input-group">
-        <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="` + r.result.file_name.replace('.png', '') + `" style='width:200px;'class="form-control" placeholder="Image name">
-        <span class="input-group-btn" style="display: inline; ">
-          <button class="btn btn-primary" onClick='renamePasted("` + r.result.sys_id + `")' style="width: 80px;" type="button">.png Save..</button>
-        </span>
-      </div><span id='divRenamed'></span></form>`);
-            $j('#tbxImageName').focus().select();
 
-        },
-        error: function (error) {
+
+        var request = new XMLHttpRequest();
+        request.open("POST", URL, true);
+        request.setRequestHeader('Cache-Control', 'no-cache');
+        request.setRequestHeader('Accept', 'application/json');
+        request.setRequestHeader('Content-Type', fileInfo.type);
+        if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
+
+        request.onload = function (resp) {
+            if (this.status >= 200 && this.status < 400) {
+                var r = JSON.parse(this.response);
+                if (typeof g_form != 'undefined'){ 
+                    g_form.clearMessages();
+                    g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" +
+                        `<div class="input-group">
+                <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="` + r.result.file_name.replace('.png', '') + `" style='width:200px;'class="form-control" placeholder="Image name">
+                <span class="input-group-btn" style="display: inline; ">
+                <button class="btn btn-primary" onClick='renamePasted("` + r.result.sys_id + `")' style="width: 80px;" type="button">.png Save..</button>
+                </span>
+            </div><span id='divRenamed'></span></form>`);
+                    jQuery('#tbxImageName').focus().select();
+                }
+            } else {
+                //callback(this);
+            }
+        };
+        request.onerror = function (error) {
             console.log(error);
-            g_form.clearMessages();
-            g_form.addErrorMessage(error.responseJSON.error.detail);
-
-        }
-    });
-
+            if (typeof g_form != 'undefined'){
+                g_form.clearMessages();
+                g_form.addErrorMessage(error.responseJSON.error.detail);
+            }
+        };
+        request.send(imgData);
 }
 
 function renamePasted(sysID, check) {
@@ -1726,12 +1745,9 @@ function renamePasted(sysID, check) {
         alert("Please insert a valid filename.");
         return false;
     }
-
-
     var requestBody = {
         "file_name": $j('#tbxImageName').val()
     };
-
     var client = new XMLHttpRequest();
     client.open("put", "/api/now/table/sys_attachment/" + sysID);
     client.setRequestHeader('Accept', 'application/json');
@@ -1748,8 +1764,6 @@ function renamePasted(sysID, check) {
         }
     };
     client.send(JSON.stringify(requestBody));
-
-
 }
 
 function getListV3Fields() {
@@ -1774,7 +1788,6 @@ function getListV3Fields() {
             "fields": fields.toString()
 
         };
-
         //dbl click to view and update filter condition
         jQuery('div.breadcrumb-container').on("dblclick", function (event) {
             var qry = angular.element('.list-container').scope().$parent.$parent.queryString;
@@ -1795,7 +1808,6 @@ function getListV3Fields() {
 
 
 function updateReportDesignerQuery() {
-
     if (location.pathname != "/sys_report_template.do") return;
     jQuery('div.breadcrumb-container').on("dblclick", function (event) {
         var qry = angular.element('#run-report').scope().main.report.sysparm_query;
@@ -1820,7 +1832,7 @@ function loadIframe(url) {
     return true;
 }
 
-var elNames = '';
+var elNames = ''; //used in background.js
 
 function getFormElementNames() {
     if (typeof g_form !== 'undefined') {
@@ -1842,10 +1854,10 @@ function loadXMLDoc(token, url, post, callback) {
 
         var request = new XMLHttpRequest();
         request.open(method, url, true);
-        request.setRequestHeader('Cache-Control','no-cache');
-        request.setRequestHeader('Accept','application/json');
-        request.setRequestHeader('Content-Type','application/json');
-        if (token) request.setRequestHeader('X-UserToken',  token);
+        request.setRequestHeader('Cache-Control', 'no-cache');
+        request.setRequestHeader('Accept', 'application/json');
+        request.setRequestHeader('Content-Type', 'application/json');
+        if (token) request.setRequestHeader('X-UserToken', token);
 
         request.onload = function () {
             if (this.status >= 200 && this.status < 400) {
@@ -1942,16 +1954,12 @@ function hideSlashCommand() {
 }
 
 function showSlashCommand() {
-
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = '/';
         window.top.document.getElementById('snufilter').focus();
         snuShowSlashCommandHints("", false, "", false);
         setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
-    }
-    else {
-
     }
 }
 
@@ -1964,7 +1972,6 @@ function getSelectionText() {
     }
     return text;
 }
-
 
 function postRequestToScriptSync(requestType) {
 
@@ -1994,7 +2001,6 @@ function postRequestToScriptSync(requestType) {
             if (data.widget.data_table.hasOwnProperty('choices'))
                 data.widget.data_table.choices = []; //skip useless data
 
-
     }
 
     var client = new XMLHttpRequest();
@@ -2014,7 +2020,6 @@ function postToScriptSync(field) {
 
     snuScriptSync();
     var data = {};
-
     var instance = {};
     instance.name = window.location.host.split('.')[0];
     instance.url = window.location.origin;
@@ -2032,9 +2037,9 @@ function postToScriptSync(field) {
         data.fieldType = g_form.getGlideUIElement(field).type;
         data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
     }
-    else{ //bgscript
+    else { //bgscript
         let date = new Date();
-        let my_id = ( date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + '-' + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() ) );    
+        let my_id = (date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2(date.getDate()) + '-' + pad2(date.getHours()) + pad2(date.getMinutes()) + pad2(date.getSeconds()));
         function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
         data.field = 'bg';
         data.table = 'background'
@@ -2053,14 +2058,11 @@ function postToScriptSync(field) {
     client.onerror = function (e) {
         var msg = "Error, please check if VS Code with SN SriptSync is running";
         try {
-        g_form.addErrorMessage(msg);
-        } catch(e) {alert(msg);}
+            g_form.addErrorMessage(msg);
+        } catch (e) { alert(msg); }
 
     };
     client.send(JSON.stringify(data));
-
-    // var syncPage = jQuery("#snUtils").data("syncpage");
-    // window.open(syncPage, syncPage);
 
 }
 
@@ -2075,15 +2077,12 @@ function postLinkRequestToScriptSync(field) {
     instance.g_ck = g_ck;
 
     var ngScope = angular.element(document.getElementById('explorer-editor-wrapper')).scope()
-
-
     var data = {};
     data.action = 'linkAppToVSCode';
     data.instance = instance;
     data.appId = ngScope.ProjectConfig.APP_ID;
     data.appName = ngScope.ProjectConfig.APP_NAME;
     data.appScope = ngScope.ProjectConfig.APP_SCOPE;
-
 
     var client = new XMLHttpRequest();
     client.open("post", "http://127.0.0.1:1977");
@@ -2095,10 +2094,6 @@ function postLinkRequestToScriptSync(field) {
         alert("Error, please check if VS Code with SN SriptSync is running");
     };
     client.send(JSON.stringify(data));
-
-    // var syncPage = jQuery("#snUtils").data("syncpage");
-    // window.open(syncPage, syncPage);
-
 }
 
 function addFieldSyncButtons() {
@@ -2123,7 +2118,6 @@ function addFieldSyncButtons() {
                         jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
                         break;
                     }
-
                 }
             } catch (error) {
 
@@ -2153,16 +2147,13 @@ function addFieldSyncButtons() {
 }
 
 
-function addBGScriptButton(){
+function addBGScriptButton() {
     if (!location.href.includes("/sys.scripts.do")) return; //only in bg script
     g_ck = document.getElementsByName('sysparm_ck')[0].value;
     document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:postToScriptSync();'>[Mirror in sn-scriptsync]</a>");
-    // var snuScriptSyncLink = '<a style="color:white; margin-left:10px;" href="javascript:postLinkRequestToScriptSync();"> <span class="icon icon-save"></span> Link VS Code via sn-scriptsync</a>'
-    // document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuScriptSyncLink);
 }
 
 function setAllMandatoryFieldsToFalse() {
-
     if (typeof g_form != 'undefined' && typeof g_user != 'undefined') {
         if (g_user.hasRole('admin')) {
             var fields = g_form.getEditableFields();
@@ -2178,7 +2169,6 @@ function setAllMandatoryFieldsToFalse() {
 
 
 function addSgStudioPlatformLink() {
-
     if (!location.href.includes("$sg-studio.do")) return; //only in studio
     if (location.hash.split("/").length < 2) return;
 
@@ -2299,8 +2289,6 @@ function addStudioScriptSync() {
         }
     }
 
-
-
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
 
     var snuScriptSyncLink = '<a style="color:white; margin-left:10px;" href="javascript:postLinkRequestToScriptSync();"> <span class="icon icon-save"></span> Link VS Code via sn-scriptsync</a>'
@@ -2320,17 +2308,8 @@ function doGroupSearch(search) {
         el.parentElement.style.display = "";
     });
 
-    // if (search.length == 0) {
-    //     var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
-    //     Array.prototype.forEach.call(elms, function (el, i) {
-    //         el.style.display = "";
-    //     });
-    //     return;
-    // }
-
     search = search.split(',');
     var srch = search[0].toLowerCase();
-
 
     //filter based on item text.
     var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
@@ -2448,8 +2427,7 @@ function searchSysIdTables(sysId) {
                     return false;
                 }
             }
-
-            findSysID('`+ sysId +`')
+            findSysID('`+ sysId + `')
         `;
         startBackgroundScript(script, function (rspns) {
             answer = rspns.match(/###(.*)###/);
@@ -2457,7 +2435,7 @@ function searchSysIdTables(sysId) {
                 showAlert('Opening in new tab: ' + answer[1].split('^')[1], 'success');
                 var table = answer[1].split('^')[0];
                 var url = table + '.do?sys_id=' + sysId;
-                window.open(url, '_blank');   
+                window.open(url, '_blank');
             } else {
                 showAlert('sys_id was not found in the system.', 'warning');
             }
@@ -2552,11 +2530,11 @@ function snuGetNav(shortcut) {
             navArr = [];
             Object.entries(resp['history']).forEach(([key, val]) => {
 
-                navArr.push({ "app": val.title, "item": val.description || val.title , "uri": val.url })
+                navArr.push({ "app": val.title, "item": val.description || val.title, "uri": val.url })
 
             });
             snuNav['history'] = navArr;
-            
+
             snuNav.loading = 'loaded';
 
         }
@@ -2572,7 +2550,7 @@ function snuGetNavHints(shortcut, srch) {
     var html = "";
     var lastApp = "";
     var srchArr = srch.toLowerCase().split(","); srchArr.push(srchArr[0]);
-    var hits = 80; var hit =0// maximum results
+    var hits = 80; var hit = 0// maximum results
     for (var ix = 0; ix < nav.length && hit < hits; ix++) {
         var srchApp = srchArr[0].trim(); var srchItem = srchArr[1].trim()
         if ((srchArr.length == 3 && (nav[ix].app.toLowerCase().includes(srchApp) && nav[ix].item.toLowerCase().includes(srchItem))) ||
@@ -2585,5 +2563,5 @@ function snuGetNavHints(shortcut, srch) {
             hit++;
         }
     }
-    return '<br />' + hit +' Matches:<br />' + html;
+    return '<br />' + hit + ' Matches:<br />' + html;
 }
