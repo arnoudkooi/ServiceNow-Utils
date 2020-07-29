@@ -40,6 +40,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "[Beta] Favorites <search>"
     },
+    "tab": {
+        "url": "/$0",
+        "hint": "New tab <pag or portal ie. foo.do or csm>"
+    },
     "hist": {
         "url": "*",
         "hint": "[Beta] History <search>"

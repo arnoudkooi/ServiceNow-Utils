@@ -14,9 +14,9 @@
  *
  * It accepts one, two or three parameters:
  *
- *     $.fn.dataTable.render.moment( to );
- *     $.fn.dataTable.render.moment( from, to );
- *     $.fn.dataTable.render.moment( from, to, locale );
+ * * `$.fn.dataTable.render.moment( to );`
+ * * `$.fn.dataTable.render.moment( from, to );`
+ * * `$.fn.dataTable.render.moment( from, to, locale );`
  *
  * Where:
  *
@@ -29,14 +29,14 @@
  *  @name datetime
  *  @summary Convert date / time source data into one suitable for display
  *  @author [Allan Jardine](http://datatables.net)
- *  @requires DataTables 1.10+
+ *  @requires DataTables 1.10+, Moment.js 1.7+
  *
  *  @example
  *    // Convert ISO8601 dates into a simple human readable format
  *    $('#example').DataTable( {
  *      columnDefs: [ {
  *        targets: 1,
- *        render: $.fn.dataTable.render.moment( 'Do MMM YYYYY' )
+ *        render: $.fn.dataTable.render.moment( 'Do MMM YYYY' )
  *      } ]
  *    } );
  *
@@ -106,6 +106,10 @@ $.fn.dataTable.render.moment = function ( from, to, locale ) {
 	}
 
 	return function ( d, type, row ) {
+		if (! d) {
+			return type === 'sort' || type === 'type' ? 0 : d;
+		}
+
 		var m = window.moment( d, from, locale, true );
 
 		// Order and type get a number value from Moment, everything else
