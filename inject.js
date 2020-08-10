@@ -252,7 +252,7 @@ function snuEncodeHtml(str) {
 
 function snuDecodeHtml(html) {
     var txt = document.createElement("textarea");
-    txt.innerHTML = html;
+    txt.innerHTML = DOMPurify.sanitize(html);
     return txt.value;
 }
 
@@ -318,7 +318,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                     directlinks += '> <a target="gsft_main" onclick="hideSlashCommand()" href="' + table + ".do?sys_id=" + val.sys_id + '">' + val[fields] + '</a><br />';
                 });
             }
-            window.top.document.getElementById('snudirectlinks').innerHTML = directlinks;
+            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks);
         })
     }
 }
@@ -780,9 +780,9 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
             "<span class='cmdlabel'>Table search (hit ► to search tables)</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
-    window.top.document.getElementById('snuhelper').innerHTML = html;
-    window.top.document.getElementById('snudirectlinks').innerHTML = '';
-    window.top.document.getElementById('snuswitches').innerHTML = switchText;
+    window.top.document.getElementById('snuhelper').innerHTML =  DOMPurify.sanitize(html);
+    window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
+    window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
 }
 
 function setSnuFilter(elm) {
@@ -1164,26 +1164,6 @@ function delQry() {
     g_form.clearMessages();
 }
 
-
-function loadScript(url) {
-    return new Promise(function (resolve, reject) {
-        var script = document.createElement("script");
-        script.onload = resolve;
-        script.onerror = reject;
-        script.src = url;
-        document.getElementsByTagName("head")[0].appendChild(script);
-    });
-}
-
-function loadjQuery() {
-    if (window.jQuery) {
-        // already loaded and ready to go
-        return Promise.resolve();
-    } else {
-        return loadScript('//code.jquery.com/jquery-latest.min.js');
-    }
-}
-
 /**
  * this solves an issue where e.g. OOTB read-only Script Include content was not copyable
  */
@@ -1278,9 +1258,9 @@ function addTechnicalNames() {
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
-                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = "↗"; hl.title = "-SN Utils Original hyperlink-\n" + hl.title;
+                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title;
                     var wr = document.createElement('div');
-                    return hl.outerHTML + " " + cnt;
+                    return DOMPurify.sanitize(hl.outerHTML + " " + cnt);
                 });
             });
 
@@ -1459,7 +1439,7 @@ function searchLargeSelects() {
                     ev.preventDefault();
                     var opt = document.createElement('option');
                     opt.value = input.value;
-                    opt.innerHTML = input.value;
+                    opt.innerHTML = DOMPurify.sanitize(input.value) ;
                     el.appendChild(opt);
                 }
             }
@@ -1524,14 +1504,16 @@ function setShortCuts() {
 
 
     var htmlFilter = document.createElement('div');
-    htmlFilter.innerHTML = divstyle +
+    var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a class='cmdlink'  href="javascript:hideSlashCommand()">
     <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands<span style="float:right; font-size:6pt; line-height: 16pt;"><a href="https://twitter.com/sn_utils" target="_blank">@sn_utils</a>&nbsp;</span></div>
     <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
     <div id="snuswitches"></div>
-    </div>`
+    </div>`, {FORCE_BODY: true});
+    debugger;
+    htmlFilter.innerHTML = cleanHTML
     window.top.document.body.appendChild(htmlFilter);
     addSlashCommandListener();
 
@@ -2203,7 +2185,7 @@ function addSgStudioPlatformLink() {
 
             var elm = document.querySelector("h1");
             if (elm)
-                elm.innerHTML = "<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + sysId + "'>" + elm.innerText + "</a>";
+                elm.innerHTML = DOMPurify.sanitize("<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + sysId + "'>" + elm.innerText + "</a>");
 
         }
 

@@ -297,7 +297,7 @@ function updateRealtimeBrowser(scriptObj) {
                 url: scriptObj.testUrls[i]
             }, function (arrayOfTabs) {
                 if (arrayOfTabs.length)
-                    chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": "document.getElementById('v" + scriptObj.sys_id + "-s').innerHTML = `" + scriptObj.css + "`" });
+                    chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": "document.getElementById('v" + scriptObj.sys_id + "-s').innerHTML = `" +  DOMPurify.sanitize(scriptObj.css) + "`" });
             });
         }
     }

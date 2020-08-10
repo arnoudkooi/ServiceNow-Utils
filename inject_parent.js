@@ -3,7 +3,7 @@
     //Initialize Alert
     var parent = document.querySelector('body');
     var alertContainer = document.createElement('div');
-    alertContainer.innerHTML = '<input id="sn_gck" type="hidden" value="' + (g_ck || '') + '" /><div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>';
+    alertContainer.innerHTML = DOMPurify.sanitize('<input id="sn_gck" type="hidden" value="' + (g_ck || '') + '" /><div class="notification-container service-now-util-alert" role="alert" style="top: 20px;"><div class="notification outputmsg outputmsg_has_text"><span class="outputmsg_text role="alert"></span></div></div>');
     parent.insertBefore(alertContainer, parent.firstChild);
 //});
 

@@ -7,7 +7,6 @@
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
-        "declarativeContent",
         "contextualIdentities",
         "tabs",
         "storage",
@@ -22,8 +21,8 @@
     },
     "background": {
         "scripts": [
+            "js/purify.min.js",
             "js/jquery.js",
-            "js/snrest.js",
             "background.js"
         ],
         "persistent": true
@@ -38,19 +37,9 @@
                 "https://*.service-now.com/*XML=*"
             ],
             "js": [
-                "content_script_parent.js"
-            ]
-        },
-        {
-            "matches": [
-                "https://*.service-now.com/*"
-            ],
-            "exclude_matches": [
-                "https://signon.service-now.com/*",
-                "https://*.service-now.com/*XML=*"
-            ],
-            "js": [
+                "js/purify.min.js",
                 "js/jquery.js",
+                "content_script_parent.js",
                 "content_script_all_frames.js"
             ],
             "all_frames": true
@@ -106,6 +95,7 @@
         "browser_style": true
     },
     "web_accessible_resources": [
+        "js/purify.min.js",
         "inject.js",
         "inject_parent.js"
     ],

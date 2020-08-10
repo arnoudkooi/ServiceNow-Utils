@@ -11,30 +11,37 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 });
 
 (function () {
-    var s = document.createElement('script');
-    s.src = chrome.runtime.getURL('inject.js');
-    s.onload = function () {
-        getFromSyncStorageGlobal("snusettings", function (settings) {
-
-            settings = convertSlashCommands(settings);
-
-            if (!settings) settings = {};
-            var script = document.createElement('script');
-            script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
-            (document.head || document.documentElement).appendChild(script);
-            //script.remove();
-        });
-    };
-    (document.head || document.documentElement).appendChild(s);
-
+    addScript('/js/purify.min.js',false); //needed for safe html insertion required by FF
+    addScript('inject.js',true);
 })();
 
+
+function addScript(filePath,processSettings) {
+    var s = document.createElement('script');
+    s.src = chrome.runtime.getURL(filePath);
+    s.onload = function () {
+        if (processSettings) {
+            getFromSyncStorageGlobal("snusettings", function (settings) {
+
+                settings = convertSlashCommands(settings);
+
+                if (!settings) settings = {};
+                var script = document.createElement('script');
+                script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
+                (document.head || document.documentElement).appendChild(script);
+                //script.remove();
+            });
+        }
+    };
+
+    (document.head || document.documentElement).appendChild(s);
+}
 
 //temporary check, to convert slashcommands
 // var settings = {
 //     "slashcommands" : ["i;incdent.do incdentjes hier", "chg;chg.do chamges hier", "prb;prob.do"].join('\n')
 // }
-function convertSlashCommands(settings){
+function convertSlashCommands(settings) {
 
     if (typeof settings == 'undefined') return {};
     if (!settings.hasOwnProperty('slashcommands')) return settings;
@@ -47,8 +54,8 @@ function convertSlashCommands(settings){
             var cmdSplit = cmdArr[i].split(";");
             if (cmdSplit.length == 2) {
                 cmds[cmdSplit[0]] = {
-                    "url" : cmdSplit[1].split(" ")[0],
-                    "hint" : cmdSplit[1].split(" ").slice(1).join(" ")
+                    "url": cmdSplit[1].split(" ")[0],
+                    "hint": cmdSplit[1].split(" ").slice(1).join(" ")
 
                 }
             }
