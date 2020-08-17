@@ -315,10 +315,13 @@ function snuGetDirectLinks(targeturl, shortcut) {
             var results = jsn.result;
             if (jsn.hasOwnProperty('result')) {
                 Object.entries(results).forEach(([key, val]) => {
-                    directlinks += '> <a target="gsft_main" onclick="hideSlashCommand()" href="' + table + ".do?sys_id=" + val.sys_id + '">' + val[fields] + '</a><br />';
+                    directlinks += '> <a target="gsft_main" href="' + table + ".do?sys_id=" + val.sys_id + '">' + val[fields] + '</a><br />';
                 });
             }
-            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks);
+            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
+            window.top.document.getElementById('snudirectlinks');
+            window.top.document.querySelectorAll("#snudirectlinks a").forEach(function(elm) { elm.addEventListener("click", hideSlashCommand) });
+            
         })
     }
 }
@@ -407,7 +410,8 @@ function addSlashCommandListener() {
             snuGetNav(shortcut);
             switchText = snuGetNavHints(shortcut, query + thisKey);
         }
-        if (targeturl.includes('sysparm_query=')) {
+        if (targeturl.includes('sysparm_query=') || originalShortcut.startsWith("-")) {
+            if (originalShortcut.startsWith("-")) query = shortcut;
             var extraParams = "";
             var unusedSwitches = Object.assign({}, snuslashswitches);
             var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
@@ -418,7 +422,7 @@ function addSlashCommandListener() {
                     if (snuslashswitches.hasOwnProperty(prop) && !linkSwitch) {
                         query = query.replace(val, "");
                         if (snuslashswitches[prop].type == "link") {
-                            var tableName = targeturl.split("_list.do")[0] || "";
+                            var tableName = targeturl.split("_list.do")[0] || "{}";
                             targeturl = snuslashswitches[prop].value.replace(/\$0/, tableName);
                             linkSwitch = true;
                             unusedSwitches = {};
@@ -580,6 +584,24 @@ function addSlashCommandListener() {
                 });
                 addTechnicalNames();
                 window.top.document.getElementById('snufilter').value = '';
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut.startsWith("-")) {
+                var doc = document.gsft_main || document;
+                if (typeof doc.GlideList2 != 'undefined'){
+                    var qry = doc.GlideList2.get(doc.jQuery('#sys_target').val());
+                    if (typeof qry != 'undefined'){
+                        if (targeturl.includes("{}")){
+                            targeturl = targeturl.replace('{}',qry.getTableName());
+                            window.open(targeturl,'_blank');
+                        }
+                        else {
+                            var newQ = qry.filter.replace(targeturl,"")
+                            qry.setFilterAndRefresh(newQ + targeturl);
+                        }
+                    }
+                }
                 hideSlashCommand();
                 return;
             }
@@ -756,7 +778,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     for (i = 0; i < snuPropertyNames.length && i < snuMaxHints; i++) {
         var cssclass = (snuIndex == i) ? 'active' : '';
         var lbl = ((snuslashcommands[snuPropertyNames[i]].fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]].hint);
-        html += "<li id='cmd" + snuPropertyNames[i] + "' onclick='setSnuFilter(this)' class='" + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
+        html += "<li id='cmd" + snuPropertyNames[i] + "' data-index='"+ i+"' class='cmdfilter " + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
             "<span class='cmdlabel'>" + lbl + "</span></li>"
         if (fltr.value.includes(" ")) {
             break;
@@ -764,35 +786,42 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     }
 
     if (snuPropertyNames.length > snuMaxHints) {
-        html += "<li onclick='snuExpandHints(\"" + shortcut + "\")'><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
+        html += "<li class='cmdexpand' data-shortcut='" + shortcut + "' ><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
     }
 
     if (!html && shortcut.replace(/ /g, '').length == 32) {
-        html += "<li onclick='setSnuFilter(this)' ><span class='cmdkey'>/sys_id</span> " +
+        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/sys_id</span> " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
     if (!html && shortcut.includes(".do")) {
-        html += "<li onclick='setSnuFilter(this)' ><span class='cmdkey'>/" + shortcut + "</span> " +
+        html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
             "<span class='cmdlabel'>Direct navigation</span></li>"
     }
     if (!html && shortcut.length > 5) {
-        html += "<li onclick='setSnuFilter(this)' ><span class='cmdkey'>/" + shortcut + "</span> " +
+        html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
             "<span class='cmdlabel'>Table search (hit ► to search tables)</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
     window.top.document.getElementById('snuhelper').innerHTML =  DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
+
+    window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function(elm) { elm.addEventListener("click", setSnuFilter) });
+    window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function(elm) { elm.addEventListener("click", snuExpandHints) });
+
 }
 
-function setSnuFilter(elm) {
+function setSnuFilter() {
+    var elm = this;
     if (elm.innerText.length > window.top.document.getElementById('snufilter').value.length) {
         window.top.document.getElementById('snufilter').focus();
         window.top.document.getElementById('snufilter').value = elm.querySelector('.cmdkey').innerText + ' ';
+        snuIndex = parseInt(this.dataset.index || 0);
     }
 }
 
 function snuExpandHints(shortcut) {
+    shortcut = shortcut || this.dataset.shortcut;
     snuMaxHints = 1000;
     var e = new KeyboardEvent('keypress', { 'key': 'KeyDown' });
     snuShowSlashCommandHints(shortcut, false, '', e);
@@ -1505,21 +1534,20 @@ function setShortCuts() {
 
     var htmlFilter = document.createElement('div');
     var cleanHTML = DOMPurify.sanitize(divstyle +
-        `<div class="snutils" style="display:none;"><div class="snuheader"><a class='cmdlink'  href="javascript:hideSlashCommand()">
+        `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
     <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands<span style="float:right; font-size:6pt; line-height: 16pt;"><a href="https://twitter.com/sn_utils" target="_blank">@sn_utils</a>&nbsp;</span></div>
-    <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" onfocus="this.select();" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
+    <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
     <div id="snuswitches"></div>
     </div>`, {FORCE_BODY: true});
-    debugger;
     htmlFilter.innerHTML = cleanHTML
     window.top.document.body.appendChild(htmlFilter);
+    window.top.document.getElementById('cmdhidedot').addEventListener('click',hideSlashCommand);
+    window.top.document.getElementById('snufilter').addEventListener('focus',function() {this.select()});
     addSlashCommandListener();
 
     document.addEventListener("keydown", function (event) {
-
-
 
         if (event.key == '/') {
             if (snusettings.slashoption == 'off') return;
@@ -1732,7 +1760,7 @@ function renamePasted(sysID, check) {
         return false;
     }
     var requestBody = {
-        "file_name": $j('#tbxImageName').val()
+        "file_name": $j('#tbxImageName').val() + ".png"
     };
     var client = new XMLHttpRequest();
     client.open("put", "/api/now/table/sys_attachment/" + sysID);
