@@ -3,6 +3,7 @@ var mySysId = '';
 var snuMaxHints = 10;
 var snuPropertyNames = [];
 var snuIndex = 0;
+var snuSelection = '';
 var snuNav = {
     'loading': 'mustload',
     'loadedLastTime': 0
@@ -354,6 +355,7 @@ function addSlashCommandListener() {
             else
                 snuIndex--;
         }
+
         if (e.key == 'Meta' || e.key == 'Control') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
@@ -369,6 +371,11 @@ function addSlashCommandListener() {
         var noSpace = (snufilter.indexOf(' ') == -1);
         var selectFirst = (e.key == " " || e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
         var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
+        if (e.key == '\\'){
+            e.currentTarget.value = (e.currentTarget.value + window.top.document.snuSelection).trim();
+            thisKey = "";
+            e.preventDefault();
+        }
         if (noSpace) idx = snufilter.length;
         var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : ""))).toLowerCase();
 
@@ -600,10 +607,22 @@ function addSlashCommandListener() {
                             var newQ = qry.filter.replace(targeturl,"")
                             qry.setFilterAndRefresh(newQ + targeturl);
                         }
+                        hideSlashCommand();
+                        return;
                     }
+                }
+                if (typeof doc.g_form != 'undefined') {
+                    if (targeturl.includes("{}")) {
+                        targeturl = targeturl.replace('{}', g_form.getTableName());
+                    }
+                    else {
+                        targeturl = "/" + g_form.getTableName() + "_list.do?sysparm_query=" + targeturl;
+                    }
+                    window.open(targeturl, '_blank');
                 }
                 hideSlashCommand();
                 return;
+
             }
             else if (shortcut == "uh") {
                 var iframes = window.top.document.querySelectorAll("iframe");
@@ -1954,6 +1973,7 @@ function hideAlert() {
     jQuery('.service-now-util-alert').removeClass('visible');
 }
 function hideSlashCommand() {
+    window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
         if (window.top.document.getElementById('filter') != null) {
@@ -1968,6 +1988,7 @@ function hideSlashCommand() {
 }
 
 function showSlashCommand() {
+    window.top.document.snuSelection = getSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = '/';
@@ -2202,7 +2223,6 @@ function addSgStudioPlatformLink() {
         if (match.hasOwnProperty(arr[1])) {
 
             var sysId = arr[2];
-            console.log(arr)
             if (sysId.includes("{")) {
                 try {
                     sysId = JSON.parse(decodeURIComponent(sysId))['sysId'];
