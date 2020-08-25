@@ -21,7 +21,6 @@
     "background": {
         "scripts": [
             "js/jquery.js",
-            "js/snrest.js",
             "background.js"
         ],
         "persistent": true
