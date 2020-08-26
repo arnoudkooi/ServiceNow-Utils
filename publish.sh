@@ -27,4 +27,4 @@ sed -i '' "6s/.*/$var/" publish/manifest-firefox.json #sync version to other
 sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
 
-node publish/publish.js
+# node publish/publish.js
