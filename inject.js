@@ -901,6 +901,7 @@ function snuSettingsAdded() {
         snuRemoveLinkLess();
         snuTableCollectionLink();
         newFromPopupToTab();
+        createHyperLinkForGlideLists();
 
     }
 
@@ -930,6 +931,24 @@ function snuSettingsAdded() {
         addTechnicalNames();
     }
 
+}
+
+function createHyperLinkForGlideLists(){
+    try{
+        document.querySelectorAll('div[type=glide_list]').forEach(function(elm){
+        var field = elm.id.split('.')[2];
+        var table = g_form.getGlideUIElement(field).reference;
+        var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
+        var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
+        if (labels.length != values.length) return //not a reliable match
+        var links = []
+        for (var i = 0; i < labels.length; i++){
+            links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
+        }
+        var html = links.join(', ');
+            elm.nextSibling.querySelector('p').innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+        })
+    } catch (e) { };
 }
 
 
@@ -1340,6 +1359,7 @@ function addTechnicalNames() {
 
     showSelectFieldValues();
     searchLargeSelects();
+    createHyperLinkForGlideLists();
 }
 
 function snuUiActionInfo(event, si) {
