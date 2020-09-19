@@ -3,6 +3,7 @@ var realTimeUpdating = false;
 var msgCnt = 0;
 var msgShown = false;
 var scriptTabCreated = false;
+var ws;
 
 $(document).ready(function () {
     t = $('#synclog').DataTable({
