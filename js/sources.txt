@@ -5,4 +5,4 @@ datetime-moment.js https://cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-
 jquery.js https://code.jquery.com/jquery-3.5.1.min.js
 moment.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js
 jquery.deserialize.js https://raw.githubusercontent.com/kflorence/jquery-deserialize/master/src/jquery.deserialize.js
-DOMPurify https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.0.12/purify.min.js
+DOMPurify https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.1.1/purify.min.js

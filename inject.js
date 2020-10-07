@@ -379,7 +379,7 @@ function addSlashCommandListener() {
         if (noSpace) idx = snufilter.length;
         var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : ""))).toLowerCase();
 
-        if (e.key == 'Backspace') originalShortcut = originalShortcut.slice(0, -1);
+        if (e.key == 'Backspace' && noSpace) originalShortcut = originalShortcut.slice(0, -1);
         var shortcut = snufilter.slice(0, idx).toLowerCase();
         if (snuPropertyNames.length > 1 && snuIndex >= 0 && ["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key)) {
             shortcut = snuPropertyNames[snuIndex];
@@ -938,12 +938,16 @@ function createHyperLinkForGlideLists(){
         document.querySelectorAll('div[type=glide_list]').forEach(function(elm){
         var field = elm.id.split('.')[2];
         var table = g_form.getGlideUIElement(field).reference;
+        if (!table) return;
         var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
         var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
         if (labels.length != values.length) return //not a reliable match
         var links = []
         for (var i = 0; i < labels.length; i++){
-            links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
+            if (values[i].includes("@"))
+                links.push(values[i]);
+            else
+                links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
         }
         var html = links.join(', ');
             elm.nextSibling.querySelector('p').innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
@@ -1325,9 +1329,8 @@ function addTechnicalNames() {
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
-                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title;
-                    var wr = document.createElement('div');
-                    return DOMPurify.sanitize(hl.outerHTML + " " + cnt);
+                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target="_blank";
+                    return DOMPurify.sanitize(hl.outerHTML + " " + cnt, { ADD_ATTR: ['target'] });
                 });
             });
 
