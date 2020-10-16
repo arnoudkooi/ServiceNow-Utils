@@ -227,6 +227,8 @@ var snuslashswitches = {
     "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on", "type": "encodedquerypart" },
 }
 
+var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD",
+    "IN", "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
 
 
 if (typeof jQuery != "undefined") {
@@ -280,7 +282,7 @@ function snuGetTables(shortcut) {
             Object.entries(results).forEach(([key, val]) => {
                 snuslashcommands[val.name] = {
                     "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
-                    "hint": "" + val.label,
+                    "hint": "" + val.label + " &lt;encodedquery&gt;",
                     "type": "table"
                 };
             });
@@ -321,8 +323,8 @@ function snuGetDirectLinks(targeturl, shortcut) {
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
             window.top.document.getElementById('snudirectlinks');
-            window.top.document.querySelectorAll("#snudirectlinks a").forEach(function(elm) { elm.addEventListener("click", hideSlashCommand) });
-            
+            window.top.document.querySelectorAll("#snudirectlinks a").forEach(function (elm) { elm.addEventListener("click", hideSlashCommand) });
+
         })
     }
 }
@@ -371,7 +373,7 @@ function addSlashCommandListener() {
         var noSpace = (snufilter.indexOf(' ') == -1);
         var selectFirst = (e.key == " " || e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
         var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
-        if (e.key == '\\'){
+        if (e.key == '\\') {
             e.currentTarget.value = (e.currentTarget.value + window.top.document.snuSelection).trim();
             thisKey = "";
             e.preventDefault();
@@ -454,6 +456,10 @@ function addSlashCommandListener() {
 
         }
         query = query.trim();
+
+        if (snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
+            targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + query + (e.key.length == 1 ? e.key : ""));
+        }
         targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
         //if (e.key != 'Enter' && (query.length > 1 || e.key == 'ArrowRight' )) snuGetDirectLinks(targeturl, shortcut);
         if (e.key == 'ArrowRight') snuGetDirectLinks(targeturl, shortcut);
@@ -596,15 +602,15 @@ function addSlashCommandListener() {
             }
             else if (shortcut.startsWith("-")) {
                 var doc = document.gsft_main || document;
-                if (typeof doc.GlideList2 != 'undefined'){
+                if (typeof doc.GlideList2 != 'undefined') {
                     var qry = doc.GlideList2.get(doc.jQuery('#sys_target').val());
-                    if (typeof qry != 'undefined'){
-                        if (targeturl.includes("{}")){
-                            targeturl = targeturl.replace('{}',qry.getTableName());
-                            window.open(targeturl,'_blank');
+                    if (typeof qry != 'undefined') {
+                        if (targeturl.includes("{}")) {
+                            targeturl = targeturl.replace('{}', qry.getTableName());
+                            window.open(targeturl, '_blank');
                         }
                         else {
-                            var newQ = qry.filter.replace(targeturl,"")
+                            var newQ = qry.filter.replace(targeturl, "")
                             qry.setFilterAndRefresh(newQ + targeturl);
                         }
                         hideSlashCommand();
@@ -696,7 +702,7 @@ function addSlashCommandListener() {
                     return;
                 }
                 else if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
-                    var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=name" + query;
+                    var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=" + query;
 
                     if (inIFrame) {
                         jQuery('#gsft_main').attr('src', url);
@@ -718,7 +724,6 @@ function addSlashCommandListener() {
                     return;
                 }
             }
-
 
             var inIFrame = !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
             if (e.target.className == "snutils") inIFrame = false;
@@ -797,7 +802,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     for (i = 0; i < snuPropertyNames.length && i < snuMaxHints; i++) {
         var cssclass = (snuIndex == i) ? 'active' : '';
         var lbl = ((snuslashcommands[snuPropertyNames[i]].fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]].hint);
-        html += "<li id='cmd" + snuPropertyNames[i] + "' data-index='"+ i+"' class='cmdfilter " + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
+        html += "<li id='cmd" + snuPropertyNames[i] + "' data-index='" + i + "' class='cmdfilter " + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
             "<span class='cmdlabel'>" + lbl + "</span></li>"
         if (fltr.value.includes(" ")) {
             break;
@@ -818,15 +823,15 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     }
     if (!html && shortcut.length > 5) {
         html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
-            "<span class='cmdlabel'>Table search (hit ► to search tables)</span></li>"
+            "<span class='cmdlabel'>Table search &lt;encodedquery&gt; (hit ► to search tables)</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
-    window.top.document.getElementById('snuhelper').innerHTML =  DOMPurify.sanitize(html);
+    window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
 
-    window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function(elm) { elm.addEventListener("click", setSnuFilter) });
-    window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function(elm) { elm.addEventListener("click", snuExpandHints) });
+    window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
+    window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
 
 }
 
@@ -933,23 +938,23 @@ function snuSettingsAdded() {
 
 }
 
-function createHyperLinkForGlideLists(){
-    try{
-        document.querySelectorAll('div[type=glide_list]').forEach(function(elm){
-        var field = elm.id.split('.')[2];
-        var table = g_form.getGlideUIElement(field).reference;
-        if (!table) return;
-        var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
-        var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
-        if (labels.length != values.length) return //not a reliable match
-        var links = []
-        for (var i = 0; i < labels.length; i++){
-            if (values[i].includes("@"))
-                links.push(values[i]);
-            else
-                links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
-        }
-        var html = links.join(', ');
+function createHyperLinkForGlideLists() {
+    try {
+        document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
+            var field = elm.id.split('.')[2];
+            var table = g_form.getGlideUIElement(field).reference;
+            if (!table) return;
+            var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
+            var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
+            if (labels.length != values.length) return //not a reliable match
+            var links = []
+            for (var i = 0; i < labels.length; i++) {
+                if (values[i].includes("@"))
+                    links.push(values[i]);
+                else
+                    links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
+            }
+            var html = links.join(', ');
             elm.nextSibling.querySelector('p').innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
         })
     } catch (e) { };
@@ -1329,7 +1334,7 @@ function addTechnicalNames() {
                 jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
-                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target="_blank";
+                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
                     return DOMPurify.sanitize(hl.outerHTML + " " + cnt, { ADD_ATTR: ['target'] });
                 });
             });
@@ -1510,7 +1515,7 @@ function searchLargeSelects() {
                     ev.preventDefault();
                     var opt = document.createElement('option');
                     opt.value = input.value;
-                    opt.innerHTML = DOMPurify.sanitize(input.value) ;
+                    opt.innerHTML = DOMPurify.sanitize(input.value);
                     el.appendChild(opt);
                 }
             }
@@ -1582,11 +1587,11 @@ function setShortCuts() {
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
     <div id="snuswitches"></div>
-    </div>`, {FORCE_BODY: true});
+    </div>`, { FORCE_BODY: true });
     htmlFilter.innerHTML = cleanHTML
     window.top.document.body.appendChild(htmlFilter);
-    window.top.document.getElementById('cmdhidedot').addEventListener('click',hideSlashCommand);
-    window.top.document.getElementById('snufilter').addEventListener('focus',function() {this.select()});
+    window.top.document.getElementById('cmdhidedot').addEventListener('click', hideSlashCommand);
+    window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
     addSlashCommandListener();
 
     document.addEventListener("keydown", function (event) {
@@ -1671,7 +1676,7 @@ function bindPaste(showIcon) {
                     return false;
                 }
                 g_form.addInfoMessage('<span class="icon icon-loading"></span> Pasted image being processed...');
-                snuDoPaste(e.clipboardData.items[0].getAsFile(),g_form.getTableName(),g_form.getUniqueValue());
+                snuDoPaste(e.clipboardData.items[0].getAsFile(), g_form.getTableName(), g_form.getUniqueValue());
 
             }
         });
@@ -1689,11 +1694,11 @@ function bindPaste(showIcon) {
             }
             if (tableName && sysId) {
                 if (e.clipboardData.items.length > 0 && e.clipboardData.items[0].kind == "file") {
-                    snuDoPaste(e.clipboardData.items[0].getAsFile(),tableName, sysId);
+                    snuDoPaste(e.clipboardData.items[0].getAsFile(), tableName, sysId);
                 }
             }
         });
-        
+
     }
 
     function snuDoPaste(fileInfo, tableName, sysId) {
@@ -1760,39 +1765,39 @@ function snuSaveImage(imgData, fileInfo, tableName, sysId) {
 
 
 
-        var request = new XMLHttpRequest();
-        request.open("POST", URL, true);
-        request.setRequestHeader('Cache-Control', 'no-cache');
-        request.setRequestHeader('Accept', 'application/json');
-        request.setRequestHeader('Content-Type', fileInfo.type);
-        if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
+    var request = new XMLHttpRequest();
+    request.open("POST", URL, true);
+    request.setRequestHeader('Cache-Control', 'no-cache');
+    request.setRequestHeader('Accept', 'application/json');
+    request.setRequestHeader('Content-Type', fileInfo.type);
+    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
 
-        request.onload = function (resp) {
-            if (this.status >= 200 && this.status < 400) {
-                var r = JSON.parse(this.response);
-                if (typeof g_form != 'undefined'){ 
-                    g_form.clearMessages();
-                    g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" +
-                        `<div class="input-group">
+    request.onload = function (resp) {
+        if (this.status >= 200 && this.status < 400) {
+            var r = JSON.parse(this.response);
+            if (typeof g_form != 'undefined') {
+                g_form.clearMessages();
+                g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" +
+                    `<div class="input-group">
                 <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="` + r.result.file_name.replace('.png', '') + `" style='width:200px;'class="form-control" placeholder="Image name">
                 <span class="input-group-btn" style="display: inline; ">
                 <button class="btn btn-primary" onClick='renamePasted("` + r.result.sys_id + `")' style="width: 80px;" type="button">.png Save..</button>
                 </span>
             </div><span id='divRenamed'></span></form>`);
-                    jQuery('#tbxImageName').focus().select();
-                }
-            } else {
-                //callback(this);
+                jQuery('#tbxImageName').focus().select();
             }
-        };
-        request.onerror = function (error) {
-            console.log(error);
-            if (typeof g_form != 'undefined'){
-                g_form.clearMessages();
-                g_form.addErrorMessage(error.responseJSON.error.detail);
-            }
-        };
-        request.send(imgData);
+        } else {
+            //callback(this);
+        }
+    };
+    request.onerror = function (error) {
+        console.log(error);
+        if (typeof g_form != 'undefined') {
+            g_form.clearMessages();
+            g_form.addErrorMessage(error.responseJSON.error.detail);
+        }
+    };
+    request.send(imgData);
 }
 
 function renamePasted(sysID, check) {
@@ -1984,10 +1989,10 @@ function showAlert(msg, type, timeout) {
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
     window.top.jQuery('.service-now-util-alert>div>span').html(msg);
-    window.top.jQuery('.service-now-util-alert').addClass('visible');
+    window.top.jQuery('.service-now-util-alert').addClass('visible').show();
     window.top.jQuery('.service-now-util-alert>.notification').addClass('notification-' + type);
     window.top.setTimeout(function () {
-        window.top.jQuery('.service-now-util-alert').removeClass('visible');
+        window.top.jQuery('.service-now-util-alert').removeClass('visible').hide();
         window.top.jQuery('.service-now-util-alert>.notification').removeClass('notification-' + type);
     }, timeout);
 }
