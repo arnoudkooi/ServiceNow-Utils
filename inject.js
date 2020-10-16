@@ -282,7 +282,7 @@ function snuGetTables(shortcut) {
             Object.entries(results).forEach(([key, val]) => {
                 snuslashcommands[val.name] = {
                     "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
-                    "hint": "" + val.label + " &lt;encodedquery&gt;",
+                    "hint": "" + val.label + " <encodedquery>",
                     "type": "table"
                 };
             });
@@ -457,8 +457,9 @@ function addSlashCommandListener() {
         }
         query = query.trim();
 
-        if (snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
+        if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
             targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + query + (e.key.length == 1 ? e.key : ""));
+            switchText = '<br />Encodedquery detected<br /><br />'
         }
         targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
         //if (e.key != 'Enter' && (query.length > 1 || e.key == 'ArrowRight' )) snuGetDirectLinks(targeturl, shortcut);
