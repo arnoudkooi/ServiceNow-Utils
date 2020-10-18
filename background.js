@@ -790,7 +790,7 @@ function getGck(cookieStoreId, callback) {
 }
 
 function grVarName(tableName, fullvarname) {
-    grVar = tableName.replace(/[-_]([a-z])/g, function (g) {
+    grVar = ('' + tableName).replace(/[-_]([a-z])/g, function (g) {
         return g[1].toUpperCase();
     });
 

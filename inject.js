@@ -121,9 +121,9 @@ var snuslashcommands = {
         "hint": "Global Instance Search <search>"
     },
     "si": {
-        "url": "sys_script_include_list.do?sysparm_query=nameLIKE$0",
+        "url": "sys_script_include_list.do?sysparm_orderby=api_name&sysparm_query=nameLIKE$0^api_nameLIKE$0",
         "hint": "Filter Script Includes <name>",
-        "fields": "name"
+        "fields": "api_name"
     },
     "sp": {
         "url": "/sp",
@@ -358,7 +358,8 @@ function addSlashCommandListener() {
                 snuIndex--;
         }
 
-        if (e.key == 'Meta' || e.key == 'Control') return;
+        if (e.key == 'Meta' || e.key == 'Control' || e.key == 'ArrowLeft') return;
+        if (e.currentTarget.selectionStart < e.currentTarget.value.length && e.key == 'ArrowRight') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
         if (!e.currentTarget.value.startsWith("/")) {
@@ -388,7 +389,8 @@ function addSlashCommandListener() {
             idx = snufilter.indexOf(' ');
         }
         var query = snufilter.slice(idx + 1);
-        if (e.key == 'ArrowRight' & !query) { snuGetTables(shortcut) };
+        var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
+        if (e.key == 'ArrowRight' || ((shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length ==1) && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";

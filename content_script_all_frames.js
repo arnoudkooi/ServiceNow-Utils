@@ -22,9 +22,6 @@ function addScript(filePath,processSettings) {
     s.onload = function () {
         if (processSettings) {
             getFromSyncStorageGlobal("snusettings", function (settings) {
-
-                settings = convertSlashCommands(settings);
-
                 if (!settings) settings = {};
                 var script = document.createElement('script');
                 script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
@@ -36,40 +33,6 @@ function addScript(filePath,processSettings) {
 
     (document.head || document.documentElement).appendChild(s);
 }
-
-//temporary check, to convert slashcommands
-// var settings = {
-//     "slashcommands" : ["i;incdent.do incdentjes hier", "chg;chg.do chamges hier", "prb;prob.do"].join('\n')
-// }
-function convertSlashCommands(settings) {
-
-    if (typeof settings == 'undefined') return {};
-    if (!settings.hasOwnProperty('slashcommands')) return settings;
-    if (settings.slashcommands.trim().startsWith('{')) return settings;
-
-    var cmds = {}
-    if ((settings.slashcommands).length > 7) {
-        var cmdArr = settings.slashcommands.split('\n');
-        for (var i = 0; i < cmdArr.length; i++) {
-            var cmdSplit = cmdArr[i].split(";");
-            if (cmdSplit.length == 2) {
-                cmds[cmdSplit[0]] = {
-                    "url": cmdSplit[1].split(" ")[0],
-                    "hint": cmdSplit[1].split(" ").slice(1).join(" ")
-
-                }
-            }
-        }
-
-        settings.slashcommands = JSON.stringify(cmds);
-        setToChromeSyncStorageGlobal("snusettings", settings);
-    }
-    return settings;
-
-}
-
-
-
 
 function runFunction(f, context) {
     var doc;

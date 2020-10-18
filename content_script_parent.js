@@ -1,14 +1,6 @@
 (function () {
 
     if (document.getElementById("filter") != null) {
-        // //add typeahead for usage in Application Navigator
-        // var t = document.createElement('script');
-        // t.src = chrome.runtime.getURL('js/typeahead.bundle.min.js');
-        // t.onload = function () {
-        //     this.remove();
-        // };
-        // (document.head || document.documentElement).appendChild(t);
-
 
         //add script to extend search field
         var c = document.createElement('script');
@@ -54,7 +46,7 @@ function toggleSearch() {
 }
 
 
-//get the selected text, user gas selected with mouse.
+//get the selected text, user has selected with mouse.
 function getSelection() {
 
     if (("" + document.activeElement.name).indexOf('label') > -1 ||
@@ -77,11 +69,11 @@ function getSelection() {
 function getFrameHref() {
     var frameHref = '';
 
-    if (jQuery('#gsft_main').length)
+    if (document.querySelectorAll('#gsft_main').length)
         frameHref = document.getElementById("gsft_main").contentWindow.location.href;
-    else if (jQuery('div.tab-pane.active').length == 1) {
+    else if (document.querySelectorAll('div.tab-pane.active').length == 1) {
         try{
-            frameHref = jQuery('iframe.activetab')[0].contentWindow.location.href;
+            frameHref = document.querySelectorAll('iframe.activetab')[0].contentWindow.location.href;
         }
         catch (e){
             frameHref = document.location.href;
@@ -121,14 +113,11 @@ function getVars(varstring) {
     if (varstring.indexOf('g_list') > -1)
         setGList();
 
-
-
-
     var doc;
     var ret = {};
-    if (jQuery('#gsft_main').length)
-        doc = jQuery('#gsft_main')[0].contentWindow.document;
-    else if (jQuery('div.tab-pane.active').length == 1) {
+    if (document.querySelectorAll('#gsft_main').length)
+        doc = document.querySelectorAll('#gsft_main')[0].contentWindow.document;
+    else if (document.querySelectorAll('div.tab-pane.active').length == 1) {
 
         try{
         ret.g_ck = jQuery('input#sysparm_ck').val();
