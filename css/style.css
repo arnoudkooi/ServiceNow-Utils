@@ -320,3 +320,11 @@ a.deletecmd {
 .hidden{
     display: none;
 }
+
+.width30{
+    width:30px;
+    font: 9pt monospace;
+    text-align: center;
+    border: 1pt solid #e5e5e5;
+    outline: none;
+}

@@ -1015,6 +1015,21 @@ function setToChromeStorage(theName, theValue) {
     });
 }
 
+
+function setToChromeSyncStorage(theName, theValue) {
+    var myobj = {};
+    myobj[instance + "-" + theName] = theValue;
+    chrome.storage.sync.set(myobj, function () {
+    });
+}
+
+//get an instance sync parameter
+function getFromSyncStorage(theName, callback) {
+    chrome.storage.sync.get(instance + "-" + theName, function (result) {
+        callback(result[instance + "-" + theName]);
+    });
+}
+
 //set an instance independent sync parameter
 function setToChromeSyncStorageGlobal(theName, theValue) {
     var myobj = {};

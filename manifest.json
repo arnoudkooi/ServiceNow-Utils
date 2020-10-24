@@ -3,7 +3,7 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "4.0.7.1",
+    "version": "4.1.0.0",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -37,6 +37,7 @@
             "js": [
                 "js/purify.min.js",
                 "js/jquery.js",
+                "js/Tinycon.js",
                 "content_script_parent.js",
                 "content_script_all_frames.js"
             ],

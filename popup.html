@@ -367,7 +367,38 @@
                             </form>
                         </div>
                     </div>
+                    <hr>
+                    <div class="form-check" title="">
+                        <input class="form-check-input snu-setting" type="checkbox" checked="checked" id="iconallowbadge"
+                            name="iconallowbadge">
+                        <label class="form-check-label" for="iconallowbadge">
+                            Allow favicon badge overlay to identify instances.
+                        </label><br />
+                    </div>
+                    <div id="iconsettingsdiv">
+                    Favicon badge for instance: <b id="instancename"></b><br />
+                    <input title="Background color" type="color" id="iconcolorbg" name="iconcolorbg" class="snu-instance-setting" value="#ff3333" list="colorslist" />
+                    <input title="Text" type="text" id="icontext" name="icontext" maxlength="3" class="width30 snu-instance-setting" />
+                    <input title="Text color" type="color" id="iconcolortext" name="iconcolortext" class="snu-instance-setting" value="#ffffff" list="colorslist" >
 
+                    <datalist id="colorslist">
+                        <option value="#ff3333">
+                        <option value="#ffff33">
+                        <option value="#009900">
+                        <option value="#0066cc">
+                        <option value="#ff8000">
+                        <option value="#80b6a1">
+                        <option value="#ffe119">
+                        <option value="#ff007f">
+                        <option value="#a0a0a0">
+                        <option value="#ffffff">
+                        <option value="#000000">
+                    </datalist>
+                  
+                    Width: <input type="range" min="7" max="16" value="7" class="slider snu-instance-setting" id="iconwidth"> 
+                    Heigth: <input type="range" min="7" max="16" value="9" class="slider snu-instance-setting" id="iconheight"> 
+                    Font: <input type="range" min="9" max="20" value="20" class="slider snu-instance-setting" id="iconfontsize">
+                </div>
                     <hr />
                     <h5>Slash Commands</h5>
                     Advanced, please use the <a id="helperslashcommands" href='#tabslashcommands'>Slashcommands</a> tab to manage custom commands, or doubleclick textarea to remove readonly.

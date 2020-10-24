@@ -41,12 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-function setIcon(icon) {
-    chrome.pageAction.setIcon({
-        tabId: tabid,
-        path: icon
-    });
-}
 
 //Set variables, called by BG page after calling getRecordVariables
 function setRecordVariables(obj) {
@@ -206,6 +200,14 @@ function setBrowserVariables(obj) {
         setSettings();
     });
 
+    $('.snu-instance-setting').change(function () {
+        setInstanceSettings();
+    });
+
+    $('input.snu-instance-setting').on('keyup',function () {
+        setInstanceSettings();
+    });
+
 
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
@@ -241,6 +243,11 @@ function setBrowserVariables(obj) {
     $('#slashcommands').on('dblclick',function(){
         $(this).prop('readonly','');
     })
+
+    $('#iconallowbadge').on('change',function(){
+       iconSettingsDiv($(this).prop('checked'));
+    })
+    
 
 
     $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
@@ -326,13 +333,14 @@ function setBrowserVariables(obj) {
                 if (typeof InstallTrigger !== 'undefined') {
                     jQuery(".hide-in-chrome").css('display', 'inline');
                 }
-                getSettings();
+                getSettings(function(){});
+                getInstanceSettings();
                 break;
             case "#tabslashcommands":
                 getSlashcommands();
                 break;
             case "#tabwhitelist":
-                getSettings();
+                getSettings(function(){});
                 break;
         }
 
@@ -370,6 +378,7 @@ function getSettings(callback) {
             else
                 document.getElementById(setting).value = settings[setting];
         };
+        iconSettingsDiv($('#iconallowbadge').prop('checked')); 
         callback();
     })
 }
@@ -386,6 +395,47 @@ function setSettings() {
 
     });
     bgPage.setToChromeSyncStorageGlobal("snusettings", snusettings);
+}
+
+function setInstanceSettings() {
+    var snuinstancesettings = {};
+    $('.snu-instance-setting').each(function (index, item) {
+        snuinstancesettings[this.id] = this.value;
+    });
+    bgPage.setToChromeSyncStorage("snuinstancesettings", snuinstancesettings);
+    applyFavIconBadge(snuinstancesettings);
+}
+
+function getInstanceSettings() {
+
+    bgPage.getFromSyncStorage("snuinstancesettings", function(settings){
+        objSettings = settings || {};
+        for (var setting in settings) {
+
+            if (typeof settings[setting] == "boolean")
+                document.getElementById(setting).checked = settings[setting];
+            else
+                document.getElementById(setting).value = settings[setting];
+        };
+        applyFavIconBadge(settings);
+
+    });
+    $('#instancename').text(instance);
+}
+
+function iconSettingsDiv(visible){
+    if (visible)
+        $('#iconsettingsdiv').show();
+    else 
+        $('#iconsettingsdiv').hide();
+}
+
+function applyFavIconBadge(settings){
+    document.getElementById("icontext").style.backgroundColor = settings.iconcolorbg; 
+    document.getElementById("icontext").style.color = settings.iconcolortext; 
+
+    chrome.tabs.sendMessage(tabid, { method: "setFavIconBadge", options: settings }, function () {});
+
 }
 
 function getGRQuery() {
