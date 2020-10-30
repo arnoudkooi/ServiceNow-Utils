@@ -946,7 +946,7 @@ function createHyperLinkForGlideLists() {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
             var table = g_form.getGlideUIElement(field).reference;
-            if (!table) return;
+            if (!table || table === 'null') return;
             var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
             var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
             if (labels.length != values.length) return //not a reliable match
@@ -1538,7 +1538,7 @@ function setShortCuts() {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
-        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
+        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; }
         ul#snuhelper li {margin-top:2px}
         span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; min-width: 40px; cursor: pointer; display: inline-block;}
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; font-weight:bold; width:99%; border: 1px solid #ffffff; margin:8px 2px 4px 2px; background-color:#ffffff }
@@ -1554,7 +1554,7 @@ function setShortCuts() {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
         div.snuheader {display:none}
-        ul#snuhelper { display:none } 
+        ul#snuhelper { display:none }
         ul#snuhelper li {display:none}
         span.cmdkey {display:none}
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; background: transparent; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; width:100%; border: 0px; margin:8px 2px 4px 2px; }
@@ -1567,7 +1567,7 @@ function setShortCuts() {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
-        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
+        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;}
         ul#snuhelper li {margin-top:2px}
         span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:100%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
@@ -1630,10 +1630,10 @@ function setShortCuts() {
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             }
-            else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 85) { //cmd-shift-u 
+            else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 85) { //cmd-shift-u
                 unhideFields();
             }
-            else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
+            else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u
                 event.preventDefault();
                 action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
                 gsftSubmit(null, g_form.getFormElement(), action);
@@ -2274,7 +2274,7 @@ function addSgStudioPlatformLink() {
     }, 2000);
 }
 
-//Enable sluchbucket doubleclick in studio to select fields in 
+//Enable sluchbucket doubleclick in studio to select fields in
 function snuAddDblClick() {
     $("div[class^='FieldMappingBucket__field']").each(function () {
         var $elm = $(this);
@@ -2292,7 +2292,7 @@ function snuAddDblClick() {
 
 function sortStudioLists() {
 
-    doGroupSearch(""); //call to remove var__m_ from flowdesigner 
+    doGroupSearch(""); //call to remove var__m_ from flowdesigner
 
     var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
 
@@ -2452,7 +2452,7 @@ function sncWait(ms) { //dirty. but just need to wait a sec...
 function searchSysIdTables(sysId) {
     try {
         showAlert('Searching for sys_id. This could take some seconds...')
-        var script = `      
+        var script = `
             function findSysID(sysId) {
                 var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
                 var rtrn;
@@ -2485,8 +2485,8 @@ function searchSysIdTables(sysId) {
                     s.query();
                     if (s.hasNext()) {
                         s.next();
-                        return s.getRecordClassName() + "^" 
-                        + s.getClassDisplayValue() + " - " 
+                        return s.getRecordClassName() + "^"
+                        + s.getClassDisplayValue() + " - "
                         + s.getDisplayValue() ;
                     }
                     return false;
