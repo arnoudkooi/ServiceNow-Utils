@@ -946,7 +946,7 @@ function createHyperLinkForGlideLists() {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
             var table = g_form.getGlideUIElement(field).reference;
-            if (!table) return;
+            if (!table || table === 'null') return;
             var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
             var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
             if (labels.length != values.length) return //not a reliable match
