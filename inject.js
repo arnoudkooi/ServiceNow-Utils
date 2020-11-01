@@ -948,16 +948,19 @@ function createHyperLinkForGlideLists() {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
             var table = g_form.getGlideUIElement(field).reference;
-            if (!table) return;
+            var hasReferenceTable = table && table !== 'null';
+            // if there's no Reference Table, there's no use adding links, values are to be used as-is 
+            if (!hasReferenceTable) return;
             var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
             var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
-            if (labels.length != values.length) return //not a reliable match
-            var links = []
+            if (labels.length != values.length) return; //not a reliable match
+            var links = [];
+            var sysIDRegex = /[0-9a-f]{32}/i;
             for (var i = 0; i < labels.length; i++) {
-                if (values[i].includes("@"))
-                    links.push(values[i]);
-                else
+                if (hasReferenceTable && sysIDRegex.test(values[i]))
                     links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
+                else
+                    links.push(values[i]);
             }
             var html = links.join(', ');
             elm.nextSibling.querySelector('p').innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
