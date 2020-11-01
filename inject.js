@@ -280,11 +280,13 @@ function snuGetTables(shortcut) {
         if (jsn.hasOwnProperty('result')) {
             var results = jsn.result;
             Object.entries(results).forEach(([key, val]) => {
-                snuslashcommands[val.name] = {
-                    "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
-                    "hint": "" + val.label + " <encodedquery>",
-                    "type": "table"
-                };
+                if (!snuslashcommands.hasOwnProperty(val.name)){
+                    snuslashcommands[val.name] = {
+                        "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
+                        "hint": "" + val.label + " <encodedquery>",
+                        "type": "table"
+                    };
+                }
             });
         } else {
             snuslashcommands[shortcut] = {
@@ -874,7 +876,6 @@ function snuAddSlashCommand(cmd) {
 
 
 function snuSettingsAdded() {
-
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
@@ -910,6 +911,7 @@ function snuSettingsAdded() {
         snuTableCollectionLink();
         newFromPopupToTab();
         createHyperLinkForGlideLists();
+        enhanceTinMCE();
 
     }
 
@@ -1592,9 +1594,11 @@ function setShortCuts() {
     <div id="snuswitches"></div>
     </div>`, { FORCE_BODY: true });
     htmlFilter.innerHTML = cleanHTML
-    window.top.document.body.appendChild(htmlFilter);
-    window.top.document.getElementById('cmdhidedot').addEventListener('click', hideSlashCommand);
-    window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
+    if (!window.top.document.querySelectorAll('#snufilter').length){ //prevent reinject 
+        window.top.document.body.appendChild(htmlFilter);
+        window.top.document.getElementById('cmdhidedot').addEventListener('click', hideSlashCommand);
+        window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
+    }
     addSlashCommandListener();
 
     document.addEventListener("keydown", function (event) {
@@ -1663,6 +1667,23 @@ function splitContainsToAnd() {
     }
     qry.setFilterAndRefresh(qaNew.join("^"));
 
+}
+
+function enhanceTinMCE(){
+    if (typeof(tinymce) == 'undefined') return;
+    var editor=tinymce.activeEditor; 
+    if (typeof(editor) == 'undefined') return;
+    editor.addButton('snexp', {
+      text: '+/-',
+      title:'SN Utils: Add template to expand collapse content',
+      onclick: function () {
+        editor.insertContent('<details style="padding-bottom:10px; padding-top:10px"><summary style="font-size:14pt; font-weight:bold;">SubTitle</summary><p>Expand and collapse this block.</p></details>');
+      }
+    });
+    
+    var bg=editor.theme.panel.find('toolbar buttongroup')[editor.theme.panel.find('toolbar buttongroup').length-1];
+    bg._lastRepaintRect=bg._layoutRect;
+    bg.append(editor.buttons['snexp']);
 }
 
 function bindPaste(showIcon) {
