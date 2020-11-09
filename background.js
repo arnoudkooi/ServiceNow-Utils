@@ -757,6 +757,7 @@ function getBrowserVariables(tid, cStoreId) {
         method: "getVars",
         myVars: "g_ck,g_user_date_time_format,NOW.user.roles,NOW.user.name,NOW.user_name"
     }, function (response) {
+        if (response == null || typeof response !== 'object') return;
         g_ck = response.myVars.g_ck || '';
         url = response.url;
         instance = (new URL(url)).host.replace(".service-now.com", "");
