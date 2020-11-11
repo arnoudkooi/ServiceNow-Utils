@@ -1675,7 +1675,7 @@ function splitContainsToAnd() {
 function enhanceTinMCE(){
     if (typeof(tinymce) == 'undefined') return;
     var editor=tinymce.activeEditor; 
-    if (typeof(editor) == 'undefined') return;
+    if (typeof editor === 'undefined' || editor == null) return;
     editor.addButton('snexp', {
       text: '+/-',
       title:'SN Utils: Add template to expand collapse content',
