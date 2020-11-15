@@ -100,7 +100,6 @@
         "inject.js",
         "inject_parent.js"
     ],
-    "incognito": "split",
     "manifest_version": 2,
     "applications": {
         "gecko": {

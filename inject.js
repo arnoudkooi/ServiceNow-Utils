@@ -84,7 +84,7 @@ var snuslashcommands = {
     },
     "help": {
         "url": "*",
-        "hint": "Open info page"
+        "hint": "Open SN Utils info page"
     },
     "lang": {
         "url": "*",
@@ -127,7 +127,7 @@ var snuslashcommands = {
     },
     "sp": {
         "url": "/sp",
-        "hint": "Open Service Portal"
+        "hint": "Service Portal"
     },
     "st": {
         "url": "/$studio.do",
@@ -183,11 +183,11 @@ var snuslashcommands = {
     },
     "va": {
         "url": "/$conversation-builder.do",
-        "hint": "Open Virtual Agent"
+        "hint": "Virtual Agent Designer"
     },
     "wf": {
         "url": "/workflow_ide.do?sysparm_nostack=true",
-        "hint": "Open Workflow Editor"
+        "hint": "Workflow Editor"
     },
     "imp": {
         "url": "impersonate_dialog.do",
@@ -939,6 +939,7 @@ function snuSettingsAdded() {
 
     if (snusettings.addtechnicalnames == true) {
         addTechnicalNames();
+        setTimeout(addTechnicalNamesPortal,5000);
     }
 
 }
@@ -1309,9 +1310,25 @@ function snuShowScratchpad() {
     g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {}, 2, 2) + "</pre>");
 }
 
+function addTechnicalNamesPortal(){
+    if (typeof window?.NOW?.sp != 'undefined') { //basic serviceportal names
+        document.querySelectorAll('label.field-label, span.type-boolean').forEach(function (lbl) {
+            try {
+                var fld = angular.element(lbl).scope().field.name;
+                if (!lbl.innerText.includes('|')) {
+                    jQuery(lbl).append(' | <span style="font-family:monospace; font-size:small;">' + fld + '</span> ');
+                }
+            } catch (e) { }
+        })
+    }
+}
+
+
 function addTechnicalNames() {
 
     if (typeof jQuery == 'undefined') return; //not in studio
+
+    addTechnicalNamesPortal();
 
     if (typeof g_form != 'undefined') {
         try {
