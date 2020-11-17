@@ -60,22 +60,16 @@ function setFavIconBadge(settings) {
 }
 
 function runFunction(f, context) {
-    let doc = document?.querySelector('#gsft_main')?.contentWindow?.document;
-
-    if (context == 'child' && doc) {
+    if (typeof document === 'undefined' || document == null) return;
+    
+    let inParent = document.querySelector('iframe#gsft_main') != null && document.querySelector('iframe#gsft_main').contentDocument != null;
+    if (context == 'child' && inParent) {
         // don't run function meant for content frame if we're not in it
         return;
     }
 
-    if (doc == null && typeof document === 'undefined') {
-        // we can find neither the content frame nor `document`, for some reason; exit right away
-        return;
-    } else if (doc == null) {
-        // we're on the content frame itself, use 'document' directly
-        doc = document;
-    }
-
-    var script = doc.createElement('script');
+    let doc = inParent ? document.querySelector('iframe#gsft_main').contentDocument : document;
+    let script = doc.createElement('script');
     script.appendChild(doc.createTextNode(f));
     doc.body.appendChild(script);
 
