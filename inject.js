@@ -392,7 +392,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if (e.key == 'ArrowRight' || ((shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length ==1) && !query) { snuGetTables(tmpshortcut) };
+        if (e.key == 'ArrowRight' || ((shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length ==1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
