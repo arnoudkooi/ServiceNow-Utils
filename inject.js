@@ -1345,18 +1345,31 @@ function addTechnicalNames() {
                 }
 
                 var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
-                var btn = '';
+                let linkBtn = '', linkAttrs;
                 if (fieldType == 'reference' || fieldType == 'glide_list') {
                     var reftable = g_form.getGlideUIElement(elm).reference;
-                    elm = ' <a onclick="openReference(\'' + reftable + '\',\'' + elm + '\');"  title="Reference table: ' + reftable + '" target="_blank">' + elm + '</a>';
+                    linkAttrs = {
+                        onclick: "openReference('" + reftable + "','" + elm + "');",
+                        title: 'Open reference table list (click) or record (ctrl+click): ' + reftable
+                    };
                 }
                 else if (fieldType == 'conditions') {
-                    elm = '<a onclick="openConditions(\'' + elm + '\');"  title="Preview condition in list" target="_blank">' + elm + '</a>';
+                    linkAttrs = {
+                        onclick: "openConditions('" + elm + "');",
+                        title: 'Preview condition in list'
+                    };
                 }
                 else if (fieldType == 'table_name') {
-                    elm = '<a onclick="openTable(\'' + elm + '\');"  title="Open table in list" target="_blank">' + elm + '</a>';
+                    linkAttrs = {
+                        onclick: 'openTable(\'' + elm + '\');',
+                        title: 'Open table in list'
+                    };
                 }
-                jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span> ');
+                if (linkAttrs) {
+                    linkBtn = '<a class="icon-pop-out" style="margin-left:1ch" onclick="' + linkAttrs.onclick + '" title="' +
+                        linkAttrs.title + '" target="_blank"></a>';
+                }
+                jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span>'+linkBtn);
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
