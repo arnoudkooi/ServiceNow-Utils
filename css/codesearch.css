@@ -46,3 +46,10 @@
 #searchcontent{
     margin-bottom: 10pt;
 }
+
+#searchmsg{
+    height: 20px;
+    font-size:12pt;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}

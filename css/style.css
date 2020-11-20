@@ -328,3 +328,8 @@ a.deletecmd {
     border: 1pt solid #e5e5e5;
     outline: none;
 }
+
+.refname{
+    font-family:monospace;
+    font-size:small;
+}

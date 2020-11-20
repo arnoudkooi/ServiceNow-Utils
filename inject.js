@@ -31,7 +31,7 @@ var snuslashcommands = {
     },
     "code": {
         "url": "*",
-        "hint": "Code Search (beta) <search>"
+        "hint": "Code Search <search>"
     },
     "nav": {
         "url": "*",
@@ -1286,7 +1286,7 @@ function openTable(fieldName) {
 
 
 function unhideFields() {
-    if (typeof g_form == 'undefined' || !g_user.hasRole('admin')) return; //only on forms and only if admin
+    if (typeof g_form == 'undefined') return; //only on forms and only if admin
     var bulb = '<span class="icon-lightbulb color-orange" title="Field displayed by SN Utils"></span>';
     var sections = g_form.getSectionNames();
     for (var sec = 0; sec < sections.length; sec++) {
@@ -1308,6 +1308,10 @@ function unhideFields() {
 
 function snuShowScratchpad() {
     g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {}, 2, 2) + "</pre>");
+}
+
+function toggleLabel(){
+    jQuery('span.label-orig, span.label-tech, span.label-snu').toggle();
 }
 
 function addTechnicalNamesPortal(){
@@ -1334,7 +1338,7 @@ function addTechnicalNames() {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
             jQuery("h1.navbar-title:not(:contains('|'))").append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
-                ' <a onclick="snuShowScratchpad()">[show scratchpad]</a> </span>');
+                ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="For easier copying of field names" onclick="toggleLabel()">[toggle label]</a> </span>');
             jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
                 jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
@@ -1349,7 +1353,7 @@ function addTechnicalNames() {
                 if (fieldType == 'reference' || fieldType == 'glide_list') {
                     var reftable = g_form.getGlideUIElement(elm).reference;
                     linkAttrs = {
-                        onclick: "openReference('" + reftable + "','" + elm + "');",
+                        onclick: "openReference('" + reftable + "','" + elm + "',event);",
                         title: 'Open reference table list (click) or record (ctrl+click): ' + reftable
                     };
                 }
@@ -1366,10 +1370,10 @@ function addTechnicalNames() {
                     };
                 }
                 if (linkAttrs) {
-                    linkBtn = '<a class="icon-pop-out" style="margin-left:1ch" onclick="' + linkAttrs.onclick + '" title="' +
-                        linkAttrs.title + '" target="_blank"></a>';
+                    linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
+                        linkAttrs.title + '" target="_blank">' + elm +'</a>';
                 }
-                jQuery(this).append(' | <span style="font-family:monospace; font-size:small;">' + elm + '</span>'+linkBtn);
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm +'</span><span class="label-orig">' + this.innerHTML + ' | </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) +'</span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
@@ -1419,10 +1423,11 @@ function snuUiActionInfo(event, si) {
     }
 }
 
-function openReference(refTable, refField) {
-    var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + g_form.getValue(refField);
-    if (event.ctrlKey || event.metaKey)
-        url = '/' + refTable + '?sysparm_query=sys_idIN' + g_form.getValue(refField);
+function openReference(refTable, refField, evt) {
+    var sysIds = g_form.getValue(refField);
+    var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + sysIds;
+    if ((evt.ctrlKey || evt.metaKey || !sysIds.includes(',')) && sysIds )
+        url = '/' + refTable + '?sysparm_query=sys_idIN' + sysIds;
     window.open(url, 'refTable');
 }
 
@@ -1770,7 +1775,7 @@ function bindPaste(showIcon) {
 
 //Because we dont like creating records in a popup with sys_ref_list view
 function newFromPopupToTab() {
-
+    return //buggy
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {

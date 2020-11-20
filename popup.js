@@ -27,6 +27,7 @@ var table;
 var sys_id;
 var isNoRecord = true;
 
+
 $.fn.dataTable.ext.errMode = 'none';
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -38,6 +39,8 @@ document.addEventListener('DOMContentLoaded', function () {
         bgPage.getBrowserVariables(tabid, cookieStoreId);
     });
     document.querySelector('#firefoxoptions').href = chrome.runtime.getURL("options.html");
+
+    if (typeof InstallTrigger !== 'undefined') $('input[type="color"]').attr('type','text') //bug in FireFox to use html5 color tag in popup
 
 });
 
@@ -911,7 +914,17 @@ function setDataExplore(nme) {
 
             { "mDataProp": "meta.label" },
             { "mDataProp": "name" },
-            { "mDataProp": "meta.type" },
+            {
+                mRender: function (data, type, row) {
+                    var reference = "<div class='refname'>" + row.meta.reference + "</div>";
+                    if (reference.includes('undefined')) reference = '';
+                    return row.meta.type + reference;
+                },
+
+                "bSearchable": true,
+                "mDataProp": "meta.type"
+
+            },
             { "mDataProp": "value" },
             { "mDataProp": "display_value" }
         ],

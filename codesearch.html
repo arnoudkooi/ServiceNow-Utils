@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Codesearch [Beta] SN Utils </title>
+    <title>Codesearch - SN Utils </title>
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/datatables.min.css">
     <link rel="stylesheet" href="/css/font-awesome.min.css">
@@ -21,12 +21,9 @@
                 <button class="btn btn-outline-secondary btn-sm" id="btnSearch" type="button">Go!</button>
             </span>
     </div>
-        
-    <input type="hidden" id="instance" />
-    <input type="hidden" id="url" />
-    <input type="hidden" id="g_ck" />
-    <br />
-    <div id="searchcontent">Please trigger a search from your instance, using the slashcommand /code &lt;search&gt; </div>
+
+    <div id="searchmsg">Please trigger a search from your instance, using the slashcommand /code &lt;search&gt; </div>
+    <div id="searchcontent"></div>
     <span class="ft7">
         By <a href="https://www.arnoudkooi.com" target="arnoudkooi">arnoudkooi.com</a> | 
         <a href="https://www.youtube.com/playlist?list=PLTyELlWS-zjT1GaLaJnWTKnHOMyEWA8Xe" target="arnoudkooi">YouTube Playlist </a> | 
@@ -43,7 +40,6 @@
 <script src="/js/bootstrap.js"></script>
 <script src="/js/datatables.min.js"></script>
 <script src="/js/moment.js"></script>
-<script src="/js/q.js"></script>
 <script src="codesearch.js"></script>
 
 </html>
