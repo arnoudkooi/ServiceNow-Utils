@@ -21,6 +21,9 @@
       });
 
       jQuery('#btnSearch').on('click', doSearch);
+      jQuery('input#query').on('keyup', function (e) {
+      	if (e.key === 'Enter') doSearch();
+      });
       
 })();
 
