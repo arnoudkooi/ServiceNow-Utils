@@ -280,7 +280,7 @@ function snuGetTables(shortcut) {
         if (jsn.hasOwnProperty('result')) {
             var results = jsn.result;
             Object.entries(results).forEach(([key, val]) => {
-                if (!snuslashcommands.hasOwnProperty(val.name)){
+                if (!snuslashcommands.hasOwnProperty(val.name)) {
                     snuslashcommands[val.name] = {
                         "url": val.name + "_list.do?sysparm_filter_pinned=true&sysparm_query=",
                         "hint": "" + val.label + " <encodedquery>",
@@ -392,7 +392,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if (e.key == 'ArrowRight' || ((shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length ==1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
+        if (e.key == 'ArrowRight' || ((shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -601,6 +601,7 @@ function addSlashCommandListener() {
                         iframe.contentWindow.addTechnicalNames();
                 });
                 addTechnicalNames();
+
                 window.top.document.getElementById('snufilter').value = '';
                 hideSlashCommand();
                 return;
@@ -939,7 +940,7 @@ function snuSettingsAdded() {
 
     if (snusettings.addtechnicalnames == true) {
         addTechnicalNames();
-        setTimeout(addTechnicalNamesPortal,5000);
+        setTimeout(addTechnicalNamesPortal, 5000);
     }
 
 }
@@ -1310,11 +1311,11 @@ function snuShowScratchpad() {
     g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {}, 2, 2) + "</pre>");
 }
 
-function toggleLabel(){
+function toggleLabel() {
     jQuery('span.label-orig, span.label-tech, span.label-snu').toggle();
 }
 
-function addTechnicalNamesPortal(){
+function addTechnicalNamesPortal() {
     if (typeof window?.NOW?.sp != 'undefined') { //basic serviceportal names
         document.querySelectorAll('label.field-label, span.type-boolean').forEach(function (lbl) {
             try {
@@ -1329,6 +1330,8 @@ function addTechnicalNamesPortal(){
 
 
 function addTechnicalNames() {
+
+    addTechnicalNamesWorkspace();
 
     if (typeof jQuery == 'undefined') return; //not in studio
 
@@ -1371,9 +1374,9 @@ function addTechnicalNames() {
                 }
                 if (linkAttrs) {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
-                        linkAttrs.title + '" target="_blank">' + elm +'</a>';
+                        linkAttrs.title + '" target="_blank">' + elm + '</a>';
                 }
-                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm +'</span><span class="label-orig">' + this.innerHTML + ' | </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) +'</span>');
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + ' | </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
@@ -1426,8 +1429,8 @@ function snuUiActionInfo(event, si) {
 function openReference(refTable, refField, evt) {
     var sysIds = g_form.getValue(refField);
     var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + sysIds;
-    if ((evt.ctrlKey || evt.metaKey || !sysIds.includes(',')) && sysIds )
-        url = '/' + refTable + '?sysparm_query=sys_idIN' + sysIds;
+    if ((evt.ctrlKey || evt.metaKey || !sysIds.includes(',')) && sysIds)
+        url = '/' + refTable + '.do?sysparm_query=sys_idIN' + sysIds;
     window.open(url, 'refTable');
 }
 
@@ -1632,7 +1635,7 @@ function setShortCuts() {
     <div id="snuswitches"></div>
     </div>`, { FORCE_BODY: true });
     htmlFilter.innerHTML = cleanHTML
-    if (!window.top.document.querySelectorAll('#snufilter').length){ //prevent reinject 
+    if (!window.top.document.querySelectorAll('#snufilter').length) { //prevent reinject 
         window.top.document.body.appendChild(htmlFilter);
         window.top.document.getElementById('cmdhidedot').addEventListener('click', hideSlashCommand);
         window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
@@ -1707,20 +1710,21 @@ function splitContainsToAnd() {
 
 }
 
-function enhanceTinMCE(){
-    if (typeof(tinymce) == 'undefined') return;
-    var editor=tinymce.activeEditor; 
+function enhanceTinMCE() {
+    if (typeof (tinymce) == 'undefined') return;
+    var editor = tinymce.activeEditor;
     if (typeof editor === 'undefined' || editor == null) return;
+    if (editor.buttons.hasOwnProperty('snexp')) return;
     editor.addButton('snexp', {
-      text: '+/-',
-      title:'SN Utils: Add template to expand collapse content',
-      onclick: function () {
-        editor.insertContent('<details style="padding-bottom:10px; padding-top:10px"><summary style="font-size:14pt; font-weight:bold;">SubTitle</summary><p>Expand and collapse this block.</p></details>');
-      }
+        text: '+/-',
+        title: 'SN Utils: Add template to expand collapse content',
+        onclick: function () {
+            editor.insertContent('<details style="padding-bottom:10px; padding-top:10px"><summary style="font-size:14pt; font-weight:bold;">SubTitle</summary><p>Expand and collapse this block.</p></details>');
+        }
     });
-    
-    var bg=editor.theme.panel.find('toolbar buttongroup')[editor.theme.panel.find('toolbar buttongroup').length-1];
-    bg._lastRepaintRect=bg._layoutRect;
+
+    var bg = editor.theme.panel.find('toolbar buttongroup')[editor.theme.panel.find('toolbar buttongroup').length - 1];
+    bg._lastRepaintRect = bg._layoutRect;
     bg.append(editor.buttons['snexp']);
 }
 
@@ -2688,4 +2692,85 @@ function snuGetNavHints(shortcut, srch) {
         }
     }
     return '<br />' + hit + ' Matches:<br />' + html;
+}
+
+
+
+
+function addTechnicalNamesWorkspace() {
+    //in workspace, iterate through the components, and dive into their shadowroots.
+    document.querySelectorAll("sn-workspace-content").forEach(function (elm1) {
+        elm1.shadowRoot.querySelectorAll("now-record-form-connected").forEach(function (elm2) {
+            elm2.shadowRoot.querySelectorAll("sn-form-internal-workspace-form-layout").forEach(function (elm3) {
+
+                //add link after the UI action
+                elm3.shadowRoot.querySelector("sn-form-internal-header-layout").
+                    shadowRoot.querySelector("now-record-common-uiactionbar").
+                    shadowRoot.querySelectorAll("now-button").forEach(function (uiact) {
+                        var lnk = document.createElement("A");
+                        lnk.innerHTML = '?';
+                        lnk.href = '/sys_ui_action.do?sys_id=' + uiact.appendToPayload.item.sysId;
+                        lnk.target = 'uia';
+                        lnk.title = 'SN Utils - Open the UI Action definition';
+                        insertAfter(lnk,uiact);
+                        console.dir(uiact);
+                    });
+
+                elm3.shadowRoot.querySelectorAll("now-record-form-blob").forEach(function (elm4) {
+                    elm4.shadowRoot.querySelectorAll("sn-form-internal-tabs").forEach(function (elm5) {
+                        elm5.shadowRoot.querySelectorAll("sn-form-internal-tab-contents").forEach(function (elm6) {
+                            elm6.shadowRoot.querySelectorAll("now-record-form-section-column-layout").forEach(function (elm7) {
+                                elm7.shadowRoot.querySelectorAll("*").forEach(function (elm8) {
+                                    if (elm8.nodeName.includes('-')) {
+                                        var lbl = elm8.shadowRoot.querySelector('.sn-control-label');
+                                        if (lbl && !lbl.innerHTML.includes('|')) {
+                                            var btn = document.createElement("A");
+                                            btn.innerHTML = elm8.name;
+                                            btn.href = 'javascript:void(0);';
+                                            btn.title = 'SN Utils - Doubleclick to edit';
+                                            btn.addEventListener('dblclick', function () { snuWsGetValue(elm4, elm8.name) }, false);
+                                            lbl.innerHTML = lbl.innerHTML + ' | ';
+                                            lbl.appendChild(btn);
+                                        }
+                                        console.dir(elm8)
+                                        elm8.shadowRoot.querySelectorAll("*").forEach(function (elm9) {
+                                            if (elm9.nodeName.includes('-')) {
+                                                var lbl = elm9.shadowRoot.querySelector('.sn-control-label');
+                                                if (lbl && !lbl.innerHTML.includes('|')) {
+                                                    var btn = document.createElement("A");
+                                                    btn.innerHTML = elm8.name;
+                                                    btn.href = 'javascript:void(0);';
+                                                    btn.title = 'SN Utils - Doubleclick to edit';
+                                                    btn.addEventListener('dblclick', function () { snuWsGetValue(elm4, elm8.name) }, false);
+                                                    lbl.innerHTML = lbl.innerHTML + ' | ';
+                                                    lbl.appendChild(btn);
+                                                }
+                                            }
+                                        })
+                                    }
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        })
+    })
+
+    function snuWsGetValue(frm, field) {
+        var newval = prompt("SNU", frm.fields[field].value);
+
+        if (newval != null) {
+            frm.dispatch("GFORM#SET_VALUE",
+                {
+                    fieldName: field,
+                    value: newval
+                });
+        }
+    }
+
+    function insertAfter(newNode, referenceNode) {
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+    }
+
 }

@@ -23,12 +23,13 @@ var statisticsObj
     }
 
     jQuery('#btnSearch').on('click', doSearch);
-    jQuery('#query').keypress(function (e) {
-        if (e.which == '13') {
+    jQuery('input#query').on('keyup', function (e) {
+        if (e.key === 'Enter') {
             e.preventDefault();
             doSearch();
         }
     });
+
 
 })();
 
@@ -150,7 +151,6 @@ function executeCodeSearch(url, gck, searchTerm, table) {
             'sys_script_validator',
             'sysauto_script',
             'sys_relationship',
-            'sys_ui_macro',
             'sys_script_ajax',
             'sys_transform_script',
             'sysevent_email_action',
