@@ -311,7 +311,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
     if (fields) {
         snuslashcommands[shortcut].fields
         var url = "api/now/table/" + targeturl.replace("_list.do", "") +
-            "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=10" +
+            "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
             "&sysparm_fields=sys_id," + fields;
 
         var table = url.match(/.*\/(.*)\?/)[1]
@@ -320,7 +320,13 @@ function snuGetDirectLinks(targeturl, shortcut) {
             var results = jsn.result;
             if (jsn.hasOwnProperty('result')) {
                 Object.entries(results).forEach(([key, val]) => {
-                    directlinks += '> <a target="gsft_main" href="' + table + ".do?sys_id=" + val.sys_id + '">' + val[fields] + '</a><br />';
+                    var fieldArr = fields.split(',');
+                    var txtArr = [];
+                    for (var i = 0; i < fieldArr.length; i++){
+                        txtArr.push(val[fieldArr[i]])
+                    }
+                    var txt = txtArr.join(' | ');
+                    directlinks += '> <a target="gsft_main" href="' + table + ".do?sys_id=" + val.sys_id + '">' + txt + '</a><br />';
                 });
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
@@ -1579,7 +1585,7 @@ function setShortCuts() {
 
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
         ul#snuhelper li {margin-top:2px}
@@ -1589,13 +1595,13 @@ function setShortCuts() {
         a.cmdlink { font-size:10pt; color: #1f8476; }
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey { border-color: #8BB3A2}
         ul#snuhelper li.active span.cmdlabel { color: black}
-        div#snudirectlinks {margin: -5px 10px;}
+        div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#22885c;}
         </style>`;
     }
     else if (snusettings.slashtheme == 'stealth') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
         div.snuheader {display:none}
         ul#snuhelper { display:none } 
         ul#snuhelper li {display:none}
@@ -1608,7 +1614,7 @@ function setShortCuts() {
     }
     else {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
         ul#snuhelper li {margin-top:2px}
@@ -1618,7 +1624,7 @@ function setShortCuts() {
         a.cmdlink { font-size:10pt; color: #1f8476; }
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey  { border-color: yellow}
         ul#snuhelper li.active span.cmdlabel { color: yellow}
-        div#snudirectlinks {margin: -5px 10px;}
+        div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#1cad6e;}
         </style>`;
     }

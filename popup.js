@@ -779,11 +779,12 @@ function getSlashcommands() {
         dataslashcommands = Object.keys(snuslashcommands).map(function (key) {
             var source = "2builtin";
             var url = snuslashcommands[key].url;
+            var fields = snuslashcommands[key].fields;
             if (url.startsWith('*')) {
                 source = "3script";
                 url = 'Built in scripted command, cannot be overwritten';
             };
-            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "source": source };
+            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "fields": fields, "source": source  };
         });
 
         try {
@@ -791,7 +792,7 @@ function getSlashcommands() {
         } catch (e) { };
 
         Object.keys(objCustomCommands).forEach(function (key) {
-            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "source": "1custom" });
+            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "fields": objCustomCommands[key].fields, "source": "1custom" });
         });
 
 
@@ -851,6 +852,8 @@ function getSlashcommands() {
                         $('#tbxslashcmd').val(row.command);
                         $('#tbxslashurl').val(row.url);
                         $('#tbxslashhint').val(snuDecodeHtml(row.hint));
+                        $('#tbxslashfields').val(snuDecodeHtml(row.fields));
+                        slashCommandShowFieldField();
                     });
 
                 }
@@ -880,6 +883,12 @@ function getSlashcommands() {
         
         });
 
+        $('#tbxslashurl').on('change', function (e) {
+            slashCommandShowFieldField();
+        });
+
+
+
         $('button#btnsaveslashcommand').click(function () {
 
             event.preventDefault();
@@ -889,7 +898,8 @@ function getSlashcommands() {
             } catch (e) { };
             cmds[$('#tbxslashcmd').val().replace(/[^a-zA-Z0-9]/gi, '').toLowerCase()] = {
                 "url": $('#tbxslashurl').val(),
-                "hint": $('#tbxslashhint').val()
+                "hint": $('#tbxslashhint').val(),
+                "fields" : $('#tbxslashfields').val()
             };
             $('#slashcommands').val(JSON.stringify(cmds));
 
@@ -964,4 +974,14 @@ function setDataExplore(nme) {
 
     $('#waitingdataexplore').hide();
 
+}
+
+function slashCommandShowFieldField(){
+    if ($('#tbxslashurl').val().includes('sysparm_query=')){
+        $('.showfields').show();
+
+    }
+    else{
+        $('.showfields').hide();
+    }       
 }

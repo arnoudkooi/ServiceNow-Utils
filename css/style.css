@@ -333,3 +333,12 @@ a.deletecmd {
     font-family:monospace;
     font-size:small;
 }
+
+label {
+    margin-top: .5rem;
+    margin-bottom: .1rem;
+}
+
+.showfields{
+    display: none;
+}
