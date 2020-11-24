@@ -976,7 +976,7 @@ function createHyperLinkForGlideLists() {
 function doubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("dblclick", function (event) {
-            if (jQuery(event.target).hasClass('label-text')) {
+            if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
                 var elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var val = g_form.getValue(elm);
                 if (NOW.user.roles.includes('admin')) { //only allow "admin" ti change fields
@@ -2708,7 +2708,7 @@ function addTechnicalNamesWorkspace() {
                     shadowRoot.querySelector("now-record-common-uiactionbar").
                     shadowRoot.querySelectorAll("now-button").forEach(function (uiact) {
                         var lnk = document.createElement("A");
-                        lnk.innerHTML = '?';
+                        lnk.textContent = '?';
                         lnk.href = '/sys_ui_action.do?sys_id=' + uiact.appendToPayload.item.sysId;
                         lnk.target = 'uia';
                         lnk.title = 'SN Utils - Open the UI Action definition';
@@ -2725,11 +2725,11 @@ function addTechnicalNamesWorkspace() {
                                         var lbl = elm8.shadowRoot.querySelector('.sn-control-label');
                                         if (lbl && !lbl.innerHTML.includes('|')) {
                                             var btn = document.createElement("A");
-                                            btn.innerHTML = elm8.name;
+                                            btn.textContent = elm8.name;
                                             btn.href = 'javascript:void(0);';
                                             btn.title = 'SN Utils - Doubleclick to edit';
                                             btn.addEventListener('dblclick', function () { snuWsGetValue(elm4, elm8.name) }, false);
-                                            lbl.innerHTML = lbl.innerHTML + ' | ';
+                                            lbl.textContent = lbl.textContent + ' | ';
                                             lbl.appendChild(btn);
                                         }
                                         console.dir(elm8)
@@ -2738,11 +2738,11 @@ function addTechnicalNamesWorkspace() {
                                                 var lbl = elm9.shadowRoot.querySelector('.sn-control-label');
                                                 if (lbl && !lbl.innerHTML.includes('|')) {
                                                     var btn = document.createElement("A");
-                                                    btn.innerHTML = elm8.name;
+                                                    btn.textContent = elm8.name;
                                                     btn.href = 'javascript:void(0);';
                                                     btn.title = 'SN Utils - Doubleclick to edit';
                                                     btn.addEventListener('dblclick', function () { snuWsGetValue(elm4, elm8.name) }, false);
-                                                    lbl.innerHTML = lbl.innerHTML + ' | ';
+                                                    lbl.textContent = lbl.textContent + ' | ';
                                                     lbl.appendChild(btn);
                                                 }
                                             }
