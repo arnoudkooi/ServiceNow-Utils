@@ -19,6 +19,8 @@ if (onprem) {
     urlPattern = "*://*/*";
 }
 
+if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatability
+
 //Attatch eventlistener, setting extension only active on matching urls
 chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
@@ -44,11 +46,12 @@ chrome.runtime.onInstalled.addListener(function (details) {
     });
 });
 
-chrome.runtime.onUpdateAvailable.addListener(function () {
-    chrome.runtime.reload();
-    //clear storage on update (just to keep it clean)
-    chrome.storage.local.clear();
-});
+
+// chrome.runtime.onUpdateAvailable.addListener(function () {
+//     chrome.runtime.reload();
+//     //clear storage on update (just to keep it clean)
+//     chrome.storage.local.clear();
+// });
 
 
 chrome.commands.onCommand.addListener(function (command) {
@@ -405,23 +408,17 @@ function sendToggleAtfHelper() {
 
 function codeSearch(message, cookieStoreId) {
     var url = chrome.runtime.getURL("codesearch.html");
+    var args = '?query=' + message.command["query"] + 
+    '&instance=' + message.command["instance"] + 
+    '&url=' + message.command["url"] + 
+    '&g_ck=' + message.command["g_ck"];
+
     var createObj = {
-        'url': url,
+        'url': url + args,
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
-    chrome.tabs.create(createObj,
-        function(tab) {
-          var handler = function(tabId, changeInfo) {
-            if(tabId === tab.id && changeInfo.status === "complete"){
-              chrome.tabs.onUpdated.removeListener(handler);
-              chrome.tabs.sendMessage(tabId, {message});
-            }
-          };
-          chrome.tabs.onUpdated.addListener(handler);
-          chrome.tabs.sendMessage(tab.id, {message});
-        }
-      ); 
+    chrome.tabs.create(createObj); 
 }
 
 function openFile(link) {

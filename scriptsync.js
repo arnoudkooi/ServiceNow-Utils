@@ -396,7 +396,9 @@ function updateRecord(scriptObj, canRefreshToken) {
             if (resp.hasOwnProperty('result')) {
                 t.row.add([
                     new Date(), 'VS Code', 'Saved to ServiceNow: <b>' + scriptObj.name + '</b><br /><span class="code">Instance: ' +
-                    scriptObj.instance.name + ' | Field: ' + scriptObj.tableName + '.' + scriptObj.fieldName +
+                    scriptObj.instance.name + 
+                    ' | Field: ' + scriptObj.tableName + '.' + scriptObj.fieldName + 
+                    ' | Save source: ' + (scriptObj.saveSource || "unknown") + 
                     ' | Characters: ' + scriptObj.content.length + '</span>'
 
                 ]).draw(false);

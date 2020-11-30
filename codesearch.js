@@ -1,18 +1,7 @@
 var tableIndex = 0;
-var statisticsObj
+var statisticsObj;
 
 (function initialize() {
-    // var url = getUrlVars()["url"];
-    // var table = getUrlVars()["table"];
-    // var searchTerm = getUrlVars()["searchTerm"];
-    // var gck = getUrlVars()["gck"];
-    // executeCodeSearch(url, gck, searchTerm, table);
-
-    chrome.runtime.onMessage.addListener(function (message) {
-        var command = message.message.command;
-        window.location = '?query=' + command["query"] + '&instance=' + command["instance"] + '&url=' + command["url"] + '&g_ck=' +command["g_ck"];
-
-    });
 
 
     if (getUrlVars("g_ck")) {

@@ -50,7 +50,7 @@ var snuslashcommands = {
         "hint": "[Beta] History <search>"
     },
     "aw": {
-        "url": "/now/workspace/agent/noc",
+        "url": "/now/workspace/agent/",
         "hint": "Agent Workspace"
     },
     "comm": {
@@ -2274,7 +2274,7 @@ function addFieldSyncButtons() {
                     $('#vscode-btn').remove()
                     let btn = `<button id='vscode-btn' class="btn btn-info btn-group" onclick="postRequestToScriptSync('widget')" title="Edit widget in VS Code (SN ScriptSync)">
                     <span class="glyphicon glyphicon-floppy-save"></span></button>`;
-                    $('button[type=submit]').before(btn);
+                    if (!$('#vscode-btn').length) $('button[type=submit]').before(btn);
                 }, 500);
             }
         });
