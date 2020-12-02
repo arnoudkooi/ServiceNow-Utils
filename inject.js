@@ -67,11 +67,11 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/orlando/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/paris/All/$0",
         "hint": "Search developer portal <search>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=orlando",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=paris",
         "hint": "Search Docs <search>"
     },
     "env": {

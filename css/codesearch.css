@@ -51,5 +51,14 @@
     height: 20px;
     font-size:12pt;
     margin-top: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 4px;
+}
+
+#searchmsgtablelinks a{
+    display: inline-block;
+    padding: 0px 3px;
+    margin: 5px 5px 5px 0;
+    background-color: #81B5A1;
+    border: 1pt solid white;
+    color:white;
 }
