@@ -780,11 +780,12 @@ function getSlashcommands() {
             var source = "2builtin";
             var url = snuslashcommands[key].url;
             var fields = snuslashcommands[key].fields;
+            var overwriteurl = snuslashcommands[key].overwriteurl;
             if (url.startsWith('*')) {
                 source = "3script";
                 url = 'Built in scripted command, cannot be overwritten';
             };
-            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "fields": fields, "source": source  };
+            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "fields": fields, "overwriteurl" : overwriteurl,  "source": source  };
         });
 
         try {
