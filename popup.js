@@ -853,6 +853,7 @@ function getSlashcommands() {
                         $('#tbxslashurl').val(row.url);
                         $('#tbxslashhint').val(snuDecodeHtml(row.hint));
                         $('#tbxslashfields').val(snuDecodeHtml(row.fields));
+                        $('#tbxslashoverwriteurl').val(snuDecodeHtml(row.overwriteurl));
                         slashCommandShowFieldField();
                     });
 
@@ -899,7 +900,8 @@ function getSlashcommands() {
             cmds[$('#tbxslashcmd').val().replace(/[^a-zA-Z0-9]/gi, '').toLowerCase()] = {
                 "url": $('#tbxslashurl').val(),
                 "hint": $('#tbxslashhint').val(),
-                "fields" : $('#tbxslashfields').val()
+                "fields" : $('#tbxslashfields').val(),
+                "overwriteurl" : $('#tbxslashoverwriteurl').val()
             };
             $('#slashcommands').val(JSON.stringify(cmds));
 

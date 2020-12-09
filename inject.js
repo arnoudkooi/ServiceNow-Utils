@@ -129,6 +129,13 @@ var snuslashcommands = {
         "url": "/sp",
         "hint": "Service Portal"
     },
+    "spw": {
+        "url": "sp_widget_list.do?sysparm_query=nameLIKE$0",
+        "hint": "Service Portal Widgets <search>",
+        "fields": "name",
+        "overwriteurl" : "/sp_config?id=widget_editor&sys_id=$sysid"
+
+    },
     "st": {
         "url": "/$studio.do",
         "hint": "Open Studio"
@@ -304,8 +311,13 @@ function snuGetTables(shortcut) {
 function snuGetDirectLinks(targeturl, shortcut) {
 
     var fields = "";
+    var overwriteurl = "";
     try {
-        var fields = (snuslashcommands[shortcut].hasOwnProperty("fields")) ? snuslashcommands[shortcut].fields || "" : "";
+        fields = (snuslashcommands[shortcut].hasOwnProperty("fields")) ? snuslashcommands[shortcut].fields || "" : "";
+    } catch (e) { }
+
+    try {
+        overwriteurl = (snuslashcommands[shortcut].hasOwnProperty("overwriteurl")) ? snuslashcommands[shortcut].overwriteurl || "" : "";
     } catch (e) { }
 
     if (fields) {
@@ -326,7 +338,13 @@ function snuGetDirectLinks(targeturl, shortcut) {
                         txtArr.push(val[fieldArr[i]])
                     }
                     var txt = txtArr.join(' | ');
-                    directlinks += '> <a target="gsft_main" href="' + table + ".do?sys_id=" + val.sys_id + '">' + txt + '</a><br />';
+                    var link = table + ".do?sys_id=" + val.sys_id;
+                    var target = "gsft_main"
+                    if (overwriteurl){
+                        link = overwriteurl.replace(/\$sysid/g,val.sys_id)
+                        target = (!overwriteurl.startsWith("http") && !overwriteurl.startsWith("/")) ? "gsft_main" : "_blank";
+                    }
+                    directlinks += '> <a target="' + target + '" href="' + link + '">' + txt + '</a><br />';
                 });
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
@@ -398,7 +416,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if (e.key == 'ArrowRight' || ((shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
+        if ((e.key == 'ArrowRight' || (shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -1541,7 +1559,7 @@ function searchLargeSelects() {
     }
 
 
-    var minItems = 25;
+    var minItems = 15;
 
     jQuery('select:not(.searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
         if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
