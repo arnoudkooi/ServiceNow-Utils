@@ -33,6 +33,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Code Search <search>"
     },
+    "copycells": {
+        "url": "*",
+        "hint": "Copy Selected Cell Values from List"
+    },
     "nav": {
         "url": "*",
         "hint": "[Beta] Navigator <search> or <application,item>"
@@ -121,7 +125,7 @@ var snuslashcommands = {
         "hint": "Global Instance Search <search>"
     },
     "si": {
-        "url": "sys_script_include_list.do?sysparm_orderby=api_name&sysparm_query=nameLIKE$0^api_nameLIKE$0",
+        "url": "sys_script_include_list.do?sysparm_orderby=api_name&sysparm_query=api_nameLIKE$0",
         "hint": "Filter Script Includes <name>",
         "fields": "api_name"
     },
@@ -134,7 +138,6 @@ var snuslashcommands = {
         "hint": "Service Portal Widgets <search>",
         "fields": "name",
         "overwriteurl" : "/sp_config?id=widget_editor&sys_id=$sysid"
-
     },
     "st": {
         "url": "/$studio.do",
@@ -554,6 +557,11 @@ function addSlashCommandListener() {
                     }
                 );
                 window.top.document.dispatchEvent(event);
+                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "copycells") {
+                copySelectedCellValues();
                 hideSlashCommand();
                 return;
             }
@@ -2125,6 +2133,33 @@ function getSelectionText() {
     }
     return text;
 }
+
+function copySelectedCellValues() {
+    var hasCopied = false;
+    var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell');
+    if (selCells.length > 0) {
+        doCopy(selCells);
+        hasCopied = true;
+    } else {
+        Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
+            selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell');
+            if (selCells.length > 0) {
+                doCopy(selCells, frm);
+                hasCopied = true;
+            }
+        });
+    }
+    if (!hasCopied) alert("Nothing copied, consider the CopyTables extension for more control");
+    function doCopy(selCells, frm) {
+        var str = '';
+        var wdw = (frm) ? frm.contentWindow : window;
+        selCells.forEach(function (cElem) {
+            str += cElem.innerText + '\n';
+        });
+        wdw.copyToClipboard(str);
+        return;
+    }
+};
 
 function postRequestToScriptSync(requestType) {
 
