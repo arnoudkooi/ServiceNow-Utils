@@ -144,6 +144,10 @@ table.dataTable tbody td {
     max-height: 250px !important;
 }
 
+#tblslashcommands_wrapper .dataTables_scrollBody {
+    max-height:200px !important;
+}
+
 .btns {
     clear: both;
 }

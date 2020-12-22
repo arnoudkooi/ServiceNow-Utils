@@ -840,7 +840,7 @@ function getSlashcommands() {
 
             ],
             "language": {
-                "info": "Matched: _TOTAL_ of _MAX_ slashcommands",
+                "info": "Matched: _TOTAL_ of _MAX_ slashcommands <a id='downloadcommands' href='javavscript:'>Backup custom slashcommands</a>",
                 "infoFiltered": "",
                 "infoEmpty": "No matches found"
             },
@@ -889,7 +889,13 @@ function getSlashcommands() {
             slashCommandShowFieldField();
         });
 
-
+        
+        if (JSON.stringify(objCustomCommands).length > 2){
+            $('#downloadcommands').on('click', downloadCommands).show();
+        }
+        else {
+            $('#downloadcommands').hide();
+        }
 
         $('button#btnsaveslashcommand').click(function () {
 
@@ -988,3 +994,19 @@ function slashCommandShowFieldField(){
         $('.showfields').hide();
     }       
 }
+
+function downloadCommands() {
+    var text = document.getElementById('slashcommands').value;
+    if (text.length < 5){
+        alert("No custom commands found");
+        return;
+    } 
+    var text = JSON.stringify(JSON.parse(text),4,4);
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', "slashcommands.json.txt");
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }

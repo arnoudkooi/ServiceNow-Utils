@@ -147,6 +147,10 @@ var snuslashcommands = {
         "url": "/nav_to.do",
         "hint": "New tab"
     },
+    "sysid": {
+        "url": "*",
+        "hint": "Instance search <sys_id>"
+    },
     "tn": {
         "url": "*",
         "hint": "Show Technical Names"
@@ -284,7 +288,7 @@ function snuGetTables(shortcut) {
         qry = '^nameLIKE' + shortcut.replace(/\*/g, '');
     }
 
-    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00' + qry + '^EORDERBYname' + shortcut;
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE$^nameNOT LIKE00' + qry + '^EORDERBYname' + shortcut;
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
 
         if (jsn.hasOwnProperty('result')) {
@@ -506,9 +510,10 @@ function addSlashCommandListener() {
                 e.preventDefault();
                 return;
             }
-            if (shortcut.match(/^[0-9a-f]{32}$/) != null) {//is a sys_id
-
-                searchSysIdTables(shortcut);
+            if (shortcut.match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid" ) {//is a sys_id
+                var sysid = (shortcut.length == 32) ? shortcut : query;
+                if (sysid.length != 32) return;
+                searchSysIdTables(sysid);
                 hideSlashCommand();
                 return;
             }
@@ -1154,7 +1159,7 @@ function enhanceNotFound(advanced) {
         html += 'Mode: starts with: ' + query[0] + ' | <a title="splits by underscore and does a contains for each word" href="javascript:enhanceNotFound(1)">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
 
     html += '<br /><ul>';
-    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^EORDERBYlabel^nameSTARTSWITH' + query[0];
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^EORDERBYlabel^nameSTARTSWITH' + query[0];
 
 
     if (advanced) {
@@ -2590,7 +2595,7 @@ function searchSysIdTables(sysId) {
                 }
 
                 var tblsGr = new GlideRecord("sys_db_object");
-                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEsysx_^nameNOT LIKE00^nameNOT LIKEv_^nameNOT LIKEsys_rollback_^nameNOT LIKEpa_^nameNOT INsys_metadata,task,cmdb_ci,sys_user")
+                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEsysx_^nameNOT LIKE00^nameNOT LIKEv_^nameNOT LIKE$^nameNOT LIKEsys_rollback_^nameNOT LIKEpa_^nameNOT INsys_metadata,task,cmdb_ci,sys_user")
                 tblsGr.query();
                 while (tblsGr.next()) {
                     rtrn = findClass(tblsGr.getValue('name'), sysId);
