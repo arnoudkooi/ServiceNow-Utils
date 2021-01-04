@@ -1222,7 +1222,13 @@ function getExploreData() {
                 propObj.value = tableName + " / " + sysId;
                 dataExplore.push(propObj);
 
-                var rows = jsn.result[0];
+                var rows = {}
+                
+                try {
+                    rows = jsn.result[0];
+                } catch(e){
+                    rows = {"Error" : { "display_value" : e.message ,"value" : "Record data not retrieved."}};
+                }
 
                 for (var key in rows) {
                     var propObj = {};
@@ -1237,7 +1243,7 @@ function getExploreData() {
                     }
 
                     propObj.name = key;
-                    propObj.meta = metaData.result.columns[key];
+                    propObj.meta = (metaData && metaData != "error") ? metaData.result.columns[key] : {"label" : "Error"};
                     propObj.display_value = display_value;
                     propObj.value = (display_value != rows[key].value) ? rows[key].value : '';
 
