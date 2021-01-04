@@ -35,7 +35,12 @@ var tables = [
 ];
 
 
+var header = document.getElementById("fixheader");
+var sticky = 30; //header.offsetTop;
+
 (function initialize() {
+
+    window.onscroll = function() {scrolling()};
 
 
     if (getUrlVars("g_ck")) {
@@ -87,13 +92,20 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
         return '';
     }
 
-    var header = '' +
-        '<div class="card"> <a name="'+ data.recordType+'">' +
+    var header =
+        // '<div class="card"> <a class="anchor" name="'+ data.recordType+'"></a>' +
+        // '<div class="card-header" id="head_' + data.recordType + '">' +
+        // '<h5 class="mb-0"><button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' + data.recordType + '" aria-expanded="true" aria-controls="collapse_' + data.recordType + '">' +
+        // data.tableLabel + ' [' + data.recordType + '] (' + data.hits.length + ')' + '</button>' +
+        // '</h5></div>' +
+        // '<div id="collapse_' + data.recordType + '" class="collapse show" aria-labelledby="' + data.recordType + '" idata-parent="#searchCodeAccordion">' +
+        // '<div class="card-body">';<i class="fas fa-chevron-circle-down"></i>
+        '<div class="card"> <a class="anchor" name="'+ data.recordType+'"></a>' +
         '<div class="card-header" id="head_' + data.recordType + '">' +
         '<h5 class="mb-0"><button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' + data.recordType + '" aria-expanded="true" aria-controls="collapse_' + data.recordType + '">' +
-        data.tableLabel + ' [' + data.recordType + '] (' + data.hits.length + ')' + '</button>' +
+        '<i class="fas fa-chevron-circle-right"></i></button> ' + data.tableLabel + ' [' + data.recordType + '] | Hits:' + data.hits.length +
         '</h5></div>' +
-        '<div id="collapse_' + data.recordType + '" class="collapse show" aria-labelledby="' + data.recordType + '" idata-parent="#searchCodeAccordion">' +
+        '<div id="collapse_' + data.recordType + '" class="tablecollapse collapse show" aria-labelledby="' + data.recordType + '" idata-parent="#searchCodeAccordion">' +
         '<div class="card-body">';
 
     var footer =
@@ -112,10 +124,10 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
         var recordHeader = '' +
             '<div class="card">' +
             '<div class="card-header" id="head_' + hit.sysId + '">' +
-            '<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' + hit.sysId + '" aria-expanded="true" aria-controls="collapse_' + hit.sysId + '">' +
+            '<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' + hit.sysId + '" aria-expanded="true" aria-controls="collapse_' + hit.sysId + '"><i class="fas fa-chevron-circle-right"></i></button>' +
+            ' <span class="bigger"><a href="' + url + '/' + data.recordType + '.do?sys_id=' + hit.sysId + '" target="_blank">'+
             hit.name + ' (' + hit.matches.length + ')' +
-            '</button>' +
-            ' <span class="smaller">[<a href="' + url + '/' + data.recordType + '.do?sys_id=' + hit.sysId + '" target="_blank">Open</a>]</span>' +
+            '</a></span>' +
             '</div>' +
             '<div id="collapse_' + hit.sysId + '" class="collapse show" aria-labelledby="' + hit.sysId + '" idata-parent="#searchCodeTableAccordion_' + data.recordType + '">' +
             '<div class="card-body">';
@@ -236,4 +248,14 @@ function getUrlVars(key) {
             vars[key] = decodeURIComponent(value);
         });
     return vars[key];
+}
+
+
+
+function scrolling() {
+  if (window.pageYOffset > sticky) {
+    header.classList.add("sticky");
+  } else {
+    header.classList.remove("sticky");
+  }
 }

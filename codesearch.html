@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Codesearch - SN Utils </title>
@@ -10,32 +11,41 @@
     <link rel="stylesheet" href="/css/scriptsync.css">
 
 </head>
-<body>
-    <h5><img class="wdth40" src="/images/icon128.png" alt="SN Utils logo" /> SN Utils - Codesearch - <span id="spnInstance"></span></h5>
 
-    <div class="input-group">
-            <input type="search" id="query" name="query"
-                class="form-control form-control-sm"
-                placeholder="Code search..">
+<body>
+    <h5><img class="wdth40" src="/images/icon128.png" alt="SN Utils logo" /> SN Utils - Codesearch - <span
+            id="spnInstance"></span></h5>
+
+    <div class="header" id="fixheader">
+        <div class="input-group">
+            <input type="search" id="query" name="query" class="form-control form-control-sm" placeholder="Code search..">
             <span class="input-group-append">
                 <button class="btn btn-outline-secondary btn-sm" id="btnSearch" type="button">Go!</button>
             </span>
+        </div>
+        <div id="searchmsg">Please trigger a search from your instance, using the slashcommand /code &lt;search&gt; </div>
+        <div id="searchmsgtablelinks"></div>
     </div>
+    <div class="results">
 
-    <div id="searchmsg">Please trigger a search from your instance, using the slashcommand /code &lt;search&gt; </div>
-    <div id="searchmsgtablelinks"></div>
     <div id="searchcontent"></div>
-    <div id="searchconf">Configure via <a id="hreftables" target="_blank" href="">Code Search Tables, Default Search Group</a> (System setting, tracked in updateset)</div>
+    <div id="searchconf">Configure via <a id="hreftables" target="_blank" href="">Code Search Tables, Default Search
+            Group</a> (System setting, tracked in updateset)</div>
 
     <span class="ft7">
-        SN Utils proudly offered by: <a href="https://www.arnoudkooi.com" target="arnoudkooi">arnoudkooi.com</a> | 
-        <a href="https://www.youtube.com/playlist?list=PLTyELlWS-zjT1GaLaJnWTKnHOMyEWA8Xe" target="arnoudkooi">YouTube Playlist </a> | 
-        <a href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync" target="arnoudkooi">SN ScriptSync - VS Code Marketplace </a> | 
-        <a href="https://chrome.google.com/webstore/detail/servicenow-utils/jgaodbdddndbaijmcljdbglhpdhnjobg" target="arnoudkooi">SN Utils - Chrome Webstore </a> | 
-        <a href="https://addons.mozilla.org/nl/firefox/addon/servicenow-utils2" target="arnoudkooi">SN Utils - FireFox Addons </a>  |
-        <a href="https://github.com/meinzeugde/" target="arnoudkooi">Codesearch credit: meinzeugde</a> 
+        SN Utils proudly offered by: <a href="https://www.arnoudkooi.com" target="arnoudkooi">arnoudkooi.com</a> |
+        <a href="https://www.youtube.com/playlist?list=PLTyELlWS-zjT1GaLaJnWTKnHOMyEWA8Xe" target="arnoudkooi">YouTube
+            Playlist </a> |
+        <a href="https://marketplace.visualstudio.com/items?itemName=arnoudkooicom.sn-scriptsync" target="arnoudkooi">SN
+            ScriptSync - VS Code Marketplace </a> |
+        <a href="https://chrome.google.com/webstore/detail/servicenow-utils/jgaodbdddndbaijmcljdbglhpdhnjobg"
+            target="arnoudkooi">SN Utils - Chrome Webstore </a> |
+        <a href="https://addons.mozilla.org/nl/firefox/addon/servicenow-utils2" target="arnoudkooi">SN Utils - FireFox
+            Addons </a> |
+        <a href="https://github.com/meinzeugde/" target="arnoudkooi">Codesearch credit: meinzeugde</a>
 
     </span>
+    </div>
 </body>
 
 <script src="/js/purify.min.js"></script>

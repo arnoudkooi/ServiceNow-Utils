@@ -2,38 +2,80 @@ body {
     background: white;
     font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
     font-size: 10pt;
-    width: 95%;
+
     margin: 10px;
     padding: 10px;
 }
+
+#fixheader{
+    background-color: white;
+    z-index: 1000;
+    min-height: 80px;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+a.anchor {
+    display: block;
+    position: relative;
+    top: -170px;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.fas{
+    color: #353535;
+}
+
+#searchmsgtablelinks
+{
+    margin-bottom: 10px;
+}
+
+.sticky {
+    position: fixed;
+    top: -10px;
+    padding-top: 10px;
+    width:97vw;
+}
+
+.sticky+.results {
+    padding-top: 80px;
+}
+
 .code {
     font-family: Menlo, "Courier New", Courier, monospace;
 }
+
 .dataTables_scrollBody {
     max-height: 100% !important;
 }
 
-.wdth40{
-    width:40px;
+.wdth40 {
+    width: 40px;
 }
 
-.tbl{
-    width:100%; 
+.tbl {
+    width: 100%;
     table-layout: fixed;
-    word-wrap:break-word;
+    word-wrap: break-word;
 }
 
-.ft7{
+.ft7 {
     font-size: 7pt;
 }
 
-
 /* welcome.html */
-#sn4{
-    width:800px;
+
+#sn4 {
+    width: 800px;
 }
 
-#sn4div{
+#sn4div {
+    font-size: 12pt;
+}
 
-    font-size:12pt;
+h5{
+    font-size: 1rem;
 }
