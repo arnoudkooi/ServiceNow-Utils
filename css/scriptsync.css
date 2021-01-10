@@ -33,6 +33,12 @@ a.anchor {
     margin-bottom: 10px;
 }
 
+.whitebg{
+    background-color: #ffffff !important;
+    color: #c3c3c3 !important;
+    border: 1pt solid #81B5A1 !important;
+}
+
 .sticky {
     position: fixed;
     top: -10px;
@@ -78,4 +84,8 @@ a.anchor {
 
 h5{
     font-size: 1rem;
+}
+
+#missingtables card-body{
+    border: 1px solid rgba(0,0,0,.125);
 }

@@ -949,7 +949,7 @@ function snuSettingsAdded() {
         snuTableCollectionLink();
         newFromPopupToTab();
         createHyperLinkForGlideLists();
-        enhanceTinMCE();
+        //enhanceTinMCE(); disabled #92
 
     }
 

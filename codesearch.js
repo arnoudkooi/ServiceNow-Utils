@@ -1,6 +1,6 @@
 var tableIndex = 0;
 var statisticsObj;
-var tables = [
+var defaulttables = [
     'sys_script',
     'sys_ui_action',
     'sys_trigger',
@@ -34,13 +34,64 @@ var tables = [
     'sysevent_script_action'
 ];
 
+var suggestedtables = [ //tablename,fields,condition
+    ["bsm_action", "name,script", "active=true"],
+    ["cmn_map_page", "name,script", ""],
+    ["content_block_programmatic", "name,programmitc_content", "active=true"],
+    ["ecc_agent_script_include", "name,script", "active=true"],
+    ["kb_navons", "name,script", "active=true"],
+    ["metric_definition", "name,script", "active=true"],
+    ["process_step_approval", "name,approver_script", ""],
+    ["sc_cat_item_producer", "delivery_plan_script,entitlement_script,post_insert_script,script", "active=true"],
+    ["sp_angular_provider", "script", ""],
+    ["sp_search_source", "data_fetch_script,facet_generation_script,search_page_template,typeahead_template", ""],
+    ["sp_widget", "template,script,client_script,link", ""],
+    ["sysauto_script", "name,script,condition", "active=true"],
+    ["sysevent_email_action", "name,advanced_condition,message,sms_alternate", "active=true"],
+    ["sysevent_email_template", "name,message,message_html,sms_alternate,subject", ""],
+    ["sysevent_in_email_action", "name,script,filter_conditions,condition_script", "active=true"],
+    ["sysevent_script_action", "name,script,condition_script,event_name", "active=true"],
+    ["sys_app_quota", "query", ""],
+    ["sys_dictionary", "dynamic_ref_qual,reference_qual,attributes,default_value,calculation", "active=true^use_dynamic_default=false"],
+    ["sys_dictionary_override", "reference_qual,attributes,default_value,calculation", ""],
+    ["sys_filter_option_dynamic", "script_reference_id,script", "active=true"],
+    ["sys_installation_exit", "name,script", "active=true"],
+    ["sys_processor", "name,script,description,path,class_name", "active=true"],
+    ["sys_properties", "name,choices,value", ""],
+    ["sys_relationship", "name,apply_to,query_from,query_with", ""],
+    ["sys_script", "name,script,condition,filter_condition", "active=true"],
+    ["sys_script_ajax", "name,script", "active=true"],
+    ["sys_script_client", "name,script", "active=true"],
+    ["sys_script_email", "script", ""],
+    ["sys_script_fix", "name,script", "active=true"],
+    ["sys_script_include", "name,script", "active=true"],
+    ["sys_script_validator", "validator", ""],
+    ["sys_security_acl", "name,script,condition", "active=true"],
+    ["sys_transform_entry", "source_script", ""],
+    ["sys_transform_map", "name,script", "active=true"],
+    ["sys_transform_script", "script", "active=true"],
+    ["sys_trigger", "name,script,job_context", ""],
+    ["sys_ui_action", "name,script,condition,onclick", "active=true"],
+    ["sys_ui_context_menu", "action_script,condition,on_show_script", "active=true"],
+    ["sys_ui_list_control", "columns_condition,edit_condition,empty_condition,filter_condition,link_condition,new_condition", ""],
+    ["sys_ui_macro", "name,xml", "active=true"],
+    ["sys_ui_page", "name,client_script,html,processing_script", ""],
+    ["sys_ui_policy", "short_description,script_false,script_true,conditions", "active=true"],
+    ["sys_ui_script", "name,script", "active=true"],
+    ["sys_variable_value", "value", ""],
+    ["sys_web_service", "script", "active=true"],
+    ["sys_widgets", "name,script", "active=true"],
+    ["sys_ws_operation", "operation_script", "active=true"],
+    ["wf_activity_definition", "name,script", ""]
+];
+var missingtables = [];
 
 var header = document.getElementById("fixheader");
 var sticky = 30; //header.offsetTop;
 
 (function initialize() {
 
-    window.onscroll = function() {scrolling()};
+    window.onscroll = function () { scrolling() };
 
 
     if (getUrlVars("g_ck")) {
@@ -54,8 +105,19 @@ var sticky = 30; //header.offsetTop;
         var g_ck = getUrlVars("g_ck");
         var query = getUrlVars("query");
         loadXMLDoc(g_ck, endpoint, null).then((results) => {
+            var actualtablesarray = [];
             results.result.forEach(res => {
-                if (!tables.includes(res.table)) tables.unshift(res.table);
+                if (!defaulttables.includes(res.table)) defaulttables.unshift(res.table);
+                actualtablesarray.push(res.table);
+            })
+
+            suggestedtables.forEach(tbl => {
+                if (!actualtablesarray.includes(tbl[0])) {
+                    var lnk = url + "/sn_codesearch_table.do?sys_id=-1&sysparm_query=search_group=9a44f352d7120200b6bddb0c82520376^table=" +
+                        tbl[0] + "^search_fields=" + tbl[1] + "^additional_filter=" + tbl[2];
+                    tbl.push(lnk);
+                    missingtables.push(tbl);
+                }
             })
 
             if (query)
@@ -100,7 +162,7 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
         // '</h5></div>' +
         // '<div id="collapse_' + data.recordType + '" class="collapse show" aria-labelledby="' + data.recordType + '" idata-parent="#searchCodeAccordion">' +
         // '<div class="card-body">';<i class="fas fa-chevron-circle-down"></i>
-        '<div class="card"> <a class="anchor" name="'+ data.recordType+'"></a>' +
+        '<div class="card"> <a class="anchor" name="' + data.recordType + '"></a>' +
         '<div class="card-header" id="head_' + data.recordType + '">' +
         '<h5 class="mb-0"><button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' + data.recordType + '" aria-expanded="true" aria-controls="collapse_' + data.recordType + '">' +
         '<i class="fas fa-chevron-circle-right"></i></button> ' + data.tableLabel + ' [' + data.recordType + '] | Hits:' + data.hits.length +
@@ -115,9 +177,9 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
 
 
     statisticsObj.tables += 1;
-    statisticsObj.tableNames += "<a href='#" + data.recordType +"'>"+ data.tableLabel +"</a>" ;
-    
-    
+    statisticsObj.tableNames += "<a href='#" + data.recordType + "'>" + data.tableLabel + "</a>";
+
+
     var tableAccordion = '<div class="accordion" id="searchCodeTableAccordion_' + data.recordType + '">';
 
     jQuery.each(data.hits, function (idx, hit) {
@@ -125,7 +187,7 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
             '<div class="card">' +
             '<div class="card-header" id="head_' + hit.sysId + '">' +
             '<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' + hit.sysId + '" aria-expanded="true" aria-controls="collapse_' + hit.sysId + '"><i class="fas fa-chevron-circle-right"></i></button>' +
-            ' <span class="bigger"><a href="' + url + '/' + data.recordType + '.do?sys_id=' + hit.sysId + '" target="_blank">'+
+            ' <span class="bigger"><a href="' + url + '/' + data.recordType + '.do?sys_id=' + hit.sysId + '" target="_blank">' +
             hit.name + ' (' + hit.matches.length + ')' +
             '</a></span>' +
             '</div>' +
@@ -172,10 +234,7 @@ function executeCodeSearch(url, gck, searchTerm) {
         return;
     }
 
-
     var endpoint = url + '/api/sn_codesearch/code_search/search?term=' + searchTerm + '&limit=500&search_all_scopes=true&search_group=sn_codesearch.Default Search Group';
-
-
 
     function searchLocation(idx) {
 
@@ -185,15 +244,15 @@ function executeCodeSearch(url, gck, searchTerm) {
                 tables: 0,
                 hits: 0,
                 lines: 0,
-                tableNames : ''
+                tableNames: ''
             };
         }
-        jQuery('#searchmsg').html("Searching table: " + tables[idx] + "...");
+        jQuery('#searchmsg').html("Searching table: " + defaulttables[idx] + "...");
 
 
-        loadXMLDoc(gck, endpoint + '&table=' + tables[idx], null).then((results) => {
-            renderResults(url, results, searchTerm, tables);
-            if ((tableIndex + 1) < tables.length) {
+        loadXMLDoc(gck, endpoint + '&table=' + defaulttables[idx], null).then((results) => {
+            renderResults(url, results, searchTerm, defaulttables);
+            if ((tableIndex + 1) < defaulttables.length) {
                 tableIndex++;
                 searchLocation(tableIndex);
             } else {
@@ -204,6 +263,21 @@ function executeCodeSearch(url, gck, searchTerm) {
                     ' | Records: <u>' + statisticsObj.hits + '</u>' +
                     ' | Hits: <u>' + statisticsObj.lines + '</u>'
                 jQuery('#searchmsg').html(html);
+
+                if (missingtables.length > 0) {
+
+                    statisticsObj.tableNames += "<a class='whitebg' href='#suggestedtables'>" + missingtables.length + " suggested tables</a>";
+                    jQuery('#searchmsgtablelinks').html(statisticsObj.tableNames || "");
+
+                    var missingTablesHtml = "<div class='card-body'><a class='anchor' name='suggestedtables'></a>Condsider adding the following tables to code search. (Credit: <a href='https://jace.pro' target='_blank'>Jace Benson</a>)<br />" +
+                        "Click link to open preffiled record. Note this will be tracked in current scope / updateset<br /><br /><ul>";
+                        missingtables.forEach(tbl => {
+                        missingTablesHtml += "<li><a href='" + tbl[3] + "' target='tbls'>" + tbl[0] + "</a></li>"
+                    });
+                    missingTablesHtml += "</ul></div>";
+                    jQuery('#missingtables').html(missingTablesHtml);
+
+                }
 
             };
 
@@ -253,9 +327,9 @@ function getUrlVars(key) {
 
 
 function scrolling() {
-  if (window.pageYOffset > sticky) {
-    header.classList.add("sticky");
-  } else {
-    header.classList.remove("sticky");
-  }
+    if (window.pageYOffset > sticky) {
+        header.classList.add("sticky");
+    } else {
+        header.classList.remove("sticky");
+    }
 }
