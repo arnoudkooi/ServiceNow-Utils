@@ -25,8 +25,8 @@ if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatab
 chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
     var version = chrome.runtime.getManifest().version;
-    if(details.reason == "install" || (details.reason == "update" && version == "4" ) ){
-        openFile("welcome.html" );
+    if (details.reason == "install" || (details.reason == "update" && version == "4")) {
+        openFile("welcome.html");
     }
 
     if (typeof chrome.declarativeContent === 'undefined')
@@ -313,6 +313,33 @@ for (var snip in snippets) {
         defaultMenuConf));
 }
 
+
+getFromSyncStorageGlobal("snusettings", function (snusettings) {
+    if (!snusettings) snusettings = {};
+    if (snusettings.hasOwnProperty("slashcommands")) {
+        try {
+            var customCommands = JSON.parse(snusettings.slashcommands || "{}");
+            Object.keys(customCommands).forEach(function (key) {
+                //contexts =  (customCommands[key].url.includes("$0") ? "selection" : "all");
+                if (customCommands[key].url.includes("contextmenu")){
+                    chrome.contextMenus.create(Object.assign({
+                        "id": "sc" + key,
+                        "contexts": ["all"],
+                        "title": customCommands[key].hint + ":%s",
+                        "onclick": function (e, f) {
+                            openUrl(e, f, customCommands[key].url);
+                        }
+                    },
+                        defaultMenuConf));
+                }
+            });
+        }
+        catch (e) { }
+    }
+});
+
+
+
 function insertSnippet(e, f) {
 
     chrome.tabs.query({
@@ -396,8 +423,8 @@ function sendToggleSearchFocus() {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "toggleSearch"
             }, {
-                    frameId: 0
-                });
+                frameId: 0
+            });
         });
 }
 
@@ -416,24 +443,24 @@ function sendToggleAtfHelper() {
 
 function codeSearch(message, cookieStoreId) {
     var url = chrome.runtime.getURL("codesearch.html");
-    var args = '?query=' + message.command["query"] + 
-    '&instance=' + message.command["instance"] + 
-    '&url=' + message.command["url"] + 
-    '&g_ck=' + message.command["g_ck"];
+    var args = '?query=' + message.command["query"] +
+        '&instance=' + message.command["instance"] +
+        '&url=' + message.command["url"] +
+        '&g_ck=' + message.command["g_ck"];
 
     var createObj = {
         'url': url + args,
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
-    chrome.tabs.create(createObj); 
+    chrome.tabs.create(createObj);
 }
 
 function openFile(link) {
     var url = chrome.runtime.getURL(link);
     var createObj = {
-    'url': url,
-    'active': true
+        'url': url,
+        'active': true
     }
     chrome.tabs.create(createObj);
 }
@@ -470,7 +497,7 @@ function createScriptSyncTab(cookieStoreId) {
             chrome.tabs.create(createObj,
                 function (t) {
                     setToChromeSyncStorageGlobal("synctab", t.id);
-            });
+                });
         }
     });
 }
@@ -480,7 +507,7 @@ function openVersions(e, f) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var baseurl = tokens.join('/');
     var cookieStoreId = '';
-    if (f.hasOwnProperty('cookieStoreId')){
+    if (f.hasOwnProperty('cookieStoreId')) {
         cookieStoreId = f.cookieStoreId;
     }
 
@@ -509,12 +536,12 @@ function openVersions(e, f) {
                 function (jsn) {
                     if (typeof jsn == "undefined" || jsn == "error")
                         alert("No access to Update Versions");
-                    else if (Number(jsn.result.stats.count)){
+                    else if (Number(jsn.result.stats.count)) {
                         var createObj = {
                             'url': baseurl + "/sys_update_version_list.do?sysparm_query=name=" + updateName + sys_id + "^ORDERBYDESCsys_recorded_at"
                         }
-                        if (cookieStoreId){
-                            createObj.cookieStoreId =cookieStoreId; 
+                        if (cookieStoreId) {
+                            createObj.cookieStoreId = cookieStoreId;
                         }
                         chrome.tabs.create(createObj);
                     }
@@ -579,11 +606,13 @@ function clearCookies(e, tabid, target) {
 
 
 function openUrl(e, f, u) {
+
+    var url = u.replace(/\$0/g,e.selectionText);
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var createObj = {
-        'url': tokens.join('/') + u
+        'url': tokens.join('/') + url
     }
-    if (f.hasOwnProperty('cookieStoreId')){
+    if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
     chrome.tabs.create(createObj);
@@ -595,13 +624,13 @@ function openSearch(e, f) {
     var createObj = {
         'url': tokens.join('/') + "/text_search_exact_match.do?sysparm_search=" + srch
     }
-    if (f.hasOwnProperty('cookieStoreId')){
+    if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
-    if (srch.length < 100){
+    if (srch.length < 100) {
         chrome.tabs.create(createObj);
     }
-        
+
 }
 
 function contextCodeSearch(e, f) {
@@ -617,74 +646,74 @@ function contextCodeSearch(e, f) {
         chrome.tabs.sendMessage(tid, {
             method: "getVars",
             myVars: "g_ck"
-        }, 
-        function (response) {
-            g_ck = response.myVars.g_ck || '';
-            url = response.url;
-            instance = (new URL(url)).host.replace(".service-now.com", "");
-    
-            var cookieStoreId;
-            if (f.hasOwnProperty('cookieStoreId')){
-                cookieStoreId = f.cookieStoreId;
-            }
-            var message = {
-                "event" : "codesearch",
-                "command" : {
-                    "query" : e.selectionText,
-                    "instance" : instance,
-                    "url" : url,
-                    "g_ck" : g_ck
+        },
+            function (response) {
+                g_ck = response.myVars.g_ck || '';
+                url = response.url;
+                instance = (new URL(url)).host.replace(".service-now.com", "");
+
+                var cookieStoreId;
+                if (f.hasOwnProperty('cookieStoreId')) {
+                    cookieStoreId = f.cookieStoreId;
                 }
-            };
-            codeSearch(message,cookieStoreId);  
-        });
+                var message = {
+                    "event": "codesearch",
+                    "command": {
+                        "query": e.selectionText,
+                        "instance": instance,
+                        "url": url,
+                        "g_ck": g_ck
+                    }
+                };
+                codeSearch(message, cookieStoreId);
+            });
 
     });
 
 
 }
 
-function openScriptInclude(e,f) {
+function openScriptInclude(e, f) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
     var createObj = {
         'url': tokens.join('/') + "/sys_script_include.do?sysparm_refkey=name&sys_id=" + srch
     }
-    if (f.hasOwnProperty('cookieStoreId')){
+    if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
-    if (srch.length < 100){
+    if (srch.length < 100) {
         chrome.tabs.create(createObj);
     }
 }
 
-function openTableList(e,f) {
+function openTableList(e, f) {
 
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
     var createObj = {
         'url': tokens.join('/') + "/" + srch + "_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)"
     }
-    if (f.hasOwnProperty('cookieStoreId')){
+    if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
-    if (srch.length < 50){
+    if (srch.length < 50) {
         chrome.tabs.create(createObj);
     }
 
 }
 
-function openPropertie(e,f) {
+function openPropertie(e, f) {
 
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
     var createObj = {
-        'url': tokens.join('/') +  "/sys_properties_list.do?sysparm_query=name=" + srch
+        'url': tokens.join('/') + "/sys_properties_list.do?sysparm_query=name=" + srch
     }
-    if (f.hasOwnProperty('cookieStoreId')){
+    if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
-    if (srch.length < 50){
+    if (srch.length < 50) {
         chrome.tabs.create(createObj);
     }
 
@@ -738,7 +767,7 @@ chrome.runtime.onMessageExternal.addListener(
 
 //Retrieve variables from browser tab, passing them back to popup
 function getBrowserVariables(tid, cStoreId) {
-    
+
     // if (cStoreId){ //firefox only, rewrite the cookie to the one of the current container
     //     cookieStoreId = cStoreId;
     //     browser.contextualIdentities.get(cookieStoreId).then(function(r){
@@ -750,7 +779,7 @@ function getBrowserVariables(tid, cStoreId) {
     //                 cookie = c;
     //             }
     //         )
-            
+
     //     })
     // }
 
@@ -781,17 +810,17 @@ function getGck(cookieStoreId, callback) {
             "currentWindow": true
         }
         if (cookieStoreId) queryObj.cookieStoreId = cookieStoreId;
-        chrome.tabs.query(queryObj, 
+        chrome.tabs.query(queryObj,
             function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                method: "getVars",
-                myVars: "g_ck,NOW.sysId"
-            }, function (response) {
-                g_ck = response.myVars.g_ck || '';
-                sysId = response.myVars.NOWsysId || '';
-                callback();
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    method: "getVars",
+                    myVars: "g_ck,NOW.sysId"
+                }, function (response) {
+                    g_ck = response.myVars.g_ck || '';
+                    sysId = response.myVars.NOWsysId || '';
+                    callback();
+                });
             });
-        });
     }
 }
 
@@ -802,7 +831,7 @@ function grVarName(tableName, fullvarname) {
 
     var varName = grVar.charAt(0).toUpperCase() + grVar.slice(1);
     if (varName.length >= 10 && !fullvarname)
-        varName = varName.replace(/[a-z]/g,'');
+        varName = varName.replace(/[a-z]/g, '');
     return 'gr' + varName;
 }
 
@@ -869,7 +898,7 @@ function getGRQuery(varName, template, templatelines, fullvarname) {
                 queryStr += "    //" + varName + ".deleteRecord();\n";
             }
             queryStr += "}";
-            
+
             popup.setGRQuery(queryStr);
         });
     });
@@ -1054,28 +1083,28 @@ function getFromSyncStorageGlobal(theName, callback) {
 
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-    if (message.event == "scriptsync"){
+    if (message.event == "scriptsync") {
         var cookieStoreId = '';
-        if (sender.tab.hasOwnProperty('cookieStoreId')){
+        if (sender.tab.hasOwnProperty('cookieStoreId')) {
             cookieStoreId = sender.tab.cookieStoreId;
         }
         createScriptSyncTab(cookieStoreId);
     }
-    if (message.event == "pop"){
+    if (message.event == "pop") {
         pop();
     }
-    else if (message.event == "codesearch"){      
+    else if (message.event == "codesearch") {
         codeSearch(message, cookieStoreId);
     }
-    else if (message.event == "openfile"){
+    else if (message.event == "openfile") {
         openFile(message.command);
     }
-    else if (message.event == "addslashcommand"){
-        getFromSyncStorageGlobal("snusettings", function(settings){
-            if ( settings["slashcommands"].length == 0){
+    else if (message.event == "addslashcommand") {
+        getFromSyncStorageGlobal("snusettings", function (settings) {
+            if (settings["slashcommands"].length == 0) {
                 settings["slashcommands"] = message.command;
             }
-            else{
+            else {
                 settings["slashcommands"] = settings["slashcommands"] + "\n" + message.command;
             }
             setToChromeSyncStorageGlobal("snusettings", settings);
@@ -1094,7 +1123,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         var createObj = {
             'url': message.command,
         }
-        if (sender.tab.hasOwnProperty('cookieStoreId')){
+        if (sender.tab.hasOwnProperty('cookieStoreId')) {
             createObj.cookieStoreId = sender.tab.cookieStoreId;
         }
         chrome.tabs.create(createObj);
@@ -1182,18 +1211,18 @@ function getExploreData() {
         method: "getVars",
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
-        var tableName = response.myVars.g_formtableName || getParameterByName("table",response.frameHref);
-        var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id",response.frameHref);
+        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref);
+        var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id", response.frameHref);
 
-        if (!tableName){ //try to find table and sys_id in workspace
+        if (!tableName) { //try to find table and sys_id in workspace
             var myurl = new URL(response.frameHref)
             var parts = myurl.pathname.split("/");
             var idx = parts.indexOf("sub") // show subrecord if available
             if (idx != -1) parts = parts.slice(idx);
             idx = parts.indexOf("record")
-            if (idx > -1 && parts.length >= idx+2 ){
-                tableName = parts[idx+1];
-                sysId = parts[idx+2];               
+            if (idx > -1 && parts.length >= idx + 2) {
+                tableName = parts[idx + 1];
+                sysId = parts[idx + 2];
             }
         }
 
@@ -1223,11 +1252,11 @@ function getExploreData() {
                 dataExplore.push(propObj);
 
                 var rows = {}
-                
+
                 try {
                     rows = jsn.result[0];
-                } catch(e){
-                    rows = {"Error" : { "display_value" : e.message ,"value" : "Record data not retrieved."}};
+                } catch (e) {
+                    rows = { "Error": { "display_value": e.message, "value": "Record data not retrieved." } };
                 }
 
                 for (var key in rows) {
@@ -1243,7 +1272,7 @@ function getExploreData() {
                     }
 
                     propObj.name = key;
-                    propObj.meta = (metaData && metaData != "error") ? metaData.result.columns[key] : {"label" : "Error"};
+                    propObj.meta = (metaData && metaData != "error") ? metaData.result.columns[key] : { "label": "Error" };
                     propObj.display_value = display_value;
                     propObj.value = (display_value != rows[key].value) ? rows[key].value : '';
 
