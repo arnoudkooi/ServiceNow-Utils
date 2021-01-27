@@ -609,8 +609,9 @@ function openUrl(e, f, u) {
 
     var url = u.replace(/\$0/g,e.selectionText);
     var tokens = e.pageUrl.split('/').slice(0, 3);
+    if (!url.startsWith('http')) url = tokens.join('/') + url;
     var createObj = {
-        'url': tokens.join('/') + url
+        'url': url
     }
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
