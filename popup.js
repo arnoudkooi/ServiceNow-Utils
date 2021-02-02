@@ -793,7 +793,7 @@ function getSlashcommands() {
         } catch (e) { };
 
         Object.keys(objCustomCommands).forEach(function (key) {
-            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "fields": objCustomCommands[key].fields, "source": "1custom" });
+            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "fields": objCustomCommands[key].fields, "overwriteurl" : objCustomCommands[key].overwriteurl,  "source": "1custom" });
         });
 
 

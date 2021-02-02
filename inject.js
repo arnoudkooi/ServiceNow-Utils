@@ -218,6 +218,12 @@ var snuslashcommands = {
     "json": {
         "url": "/$table.do?JSONv2&sysparm_action=get&sysparm_sys_id=$sysid",
         "hint": "Open current record's JSONv2 view"
+    },
+    "versions": {
+        "url": "/sys_update_version_list.do?sysparm_query=name=$table_$sysid^ORDERBYDESCsys_recorded_at",
+        "hint": "Versions of current record",
+        "fields": "sys_recorded_at,sys_created_by",
+        "overwriteurl" : "/merge_form_current_version.do?sysparm_version_id=$sysid"
     }
 
 }
