@@ -62,3 +62,19 @@
     border: 1pt solid white;
     color:white;
 }
+
+.input-group {
+    margin-bottom: 10px;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+    font-size: 1rem;
+}
+
+#select_default_tables_checkbox {
+    height: 100%;
+    margin-top: unset;
+}
