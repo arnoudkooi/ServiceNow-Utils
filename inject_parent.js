@@ -20,12 +20,17 @@ function addStudioLink() {
 
         if (addStudio) {
                 widgetHtml = '<div class="navpage-header-content">' +
+                    '<button data-placement="auto" class="btn btn-icon icon-cards"' +
+                    ' title="Quick Application Switch (By SN Utils)\nSlashcommand: /sa" data-original-title="Studio" onclick="showSlashCommand(\'/sa\');">' +
+                    '<span class="sr-only">Studio</span>' +
+                    '</button>' + 
                     '<button data-placement="auto" class="btn btn-icon icon-script"' +
                     ' title="Open Studio IDE (Link by SN Utils)" data-original-title="Studio" onclick="window.open(\'/$studio.do\', \'_blank\');">' +
                     '<span class="sr-only">Studio</span>' +
                     '</button></div>';
                 jQuery('#sysparm_search').parents('div.navpage-header-content').first().after(widgetHtml);
-            
+                
+
         }
     });
 }

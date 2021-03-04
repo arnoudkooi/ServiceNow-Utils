@@ -137,7 +137,11 @@ var snuslashcommands = {
         "url": "sp_widget_list.do?sysparm_query=nameLIKE$0",
         "hint": "Service Portal Widgets <search>",
         "fields": "name",
-        "overwriteurl" : "/sp_config?id=widget_editor&sys_id=$sysid"
+        "overwriteurl": "/sp_config?id=widget_editor&sys_id=$sysid"
+    },
+    "sa": {
+        "url": "*",
+        "hint": "Switch Application (10 most recent)"
     },
     "st": {
         "url": "/$studio.do",
@@ -223,7 +227,7 @@ var snuslashcommands = {
         "url": "/sys_update_version_list.do?sysparm_query=name=$table_$sysid^ORDERBYDESCsys_recorded_at",
         "hint": "Versions of current record",
         "fields": "sys_recorded_at,sys_created_by",
-        "overwriteurl" : "/merge_form_current_version.do?sysparm_version_id=$sysid"
+        "overwriteurl": "/merge_form_current_version.do?sysparm_version_id=$sysid"
     }
 
 }
@@ -347,14 +351,14 @@ function snuGetDirectLinks(targeturl, shortcut) {
                 Object.entries(results).forEach(([key, val]) => {
                     var fieldArr = fields.split(',');
                     var txtArr = [];
-                    for (var i = 0; i < fieldArr.length; i++){
+                    for (var i = 0; i < fieldArr.length; i++) {
                         txtArr.push(val[fieldArr[i]])
                     }
                     var txt = txtArr.join(' | ');
                     var link = table + ".do?sys_id=" + val.sys_id;
                     var target = "gsft_main"
-                    if (overwriteurl){
-                        link = overwriteurl.replace(/\$sysid/g,val.sys_id)
+                    if (overwriteurl) {
+                        link = overwriteurl.replace(/\$sysid/g, val.sys_id)
                         target = (!overwriteurl.startsWith("http") && !overwriteurl.startsWith("/")) ? "gsft_main" : "_blank";
                     }
                     directlinks += '> <a target="' + target + '" href="' + link + '">' + txt + '</a><br />';
@@ -516,7 +520,7 @@ function addSlashCommandListener() {
                 e.preventDefault();
                 return;
             }
-            if (shortcut.match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid" ) {//is a sys_id
+            if (shortcut.match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid") {//is a sys_id
                 var sysid = (shortcut.length == 32) ? shortcut : query;
                 if (sysid.length != 32) return;
                 searchSysIdTables(sysid);
@@ -543,6 +547,10 @@ function addSlashCommandListener() {
                 //     "Go to settings tab in popup to manage custom / commands <br />" +
                 //     "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
 
+            }
+            else if (shortcut == "sa") {
+                snuGetLastScopes();
+                return;
             }
             else if (shortcut == "token") {
                 postRequestToScriptSync();
@@ -1630,6 +1638,7 @@ function setShortCuts() {
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; font-weight:bold; width:99%; border: 1px solid #ffffff; margin:8px 2px 4px 2px; background-color:#ffffff }
         span.cmdlabel { color: #333333; font-size:7pt; font-family:verdana, arial }
         a.cmdlink { font-size:10pt; color: #1f8476; }
+        span.semihidden { font-size:6pt; color: #999; }
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey { border-color: #8BB3A2}
         ul#snuhelper li.active span.cmdlabel { color: black}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
@@ -1646,6 +1655,7 @@ function setShortCuts() {
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; background: transparent; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; width:100%; border: 0px; margin:8px 2px 4px 2px; }
         span.cmdlabel { display:none }
         a.cmdlink { display:none }
+        span.semihidden { display:none }
         div#snudirectlinks {display:none;}
         </style>`;
     }
@@ -1659,6 +1669,7 @@ function setShortCuts() {
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:100%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
         span.cmdlabel { color: #FFFFFF; font-size:7pt; }
         a.cmdlink { font-size:10pt; color: #1f8476; }
+        span.semihidden { font-size:6pt; color: #999; }
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey  { border-color: yellow}
         ul#snuhelper li.active span.cmdlabel { color: yellow}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
@@ -2124,14 +2135,21 @@ function hideSlashCommand() {
     return true;
 }
 
-function showSlashCommand() {
+function showSlashCommand(initialCommand) {
     window.top.document.snuSelection = getSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
-        window.top.document.getElementById('snufilter').value = '/';
+        window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints("", false, "", false);
-        setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
+        snuShowSlashCommandHints((initialCommand||"").substring(1), false, "", false);
+        if (initialCommand){
+            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'Enter'}));
+            setTimeout(function(){ window.top.document.getElementById('snufilter').selectionStart = 
+            window.top.document.getElementById('snufilter').selectionEnd = 10000; }, 10);
+        }
+        else {
+            setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
+        }
     }
 }
 
@@ -2782,7 +2800,7 @@ function addTechnicalNamesWorkspace() {
                         lnk.href = '/sys_ui_action.do?sys_id=' + uiact.appendToPayload.item.sysId;
                         lnk.target = 'uia';
                         lnk.title = 'SN Utils - Open the UI Action definition';
-                        insertAfter(lnk,uiact);
+                        insertAfter(lnk, uiact);
                         console.dir(uiact);
                     });
 
@@ -2843,4 +2861,57 @@ function addTechnicalNamesWorkspace() {
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
 
+}
+
+
+function snuGetLastScopes() {
+    var urlPref = "/api/now/table/sys_user_preference?sysparm_limit=10&sysparm_fields,sys_updated_on=name&sysparm_display_value=true&sysparm_query=nameSTARTSWITHupdateSetForScope^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_updated_on";
+    loadXMLDoc(g_ck, urlPref, null, res => {
+        var scopes = []
+        var scopesObj = {}
+        res.result.forEach(scp => {
+            scopes.push(scp.name.substring(17))
+            scopesObj[scp.name.substring(17)] = scp.sys_updated_on;
+        })
+        if (scopes.length < 2) return;
+        var urlScope = "/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=sys_idIN" + scopes.join(',');
+        loadXMLDoc(g_ck, urlScope, null, res => {
+            var returnScopes = {};
+            res.result.forEach(scp => returnScopes[scp.sys_id] = scp);
+
+            //var lastScopes = []
+            var scopeDirectLinks = '';
+            scopes.forEach(scp => {
+                returnScopes[scp]['date'] = scopesObj[scp];
+                //lastScopes.push(returnScopes[scp]);
+                scopeDirectLinks += '> <a class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
+            })
+            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(scopeDirectLinks);
+
+            document.querySelectorAll('a.snuscopeswitch').forEach(item => {
+                item.addEventListener('click', event => {
+                    event.preventDefault();
+                    snuSetScope(event.target.hash.substring(1));
+                })
+              })
+        })
+    })
+
+}
+
+function snuSetScope(scopeId) {
+    var payload = { "app_id": scopeId }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            location.reload();
+        }
+    };
+    xhttp.open("PUT", "/api/now/ui/concoursepicker/application", true);
+    xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
+    xhttp.setRequestHeader("Cache-Control", "no-cache");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.setRequestHeader("X-UserToken", g_ck);
+    xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
+    xhttp.send(JSON.stringify(payload));
 }
