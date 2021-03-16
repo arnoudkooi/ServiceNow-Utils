@@ -68,12 +68,12 @@
             },
             "description": "Show Technical Names"
         },
-        "toggle-scriptsync": {
+        "slashcommand-shortcut": {
             "suggested_key": {
                 "default": "Ctrl+4",
                 "mac": "Command+4"
             },
-            "description": "Open VS Code ScriptSync tab"
+            "description": "Run /shortcut slashcommand"
         },
         "slashcommand": {
             "description": "Open slashcommand popup"
