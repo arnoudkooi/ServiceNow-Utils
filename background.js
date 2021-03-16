@@ -11,6 +11,7 @@ var nme;
 var jsnNodes;
 var urlFull;
 var updateSetTables = [];
+var lastCommand = (new Date()).getTime();
 
 var urlContains = ".service-now.com";
 var urlPattern = "https://*.service-now.com/*"
@@ -55,7 +56,11 @@ chrome.runtime.onInstalled.addListener(function (details) {
 
 
 chrome.commands.onCommand.addListener(function (command) {
-    if (command == "show-technical-names")
+
+    if ((new Date()).getTime() - lastCommand < 500) {
+        //dont trigger twice
+    }
+    else if (command == "show-technical-names")
         addTechnicalNames();
     else if (command == "pop")
         pop();
@@ -63,11 +68,12 @@ chrome.commands.onCommand.addListener(function (command) {
         sendToggleSearchFocus();
     else if (command == "toggle-atf")
         sendToggleAtfHelper();
-    else if (command == "toggle-scriptsync")
-        createScriptSyncTab();
+    else if (command == "slashcommand-shortcut")
+        slashCommand('/shortcut');
     else if (command == "slashcommand")
-        slashCommand();
+        slashCommand('');
 
+    lastCommand = (new Date()).getTime();
     return true;
 
 });
@@ -384,7 +390,7 @@ function addTechnicalNames() {
 
 }
 
-function slashCommand() {
+function slashCommand(cmd) {
 
     chrome.tabs.query({
         currentWindow: true,
@@ -393,7 +399,7 @@ function slashCommand() {
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
-                myVars: "showSlashCommand()"
+                myVars: "showSlashCommand('"+ cmd +"')"
             });
         });
 

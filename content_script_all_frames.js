@@ -1,5 +1,11 @@
+var lastCommand = (new Date()).getTime();
+
+
 //attach event listener from popup
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if ((new Date()).getTime() - lastCommand < 500) {
+        //dont trigger twice
+    }
     if (request.method == "runFunction") {
         runFunction(request.myVars);
     } else if (request.method == "runFunctionChild") {
@@ -9,6 +15,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     } else if (request.snippet) {
         insertTextAtCursor(request.snippet);
     }
+
+    lastCommand = (new Date()).getTime();
 
 });
 

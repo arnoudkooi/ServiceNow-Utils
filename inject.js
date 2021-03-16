@@ -147,6 +147,10 @@ var snuslashcommands = {
         "url": "/$studio.do",
         "hint": "Open Studio"
     },
+    "shortcut": {
+        "url": "//sa",
+        "hint": "Special slashcommand, accesible via extension keyboard shortcut"
+    },
     "start": {
         "url": "/nav_to.do",
         "hint": "New tab"
@@ -451,6 +455,8 @@ function addSlashCommandListener() {
 
         if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
             snufilter = snuslashcommands[shortcut].url.substr(2);
+            window.top.document.getElementById('snufilter').value = targeturl.substring(1);
+            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowDown'}));
             var idx = snufilter.indexOf(' ')
             if (idx == -1) idx = snufilter.length;
             shortcut = snufilter.slice(0, idx).toLowerCase();

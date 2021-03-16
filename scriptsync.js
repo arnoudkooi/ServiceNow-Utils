@@ -77,8 +77,10 @@ $(document).ready(function () {
             if (wsObj.hasOwnProperty('mirrorbgscript')) {
                 mirrorBgScript(wsObj);
             }
-            else if (wsObj.hasOwnProperty('refreshtoken')) {
-                refreshToken(wsObj);
+            else if (wsObj.hasOwnProperty('refreshedtoken')) {
+                refreshedToken(wsObj);
+                flashFavicon('images/icongreen48.png', 4);
+                increaseTitlecounter();
             }
             else {
                 realTimeUpdating = false;
@@ -349,6 +351,12 @@ function mirrorBgScript(scriptObj) {
     //     }
     // });
 
+}
+
+function refreshedToken(instanceObj){
+    t.row.add([
+        new Date(), 'VS Code',  instanceObj.response
+    ]).draw(false);
 }
 
 function refreshToken(instanceObj) {
