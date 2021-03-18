@@ -4,6 +4,8 @@ var snuMaxHints = 10;
 var snuPropertyNames = [];
 var snuIndex = 0;
 var snuSelection = '';
+var snuReceivedCommand = '';
+var snuLastOpened = (new Date()).getTime();
 var snuNav = {
     'loading': 'mustload',
     'loadedLastTime': 0
@@ -386,7 +388,7 @@ function addFilterListener() {
         else if (e.currentTarget.value == "/") {
             e.preventDefault();
             e.currentTarget.value = "";
-            showSlashCommand();
+            showSlashCommand('');
         }
     });
 }
@@ -437,7 +439,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if ((e.key == 'ArrowRight' || (shortcut.length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
+        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -447,21 +449,23 @@ function addSlashCommandListener() {
                 g_form = document.getElementById('gsft_main').contentWindow.g_form;
             } catch (e) { }
         }
-        if (typeof g_form !== 'undefined') {
-            targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
-            targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
-        }
-
 
         if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
             snufilter = snuslashcommands[shortcut].url.substr(2);
-            window.top.document.getElementById('snufilter').value = targeturl.substring(1);
-            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowDown'}));
+            if (snuReceivedCommand){
+                window.top.document.getElementById('snufilter').value = targeturl.substring(1);
+                window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowDown'}));
+            }
             var idx = snufilter.indexOf(' ')
             if (idx == -1) idx = snufilter.length;
             shortcut = snufilter.slice(0, idx).toLowerCase();
             query = snufilter.slice(idx + 1).replace(/ .*/, '');;
             targeturl = (snuslashcommands[shortcut].url || "");
+        }
+
+        if (typeof g_form !== 'undefined') {
+            targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
+            targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
         }
 
         var switchText = '<br /> Options:<br />';
@@ -808,7 +812,13 @@ function addSlashCommandListener() {
                     window.location = targeturl;
                 }
                 else {
-                    window.open(targeturl, '_blank');
+
+                    if (!targeturl.startsWith("//") ) {
+                        if ((new Date()).getTime() - snuLastOpened < 500) {
+                            window.open(targeturl, '_blank');
+                        }
+                        snuLastOpened = (new Date()).getTime(); 
+                    }
                 }
             }
             hideSlashCommand();
@@ -1711,7 +1721,7 @@ function setShortCuts() {
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') && !event.srcElement.tagName.includes("-") ||
                     (event.ctrlKey || event.metaKey) && !event.srcElement.hasAttribute('aria-describedby')) { //not when form element active
                     event.preventDefault();
-                    showSlashCommand();
+                    showSlashCommand('');
                 }
             }
         }
@@ -2142,6 +2152,7 @@ function hideSlashCommand() {
 }
 
 function showSlashCommand(initialCommand) {
+    snuReceivedCommand = initialCommand;
     window.top.document.snuSelection = getSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
