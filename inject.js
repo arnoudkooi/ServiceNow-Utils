@@ -814,10 +814,13 @@ function addSlashCommandListener() {
                 else {
 
                     if (!targeturl.startsWith("//") ) {
-                        if ((new Date()).getTime() - snuLastOpened < 500) {
+                        console.log((new Date()).getTime() - snuLastOpened);
+                        if ((new Date()).getTime() - snuLastOpened > 500) {
+                            snuLastOpened = (new Date()).getTime();
                             window.open(targeturl, '_blank');
                         }
-                        snuLastOpened = (new Date()).getTime(); 
+                        snuLastOpened = (new Date()).getTime();
+                        
                     }
                 }
             }
