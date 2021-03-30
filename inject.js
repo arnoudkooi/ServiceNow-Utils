@@ -22,6 +22,10 @@ var snuslashcommands = {
         "hint": "Filter Applications <name>",
         "fields": "name"
     },
+    "aes": {
+        "url": "/now/appenginestudio",
+        "hint": "Open App Engine Studio"
+    },
     "br": {
         "url": "sys_script_list.do?sysparm_query=nameLIKE$0",
         "hint": "Filter Business Rules <name>",
@@ -73,11 +77,11 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/paris/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/quebec/All/$0",
         "hint": "Search developer portal <search>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=paris",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=quebec",
         "hint": "Search Docs <search>"
     },
     "env": {
@@ -190,6 +194,10 @@ var snuslashcommands = {
     "uh": {
         "url": "*",
         "hint": "Show Hidden Fields"
+    },
+    "uib": {
+        "url": "/now/build/ui/experiences",
+        "hint": "Open UI Builder"
     },
     "uis": {
         "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0",
