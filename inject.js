@@ -1049,7 +1049,7 @@ function doubleClickToShowFieldOrReload() {
             if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
                 var elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var val = g_form.getValue(elm);
-                if (NOW.user.roles.includes('admin')) { //only allow "admin" ti change fields
+                if (NOW.user.roles.split(",").includes('admin')) { //only allow "admin" to change fields
                     var newValue = prompt('[SN Utils]\nValue of ' + elm, val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
