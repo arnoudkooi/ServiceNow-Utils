@@ -581,14 +581,15 @@ function setDataTableNodes(nme, node) {
         "aoColumns": [
             {
                 mRender: function (data, type, row) {
-                    return row.node.display_value.split(":")[1];
+                    return row.system_id.split(":")[1];
                 }
             },
-            { "mDataProp": "node.display_value" },
+            { "mDataProp": "system_id" },
+            { "mDataProp": "status" },
             {
                 mRender: function (data, type, row) {
-                    var iscurrent = (row.node.value == node);
-                    return "<a class='setnode " + (iscurrent ? "iscurrent" : "") + "' data-node='" + row.node.display_value + "' href='#' id='" + row.node.value + "' title='Switch to Node'><i class='far fa-dot-circle' aria-hidden='true'></i>" + (iscurrent ? " Active Node" : " Set Active") + "</a> ";
+                    var iscurrent = (row.node_id == node);
+                    return "<a class='setnode " + (iscurrent ? "iscurrent" : "") + "' data-node='" + row.system_id + "' href='#' id='" + row.node_id + "' title='Switch to Node'><i class='far fa-dot-circle' aria-hidden='true'></i>" + (iscurrent ? " Active Node" : " Set Active") + "</a> ";
                 },
                 "searchable": false
             }

@@ -1140,7 +1140,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 //Query ServiceNow for nodes
 function getNodes() {
-    var myurl = url + '/api/now/table/v_cluster_nodes?sysparm_query=ORDERBYname&sysparm_fields=node&sysparm_display_value=all';
+    var myurl = url + '/api/now/table/sys_cluster_state?sysparm_query=ORDERBYsystem_id&sysparm_fields=system_id,node_id,status&sysparm_display_value=false';
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
         popup.setNodes(jsn.result);
     });

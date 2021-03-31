@@ -676,7 +676,7 @@ function addSlashCommandListener() {
                 return;
             }
             else if (shortcut.startsWith("-")) {
-                var doc = document.gsft_main || document;
+                var doc = document.gsft_main || window;
                 if (typeof doc.GlideList2 != 'undefined') {
                     var qry = doc.GlideList2.get(doc.jQuery('#sys_target').val());
                     if (typeof qry != 'undefined') {
@@ -1057,7 +1057,7 @@ function doubleClickToShowFieldOrReload() {
             if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
                 var elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var val = g_form.getValue(elm);
-                if (NOW.user.roles.split(",").includes('admin')) { //only allow "admin" to change fields
+                if (NOW.user.roles.split(",").includes('admin')) { //only allow admin to change fields
                     var newValue = prompt('[SN Utils]\nValue of ' + elm, val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
