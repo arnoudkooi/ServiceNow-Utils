@@ -149,6 +149,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Switch Application (10 most recent)"
     },
+    "rnd": {
+        "url": "*",
+        "hint": "Fill empty mandatory form fields with values from a random record"
+    },
     "st": {
         "url": "/$studio.do",
         "hint": "Open Studio"
@@ -249,6 +253,8 @@ var snuslashcommands = {
 var snuslashswitches = {
     "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
     "n": { "description": "New Record", "value": "$0.do", "type": "link" },
+    "r": { "description": "Open Random Record", "value": "$random.$0", "type": "link" },
+    "ra": { "description": "REST API Explorer", "value": "$restapi.do?tableName=$0", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
     "erd": { "description": "View Schema Map", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
 
@@ -447,7 +453,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " ") && !query) { snuGetTables(tmpshortcut) };
+        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-") && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -570,6 +576,11 @@ function addSlashCommandListener() {
                 snuGetLastScopes();
                 return;
             }
+            else if (shortcut == "rnd") {
+                fillFields();
+                hideSlashCommand();
+                return;
+            }
             else if (shortcut == "token") {
                 postRequestToScriptSync();
                 showAlert("Trying to send current token to VS Code", "info");
@@ -682,14 +693,15 @@ function addSlashCommandListener() {
                     if (typeof qry != 'undefined') {
                         if (targeturl.includes("{}")) {
                             targeturl = targeturl.replace('{}', qry.getTableName());
-                            window.open(targeturl, '_blank');
+                            //window.open(targeturl, '_blank');
                         }
                         else {
                             var newQ = qry.filter.replace(targeturl, "")
                             qry.setFilterAndRefresh(newQ + targeturl);
+                            hideSlashCommand();
+                            return;
                         }
-                        hideSlashCommand();
-                        return;
+
                     }
                 }
                 if (typeof doc.g_form != 'undefined') {
@@ -699,10 +711,14 @@ function addSlashCommandListener() {
                     else {
                         targeturl = "/" + g_form.getTableName() + "_list.do?sysparm_query=" + targeturl;
                     }
-                    window.open(targeturl, '_blank');
+                    if (!targeturl.startsWith("$random"))
+                        window.open(targeturl, '_blank');
                 }
-                hideSlashCommand();
-                return;
+
+                if(!targeturl.startsWith("$random")){
+                    hideSlashCommand();
+                    return;
+                }
 
             }
             else if (shortcut == "uh") {
@@ -811,7 +827,18 @@ function addSlashCommandListener() {
                 }
             }
 
-            if (inIFrame) {
+            if(targeturl.startsWith("$random")){
+                targeturl = targeturl.substring(8)
+                snuGetRandomRecord(targeturl,"",false,res => { 
+                    targeturl = targeturl + ".do?sys_id=" + res;
+                    if (inIFrame) 
+                        jQuery('#gsft_main').attr('src', targeturl);
+                    else
+                        window.open(targeturl, '_blank');
+                    hideSlashCommand();
+                })
+            }
+            else if (inIFrame) {
                 jQuery('#gsft_main').attr('src', targeturl);
             }
             else {
@@ -2191,6 +2218,34 @@ function getSelectionText() {
     return text;
 }
 
+function fillFields() {
+    if (typeof window.g_form != 'undefined') {
+        if (!window.NOW.user.roles.split(',').includes('admin')) return;
+        var manFields = g_form.getMissingFields();
+        setRandom(g_form.getTableName(),manFields, window);
+    } 
+    else {
+        Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
+            if (typeof frm.contentWindow.g_form != 'undefined') {
+                if (!frm.contentWindow.NOW.user.roles.split(',').includes('admin')) return;
+                var manFields = frm.contentWindow.g_form.getMissingFields();
+                setRandom(g_form.getTableName(), manFields, frm.contentWindow);
+            }
+        });
+    }
+    function setRandom(tbl, flds, doc) {
+        flds.push("");
+        var encQ = flds.join("ISNOTEMPTY^");
+        flds.pop();
+        snuGetRandomRecord(tbl,encQ,true,res => { 
+            flds.forEach(fld => {
+                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string")) ? "RANDOM TESTDATA " : "") + res[fld].value; 
+                doc.g_form.setValue(fld,val,res[fld].display_value);
+            })
+        })
+    }
+};
+
 function copySelectedCellValues() {
     var hasCopied = false;
     var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell');
@@ -2893,7 +2948,7 @@ function addTechnicalNamesWorkspace() {
 
 
 function snuGetLastScopes() {
-    var urlPref = "/api/now/table/sys_user_preference?sysparm_limit=10&sysparm_fields,sys_updated_on=name&sysparm_display_value=true&sysparm_query=nameSTARTSWITHupdateSetForScope^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_updated_on";
+    var urlPref = "/api/now/table/sys_user_preference?sysparm_limit=10&sysparm_fields=sys_id,name,sys_updated_on&sysparm_display_value=true&sysparm_query=nameSTARTSWITHupdateSetForScope^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_updated_on";
     loadXMLDoc(g_ck, urlPref, null, res => {
         var scopes = []
         var scopesObj = {}
@@ -2939,7 +2994,34 @@ function snuSetScope(scopeId) {
     xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
     xhttp.setRequestHeader("Cache-Control", "no-cache");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("X-UserToken", g_ck);
+    if (g_ck) xhttp.setRequestHeader('X-UserToken', g_ck);
     xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
     xhttp.send(JSON.stringify(payload));
+}
+
+function snuGetRandomRecord(table, query, fullRecord, callback) {
+    var url = "/api/now/table/"+ table +"?sysparm_limit=1&sysparm_fields=sys_id&sysparm_display_value=false&sysparm_query=" + query;
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.setRequestHeader('Cache-Control', 'no-cache');
+    request.setRequestHeader('Accept', 'application/json');
+    request.setRequestHeader('Content-Type', 'application/json');
+    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
+    request.onload = function () {
+        var rows = request.getResponseHeader("X-Total-Count");
+        var rnd = Math.floor(Math.random() * rows) ;
+        url = "/api/now/table/"+ table +"?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
+
+        //loadXMLDoc(g_ck,url,"", res => callback(res));
+        loadXMLDoc(g_ck,url,"", res => {
+
+            res = (fullRecord) ? res.result[0] : res.result[0].sys_id.value;
+            callback(res);
+        
+        });
+         
+    };
+    request.onerror = function () {
+    };
+    request.send();
 }
