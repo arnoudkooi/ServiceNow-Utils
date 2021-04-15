@@ -169,6 +169,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Instance search <sys_id>"
     },
+    "tsk": {
+        "url": "task.do?sysparm_refkey=name&sys_id=$0",
+        "hint": "Open task <number>"
+    },
     "tn": {
         "url": "*",
         "hint": "Show Technical Names"
@@ -956,6 +960,7 @@ function setSnuFilter() {
 }
 
 function snuExpandHints(shortcut) {
+    if (typeof shortcut == "object") shortcut = this.dataset.shortcut;
     shortcut = shortcut || this.dataset.shortcut;
     snuMaxHints = 1000;
     var e = new KeyboardEvent('keypress', { 'key': 'KeyDown' });
@@ -1130,8 +1135,6 @@ var qryDisp = '';
 
 function clickToList() {
 
-
-
     if (typeof g_form != 'undefined') {
         document.addEventListener("click", function (event) {
 
@@ -1143,7 +1146,7 @@ function clickToList() {
                 var val = 'none';
                 var valDisp = '';
                 var operator = '=';
-                if (jQuery(event.target).hasClass('label-text')) {
+                if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
                     elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                     tpe = g_form.getGlideUIElement(elm).type;
                     //tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
