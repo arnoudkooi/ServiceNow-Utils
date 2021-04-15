@@ -169,6 +169,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Instance search <sys_id>"
     },
+    "t": {
+        "url": "/task.do?sysparm_query=number=$0",
+        "hint": "Open task with this number"
+    },
     "tn": {
         "url": "*",
         "hint": "Show Technical Names"
