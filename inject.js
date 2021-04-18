@@ -13,12 +13,12 @@ var snuNav = {
 
 var snuslashcommands = {
     "acl": {
-        "url": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2",
+        "url": "sys_security_acl_list.do?sysparm_query=nameLIKE$1^operationLIKE$2^ORDERBYDESCsys_updated_on",
         "hint": "Filter ACL list <table> <operation>",
         "fields": "name"
     },
     "app": {
-        "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0",
+        "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Applications <name>",
         "fields": "name"
     },
@@ -27,7 +27,7 @@ var snuslashcommands = {
         "hint": "Open App Engine Studio"
     },
     "br": {
-        "url": "sys_script_list.do?sysparm_query=nameLIKE$0",
+        "url": "sys_script_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Business Rules <name>",
         "fields": "name"
     },
@@ -68,7 +68,7 @@ var snuslashcommands = {
         "hint": "Search Community <search>"
     },
     "cs": {
-        "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0",
+        "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Client Scripts <name>",
         "fields": "name"
     },
@@ -131,7 +131,7 @@ var snuslashcommands = {
         "hint": "Global Instance Search <search>"
     },
     "si": {
-        "url": "sys_script_include_list.do?sysparm_orderby=api_name&sysparm_query=api_nameLIKE$0",
+        "url": "sys_script_include_list.do?sysparm_orderby=api_name&sysparm_query=api_nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Script Includes <name>",
         "fields": "api_name"
     },
@@ -140,7 +140,7 @@ var snuslashcommands = {
         "hint": "Service Portal"
     },
     "spw": {
-        "url": "sp_widget_list.do?sysparm_query=nameLIKE$0",
+        "url": "sp_widget_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Service Portal Widgets <search>",
         "fields": "name",
         "overwriteurl": "/sp_config?id=widget_editor&sys_id=$sysid"
@@ -195,7 +195,7 @@ var snuslashcommands = {
         "fields": "user_name"
     },
     "ua": {
-        "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0",
+        "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter UI Actions <name>",
         "fields": "name"
     },
@@ -208,7 +208,7 @@ var snuslashcommands = {
         "hint": "Open UI Builder"
     },
     "uis": {
-        "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0",
+        "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter UI Scripts <name>",
         "fields": "name"
     },
@@ -217,7 +217,7 @@ var snuslashcommands = {
         "hint": "Stop impersonating and reload page"
     },
     "up": {
-        "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0",
+        "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "UI Policies <name>",
         "fields": "name"
     },
@@ -372,6 +372,8 @@ function snuGetDirectLinks(targeturl, shortcut) {
             var directlinks = '';
             var results = jsn.result;
             if (jsn.hasOwnProperty('result')) {
+                var idx = 0;
+                var dispIdx = 0;
                 Object.entries(results).forEach(([key, val]) => {
                     var fieldArr = fields.split(',');
                     var txtArr = [];
@@ -385,7 +387,18 @@ function snuGetDirectLinks(targeturl, shortcut) {
                         link = overwriteurl.replace(/\$sysid/g, val.sys_id)
                         target = (!overwriteurl.startsWith("http") && !overwriteurl.startsWith("/")) ? "gsft_main" : "_blank";
                     }
-                    directlinks += '> <a target="' + target + '" href="' + link + '">' + txt + '</a><br />';
+                    var idattr
+                    if (idx < 10 && (dispIdx !== '>')) {
+                        idx++; 
+                        dispIdx++;
+                        dispIdx = dispIdx%10;
+                        idattr = 'id="snulnk'+ dispIdx+'"';
+                    }
+                    else {
+                        dispIdx = '>'; 
+                        idattr = '';
+                    }
+                    directlinks += dispIdx +' <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
                 });
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
@@ -424,7 +437,13 @@ function addSlashCommandListener() {
             else
                 snuIndex--;
         }
-
+        if (isFinite(e.key)) {
+            if (window.top.document.getElementById('snulnk' + e.key)){
+                e.preventDefault();
+                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent("click"));
+                return;
+            }
+        }
         if (e.key == 'Meta' || e.key == 'Control' || e.key == 'ArrowLeft') return;
         if (e.currentTarget.selectionStart < e.currentTarget.value.length && e.key == 'ArrowRight') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
@@ -457,7 +476,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-") && !query) { snuGetTables(tmpshortcut) };
+        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -697,7 +716,7 @@ function addSlashCommandListener() {
                     if (typeof qry != 'undefined') {
                         if (targeturl.includes("{}")) {
                             targeturl = targeturl.replace('{}', qry.getTableName());
-                            //window.open(targeturl, '_blank');
+                            window.open(targeturl, '_blank');
                         }
                         else {
                             var newQ = qry.filter.replace(targeturl, "")
@@ -877,7 +896,6 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     if (!["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key) || snuIndex > snuPropertyNames.length) {
         snuIndex = 0;
     }
-
     if ((e.ctrlKey || e.metaKey) && e.key == 'v' && shortcut == 'v') {
         //asume a sys_id when pasting for correct 'autocomplete'
         shortcut = "00000000000000000000000000000000";
@@ -944,6 +962,8 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
+    window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length +  "/" + Object.keys(snuslashcommands).length);
+    
 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
@@ -951,11 +971,14 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
 }
 
 function setSnuFilter() {
-    var elm = this;
-    if (elm.innerText.length > window.top.document.getElementById('snufilter').value.length) {
+    var slshcmd = this.querySelector('.cmdkey').innerText;
+    if (!window.top.document.getElementById('snufilter').value.startsWith(slshcmd)) {
         window.top.document.getElementById('snufilter').focus();
-        window.top.document.getElementById('snufilter').value = elm.querySelector('.cmdkey').innerText + ' ';
+        window.top.document.getElementById('snufilter').value = slshcmd + ' ';
         snuIndex = parseInt(this.dataset.index || 0);
+    }
+    else {
+        window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'Enter'}));
     }
 }
 
@@ -1739,7 +1762,7 @@ function setShortCuts() {
     var htmlFilter = document.createElement('div');
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands<span style="float:right; font-size:6pt; line-height: 16pt;"><a href="https://twitter.com/sn_utils" target="_blank">@sn_utils</a>&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:6pt; line-height: 16pt;"><a href="https://twitter.com/sn_utils" target="_blank">@sn_utils</a>&nbsp;</span></div>
     <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
@@ -2816,16 +2839,18 @@ function snuGetNav(shortcut) {
 
             navArr = [];
             Object.entries(resp['favorites']).forEach(([key, val]) => {
-                Object.entries(val.favorites).forEach(([key2, val2]) => {
-                    if (val2.separator) {
-                        Object.entries(val2.favorites).forEach(([key3, val3]) => {
-                            navArr.push({ "app": (val.title + " - " + (val2.title || "")).replace("  ", " "), "item": val3.title, "uri": val3.url })
-                        });
-                    }
-                    else {
-                        navArr.push({ "app": val.title, "item": val2.title, "uri": val2.url })
-                    }
-                });
+                if (val.hasOwnProperty('favorites')){
+                    Object.entries(val.favorites).forEach(([key2, val2]) => {
+                        if (val2.separator) {
+                            Object.entries(val2.favorites).forEach(([key3, val3]) => {
+                                navArr.push({ "app": (val.title + " - " + (val2.title || "")).replace("  ", " "), "item": val3.title, "uri": val3.url })
+                            });
+                        }
+                        else {
+                            navArr.push({ "app": val.title, "item": val2.title, "uri": val2.url })
+                        }
+                    });
+                }
             });
             snuNav['favorites'] = navArr;
 
@@ -2963,6 +2988,8 @@ function snuGetLastScopes() {
         var urlScope = "/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=sys_idIN" + scopes.join(',');
         loadXMLDoc(g_ck, urlScope, null, res => {
             var returnScopes = {};
+            var idx = 0; 
+            var dispIdx = 0;
             res.result.forEach(scp => returnScopes[scp.sys_id] = scp);
 
             //var lastScopes = []
@@ -2970,7 +2997,18 @@ function snuGetLastScopes() {
             scopes.forEach(scp => {
                 returnScopes[scp]['date'] = scopesObj[scp];
                 //lastScopes.push(returnScopes[scp]);
-                scopeDirectLinks += '> <a class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
+                var idattr
+                if (idx < 10 && (dispIdx !== '>')) {
+                    idx++; 
+                    dispIdx++;
+                    dispIdx = dispIdx%10;
+                    idattr = 'id="snulnk'+ dispIdx+'"';
+                }
+                else {
+                    dispIdx = '>'; 
+                    idattr = '';
+                }
+                scopeDirectLinks += dispIdx +' <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
             })
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(scopeDirectLinks);
 
