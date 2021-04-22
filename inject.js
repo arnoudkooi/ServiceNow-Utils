@@ -720,6 +720,13 @@ function addSlashCommandListener() {
                             targeturl = targeturl.replace('{}', qry.getTableName());
                             window.open(targeturl, '_blank');
                         }
+                        else if (targeturl.startsWith("&")) {
+                            var myurl = window.location.href
+                            if (targeturl.startsWith("&sysparm_group_sort=COUNT")){
+                                myurl = myurl.replace("&sysparm_group_sort=COUNT","").replace("&sysparm_group_sort=COUNT","");
+                            }
+                            window.location = myurl + targeturl;
+                        }
                         else {
                             var newQ = qry.filter.replace(targeturl, "")
                             qry.setFilterAndRefresh(newQ + targeturl);
