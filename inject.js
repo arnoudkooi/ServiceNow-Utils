@@ -29,7 +29,7 @@ var snuslashcommands = {
     "br": {
         "url": "sys_script_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Business Rules <name>",
-        "fields": "name"
+        "fields": "name,collection"
     },
     "cancel": {
         "url": "/cancel_my_transactions.do",
@@ -197,7 +197,7 @@ var snuslashcommands = {
     "ua": {
         "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter UI Actions <name>",
-        "fields": "name"
+        "fields": "name,table"
     },
     "uh": {
         "url": "*",
@@ -264,6 +264,8 @@ var snuslashswitches = {
 
     "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
     "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
+    "ga": { "description": "Group Count Ascending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNT", "type": "querypart" },
+    "gd": { "description": "Group Count Descending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNTDESC", "type": "querypart" },
     "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
     "uct": { "description": "Updated or Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORsys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
@@ -375,7 +377,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                 var idx = 0;
                 var dispIdx = 0;
                 Object.entries(results).forEach(([key, val]) => {
-                    var fieldArr = fields.split(',');
+                    var fieldArr = fields.replace(/ /g,'').split(',');
                     var txtArr = [];
                     for (var i = 0; i < fieldArr.length; i++) {
                         txtArr.push(val[fieldArr[i]])
