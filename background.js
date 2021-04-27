@@ -26,7 +26,7 @@ if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatab
 chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
     var version = chrome.runtime.getManifest().version;
-    if (details.reason == "install" || (details.reason == "update" && version == "4")) {
+    if (details.reason == "install" || (details.reason == "update" && version == ("5.0.0.0"))) {
         openFile("welcome.html");
     }
 
