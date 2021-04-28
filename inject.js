@@ -411,6 +411,19 @@ function snuGetDirectLinks(targeturl, shortcut) {
     }
 }
 
+function snuEasyCompareTime() { //for our ITOM friends to easy select compare time range (hit left or right shift when tooltip appears)
+    if (location.pathname != "/$sw_topology_map.do") return;
+    document.addEventListener("keydown", function (event) {
+        if (event.shiftKey) {
+            var tt = document.querySelector("text.tlTooltip.compare");
+            var elm = document.querySelector("#glide_date_time_sa_history_point" + event.location + "_sa_history_point" + event.location);
+            if (!tt || !elm) return;
+            elm.value = tt.innerHTML
+            elm.dispatchEvent(new Event("change"));
+        };
+    });
+}
+snuEasyCompareTime();
 
 function addFilterListener() {
     if (document.getElementById('filter') == null) return;
