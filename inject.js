@@ -1561,7 +1561,7 @@ function addTechnicalNames() {
     //also show viewname
     var viewName = jQuery('input#sysparm_view').val();
     if (viewName && !jQuery('i.viewName').length)
-        jQuery('.section-content').first().prepend('<i class="viewName">Viewname: ' + viewName + '</i><br /> ');
+        jQuery('.section-content').first().prepend('<i class="viewName">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "")+ '</i><br /> ');
 
     showSelectFieldValues();
     searchLargeSelects();
@@ -2355,7 +2355,7 @@ function postRequestToScriptSync(requestType) {
     client.open("post", "http://127.0.0.1:1977");
     client.onreadystatechange = function (m) {
         if (client.readyState == 4 && client.status != 200)
-            g_form.addErrorMessage(client.responseText);
+            g_form.addErrorMessage(client.responseText.replace(/<\/?[^>]+(>|$)/g, ""));
     };
     client.onerror = function (e) {
         alert("Error, please check if VS Code with SN SriptSync is running");

@@ -363,7 +363,7 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
       '.do?sys_id=' +
       hit.sysId +
       '" target="_blank">' +
-      hit.name +
+      hit.name.replace(/<\/?[^>]+(>|$)/g, "") +
       ' (' +
       hit.matches.length +
       ')' +
@@ -440,7 +440,7 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
 
     jQuery('#searchmsg').html('Searching table: ' + searchTables[idx] + '...');
 
-    console.log(endpoint + '&table=' + searchTables[idx]);
+    //console.log(endpoint + '&table=' + searchTables[idx]);
     loadXMLDoc(gck, endpoint + '&table=' + searchTables[idx], null).then(
       (results) => {
         renderResults(url, results, searchTerm, searchTables);
