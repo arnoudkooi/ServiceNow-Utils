@@ -2,37 +2,13 @@ var tableIndex = 0;
 var statisticsObj;
 var searchTables = [];
 var defaultTables = [
-  'sys_script',
-  'sys_ui_action',
-  'sys_trigger',
-  'sys_ui_page',
-  'sys_ui_script',
-  'sys_processor',
-  'sys_script_include',
-  'sys_ui_policy',
-  'sys_script_client',
-  'sys_ui_macro',
-  'process_step_approval',
-  'sysevent_in_email_action',
-  'sys_ui_style',
-  'sys_installation_exit',
-  'sys_script_validator',
-  'sysauto_script',
-  'sys_relationship',
-  'sys_script_ajax',
-  'sys_transform_script',
-  'sysevent_email_action',
-  'ecc_agent_script_include',
-  'sys_security_acl',
-  'cmn_map_page',
-  'wf_activity_definition',
-  'kb_navons',
-  'sys_transform_map',
-  'content_block_programmatic',
-  'sysevent_email_template',
-  'bsm_action',
-  'sys_widgets',
-  'sysevent_script_action'
+  'sys_script', 'sys_ui_action', 'sys_trigger', 'sys_ui_page', 'sys_ui_script', 'sys_processor',
+  'sys_script_include', 'sys_ui_policy', 'sys_script_client', 'sys_ui_macro', 'process_step_approval',
+  'sysevent_in_email_action', 'sys_ui_style', 'sys_installation_exit', 'sys_script_validator',
+  'sysauto_script', 'sys_relationship', 'sys_script_ajax', 'sys_transform_script', 'sysevent_email_action',
+  'ecc_agent_script_include', 'sys_security_acl', 'cmn_map_page', 'wf_activity_definition', 'kb_navons',
+  'sys_transform_map', 'content_block_programmatic', 'sysevent_email_template', 'bsm_action',
+  'sys_widgets', 'sysevent_script_action'
 ];
 
 var suggestedtables = [
@@ -203,14 +179,8 @@ function getGroupTables() {
 
     suggestedtables.forEach((tbl) => {
       if (!actualtablesarray.includes(tbl[0])) {
-        var lnk =
-          url +
-          '/sn_codesearch_table.do?sys_id=-1&sysparm_query=search_group=9a44f352d7120200b6bddb0c82520376^table=' +
-          tbl[0] +
-          '^search_fields=' +
-          tbl[1] +
-          '^additional_filter=' +
-          tbl[2];
+        var lnk = `${url}/sn_codesearch_table.do?sys_id=-1&sysparm_query=search_group=9a44f352d7120200b6bddb0c82520376^table=` +
+        `${tbl[0]}^search_fields=${tbl[1]}^additional_filter=${tbl[2]}`;
         tbl.push(lnk);
         missingtables.push(tbl);
       }
@@ -264,6 +234,7 @@ function getGroupTables() {
     const sys_id = $('#search_group_select').val();
     setDefaultGroubBySysId(sys_id);
     getGroupTables();
+    missingTablesVisible(sys_id);
   });
 
   $('#select_default_tables_checkbox').click(function (e) {
@@ -278,6 +249,14 @@ function doSearch() {
     jQuery('#query').val(),
     jQuery('#search_group').val()
   );
+}
+
+
+function missingTablesVisible(sys_id) {
+  if (sys_id == '9a44f352d7120200b6bddb0c82520376')
+    $('#missingtables').show();
+  else
+    $('#missingtables').hide();
 }
 
 function renderResults(url, result, searchTerm, tables) {
@@ -305,114 +284,63 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
     // '</h5></div>' +
     // '<div id="collapse_' + data.recordType + '" class="collapse show" aria-labelledby="' + data.recordType + '" idata-parent="#searchCodeAccordion">' +
     // '<div class="card-body">';<i class="fas fa-chevron-circle-down"></i>
-    '<div class="card"> <a class="anchor" name="' +
-    data.recordType +
-    '"></a>' +
-    '<div class="card-header" id="head_' +
-    data.recordType +
-    '">' +
-    '<h5 class="mb-0"><button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' +
-    data.recordType +
-    '" aria-expanded="true" aria-controls="collapse_' +
-    data.recordType +
-    '">' +
-    '<i class="fas fa-chevron-circle-right"></i></button> ' +
-    data.tableLabel +
-    ' [' +
-    data.recordType +
-    '] | Hits:' +
-    data.hits.length +
-    '</h5></div>' +
-    '<div id="collapse_' +
-    data.recordType +
-    '" class="tablecollapse collapse show" aria-labelledby="' +
-    data.recordType +
-    '" idata-parent="#searchCodeAccordion">' +
-    '<div class="card-body">';
+    `<div class="card"> <a class="anchor" name="${data.recordType}"></a>
+    <div class="card-header" id="head_${data.recordType}">
+    <h5 class="mb-0"><button class="btn btn-link" type="button" data-toggle="collapse" 
+    data-target="#collapse_${data.recordType}" aria-expanded="true" aria-controls="collapse_${data.recordType}">
+    <i class="fas fa-chevron-circle-right"></i></button>${data.tableLabel}' [${data.recordType}] | Hits:${data.hits.length}</h5></div>
+    <div id="collapse_${data.recordType}" class="tablecollapse collapse show" aria-labelledby="${data.recordType}" 
+    idata-parent="#searchCodeAccordion"><div class="card-body">`;
 
   var footer =
-    '</div> <!--card-body-->' +
-    '</div> <!--collapse-->' +
-    '</div> <!--card--><br />';
+    `</div> <!--card-body-->
+    </div> <!--collapse-->
+    </div> <!--card--><br />`;
 
   statisticsObj.tables += 1;
-  statisticsObj.tableNames +=
-    "<a href='#" + data.recordType + "'>" + data.tableLabel + '</a>';
+  statisticsObj.tableNames += `<a href='#${data.recordType}'>${data.tableLabel}</a>`;
 
-  var tableAccordion =
-    '<div class="accordion" id="searchCodeTableAccordion_' +
-    data.recordType +
-    '">';
+  var tableAccordion = `<div class="accordion" id="searchCodeTableAccordion_${data.recordType}">`;
 
   jQuery.each(data.hits, function (idx, hit) {
-    var recordHeader =
-      '' +
-      '<div class="card">' +
-      '<div class="card-header" id="head_' +
-      hit.sysId +
-      '">' +
-      '<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' +
-      hit.sysId +
-      '" aria-expanded="true" aria-controls="collapse_' +
-      hit.sysId +
-      '"><i class="fas fa-chevron-circle-right"></i></button>' +
-      ' <span class="bigger"><a href="' +
-      url +
-      '/' +
-      data.recordType +
-      '.do?sys_id=' +
-      hit.sysId +
-      '" target="_blank">' +
-      hit.name.replace(/<\/?[^>]+(>|$)/g, "") +
-      ' (' +
-      hit.matches.length +
-      ')' +
-      '</a></span>' +
-      '</div>' +
-      '<div id="collapse_' +
-      hit.sysId +
-      '" class="collapse show" aria-labelledby="' +
-      hit.sysId +
-      '" idata-parent="#searchCodeTableAccordion_' +
-      data.recordType +
-      '">' +
-      '<div class="card-body">';
+    var recordHeader = `
+      <div class="card">
+      <div class="card-header" id="head_${hit.sysId}">
+      <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_${hit.sysId}" 
+      aria-expanded="true" aria-controls="collapse_${hit.sysId}"><i class="fas fa-chevron-circle-right"></i></button>
+      <span class="bigger"><a href="${url}/${data.recordType}.do?sys_id=${hit.sysId}" target="_blank">
+      ${hit.name.replace(/<\/?[^>]+(>|$)/g, "")} (${hit.matches.length})</a></span></div>
+      <div id="collapse_${hit.sysId}" class="collapse show" aria-labelledby="${hit.sysId}" 
+      idata-parent="#searchCodeTableAccordion_${data.recordType}"><div class="card-body">`;
 
-    var text = '<ul class="record">';
+    var text = `<ul class="record">`;
     statisticsObj.hits += 1;
 
     jQuery.each(hit.matches, function (indx, match) {
-      text += '<li><span>Field: ' + match.fieldLabel + '</span>';
-      text += '<pre><code>';
+      text += `<li><span>Field:${match.fieldLabel}</span><pre><code>`;
       jQuery.each(match.lineMatches, function (ix, fieldMatch) {
-        if (
-          fieldMatch.escaped.toLowerCase().indexOf(searchTerm.toLowerCase()) >
-          -1
-        ) {
-          statisticsObj.lines += 1;
-          var fieldMatchHighlighted = fieldMatch.escaped.replace(
-            new RegExp(searchTerm, 'gi'),
-            function (m) {
-              return '<strong>' + m + '</strong>';
-            }
-          );
-          text += fieldMatch.line + ' | ' + fieldMatchHighlighted + '\n';
-        }
+        statisticsObj.lines += 1;
+        var fieldMatchHighlighted = fieldMatch.escaped.replace(
+          new RegExp(htmlEntities(searchTerm), 'gi'),
+          function (m) {
+            return `<strong>${m}</strong>`;
+          }
+        );
+        text += `${fieldMatch.line} | ${fieldMatchHighlighted} \n`;
       });
-      text += '</code></pre></li>';
+      text += `</code></pre></li>`;
     });
-    text += '</ul>';
+    text += `</ul>`;
 
     var recordFooter =
-      '' +
-      '</div> <!--card-body-->' +
-      '</div> <!--collapse-->' +
-      '</div> <!--card-->';
+      `</div> <!--card-body-->
+      </div> <!--collapse-->
+      </div> <!--card-->`;
 
     tableAccordion += recordHeader + text + recordFooter;
   });
 
-  tableAccordion += '</div>';
+  tableAccordion += `</div>`;
 
   var rtrn = header + tableAccordion + footer;
   return rtrn;
@@ -452,39 +380,22 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
           tableIndex = 0;
 
           var html =
-            'Result of last search: <u>' +
-            jQuery('#query').val() +
-            '</u>' +
-            ' | Tables: <u>' +
-            statisticsObj.tables +
-            '</u>' +
-            ' | Records: <u>' +
-            statisticsObj.hits +
-            '</u>' +
-            ' | Hits: <u>' +
-            statisticsObj.lines +
-            '</u>';
+            `Result of last search: <u>${jQuery('#query').val()}</u> | Tables: <u>${statisticsObj.tables}</u> | Records: <u>
+            ${statisticsObj.hits} </u> | Hits: <u>${statisticsObj.lines}</u>`;
           jQuery('#searchmsg').html(html);
 
           if (missingtables.length > 0) {
             statisticsObj.tableNames +=
-              "<a class='whitebg' href='#suggestedtables'>" +
-              missingtables.length +
-              ' suggested tables</a>';
+              `<a class='whitebg' href='#suggestedtables'>${missingtables.length} suggested tables</a>`;
             jQuery('#searchmsgtablelinks').html(statisticsObj.tableNames || '');
 
             var missingTablesHtml =
-              "<div class='card-body'><a class='anchor' name='suggestedtables'></a>Condsider adding the following tables to code search. (Credit: <a href='https://jace.pro' target='_blank'>Jace Benson</a>)<br />" +
-              'Click link to open preffiled record. Note this will be tracked in current scope / updateset<br /><br /><ul>';
+              `<div class='card-body'><a class='anchor' name='suggestedtables'></a>Condsider adding the following tables to code search. (Credit: <a href='https://jace.pro' target='_blank'>Jace Benson</a>)<br />
+              Click link to open preffiled record. Note this will be tracked in current scope / updateset<br /><br /><ul>`;
             missingtables.forEach((tbl) => {
-              missingTablesHtml +=
-                "<li><a href='" +
-                tbl[3] +
-                "' target='tbls'>" +
-                tbl[0] +
-                '</a></li>';
+              missingTablesHtml += `<li><a href='${tbl[3]}' target='tbls'>${tbl[0]}</a></li>`;
             });
-            missingTablesHtml += '</ul></div>';
+            missingTablesHtml += `</ul></div>`;
             jQuery('#missingtables').html(missingTablesHtml);
           }
         }
@@ -556,4 +467,8 @@ function setDefaultGroubBySysId(sys_id) {
 
 function setGroupDescription(group) {
   $('#search_group_description').text(group.description);
+}
+
+function htmlEntities(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

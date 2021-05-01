@@ -1816,7 +1816,7 @@ function setShortCuts() {
         if (typeof g_form != 'undefined') {
             mySysId = g_form.getUniqueValue();
             var action;
-            if ((event.ctrlKey || event.metaKey) && event.keyCode == 83) { //cmd-s
+            if ((event.ctrlKey || event.metaKey) && event.key == "s") { //cmd-s
 
                 event.preventDefault();
                 var doInsertStay = false;
@@ -2267,10 +2267,10 @@ function getSelectionText() {
 }
 
 function fillFields() {
-    if (typeof window.g_form != 'undefined') {
+    if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do') {
         if (!window.NOW.user.roles.split(',').includes('admin')) return;
-        var manFields = g_form.getMissingFields();
-        setRandom(g_form.getTableName(),manFields, window);
+        var manFields = window.g_form.getMissingFields();
+        setRandom(window.g_form.getTableName(),manFields, window);
     } 
     else {
         Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
