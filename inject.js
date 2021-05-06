@@ -263,7 +263,7 @@ var snuslashswitches = {
     "erd": { "description": "View Schema Map", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
 
     "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
-    "f": { "description": "Filter only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
+    "f": { "description": "Filter Only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
     "ga": { "description": "Group Count Ascending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNT", "type": "querypart" },
     "gd": { "description": "Group Count Descending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNTDESC", "type": "querypart" },
     "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
@@ -275,6 +275,7 @@ var snuslashswitches = {
     "m": { "description": "Updated or Created by Me", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
     "ou": { "description": "Order by Updated Descending", "value": "^ORDERBYDESCsys_updated_on", "type": "encodedquerypart" },
     "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on", "type": "encodedquerypart" },
+    "p": { "description": "Filter Pinned", "value": "&sysparm_filter_pinned=true", "type": "querypart" },
 }
 
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD",
@@ -491,7 +492,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { snuGetTables(tmpshortcut) };
+        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || snuPropertyNames.length > 99  ||tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -1589,7 +1590,7 @@ function openReference(refTable, refField, evt) {
 
 function showSelectFieldValues() {
     if (typeof jQuery == 'undefined') return; //not in studio
-    if (location.pathname == "/sys_report_template.do") return; //not in report builder
+    if (["/sys_report_template.do", "/$queryBuilder.do"].includes(location.pathname)) return; //not in report or query builder
 
     jQuery('option').not(":contains('|')").each(function (i, el) {
         var jqEl = jQuery(el);
