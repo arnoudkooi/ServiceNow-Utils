@@ -156,6 +156,8 @@ function getParameterByName(name, url) {
 //Also attach event handlers.
 function setBrowserVariables(obj) {
 
+    $("#snuVersion").text(chrome.app.getDetails().version);
+
     g_ck = obj.myVars.g_ck || '';
     url = obj.url;
     instance = (new URL(url)).host.replace(".service-now.com", "");

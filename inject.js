@@ -378,7 +378,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                 var idx = 0;
                 var dispIdx = 0;
                 Object.entries(results).forEach(([key, val]) => {
-                    var fieldArr = fields.replace(/ /g,'').split(',');
+                    var fieldArr = fields.replace(/ /g, '').split(',');
                     var txtArr = [];
                     for (var i = 0; i < fieldArr.length; i++) {
                         txtArr.push(val[fieldArr[i]])
@@ -392,16 +392,16 @@ function snuGetDirectLinks(targeturl, shortcut) {
                     }
                     var idattr
                     if (idx < 10 && (dispIdx !== '>')) {
-                        idx++; 
+                        idx++;
                         dispIdx++;
-                        dispIdx = dispIdx%10;
-                        idattr = 'id="snulnk'+ dispIdx+'"';
+                        dispIdx = dispIdx % 10;
+                        idattr = 'id="snulnk' + dispIdx + '"';
                     }
                     else {
-                        dispIdx = '>'; 
+                        dispIdx = '>';
                         idattr = '';
                     }
-                    directlinks += dispIdx +' <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
+                    directlinks += dispIdx + ' <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
                 });
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
@@ -454,7 +454,7 @@ function addSlashCommandListener() {
                 snuIndex--;
         }
         if (isFinite(e.key)) {
-            if (window.top.document.getElementById('snulnk' + e.key)){
+            if (window.top.document.getElementById('snulnk' + e.key)) {
                 e.preventDefault();
                 window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent("click"));
                 return;
@@ -492,7 +492,7 @@ function addSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || snuPropertyNames.length > 99  ||tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { snuGetTables(tmpshortcut) };
+        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { snuGetTables(tmpshortcut) };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -505,9 +505,9 @@ function addSlashCommandListener() {
 
         if (targeturl.startsWith("//")) { //enable to use ie '/dev' as a shortcut for '/env acmedev'
             snufilter = snuslashcommands[shortcut].url.substr(2);
-            if (snuReceivedCommand){
+            if (snuReceivedCommand) {
                 window.top.document.getElementById('snufilter').value = targeturl.substring(1);
-                window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowDown'}));
+                window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowDown' }));
             }
             var idx = snufilter.indexOf(' ')
             if (idx == -1) idx = snufilter.length;
@@ -736,8 +736,8 @@ function addSlashCommandListener() {
                         }
                         else if (targeturl.startsWith("&")) {
                             var myurl = doc.location.href
-                            if (targeturl.startsWith("&sysparm_group_sort=COUNT")){
-                                myurl = myurl.replace("&sysparm_group_sort=COUNT","").replace("&sysparm_group_sort=COUNT","");
+                            if (targeturl.startsWith("&sysparm_group_sort=COUNT")) {
+                                myurl = myurl.replace("&sysparm_group_sort=COUNT", "").replace("&sysparm_group_sort=COUNT", "");
                             }
                             doc.location = myurl + targeturl;
                         }
@@ -761,7 +761,7 @@ function addSlashCommandListener() {
                         window.open(targeturl, '_blank');
                 }
 
-                if(!targeturl.startsWith("$random")){
+                if (!targeturl.startsWith("$random")) {
                     hideSlashCommand();
                     return;
                 }
@@ -873,11 +873,11 @@ function addSlashCommandListener() {
                 }
             }
 
-            if(targeturl.startsWith("$random")){
+            if (targeturl.startsWith("$random")) {
                 targeturl = targeturl.substring(8)
-                snuGetRandomRecord(targeturl,"",false,res => { 
+                snuGetRandomRecord(targeturl, "", false, res => {
                     targeturl = targeturl + ".do?sys_id=" + res;
-                    if (inIFrame) 
+                    if (inIFrame)
                         jQuery('#gsft_main').attr('src', targeturl);
                     else
                         window.open(targeturl, '_blank');
@@ -894,14 +894,14 @@ function addSlashCommandListener() {
                 }
                 else {
 
-                    if (!targeturl.startsWith("//") ) {
+                    if (!targeturl.startsWith("//")) {
                         console.log((new Date()).getTime() - snuLastOpened);
                         if ((new Date()).getTime() - snuLastOpened > 500) {
                             snuLastOpened = (new Date()).getTime();
                             window.open(targeturl, '_blank');
                         }
                         snuLastOpened = (new Date()).getTime();
-                        
+
                     }
                 }
             }
@@ -985,8 +985,8 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
-    window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length +  "/" + Object.keys(snuslashcommands).length);
-    
+    window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length + "/" + Object.keys(snuslashcommands).length);
+
 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
@@ -1001,7 +1001,7 @@ function setSnuFilter() {
         snuIndex = parseInt(this.dataset.index || 0);
     }
     else {
-        window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'Enter'}));
+        window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Enter' }));
     }
 }
 
@@ -1105,6 +1105,7 @@ function createHyperLinkForGlideLists() {
     try {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
+            //var fieldId = elm.id.replace('label.','');
             var table = g_form.getGlideUIElement(field).reference;
             var hasReferenceTable = table && table !== 'null';
             // if there's no Reference Table, there's no use adding links, values are to be used as-is 
@@ -1115,19 +1116,36 @@ function createHyperLinkForGlideLists() {
             var links = [];
             var sysIDRegex = /[0-9a-f]{32}/i;
             for (var i = 0; i < labels.length; i++) {
-                if (hasReferenceTable && sysIDRegex.test(values[i]))
+                if (hasReferenceTable && sysIDRegex.test(values[i])) {
                     links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
+                    //links.push(`<span id='${field}-${values[i]}' data-fieldid="${fieldId}"><a title='Remove' class="remove icon icon-cross" href="#" style="font-size:6pt; color:red; padding-right:3px; vertical-align: middle;" aria-hidden="true"></a><a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a></span>`);
+                }
                 else
                     links.push(values[i]);
             }
             var html = links.join(', ');
             elm.nextSibling.querySelector('p').innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+            // var newElm = elm.nextSibling.querySelector('p')
+            // newElm.innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+            // Array.from(newElm.querySelectorAll('.remove')).forEach(function(elm) {
+            //     elm.addEventListener('click', snuRemoveFromList);
+            // });
         })
     } catch (e) { };
 }
 
-
-
+// function snuRemoveFromList(){
+//     var elm = this.parentElement;
+//     var ref = elm.getAttribute("data-fieldid");
+//     setRemovalNotification(ref);
+//     simpleRemoveOption($('select_0' + ref));
+//     var choiceRef = $('choice.' + ref);
+//     if (choiceRef) {
+//         choiceRef.selectedIndex = 0;
+//     }
+//     toggleGlideListIcons(ref);
+//     elm.parentNode.removeChild(elm);
+// }
 
 function doubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
@@ -1562,7 +1580,7 @@ function addTechnicalNames() {
     //also show viewname
     var viewName = jQuery('input#sysparm_view').val();
     if (viewName && !jQuery('i.viewName').length)
-        jQuery('.section-content').first().prepend('<i class="viewName">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "")+ '</i><br /> ');
+        jQuery('.section-content').first().prepend('<i class="viewName">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> ');
 
     showSelectFieldValues();
     searchLargeSelects();
@@ -2245,11 +2263,13 @@ function showSlashCommand(initialCommand) {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints((initialCommand||"").substring(1), false, "", false);
-        if (initialCommand){
-            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown',{'key':'Enter'}));
-            setTimeout(function(){ window.top.document.getElementById('snufilter').selectionStart = 
-            window.top.document.getElementById('snufilter').selectionEnd = 10000; }, 10);
+        snuShowSlashCommandHints((initialCommand || "").substring(1), false, "", false);
+        if (initialCommand) {
+            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Enter' }));
+            setTimeout(function () {
+                window.top.document.getElementById('snufilter').selectionStart =
+                window.top.document.getElementById('snufilter').selectionEnd = 10000;
+            }, 10);
         }
         else {
             setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
@@ -2271,8 +2291,8 @@ function fillFields() {
     if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do') {
         if (!window.NOW.user.roles.split(',').includes('admin')) return;
         var manFields = window.g_form.getMissingFields();
-        setRandom(window.g_form.getTableName(),manFields, window);
-    } 
+        setRandom(window.g_form.getTableName(), manFields, window);
+    }
     else {
         Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
             if (typeof frm.contentWindow.g_form != 'undefined') {
@@ -2286,10 +2306,10 @@ function fillFields() {
         flds.push("");
         var encQ = flds.join("ISNOTEMPTY^");
         flds.pop();
-        snuGetRandomRecord(tbl,encQ,true,res => { 
+        snuGetRandomRecord(tbl, encQ, true, res => {
             flds.forEach(fld => {
-                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string")) ? "RANDOM TESTDATA " : "") + res[fld].value; 
-                doc.g_form.setValue(fld,val,res[fld].display_value);
+                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string")) ? "RANDOM TESTDATA " : "") + res[fld].value;
+                doc.g_form.setValue(fld, val, res[fld].display_value);
             })
         })
     }
@@ -2385,6 +2405,7 @@ function postToScriptSync(field) {
         data.content = g_form.getValue(field);
         data.fieldType = g_form.getGlideUIElement(field).type;
         data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
+
     }
     else { //bgscript
         let date = new Date();
@@ -2862,7 +2883,7 @@ function snuGetNav(shortcut) {
 
             navArr = [];
             Object.entries(resp['favorites']).forEach(([key, val]) => {
-                if (val.hasOwnProperty('favorites')){
+                if (val.hasOwnProperty('favorites')) {
                     Object.entries(val.favorites).forEach(([key2, val2]) => {
                         if (val2.separator) {
                             Object.entries(val2.favorites).forEach(([key3, val3]) => {
@@ -3011,7 +3032,7 @@ function snuGetLastScopes() {
         var urlScope = "/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=sys_idIN" + scopes.join(',');
         loadXMLDoc(g_ck, urlScope, null, res => {
             var returnScopes = {};
-            var idx = 0; 
+            var idx = 0;
             var dispIdx = 0;
             res.result.forEach(scp => returnScopes[scp.sys_id] = scp);
 
@@ -3022,16 +3043,16 @@ function snuGetLastScopes() {
                 //lastScopes.push(returnScopes[scp]);
                 var idattr
                 if (idx < 10 && (dispIdx !== '>')) {
-                    idx++; 
+                    idx++;
                     dispIdx++;
-                    dispIdx = dispIdx%10;
-                    idattr = 'id="snulnk'+ dispIdx+'"';
+                    dispIdx = dispIdx % 10;
+                    idattr = 'id="snulnk' + dispIdx + '"';
                 }
                 else {
-                    dispIdx = '>'; 
+                    dispIdx = '>';
                     idattr = '';
                 }
-                scopeDirectLinks += dispIdx +' <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
+                scopeDirectLinks += dispIdx + ' <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
             })
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(scopeDirectLinks);
 
@@ -3040,7 +3061,7 @@ function snuGetLastScopes() {
                     event.preventDefault();
                     snuSetScope(event.target.hash.substring(1));
                 })
-              })
+            })
         })
     })
 
@@ -3064,7 +3085,7 @@ function snuSetScope(scopeId) {
 }
 
 function snuGetRandomRecord(table, query, fullRecord, callback) {
-    var url = "/api/now/table/"+ table +"?sysparm_limit=1&sysparm_fields=sys_id&sysparm_display_value=false&sysparm_query=" + query;
+    var url = "/api/now/table/" + table + "?sysparm_limit=1&sysparm_fields=sys_id&sysparm_display_value=false&sysparm_query=" + query;
     var request = new XMLHttpRequest();
     request.open("GET", url, true);
     request.setRequestHeader('Cache-Control', 'no-cache');
@@ -3073,17 +3094,17 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
     if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
     request.onload = function () {
         var rows = request.getResponseHeader("X-Total-Count");
-        var rnd = Math.floor(Math.random() * rows) ;
-        url = "/api/now/table/"+ table +"?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
+        var rnd = Math.floor(Math.random() * rows);
+        url = "/api/now/table/" + table + "?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
 
         //loadXMLDoc(g_ck,url,"", res => callback(res));
-        loadXMLDoc(g_ck,url,"", res => {
+        loadXMLDoc(g_ck, url, "", res => {
 
             res = (fullRecord) ? res.result[0] : res.result[0].sys_id.value;
             callback(res);
-        
+
         });
-         
+
     };
     request.onerror = function () {
     };

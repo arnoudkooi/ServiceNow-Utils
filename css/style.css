@@ -12,6 +12,10 @@ table {
 
 }
 
+#snuVersion{
+    font-size: 12pt;
+}
+
 a.iscurrent {
     cursor: default;
     text-decoration-line: none;

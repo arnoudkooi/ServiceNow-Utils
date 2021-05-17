@@ -322,7 +322,7 @@ function mirrorBgScript(scriptObj) {
         if (arrayOfTabs.length){
             scriptTabCreated = false;
             var prefix = arrayOfTabs[0].url.includes("nav_to.do?uri=%2Fsys.scripts.do") ? "gsft_main." : "";
-            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": prefix + "document.getElementById('runscript').value = `" + scriptObj.content + "`" });
+            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": prefix + "document.getElementById('runscript').value = String.raw`" + scriptObj.content + "`" });
         }
         else if (!scriptTabCreated){
             var createObj = {
@@ -331,7 +331,7 @@ function mirrorBgScript(scriptObj) {
             }
             chrome.tabs.create(createObj,
                 function(tab) {
-                    chrome.tabs.executeScript(tab.id, { "code": "document.getElementById('runscript').value = `" + scriptObj.content + "`" });
+                    chrome.tabs.executeScript(tab.id, { "code": "document.getElementById('runscript').value = String.raw`" + scriptObj.content + "`" });
                 }
             );
 
