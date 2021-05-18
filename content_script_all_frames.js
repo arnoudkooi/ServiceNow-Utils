@@ -23,6 +23,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 (function () {
     addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
     addScript('inject.js', true);
+    //addScript('inject_bgscript.js', true);
     getFromSyncStorageGlobal("snusettings", function (snusettings) {
         if (snusettings && snusettings.hasOwnProperty('iconallowbadge') && !snusettings.iconallowbadge) return;
 
