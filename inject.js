@@ -1068,6 +1068,7 @@ function snuSettingsAdded() {
         snuTableCollectionLink();
         newFromPopupToTab();
         createHyperLinkForGlideLists();
+        mouseEnterToConvertToHyperlink();
         //enhanceTinMCE(); disabled #92
 
     }
@@ -1105,7 +1106,8 @@ function createHyperLinkForGlideLists() {
     try {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
-            //var fieldId = elm.id.replace('label.','');
+            var fieldId = elm.id.replace('label.','');
+            var isReadOnly = (g_form.getElement(field).getAttribute("class") || "").includes("readonly");
             var table = g_form.getGlideUIElement(field).reference;
             var hasReferenceTable = table && table !== 'null';
             // if there's no Reference Table, there's no use adding links, values are to be used as-is 
@@ -1116,36 +1118,34 @@ function createHyperLinkForGlideLists() {
             var links = [];
             var sysIDRegex = /[0-9a-f]{32}/i;
             for (var i = 0; i < labels.length; i++) {
-                if (hasReferenceTable && sysIDRegex.test(values[i])) {
-                    links.push(`<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a>`);
-                    //links.push(`<span id='${field}-${values[i]}' data-fieldid="${fieldId}"><a title='Remove' class="remove icon icon-cross" href="#" style="font-size:6pt; color:red; padding-right:3px; vertical-align: middle;" aria-hidden="true"></a><a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a></span>`);
-                }
+                if (values[i] != ""){
+                    var rmvBtn = (!isReadOnly) ? `<span style='white-space: nowrap' id='${field}-${values[i]}' data-field="${field}" data-remove="false" data-value="${values[i]}" data-fieldid="${fieldId}"><a title='Remove' class="remove icon icon-cross" href="#" style="font-size:6pt; color:red; padding-right:3px; vertical-align: middle;" aria-hidden="true"></a>` : "<span>";
+                if (hasReferenceTable && sysIDRegex.test(values[i])) 
+                    links.push(`${rmvBtn}<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a></span>`);
                 else
-                    links.push(values[i]);
-            }
+                    links.push(`${rmvBtn}${labels[i]}</span>`);
+                }
+        }
             var html = links.join(', ');
             elm.nextSibling.querySelector('p').innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
-            // var newElm = elm.nextSibling.querySelector('p')
-            // newElm.innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
-            // Array.from(newElm.querySelectorAll('.remove')).forEach(function(elm) {
-            //     elm.addEventListener('click', snuRemoveFromList);
-            // });
+            var newElm = elm.nextSibling.querySelector('p')
+            newElm.innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+            Array.from(newElm.querySelectorAll('.remove')).forEach(function(elm) {
+                elm.addEventListener('click', snuRemoveFromList);
+            });
         })
     } catch (e) { };
 }
 
-// function snuRemoveFromList(){
-//     var elm = this.parentElement;
-//     var ref = elm.getAttribute("data-fieldid");
-//     setRemovalNotification(ref);
-//     simpleRemoveOption($('select_0' + ref));
-//     var choiceRef = $('choice.' + ref);
-//     if (choiceRef) {
-//         choiceRef.selectedIndex = 0;
-//     }
-//     toggleGlideListIcons(ref);
-//     elm.parentNode.removeChild(elm);
-// }
+function snuRemoveFromList(){
+    var elm = this.parentElement;
+    var val = elm.getAttribute("data-value");
+    var fld = elm.getAttribute("data-field");
+    var oldArr = g_form.getValue(fld).split(',');
+    var newArr = oldArr.filter(item => item !== val);
+    g_form.setValue(fld, newArr.join(','));
+    setTimeout(createHyperLinkForGlideLists,1000);
+}
 
 function doubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
@@ -1168,6 +1168,16 @@ function doubleClickToShowFieldOrReload() {
             }
 
         }, true);
+    }
+}
+
+
+function mouseEnterToConvertToHyperlink() {
+    if (typeof g_form != 'undefined') {
+        document.querySelectorAll('div[type="glide_list"]').forEach(
+            div => div.parentElement.addEventListener('mouseenter', 
+                createHyperLinkForGlideLists
+            ));
     }
 }
 
