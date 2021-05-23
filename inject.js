@@ -230,8 +230,8 @@ var snuslashcommands = {
         "hint": "Workflow Editor"
     },
     "imp": {
-        "url": "impersonate_dialog.do",
-        "hint": "Open Impersonate Form"
+        "url": "*",
+        "hint": "Impersonate User"
     },
     "xml": {
         "url": "/$table.do?XML=&sys_id=$sysid ",
@@ -280,7 +280,6 @@ var snuslashswitches = {
 
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD",
     "IN", "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
-
 
 if (typeof jQuery != "undefined") {
     jQuery(function () {
@@ -339,14 +338,10 @@ function snuGetTables(shortcut) {
                     };
                 }
             });
+            snuExpandHints(shortcut)
         } else {
-            snuslashcommands[shortcut] = {
-                "url": "",
-                "hint": "Could not load results",
-                "type": "table"
-            };
+            snuSetInfoText(`<b>Log</b><br />- Tables can not be retrieved.<br />`, true);
         }
-        snuExpandHints(shortcut)
 
     });
 
@@ -365,6 +360,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
     } catch (e) { }
 
     if (fields) {
+        snuSetInfoText(`Fetching data...`, false);
         snuslashcommands[shortcut].fields
         var url = "api/now/table/" + targeturl.replace("_list.do", "") +
             "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
@@ -373,8 +369,9 @@ function snuGetDirectLinks(targeturl, shortcut) {
         var table = url.match(/.*\/(.*)\?/)[1]
         loadXMLDoc(g_ck, url, null, function (jsn) {
             var directlinks = '';
-            var results = jsn.result;
             if (jsn.hasOwnProperty('result')) {
+                var results = jsn.result;
+                if (results.length == 0) directlinks = `No results found`;
                 var idx = 0;
                 var dispIdx = 0;
                 Object.entries(results).forEach(([key, val]) => {
@@ -403,6 +400,9 @@ function snuGetDirectLinks(targeturl, shortcut) {
                     }
                     directlinks += dispIdx + ' <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
                 });
+            }
+            else {
+                directlinks = `No access to data`;
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
             window.top.document.getElementById('snudirectlinks');
@@ -570,7 +570,6 @@ function addSlashCommandListener() {
             switchText = '<br />Encodedquery detected<br /><br />'
         }
         targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
-        //if (e.key != 'Enter' && (query.length > 1 || e.key == 'ArrowRight' )) snuGetDirectLinks(targeturl, shortcut);
         if (e.key == 'ArrowRight') snuGetDirectLinks(targeturl, shortcut);
 
         if (e.key == 'Enter') {
@@ -604,12 +603,6 @@ function addSlashCommandListener() {
                 document.dispatchEvent(event);
                 hideSlashCommand();
                 return;
-
-                // var outp = "Please review in the new Slaschcommands tab in the popup";
-                // showAlert("Slashcommands <a href='https://www.youtube.com/watch?v=X6HLCV_ptQM&list=PLTyELlWS-zjSIPIs4ukRCrqc4LRHva6-L' target='_blank'>Playlist on YouTube</a><br />Start with a slash command ie '/br parent' for business Rules containing parent in name<br />" +
-                //     "Go to settings tab in popup to manage custom / commands <br />" +
-                //     "Current commands:<pre contenteditable='true' spellcheck='false'>" + outp + "</pre>", "info", 100000);
-
             }
             else if (shortcut == "sa") {
                 snuGetLastScopes();
@@ -617,7 +610,11 @@ function addSlashCommandListener() {
             }
             else if (shortcut == "rnd") {
                 fillFields();
-                hideSlashCommand();
+                return;
+            }
+            else if (shortcut == "imp"){
+                e.preventDefault();
+                snuGetUsersForImpersonate(query);
                 return;
             }
             else if (shortcut == "token") {
@@ -633,7 +630,6 @@ function addSlashCommandListener() {
                 data.url = window.location.origin;
                 data.g_ck = g_ck;
                 data.query = query;
-
                 var event = new CustomEvent(
                     "snutils-event",
                     {
@@ -747,7 +743,6 @@ function addSlashCommandListener() {
                             hideSlashCommand();
                             return;
                         }
-
                     }
                 }
                 if (typeof doc.g_form != 'undefined') {
@@ -760,12 +755,10 @@ function addSlashCommandListener() {
                     if (!targeturl.startsWith("$random"))
                         window.open(targeturl, '_blank');
                 }
-
                 if (!targeturl.startsWith("$random")) {
                     hideSlashCommand();
                     return;
                 }
-
             }
             else if (shortcut == "uh") {
                 var iframes = window.top.document.querySelectorAll("iframe");
@@ -780,22 +773,19 @@ function addSlashCommandListener() {
             }
             else if (shortcut == "unimp") {
                 e.preventDefault();
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function () {
-                    if (this.readyState == 4) {
-                        location.reload();
-                    }
-                };
-                xhttp.open("POST", "sys_unimpersonate.do", true);
-                xhttp.setRequestHeader("X-UserToken", g_ck);
-                xhttp.send();
-                return;
+                var impersonating = snuImpersonater();
+                if (impersonating){
+                    snuImpersonate(impersonating);
+                    return;
+                } else{
+                    snuSetInfoText("You are not impersonating anyone",false);
+                }
             }
             else if (shortcut == "lang") {
                 {
 
                     if (query.length != 2) {
-                        alert("Please provide a 2 character language code like 'en'");
+                        snuSetInfoText("Please provide a 2 character language code like 'en'",false);
                         return;
                     }
                     var payload = { "current": query };
@@ -864,7 +854,6 @@ function addSlashCommandListener() {
 
             var inIFrame = !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
             if (e.target.className == "snutils") inIFrame = false;
-
             if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
                 var queryArr = query.split(" ");
                 for (var i = 0; i <= queryArr.length; i++) {
@@ -872,7 +861,6 @@ function addSlashCommandListener() {
                     targeturl = targeturl.replace(re, queryArr[i] || "");
                 }
             }
-
             if (targeturl.startsWith("$random")) {
                 targeturl = targeturl.substring(8)
                 snuGetRandomRecord(targeturl, "", false, res => {
@@ -895,7 +883,6 @@ function addSlashCommandListener() {
                 else {
 
                     if (!targeturl.startsWith("//")) {
-                        console.log((new Date()).getTime() - snuLastOpened);
                         if ((new Date()).getTime() - snuLastOpened > 500) {
                             snuLastOpened = (new Date()).getTime();
                             window.open(targeturl, '_blank');
@@ -915,7 +902,6 @@ function addSlashCommandListener() {
 }
 
 function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
-
     if (!["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key) || snuIndex > snuPropertyNames.length) {
         snuIndex = 0;
     }
@@ -936,14 +922,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
         return propertyName.indexOf(shortcut) > -1;
     }).sort();
 
-
     var fltr = window.top.document.getElementById('snufilter');
-
-    // if (snuPropertyNames.length == 0 && fltr.value.includes(" ")){
-    //     snuPropertyNames = ["nav"];
-    //     shortcut = "nav"
-    //     fltr.value = "/nav " + fltr.value.replace("/","");
-    // }
 
     if (snuPropertyNames.length > 0 && selectFirst) { //select first hit when tap or space pressed
         if (e) e.preventDefault();
@@ -987,10 +966,8 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
     window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length + "/" + Object.keys(snuslashcommands).length);
 
-
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
-
 }
 
 function setSnuFilter() {
@@ -1016,7 +993,6 @@ function snuExpandHints(shortcut) {
     elm.selectionStart = elm.selectionEnd = elm.value.length;
 }
 
-
 function snuAddSlashCommand(cmd) {
     var event = new CustomEvent(
         "snutils-event",
@@ -1030,7 +1006,6 @@ function snuAddSlashCommand(cmd) {
     document.dispatchEvent(event);
     sncWait();
 }
-
 
 function snuSettingsAdded() {
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
@@ -1069,14 +1044,10 @@ function snuSettingsAdded() {
         newFromPopupToTab();
         createHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
-        //enhanceTinMCE(); disabled #92
-
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
-
         try {
-
             var customCommands = JSON.parse(snusettings.slashcommands || "{}");
             Object.keys(customCommands).forEach(function (key) {
                 snuslashcommands[key] = customCommands[key];
@@ -1086,9 +1057,7 @@ function snuSettingsAdded() {
             Object.keys(snuslashcommands).sort().forEach(function (key) {
                 sco[key] = snuslashcommands[key];
             });
-
             snuslashcommands = sco;
-
         }
         catch (e) {
             console.log("error while parsing slashcommands:" + snusettings.slashcommands + " " + e)
@@ -1099,7 +1068,6 @@ function snuSettingsAdded() {
         addTechnicalNames();
         setTimeout(addTechnicalNamesPortal, 5000);
     }
-
 }
 
 function createHyperLinkForGlideLists() {
@@ -1110,8 +1078,7 @@ function createHyperLinkForGlideLists() {
             var isReadOnly = (g_form.getElement(field).getAttribute("class") || "").includes("readonly");
             var table = g_form.getGlideUIElement(field).reference;
             var hasReferenceTable = table && table !== 'null';
-            // if there's no Reference Table, there's no use adding links, values are to be used as-is 
-            if (!hasReferenceTable) return;
+            if (!hasReferenceTable) return; // if there's no Reference Table, there's no use adding links, values are to be used as-is 
             var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
             var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
             if (labels.length != values.length) return; //not a reliable match
@@ -1153,7 +1120,7 @@ function doubleClickToShowFieldOrReload() {
             if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
                 var elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var val = g_form.getValue(elm);
-                if (NOW.user.roles.split(",").includes('admin')) { //only allow admin to change fields
+                if (NOW.user.roles.split(",").includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
                     var newValue = prompt('[SN Utils]\nValue of ' + elm, val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
@@ -1171,7 +1138,6 @@ function doubleClickToShowFieldOrReload() {
     }
 }
 
-
 function mouseEnterToConvertToHyperlink() {
     if (typeof g_form != 'undefined') {
         document.querySelectorAll('div[type="glide_list"]').forEach(
@@ -1181,8 +1147,7 @@ function mouseEnterToConvertToHyperlink() {
     }
 }
 
-function doubleClickToSetQueryListV2() {
-    //dbl click to view and update filter condition
+function doubleClickToSetQueryListV2() { //dbl click to view and update filter condition
     jQuery('div.breadcrumb_container').on("dblclick", function (event) {
 
         if (event.shiftKey) {
@@ -1196,7 +1161,6 @@ function doubleClickToSetQueryListV2() {
             }
         }
     });
-
     jQuery('div.breadcrumb_container').on("click", function (event) {
         if (event.shiftKey) {
             splitContainsToAnd();
@@ -1223,13 +1187,9 @@ function clickToList() {
                 if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
                     elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                     tpe = g_form.getGlideUIElement(elm).type;
-                    //tpe = jQuery(event.target).closest('div.label_spacing').attr('type');
                     val = g_form.getValue(elm);
-
                     elmDisp = jQuery(event.target).text();
-
                     valDisp = g_form.getDisplayBox(elm) ? g_form.getDisplayBox(elm).value : g_form.getValue(elm);
-
                 }
                 if (jQuery(event.target).hasClass('container-fluid')) {
                     elm = 'sys_id';
@@ -1247,10 +1207,8 @@ function clickToList() {
                     valDisp = '';
                     operator = 'ISEMPTY';
                 } else if (tpe == 'glide_date_time' || tpe == 'glide_date') {
-
                     operator = 'ON';
-                    //do some magic to get encodedquery to generate date
-                    var dte = val.substring(0, 10);
+                    var dte = val.substring(0, 10); //do some magic to get encodedquery to generate date
                     valDisp = dte;
                     var dateNumber = getDateFromFormat(g_form.getValue(elm), g_user_date_time_format);
                     var dateJs = new Date(dateNumber);
@@ -1265,7 +1223,6 @@ function clickToList() {
                     valDisp = val;
                     operator = 'LIKE';
                 }
-
 
                 var idx = qry.indexOf(elm + operator);
                 if (idx > -1) {
@@ -1315,7 +1272,6 @@ function enhanceNotFound(advanced) {
         }
     }
 
-
     loadXMLDoc(g_ck, myurl, null, function (jsn) {
         var results = jsn.result;
         if (results.length == 0) html += '<li>None found...</li>'
@@ -1324,14 +1280,7 @@ function enhanceNotFound(advanced) {
         }
         html += '</ul></div>';
         jQuery('.notfound_message').append(html);
-
     });
-
-
-
-
-
-
 }
 
 function generateATFValues(event) {
@@ -1354,14 +1303,10 @@ function generateATFValues(event) {
             valDisp = g_form.getDisplayBox(elm).value;
         else
             valDisp = val;
-
-
     }
     if (val == 'none' || val == '') return;
 
     else if (tpe == 'glide_date_time' || tpe == 'glide_date') {
-
-        //operator = 'ON';
         //do some magic to get encodedquery to generate date
         var dte = val.substring(0, 10);
         valDisp = dte;
@@ -1370,9 +1315,7 @@ function generateATFValues(event) {
         dte = dateJs.getFullYear() + '-' +
             ("0" + (dateJs.getMonth() + 1)).slice(-2) + '-' +
             ("0" + dateJs.getDate()).slice(-2);
-
         val = dte;
-
     } else if (val.length > 60) {
         valDisp = val.substring(0, 60) + '...';
     }
@@ -1384,16 +1327,12 @@ function generateATFValues(event) {
         qry += '^' + elm + operator + val;
         qryDisp += "- " + elmDisp + ' ' + operator + ' <b>' + valDisp + '</b><br />';
     }
-
     var listurl = qry.substring(1, 10000);
     g_form.clearMessages();
     if (qry) {
         var qryDisp2 = qryDisp.substring(0, qryDisp.length - 6);
         g_form.addInfoMessage('Input values ' + tbl + ' <a href="javascript:delQry()">delete</a><br />' + qryDisp2 + '<br /><input type="text" class="form-control" value="' + listurl + '"></input>');
     }
-
-
-
 }
 var vals;
 
@@ -1420,7 +1359,6 @@ function getFieldStates() {
                 vals.read_only.push(elm.fieldName);
             else
                 vals.not_read_only.push(elm.fieldName);
-
         } else
             vals.not_visible.push(elm.fieldName);
     }
@@ -1432,10 +1370,7 @@ function delQry() {
     g_form.clearMessages();
 }
 
-/**
- * this solves an issue where e.g. OOTB read-only Script Include content was not copyable
- */
-function makeReadOnlyContentCopyable() {
+function makeReadOnlyContentCopyable() { //this solves an issue where e.g. OOTB read-only Script Include content was not copyable
     try {
         if (typeof g_glideEditorArray != 'undefined' && g_glideEditorArray instanceof Array) {
             for (var i = 0; i < g_glideEditorArray.length; i++) {
@@ -1467,7 +1402,6 @@ function openTable(fieldName) {
     window.open(url, 'condTable');
 }
 
-
 function unhideFields() {
     if (typeof g_form == 'undefined') return; //only on forms and only if admin
     var bulb = '<span class="icon-lightbulb color-orange" title="Field displayed by SN Utils"></span>';
@@ -1477,11 +1411,8 @@ function unhideFields() {
     }
     for (var ij = 0; ij < g_form.elements.length; ij++) {
         try {
-
-
             var hidden = g_form.elements[ij].elementParentNode.getAttribute("style").includes("none");
             if (hidden) {
-
                 jQuery(g_form.elements[ij].elementParentNode).find('label:not(.checkbox-label)').prepend(bulb);
                 g_form.setDisplay(g_form.elements[ij].fieldName, true);
             }
@@ -1510,15 +1441,11 @@ function addTechnicalNamesPortal() {
     }
 }
 
-
 function addTechnicalNames() {
-
     addTechnicalNamesWorkspace();
-
     if (typeof jQuery == 'undefined') return; //not in studio
 
     addTechnicalNamesPortal();
-
     if (typeof g_form != 'undefined') {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
@@ -1566,8 +1493,6 @@ function addTechnicalNames() {
                 });
             });
 
-
-
         } catch (error) {
 
         }
@@ -1598,7 +1523,6 @@ function addTechnicalNames() {
 }
 
 function snuUiActionInfo(event, si) {
-
     if (event.ctrlKey || event.metaKey) {
         event.stopImmediatePropagation();
         prompt("[SN Utils]\nUI Action sys_id", si);
@@ -1632,18 +1556,15 @@ function showSelectFieldValues() {
 }
 
 function snuPaFormulaLinks() {
-
     if (typeof jQuery == 'undefined') return;
     if (jQuery('#pa_indicators\\.formula').length) {
         setTimeout(snuPaFormulaLinks, 4000);
-
     }
     else {
         return false;
     }
 
     jQuery('#snupaformulalinks').remove();
-
     var snuFormulas = [];
 
     var matches = g_form.getValue('formula').match(/\[\[(.*?)\]\]|\{\{(.*?)\}\}/g);
@@ -1669,20 +1590,15 @@ function snuRemoveLinkLess() {
         newUrl + "' title='Link added by SN Utils (This is NOT a UI Action!)' >Show Related links</a></span>");
 }
 
-
 function snuTableCollectionLink() {
     if (location.pathname != "/sys_db_object.do") return;
     if (typeof jQuery == 'undefined') return;
     var tbl = g_form.getValue('name');
     jQuery('.related_links_container').append("<li style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='sys_dictionary.do?sysparm_query=name=" +
         tbl + "^internal_type=collection^' title='Link added by SN Utils (This is NOT a UI Action!)' >Collection Dictionary Entry</a></li>");
-
 }
 
-
-
 function searchLargeSelects() {
-
     if (typeof jQuery.fn.filterByText == 'undefined') {
         jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
             return this.each(function () {
@@ -1716,7 +1632,6 @@ function searchLargeSelects() {
         };
     }
 
-
     var minItems = 15;
 
     jQuery('select:not(.searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
@@ -1749,16 +1664,11 @@ function searchLargeSelects() {
             }
             jQuery(el).after(input).addClass('searchified');
         }
-
     });
 }
 
-
 function setShortCuts() {
-
-
     var divstyle;
-
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
@@ -1807,8 +1717,6 @@ function setShortCuts() {
         div#snudirectlinks a {color:#1cad6e;}
         </style>`;
     }
-
-
 
     var htmlFilter = document.createElement('div');
     var cleanHTML = DOMPurify.sanitize(divstyle +
@@ -1869,11 +1777,8 @@ function setShortCuts() {
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
             }
-
         }
-
     }, false);
-
 }
 
 function splitContainsToAnd() {
@@ -1977,8 +1882,6 @@ function newFromPopupToTab() {
     }
 }
 
-
-
 function tryPaste() {
     if (!document.execCommand('paste')) {
         g_form.clearMessages();
@@ -2013,8 +1916,6 @@ function snuSaveImage(imgData, fileInfo, tableName, sysId) {
 
     var URL = "/api/now/attachment/file?table_name=" +
         tableName + "&table_sys_id=" + sysId + "&file_name=" + fileInfo.name;
-
-
 
     var request = new XMLHttpRequest();
     request.open("POST", URL, true);
@@ -2087,7 +1988,6 @@ function getListV3Fields() {
 
         var ang = angular.element('.list-container').scope().$parent.$parent;
 
-
         for (var i = 0; i < ang.data.columns.length; i++) {
             fields.push(ang.data.columns[i].name);
         }
@@ -2117,7 +2017,6 @@ function getListV3Fields() {
 
     }
 }
-
 
 function updateReportDesignerQuery() {
     if (location.pathname != "/sys_report_template.do") return;
@@ -2235,7 +2134,6 @@ function showAlert(msg, type, timeout) {
         return false;
     }
 
-
     msg = '<a href="javascript:hideAlert()">[x] </a> SN Utils: ' + msg;
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
@@ -2297,29 +2195,44 @@ function getSelectionText() {
     return text;
 }
 
+function snuSetInfoText(msg, addText){
+    var txt =  addText ? window.top.document.getElementById('snudirectlinks').innerHTML : "";
+    window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(txt + msg);
+}
+
 function fillFields() {
+
     if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do') {
-        if (!window.NOW.user.roles.split(',').includes('admin')) return;
-        var manFields = window.g_form.getMissingFields();
+        if (!(window.NOW.user.roles.split(',').includes('admin') || snuImpersonater(document))) return;
+        var manFields = window.g_form.getMissingFields();        
         setRandom(window.g_form.getTableName(), manFields, window);
     }
     else {
         Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
             if (typeof frm.contentWindow.g_form != 'undefined') {
-                if (!frm.contentWindow.NOW.user.roles.split(',').includes('admin')) return;
+                if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow)) ) return;
                 var manFields = frm.contentWindow.g_form.getMissingFields();
                 setRandom(g_form.getTableName(), manFields, frm.contentWindow);
             }
         });
     }
     function setRandom(tbl, flds, doc) {
+
+        if (!flds.length){
+            snuSetInfoText(`<b>Log</b><br />- No empty mandatory fields found.<br />`, false);
+            return;
+        }
+        snuSetInfoText(`<b>Log</b><br />- ${flds.length} Empty mandatory fields found.<br />`, false);
+
         flds.push("");
         var encQ = flds.join("ISNOTEMPTY^");
         flds.pop();
         snuGetRandomRecord(tbl, encQ, true, res => {
             flds.forEach(fld => {
+                snuSetInfoText(`- Applieing data to mandatory field`, true);
                 var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string")) ? "RANDOM TESTDATA " : "") + res[fld].value;
                 doc.g_form.setValue(fld, val, res[fld].display_value);
+                setTimeout(hideSlashCommand,3000);
             })
         })
     }
@@ -2394,9 +2307,7 @@ function postRequestToScriptSync(requestType) {
     client.send(JSON.stringify(data));
 }
 
-
 function postToScriptSync(field) {
-
     snuScriptSync();
     var data = {};
     var instance = {};
@@ -2446,9 +2357,7 @@ function postToScriptSync(field) {
 
 }
 
-
 function postLinkRequestToScriptSync(field) {
-
     snuScriptSync();
 
     var instance = {};
@@ -2526,7 +2435,6 @@ function addFieldSyncButtons() {
     }
 }
 
-
 function addBGScriptButton() {
     if (!location.href.includes("/sys.scripts.do")) return; //only in bg script
     g_ck = document.getElementsByName('sysparm_ck')[0].value;
@@ -2546,7 +2454,6 @@ function setAllMandatoryFieldsToFalse() {
         }
     }
 }
-
 
 function addSgStudioPlatformLink() {
     if (!location.href.includes("$sg-studio.do")) return; //only in studio
@@ -2605,7 +2512,6 @@ function snuAddDblClick() {
 }
 
 function sortStudioLists() {
-
     doGroupSearch(""); //call to remove var__m_ from flowdesigner 
 
     var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
@@ -2644,17 +2550,13 @@ function sortStudioLists() {
 }
 
 function addStudioSearch() {
-
     if (!location.href.includes("$studio.do")) return; //only in studio
-
     if (typeof g_ck == 'undefined') {
         if (typeof InitialState != 'undefined') {
             g_ck = InitialState.userToken;
         }
     }
-
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
-
     var snuGroupFilter = '<input autocomplete="off" onfocus="sortStudioLists(); this.select();" onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter);
 }
@@ -2718,11 +2620,8 @@ function doGroupSearch(search) {
             }
             else
                 el.style.display = "none";
-
         });
-
     });
-
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
         if (el.dataset.viewCount == "0" && el.dataset.searching == "true")
@@ -2737,9 +2636,7 @@ function doGroupSearch(search) {
             el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
         });
     }
-
 }
-
 
 function snuScriptSync() {
     var event = new CustomEvent(
@@ -2947,9 +2844,6 @@ function snuGetNavHints(shortcut, srch) {
     return '<br />' + hit + ' Matches:<br />' + html;
 }
 
-
-
-
 function addTechnicalNamesWorkspace() {
     //in workspace, iterate through the components, and dive into their shadowroots.
     document.querySelectorAll("sn-workspace-content").forEach(function (elm1) {
@@ -3025,25 +2919,112 @@ function addTechnicalNamesWorkspace() {
     function insertAfter(newNode, referenceNode) {
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
-
 }
 
+function snuGetUsersForImpersonate(query) {
+
+    var impersonating = snuImpersonater();
+
+    
+    var client=new XMLHttpRequest();
+    if (query)
+        client.open("get","api/now/table/sys_user?sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20&" +
+        `sysparm_fields=sys_id,user_name,name&sysparm_query=user_nameLIKE${query}^ORnameLIKE${query}`);
+    else 
+        try {
+        client.open("get","/api/now/ui/impersonate/recent");
+        }
+        catch (e) {
+            snuSetInfoText("No access to Impersonations (admin only)",false);
+        }
+    client.setRequestHeader('Accept','application/json');
+    client.setRequestHeader('Content-Type','application/json');
+    client.setRequestHeader("X-UserToken", g_ck);
+    client.onreadystatechange = function() { 
+        if(this.readyState == this.DONE) {
+            var idx = 0;
+            var dispIdx = (impersonating) ? 1 : 0;
+            var res = JSON.parse(this.response);
+            var impDirectLinks = '';
+            
+            if (impersonating)
+                impDirectLinks +=  `Currently Impersonating<br />1 <a id="snulnk1" class="snuimp" href="#${impersonating}">Stop Impersonating</a> <span class="semihidden">${impersonating}</span><br />\n`;
+
+            if (query)
+                impDirectLinks += 'Found users (remove filter for recent impersonations)<br />';
+            else
+                impDirectLinks += 'Recent impersonated (add filter to search users)<br />';
+            
+            if (!res.result.length)
+                impDirectLinks += '- No results found<br />';
+            
+            res.result.forEach(imp => 
+                { 
+                    var idattr
+                    if (idx < 10 && (dispIdx !== '>')) {
+                        idx++;
+                        dispIdx++;
+                        dispIdx = dispIdx % 10;
+                        idattr = 'id="snulnk' + dispIdx + '"';
+                    }
+                    else {
+                        dispIdx = '>';
+                        idattr = '';
+                    }
+                    impDirectLinks += dispIdx + ` <a  ${idattr} class="snuimp" href="#${imp.user_name}">${imp.user_display_value || imp.name }</a> <span class="semihidden">${imp.user_name}</span><br />\n`;
+                }
+            );
+
+            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(impDirectLinks);
+
+            document.querySelectorAll('a.snuimp').forEach(item => {
+                item.addEventListener('click', event => {
+                    event.preventDefault();
+                    snuImpersonate(event.target.hash.substring(1));
+                })
+            })
+        }
+    }; 
+    client.send();
+}
+
+function snuImpersonate(userName){
+    var client=new XMLHttpRequest();
+    client.open("post","/api/now/ui/impersonate/" + userName);  
+    client.setRequestHeader('Accept','application/json');
+    client.setRequestHeader('Content-Type','application/json');
+    client.setRequestHeader("X-UserToken", g_ck);
+    client.onreadystatechange = function() { 
+        if(this.readyState == this.DONE) {
+            location.reload();
+            hideSlashCommand();
+        }
+    }; 
+    client.send("");
+}
 
 function snuGetLastScopes() {
     var urlPref = "/api/now/table/sys_user_preference?sysparm_limit=10&sysparm_fields=sys_id,name,sys_updated_on&sysparm_display_value=true&sysparm_query=nameSTARTSWITHupdateSetForScope^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_updated_on";
     loadXMLDoc(g_ck, urlPref, null, res => {
+        snuSetInfoText(`<b>Log</b><br />- Looking up recent scopes in preferences.<br />`, false);
+
         var scopes = []
         var scopesObj = {}
         res.result.forEach(scp => {
             scopes.push(scp.name.substring(17))
             scopesObj[scp.name.substring(17)] = scp.sys_updated_on;
         })
-        if (scopes.length < 2) return;
+        if (scopes.length < 2) {
+            snuSetInfoText(`- No results found.<br />`, true);
+            return;
+        }
         var urlScope = "/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=sys_idIN" + scopes.join(',');
         loadXMLDoc(g_ck, urlScope, null, res => {
             var returnScopes = {};
             var idx = 0;
             var dispIdx = 0;
+            snuSetInfoText(`- Fetching scope details.<br />`, false);
+            
             res.result.forEach(scp => returnScopes[scp.sys_id] = scp);
 
             //var lastScopes = []
@@ -3105,18 +3086,46 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
     request.onload = function () {
         var rows = request.getResponseHeader("X-Total-Count");
         var rnd = Math.floor(Math.random() * rows);
+
+        if (fullRecord)
+            snuSetInfoText(`- Found ${rows} matching rows<br />- Fetching data from match ${rnd}<br />`, true);
+
+
         url = "/api/now/table/" + table + "?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
 
-        //loadXMLDoc(g_ck,url,"", res => callback(res));
         loadXMLDoc(g_ck, url, "", res => {
-
             res = (fullRecord) ? res.result[0] : res.result[0].sys_id.value;
             callback(res);
-
         });
 
     };
     request.onerror = function () {
+        snuSetInfoText("- Could not load data. (no access)<br />", true);
     };
     request.send();
+}
+
+//try to get userid of original user when impersonating
+function snuImpersonater(doc){
+    doc = doc || document;
+    var impersonatingUser = '';
+    try {
+        var scrptArr = Array.from(doc.querySelectorAll('script[type="text/javascript"]')).filter(
+                scrp => scrp.innerText.includes("user.impersonation")
+            );
+        if (scrptArr.length){    
+            impersonatingUser = scrptArr[0].innerHTML.match(/(\'user.impersonation\', \')([^&]*)\'\)/)[2];
+        }
+    }
+    catch (e){ }
+
+    if (!impersonatingUser){
+        try {
+            var client=new XMLHttpRequest();
+            client.open("get","notfoundthispage", false);
+            client.send();
+            impersonatingUser = client.response.match(/(\'user.impersonation\', \')([^&]*)\'\)/)[2];
+        } catch (e){}
+    }
+    return impersonatingUser;
 }
