@@ -1684,6 +1684,7 @@ function setShortCuts() {
         ul#snuhelper li.active span.cmdlabel { color: black}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#22885c;}
+        div.snutils a.patreon {color:#1f1cd2;}
         </style>`;
     }
     else if (snusettings.slashtheme == 'stealth') {
@@ -1715,13 +1716,14 @@ function setShortCuts() {
         ul#snuhelper li.active span.cmdlabel { color: yellow}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#1cad6e;}
+        div.snutils a.patreon {color:#0cffdd;}
         </style>`;
     }
 
     var htmlFilter = document.createElement('div');
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> SN Utils Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:6pt; line-height: 16pt;"><a href="https://twitter.com/sn_utils" target="_blank">@sn_utils</a>&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.patreon.com/snutils" target="_blank">Support SN Utils!</a>&nbsp;</span></div>
     <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
@@ -2203,14 +2205,22 @@ function snuSetInfoText(msg, addText){
 function fillFields() {
 
     if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do') {
-        if (!(window.NOW.user.roles.split(',').includes('admin') || snuImpersonater(document))) return;
+        if (!(window.NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)))
+        {
+            snuSetInfoText("Only available for admin, or when impersonating",false);
+            return;
+        }
         var manFields = window.g_form.getMissingFields();        
         setRandom(window.g_form.getTableName(), manFields, window);
     }
     else {
         Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
             if (typeof frm.contentWindow.g_form != 'undefined') {
-                if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow)) ) return;
+                if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow)) ) 
+                {
+                    snuSetInfoText("Only available for admin, or when impersonating",false);
+                    return;
+                }
                 var manFields = frm.contentWindow.g_form.getMissingFields();
                 setRandom(g_form.getTableName(), manFields, frm.contentWindow);
             }
@@ -2229,8 +2239,10 @@ function fillFields() {
         flds.pop();
         snuGetRandomRecord(tbl, encQ, true, res => {
             flds.forEach(fld => {
-                snuSetInfoText(`- Applieing data to mandatory field`, true);
-                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string")) ? "RANDOM TESTDATA " : "") + res[fld].value;
+                snuSetInfoText(`- Applying data to mandatory field`, true);
+                console.log(doc.g_form.getControl(fld).tagName != "SELECT");
+
+                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string") && doc.g_form.getControl(fld).tagName != "SELECT") ? "RANDOM TESTDATA " : "") + res[fld].value;
                 doc.g_form.setValue(fld, val, res[fld].display_value);
                 setTimeout(hideSlashCommand,3000);
             })

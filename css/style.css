@@ -217,10 +217,10 @@ img.halfwidth{
 }
 
 img.ytthumbnail{
-    width:300px; 
+    width:250px; 
     border:solid 1pt #e3e3e3; 
     padding:5px;
-    margin:20px;
+    margin:5px;
 }
 
 .fonteight{
@@ -349,4 +349,18 @@ label {
 
 .showfields{
     display: none;
+}
+
+
+#patreon:hover{
+    text-decoration: none !important;
+}
+
+
+#patreon{
+    position: fixed;
+    right: 0px;
+    width: 50px;
+    top: 10px;
+    font-size: 18pt;
 }
