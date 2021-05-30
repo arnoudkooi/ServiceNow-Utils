@@ -1,4 +1,4 @@
-bootstrap.js https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js
+bootstrap.js https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js
 datatables-datetime.js https://cdn.datatables.net/plug-ins/1.10.21/dataRender/datetime.js
 datatables.min.js https://cdn.datatables.net/v/dt/dt-1.10.21/af-2.3.4/b-1.6.1/b-html5-1.6.1/datatables.min.js
 datetime-moment.js https://cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js

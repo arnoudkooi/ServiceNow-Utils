@@ -1010,6 +1010,7 @@ function snuAddSlashCommand(cmd) {
 function snuSettingsAdded() {
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
+    if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
@@ -1044,6 +1045,7 @@ function snuSettingsAdded() {
         newFromPopupToTab();
         createHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
+        snuAddGroupSortIcon();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1144,6 +1146,26 @@ function mouseEnterToConvertToHyperlink() {
             div => div.parentElement.addEventListener('mouseenter', 
                 createHyperLinkForGlideLists
             ));
+    }
+}
+
+function snuAddGroupSortIcon(){
+    if (location.pathname.includes("_list.do") && location.search.includes("GROUPBY")){
+        var qry = GlideList2.get(jQuery('#sys_target').val());
+        var gb = qry.getGroupBy().replace("GROUPBY","");
+        var elm = document.querySelector(`th[name="${gb}"] a`);
+        var descstyle = location.search.includes("sysparm_group_sort=COUNTDESC") ? 'font-weight:bold; color:blue !important' : '';
+        var ascstyle = location.search.includes("sysparm_group_sort=COUNT") && !descstyle ? 'font-weight:bold; color:blue !important' : '';
+        elm.innerHTML = elm.innerHTML + 
+        ` <span data-slashcommand='/-gd' style="${descstyle}" class="icon icon-sort-descending snuexeccmd"></span>
+          <span data-slashcommand='/-ga' style="${ascstyle}" class="icon icon-sort-ascending snuexeccmd"></span>`;
+
+        jQuery(`th[name="${gb}"] a span.snuexeccmd`).on('click',function(elm){
+            elm.preventDefault();
+            
+            showSlashCommand(elm.currentTarget.dataset.slashcommand);
+        })
+
     }
 }
 
