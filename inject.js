@@ -41,7 +41,7 @@ var snuslashcommands = {
     },
     "copycells": {
         "url": "*",
-        "hint": "Copy Selected Cell Values from List"
+        "hint": "Copy Selected Cell Values from List [-s for SysIDs]"
     },
     "nav": {
         "url": "*",
@@ -609,7 +609,7 @@ function addSlashCommandListener() {
                 return;
             }
             else if (shortcut == "rnd") {
-                fillFields();
+                snuFillFields(query);
                 return;
             }
             else if (shortcut == "imp"){
@@ -644,7 +644,7 @@ function addSlashCommandListener() {
                 return;
             }
             else if (shortcut == "copycells") {
-                copySelectedCellValues();
+                copySelectedCellValues(query);
                 hideSlashCommand();
                 return;
             }
@@ -1156,13 +1156,12 @@ function snuAddGroupSortIcon(){
         var elm = document.querySelector(`th[name="${gb}"] a`);
         var descstyle = location.search.includes("sysparm_group_sort=COUNTDESC") ? 'font-weight:bold; color:blue !important' : '';
         var ascstyle = location.search.includes("sysparm_group_sort=COUNT") && !descstyle ? 'font-weight:bold; color:blue !important' : '';
-        elm.innerHTML = elm.innerHTML + 
+        elm.innerHTML = DOMPurify.sanitize(elm.innerHTML + 
         ` <span data-slashcommand='/-gd' style="${descstyle}" class="icon icon-sort-descending snuexeccmd"></span>
-          <span data-slashcommand='/-ga' style="${ascstyle}" class="icon icon-sort-ascending snuexeccmd"></span>`;
+          <span data-slashcommand='/-ga' style="${ascstyle}" class="icon icon-sort-ascending snuexeccmd"></span>`);
 
         jQuery(`th[name="${gb}"] a span.snuexeccmd`).on('click',function(elm){
             elm.preventDefault();
-            
             showSlashCommand(elm.currentTarget.dataset.slashcommand);
         })
 
@@ -2224,7 +2223,12 @@ function snuSetInfoText(msg, addText){
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(txt + msg);
 }
 
-function fillFields() {
+function snuFillFields(query) {
+
+    if (location.search.includes("id=sc_cat_item")){
+        snuSetRandomPortal(query,0);
+        return;
+    }
 
     if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do') {
         if (!(window.NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)))
@@ -2272,7 +2276,7 @@ function fillFields() {
     }
 };
 
-function copySelectedCellValues() {
+function copySelectedCellValues(copySysIDs) {
     var hasCopied = false;
     var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell');
     if (selCells.length > 0) {
@@ -2292,8 +2296,18 @@ function copySelectedCellValues() {
         var str = '';
         var wdw = (frm) ? frm.contentWindow : window;
         selCells.forEach(function (cElem) {
-            str += cElem.innerText + '\n';
+            if (copySysIDs ){
+                if (cElem.querySelector('a')){
+                    //str += cElem.querySelector('a[sys_id]').getAttribute('sys_id') + ',';
+                    var match = RegExp('[?&]' + "sys_id" + '=([^&]*)').exec(cElem.querySelector('a').getAttribute('href'));
+                    str += match && decodeURIComponent(match[1].replace(/\+/g, '')) + ',';
+                }
+            }
+            else 
+                str += cElem.innerText + '\n';
         });
+        if (str.endsWith(',')) str = str.substring(0, str.length - 1);
+
         wdw.copyToClipboard(str);
         return;
     }
@@ -3137,6 +3151,62 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
         snuSetInfoText("- Could not load data. (no access)<br />", true);
     };
     request.send();
+}
+
+
+function snuSetRandomPortal(allFields,iteration) {
+    var cnt = 0;
+    if (!iteration)
+        snuSetInfoText("Setting random values<br />",iteration)
+    else 
+        snuSetInfoText(`Rerunning set random values Iteration:${iteration}<br />`,iteration)
+    var gf = angular.element(document.querySelectorAll('label.field-label, span.type-boolean')[0]).scope().getGlideForm();
+    gf.getEditableFields().forEach(fldName => {
+        var fld = gf.getField(fldName);
+        if ((fld.mandatory || allFields)  && fld.visible && !fld.value) {
+            if (fld.type.includes("date")) {
+                snuSetInfoText(`- Setting random future date to field ${fldName}<br />`, true);
+                var today = new Date();
+                gf.setValue(fldName, "")
+                today.setHours(today.getHours() + Math.floor(Math.random() * 240) + 1)
+                gf.setValue(fldName, today)
+                cnt++;
+            }
+            else if (["reference","glide_list"].includes(fld.type)) {
+                snuGetRandomRecord(fld.ed.reference, fld.ed.qualifier, false, res => {
+                    snuSetInfoText(`- Setting random value to ${fld.type} field ${fldName}<br />`, true);
+                    gf.setValue(fldName, res);
+                })
+                cnt++;
+            }
+            else if (["choice"].includes(fld.type)) {
+                snuSetInfoText(`- Setting random text choice field ${fldName}<br />`, true);
+                gf.setValue(fldName, fld.choices[Math.floor(Math.random() * fld.choices.length)].value);
+                cnt++;
+            }
+            else if (["string","html", "textarea"].includes(fld.type)) {
+                snuSetInfoText(`- Setting filler value to ${fld.type} field ${fldName}<br />`, true);
+                gf.setValue(fldName, "Lorem Ipsum SN Utils Dolar /rnd Slashcommand");
+                cnt++;
+            }
+            else if (["email"].includes(fld.type)) {
+                snuSetInfoText(`- Setting filler value to email field ${fldName}<br />`, true);
+                gf.setValue(fldName, "snutils@rocks.dummy");
+                cnt++;
+            }
+            else{
+                snuSetInfoText(`- Field ${fldName} of type ${fld.type} not supported to randomfill<br />`, true);
+            }
+        }
+    })
+
+    if (cnt){
+        setTimeout(function(){ snuSetRandomPortal(allFields,++iteration) }, 800);
+    }
+    else {
+        setTimeout(hideSlashCommand, 2500);
+    }
+
 }
 
 //try to get userid of original user when impersonating
