@@ -3155,6 +3155,12 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
 
 
 function snuSetRandomPortal(allFields,iteration) {
+    if (!iteration && !g_user_is_admin ) {
+        if (!snuImpersonater()){
+            snuSetInfoText("Only available for admin or when impersonating<br />",false);
+            return;
+        }
+    }
     var cnt = 0;
     if (!iteration)
         snuSetInfoText("Setting random values<br />",iteration)

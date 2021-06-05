@@ -3,7 +3,7 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "5.1.2.0",
+    "version": "5.1.2.1",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -20,7 +20,7 @@
     },
     "background": {
         "scripts": [
-            "js/jquery.js",
+            "js/jquery.min.js",
             "background.js"
         ],
         "persistent": true
@@ -36,7 +36,7 @@
             ],
             "js": [
                 "js/purify.min.js",
-                "js/jquery.js",
+                "js/jquery.min.js",
                 "js/Tinycon.js",
                 "content_script_parent.js",
                 "content_script_all_frames.js"
