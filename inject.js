@@ -151,7 +151,7 @@ var snuslashcommands = {
     },
     "rnd": {
         "url": "*",
-        "hint": "Fill empty mandatory form fields with values from a random record"
+        "hint": "Fill empty mandatory fields"
     },
     "st": {
         "url": "/$studio.do",
@@ -2225,7 +2225,7 @@ function snuSetInfoText(msg, addText){
 
 function snuFillFields(query) {
 
-    if (location.search.includes("id=sc_cat_item")){
+    if (location.search.includes("sc_cat_item") && location.search.includes("id=")){
         snuSetRandomPortal(query,0);
         return;
     }

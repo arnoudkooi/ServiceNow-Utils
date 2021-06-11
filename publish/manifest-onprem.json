@@ -20,7 +20,7 @@
     },
     "background": {
         "scripts": [
-            "js/jquery.js",
+            "js/jquery.min.js",
             "background.js"
         ],
         "persistent": true
@@ -32,7 +32,7 @@
             ],
             "js": [
                 "js/purify.min.js",
-                "js/jquery.js",
+                "js/jquery.min.js",
                 "js/Tinycon.js",
                 "content_script_parent.js",
                 "content_script_all_frames.js"

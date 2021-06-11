@@ -74,7 +74,7 @@ $(document).ready(function () {
             if (wsObj.hasOwnProperty('liveupdate')) {
                 updateRealtimeBrowser(wsObj);
             }
-            if (wsObj.hasOwnProperty('mirrorbgscript')) {
+            else if (wsObj.hasOwnProperty('mirrorbgscript')) {
                 mirrorBgScript(wsObj);
             }
             else if (wsObj.hasOwnProperty('refreshedtoken')) {
