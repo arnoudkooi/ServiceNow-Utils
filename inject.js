@@ -3078,20 +3078,22 @@ function snuGetLastScopes() {
             //var lastScopes = []
             var scopeDirectLinks = '';
             scopes.forEach(scp => {
-                returnScopes[scp]['date'] = scopesObj[scp];
-                //lastScopes.push(returnScopes[scp]);
-                var idattr
-                if (idx < 10 && (dispIdx !== '>')) {
-                    idx++;
-                    dispIdx++;
-                    dispIdx = dispIdx % 10;
-                    idattr = 'id="snulnk' + dispIdx + '"';
+                if (returnScopes.hasOwnProperty(scp)) {
+                    returnScopes[scp]['date'] = scopesObj[scp];
+                    //lastScopes.push(returnScopes[scp]);
+                    var idattr
+                    if (idx < 10 && (dispIdx !== '>')) {
+                        idx++;
+                        dispIdx++;
+                        dispIdx = dispIdx % 10;
+                        idattr = 'id="snulnk' + dispIdx + '"';
+                    }
+                    else {
+                        dispIdx = '>';
+                        idattr = '';
+                    }
+                    scopeDirectLinks += dispIdx + ' <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
                 }
-                else {
-                    dispIdx = '>';
-                    idattr = '';
-                }
-                scopeDirectLinks += dispIdx + ' <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
             })
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(scopeDirectLinks);
 
