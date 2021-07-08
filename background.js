@@ -230,7 +230,7 @@ var menuItems = [{
     "title": "Copy Selected Cell Values from List",
     "contexts": ["all"],
     "onclick": function (e, f) {
-        copySelectedCellValuesMessage();
+        copySelectedCellValues();
     }
 }
 ];
