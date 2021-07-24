@@ -5,11 +5,14 @@ var=$(sed '6!d' manifest.json) #get version from main
 sed -i '' "6s/.*/$var/" publish/manifest-firefox.json #sync version to other
 sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
+sed -i '' "6s/.*/$var/" publish/manifest-edge.json
 zip -r publish/chrome-snutils.zip . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
 mv manifest.json publish/manifest-chrome.json
 mv publish/manifest-firefox.json manifest.json
 zip -r publish/firefox-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
 mv manifest.json publish/manifest-firefox.json
+zip -r publish/edge-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
+mv manifest.json publish/manifest-edge.json
 
 sed -i '' "1s/.*/var onprem = true;/" background.js
 mv publish/manifest-onprem.json manifest.json
@@ -26,5 +29,6 @@ var='    "version": "0.0.0.0",'
 sed -i '' "6s/.*/$var/" publish/manifest-firefox.json #sync version to other
 sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
+sed -i '' "6s/.*/$var/" publish/manifest-edge.json
 
 node publish/publish.js

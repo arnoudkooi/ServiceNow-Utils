@@ -43,6 +43,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Copy Selected Cell Values from List [-s for SysIDs]"
     },
+    "debug": {
+        "url": "javascript:window.top.launchScriptDebugger();",
+        "hint": "Open Script Debugger"
+    },
     "nav": {
         "url": "*",
         "hint": "[Beta] Navigator <search> or <application,item>"
