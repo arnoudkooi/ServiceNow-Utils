@@ -347,6 +347,10 @@ label {
     margin-bottom: .1rem;
 }
 
+.form-check-label {
+    margin-top: 3px;
+}
+
 .showfields{
     display: none;
 }

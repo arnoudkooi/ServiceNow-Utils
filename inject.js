@@ -1012,6 +1012,7 @@ function snuAddSlashCommand(cmd) {
 }
 
 function snuSettingsAdded() {
+    if (typeof snusettings.enablefulltextfilter == 'undefined') snusettings.enablefulltextfilter = true;
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
     if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;

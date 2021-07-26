@@ -11,7 +11,9 @@ mv manifest.json publish/manifest-chrome.json
 mv publish/manifest-firefox.json manifest.json
 zip -r publish/firefox-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
 mv manifest.json publish/manifest-firefox.json
-zip -r publish/edge-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
+
+mv publish/manifest-edge.json manifest.json
+zip -r publish/edge-snutils.zip . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
 mv manifest.json publish/manifest-edge.json
 
 sed -i '' "1s/.*/var onprem = true;/" background.js

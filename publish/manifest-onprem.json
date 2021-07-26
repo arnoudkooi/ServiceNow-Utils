@@ -38,6 +38,16 @@
                 "content_script_all_frames.js"
             ],
             "all_frames": true
+        },
+        {
+            "matches": [
+                "*://*/navpage.do"
+            ],
+            "js": [
+                "content_script_navigatorservice.js"
+            ],
+            "run_at" : "document_end",
+            "all_frames": false
         }
     ],
     "commands": {
