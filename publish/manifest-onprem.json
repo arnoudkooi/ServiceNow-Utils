@@ -41,7 +41,7 @@
         },
         {
             "matches": [
-                "*://*/navpage.do"
+                "*://*/navpage.do", "*://*/"
             ],
             "js": [
                 "content_script_navigatorservice.js"

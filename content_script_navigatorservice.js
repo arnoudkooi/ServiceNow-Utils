@@ -2,7 +2,7 @@
 
 var scriptContent = `
 /*! RESOURCE: SN Utils Content script to enhance navigator to support "fulltext" search  */
-debugger
+
 angular.module("Magellan").decorator("concourseNavigatorService",
     function ($q, $window, glideUrlBuilder, userPreferences, urlTools) {
         "use strict";

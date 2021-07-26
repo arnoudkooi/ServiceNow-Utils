@@ -47,7 +47,7 @@
         },
         {
             "matches": [
-                "https://*.service-now.com/navpage.do"
+                "https://*.service-now.com/navpage.do", "https://*.service-now.com/"
             ],
             "js": [
                 "content_script_navigatorservice.js"
