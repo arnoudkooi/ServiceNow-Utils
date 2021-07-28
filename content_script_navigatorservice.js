@@ -279,6 +279,9 @@ angular.module("Magellan").decorator("concourseNavigatorService",
         ) {
             var excludedTypes = [TYPE_APP, TYPE_SEPARATOR, TYPE_PARENT];
             var showParent = false;
+            if (typeof snusettings != "undefined") {
+                var snusettings = { "enablefulltextfilter" : false };
+            }
             if ((snusettings.enablefulltextfilter &&
                 angular.isDefined(parent.fullTitle) &&
                 filterText.split(" ").every(item => parent.fullTitle.toLowerCase().includes(item))) ||
