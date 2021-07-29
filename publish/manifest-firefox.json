@@ -44,16 +44,6 @@
                 "content_script_all_frames.js"
             ],
             "all_frames": true
-        },
-        {
-            "matches": [
-                "https://*.service-now.com/navpage.do", "https://*.service-now.com/"
-            ],
-            "js": [
-                "content_script_navigatorservice.js"
-            ],
-            "run_at" : "document_end",
-            "all_frames": false
         }
     ],
     "commands": {
