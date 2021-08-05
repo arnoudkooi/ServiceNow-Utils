@@ -1,6 +1,6 @@
 (function () {
 
-    if (document.getElementById("filter") != null && document.contentType != "text/xml") {
+    if (document.getElementById("filter") != null) {
 
         //add script to extend search field
         var c = document.createElement('script');

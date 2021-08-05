@@ -34,7 +34,10 @@
             ],
             "exclude_matches": [
                 "https://signon.service-now.com/*",
-                "https://*.service-now.com/*XML=*"
+                "https://*.service-now.com/*?XML*",
+                "https://*.service-now.com/*&XML*",
+                "https://*.service-now.com/*?WSDL*",
+                "https://*.service-now.com/*&WSDL*"
             ],
             "js": [
                 "js/purify.min.js",
