@@ -21,16 +21,18 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 });
 
 (function () {
-    addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
-    addScript('inject.js', true);
-    //addScript('inject_bgscript.js', true);
-    getFromSyncStorageGlobal("snusettings", function (snusettings) {
-        if (snusettings && snusettings.hasOwnProperty('iconallowbadge') && !snusettings.iconallowbadge) return;
+    if (document.contentType != "text/xml") {
+        addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
+        addScript('inject.js', true);
+        //addScript('inject_bgscript.js', true);
+        getFromSyncStorageGlobal("snusettings", function (snusettings) {
+            if (snusettings && snusettings.hasOwnProperty('iconallowbadge') && !snusettings.iconallowbadge) return;
 
-        getFromSyncStorage("snuinstancesettings", function (settings) {
-            setFavIconBadge(settings);
+            getFromSyncStorage("snuinstancesettings", function (settings) {
+                setFavIconBadge(settings);
+            });
         });
-    });
+    }
 })();
 
 
@@ -70,7 +72,7 @@ function setFavIconBadge(settings) {
 
 function runFunction(f, context) {
     if (typeof document === 'undefined' || document == null) return;
-    
+
     let inParent = document.querySelector('iframe#gsft_main') != null && document.querySelector('iframe#gsft_main').contentDocument != null;
     if (context == 'child' && inParent) {
         // don't run function meant for content frame if we're not in it

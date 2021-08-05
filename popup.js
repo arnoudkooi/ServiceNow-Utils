@@ -378,10 +378,14 @@ function getSettings(callback) {
         objSettings = settings || {};
         for (var setting in settings) {
 
+            try {
             if (typeof settings[setting] == "boolean")
                 document.getElementById(setting).checked = settings[setting];
             else
                 document.getElementById(setting).value = settings[setting];
+            }
+            catch (ex) { //property removed
+            }
         };
         iconSettingsDiv($('#iconallowbadge').prop('checked')); 
         callback();
