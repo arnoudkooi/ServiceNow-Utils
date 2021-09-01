@@ -252,6 +252,11 @@ function setBrowserVariables(obj) {
     $('#iconallowbadge').on('change',function(){
        iconSettingsDiv($(this).prop('checked'));
     })
+
+    // $('#addtechnicalnames').on('change', function (e) {
+    //     technicalNamesShowRegex();
+    // });
+
     
 
 
@@ -388,6 +393,7 @@ function getSettings(callback) {
             }
         };
         iconSettingsDiv($('#iconallowbadge').prop('checked')); 
+        //technicalNamesShowRegex();
         callback();
     })
 }
@@ -1017,3 +1023,12 @@ function downloadCommands() {
     element.click();
     document.body.removeChild(element);
   }
+
+  function technicalNamesShowRegex(){
+        // if (document.getElementById('addtechnicalnames').checked){
+        //     $('#technicalnamesregexdiv').show();
+        // }
+        // else{
+        //     $('#technicalnamesregexdiv').hide();
+        // }       
+    }

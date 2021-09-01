@@ -25,7 +25,7 @@ function addStudioLink() {
                     '<span class="sr-only">Studio</span>' +
                     '</button>' + 
                     '<button data-placement="auto" class="btn btn-icon icon-script"' +
-                    ' title="Open Studio IDE (Link by SN Utils)\nSlashcommand: /br" data-original-title="Studio" onclick="window.open(\'/$studio.do\', \'_blank\');">' +
+                    ' title="Open Studio IDE (Link by SN Utils)\nSlashcommand: /st" data-original-title="Studio" onclick="window.open(\'/$studio.do\', \'_blank\');">' +
                     '<span class="sr-only">Studio</span>' +
                     '</button></div>';
                 jQuery('#sysparm_search').parents('div.navpage-header-content').first().after(widgetHtml);

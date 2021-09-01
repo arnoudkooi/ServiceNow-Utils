@@ -190,8 +190,8 @@ var snuslashcommands = {
         "hint": "Filter Transaction Log <search>"
     },
     "tweets": {
-        "url": "https://twitter.com/sn_utils",
-        "hint": "Show @sn_utils Tweets"
+        "url": "https://twitter.com/search?q=from%3Asn_utils%20$0&src=typed_query&f=live",
+        "hint": "Search @sn_utils Tweets <search>"
     },
     "u": {
         "url": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",

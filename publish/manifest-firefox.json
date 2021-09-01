@@ -37,7 +37,8 @@
                 "https://*.service-now.com/*?XML*",
                 "https://*.service-now.com/*&XML*",
                 "https://*.service-now.com/*?WSDL*",
-                "https://*.service-now.com/*&WSDL*"
+                "https://*.service-now.com/*&WSDL*",
+                "https://*.service-now.com/api/now*"
             ],
             "js": [
                 "js/purify.min.js",
