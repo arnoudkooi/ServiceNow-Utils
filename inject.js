@@ -1214,7 +1214,7 @@ function clickToList() {
                     tpe = g_form.getGlideUIElement(elm).type;
                     val = g_form.getValue(elm);
                     elmDisp = jQuery(event.target).text();
-                    valDisp = g_form.getDisplayBox(elm) ? g_form.getDisplayBox(elm).value : g_form.getValue(elm);
+                    valDisp = g_form.getDisplayBox(elm) && g_form.getDisplayBox(elm).value || g_form.getValue(elm);
                 }
                 if (jQuery(event.target).hasClass('container-fluid')) {
                     elm = 'sys_id';
