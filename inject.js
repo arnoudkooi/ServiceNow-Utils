@@ -1249,6 +1249,12 @@ function clickToList() {
                     operator = 'LIKE';
                 }
 
+                // Some characters cannot be part of a URL
+                val = encodeURIComponent(val);
+                // ServiceNow uses CR LF to encode newlines. The only exceptions are script fields - some of them use LF, others use CR LF.
+                // But since this feature is mainly used with other types of fields, we can ignore the support of multiline scripts.
+                val = val.replace(/%0A/g, '%0D%0A');
+
                 var idx = qry.indexOf(elm + operator);
                 if (idx > -1) {
                     qry = qry.replace(elm + operator + val + '^', '');
