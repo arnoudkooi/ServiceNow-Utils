@@ -1195,6 +1195,7 @@ function doubleClickToSetQueryListV2() { //dbl click to view and update filter c
 
 var qry = '';
 var qryDisp = '';
+var _qry = {};
 
 function clickToList() {
 
@@ -1255,13 +1256,27 @@ function clickToList() {
                 // But since this feature is mainly used with other types of fields, we can ignore the support of multiline scripts.
                 val = val.replace(/%0A/g, '%0D%0A');
 
-                var idx = qry.indexOf(elm + operator);
-                if (idx > -1) {
-                    qry = qry.replace(elm + operator + val + '^', '');
-                    qryDisp = qryDisp.replace(elmDisp + ' ' + operator + ' <b>' + valDisp + '</b> > ', '');
+                _qry = typeof _qry == 'object' ? _qry : {};
+
+                var subCondition = {
+                    val: val,
+                    valDisp: valDisp,
+                    elmDisp: elmDisp,
+                    operator: operator
+                };
+
+                if (_qry[elm] && _qry[elm].val == subCondition.val && _qry[elm].operator == subCondition.operator) {
+                    // Double function call in case of no changes removes the subcondition
+                    delete _qry[elm];
                 } else {
-                    qry += elm + operator + val + '^';
-                    qryDisp += elmDisp + ' ' + operator + ' <b>' + valDisp + '</b> > ';
+                    _qry[elm] = subCondition;
+                }
+
+                var qry = '';
+                var qryDisp = '';
+                for (var _elm in _qry) {
+                    qry += _elm + _qry[_elm].operator + _qry[_elm].val + '^';
+                    qryDisp += _qry[_elm].elmDisp + ' ' + _qry[_elm].operator + ' <b>' + _qry[_elm].valDisp + '</b> > ';
                 }
 
                 var listurl = '/' + tbl + '_list.do?sysparm_query=' + qry;
@@ -1398,6 +1413,7 @@ function getFieldStates() {
 function delQry() {
     qry = '';
     qryDisp = '';
+    _qry = {};
     g_form.clearMessages();
 }
 
