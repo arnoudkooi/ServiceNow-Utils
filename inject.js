@@ -17,6 +17,10 @@ var snuslashcommands = {
         "hint": "Filter ACL list <table> <operation>",
         "fields": "name"
     },
+    "api": {
+        "url": "https://developer.servicenow.com/dev.do#!/search/aspen/Reference/$0",//searching aspen redirects to most recent current family
+        "hint": "Search Developer References <search>"
+    },
     "app": {
         "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Applications <name>",
