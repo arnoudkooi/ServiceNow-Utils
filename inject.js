@@ -22,6 +22,10 @@ var snuslashcommands = {
         "hint": "Filter Applications <name>",
         "fields": "name"
     },
+    "api": {
+        "url": "https://developer.servicenow.com/dev.do#!/search/aspen/Reference/$0",//searching aspen redirects to most recent current family
+        "hint": "Search Developer References <search>"
+    },
     "aes": {
         "url": "/now/appenginestudio",
         "hint": "Open App Engine Studio"
