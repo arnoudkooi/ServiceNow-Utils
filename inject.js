@@ -1250,8 +1250,6 @@ function clickToList() {
                     operator = 'LIKE';
                 }
 
-                // The caret is a reserved character used to separate subconditions and must be escaped
-                val = val.replace(/\^/g, '^^');
                 // Some characters cannot be part of a URL
                 val = encodeURIComponent(val);
                 // ServiceNow uses CR LF to encode newlines. The only exceptions are script fields - some of them use LF, others use CR LF.
