@@ -157,6 +157,13 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Switch Application (10 most recent)"
     },
+    "su": {
+        "url": "sys_update_set_list.do?sysparm_query=sys_created_by=javascript:gs.getUserName()^state=in progress^application=javascript:gs.getCurrentApplicationId()^nameLIKE$0^ORDERBYDESCsys_updated_on",
+        "hint": "[BETA] Switch Updateset (created by me) <name>",
+        "fields": "name,sys_updated_on",
+        "overwriteurl": "javascript:snuSetUpdateSet('$sysid')",
+        "inline_only" : true
+    },
     "rnd": {
         "url": "*",
         "hint": "Fill empty mandatory fields"
@@ -412,7 +419,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             else {
                 directlinks = `No access to data`;
             }
-            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
+            window.top.document.getElementById('snudirectlinks').innerHTML = directlinks; //DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
             window.top.document.getElementById('snudirectlinks');
             window.top.document.querySelectorAll("#snudirectlinks a").forEach(function (elm) { elm.addEventListener("click", hideSlashCommand) });
 
@@ -504,6 +511,7 @@ function addSlashCommandListener() {
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
+        var inlineOnly = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].inline_only : false;
 
         if (typeof g_form == 'undefined') {
             try { //get if in iframe
@@ -578,9 +586,9 @@ function addSlashCommandListener() {
             switchText = '<br />Encodedquery detected<br /><br />'
         }
         targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
-        if (e.key == 'ArrowRight') snuGetDirectLinks(targeturl, shortcut);
+        if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly)) snuGetDirectLinks(targeturl, shortcut);
 
-        if (e.key == 'Enter') {
+        else if (e.key == 'Enter') {
             shortcut = shortcut.replace(/\*/g, '');
             snufilter = snufilter.replace(/\*/g, '');
             idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
@@ -2135,7 +2143,7 @@ function loadXMLDoc(token, url, post, callback) {
         request.onerror = function () {
             // There was a connection error of some sort
         };
-        request.send();
+        request.send(post || "");
 
     } catch (error) {
         console.log('Server Request failed (' + error + ')');
@@ -3272,4 +3280,18 @@ function snuImpersonater(doc){
         } catch (e){}
     }
     return impersonatingUser;
+}
+
+
+function snuSetUpdateSet(sysid) { 
+    var updateSetSelect = window.top.document.getElementById("update_set_picker_select");
+    if (updateSetSelect) { //set the select if in UI16
+        window.top.jQuery("#update_set_picker_select").val("string:" + sysid).trigger('change');
+    }
+    else { //via the API
+        var myurl = '/api/now/ui/concoursepicker/updateset';
+        loadXMLDoc(g_ck, myurl, `{"sysId": "${sysid}"}`, function (jsn) {
+
+        });
+    }
 }
