@@ -23,7 +23,22 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 (function () {
     addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
     addScript('inject.js', true);
-    //addScript('inject_bgscript.js', true);
+    
+    if (location.pathname == "/sys.scripts.do") {
+        setTimeout(function(){
+            addScript('js/monaco/vs/loader.js', false);
+        },1000)
+        setTimeout(function(){
+            addScript('js/monaco/monaco.js', false);
+        },2000)
+    }
+
+
+
+
+
+
+
     getFromSyncStorageGlobal("snusettings", function (snusettings) {
         if (snusettings && snusettings.hasOwnProperty('iconallowbadge') && !snusettings.iconallowbadge) return;
 
@@ -41,6 +56,7 @@ function addScript(filePath, processSettings) {
         if (processSettings) {
             getFromSyncStorageGlobal("snusettings", function (settings) {
                 if (!settings) settings = {};
+                settings.extensionUrl = chrome.runtime.getURL('/');
                 var script = document.createElement('script');
                 script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
                 (document.head || document.documentElement).appendChild(script);

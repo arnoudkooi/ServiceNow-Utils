@@ -102,7 +102,9 @@
     "web_accessible_resources": [
         "js/purify.min.js",
         "inject.js",
-        "inject_parent.js"
+        "inject_parent.js",
+        "js/monaco/*"
+
     ],
     "manifest_version": 2,
     "applications": {
@@ -110,5 +112,5 @@
             "id": "email@arnoudkooi.com"
         }
     },
-    "content_security_policy": "default-src 'self'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
+    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
 }

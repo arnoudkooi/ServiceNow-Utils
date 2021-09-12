@@ -51,6 +51,10 @@ var snuslashcommands = {
         "url": "javascript:window.top.launchScriptDebugger();",
         "hint": "Open Script Debugger"
     },
+    "bg": {
+        "url": "sys.scripts.do",
+        "hint": "Background Script"
+    },
     "nav": {
         "url": "*",
         "hint": "[Beta] Navigator <search> or <application,item>"
@@ -157,13 +161,13 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Switch Application (10 most recent)"
     },
-    "su": {
-        "url": "sys_update_set_list.do?sysparm_query=sys_created_by=javascript:gs.getUserName()^state=in progress^application=javascript:gs.getCurrentApplicationId()^nameLIKE$0^ORDERBYDESCsys_updated_on",
-        "hint": "[BETA] Switch Updateset (created by me) <name>",
-        "fields": "name,sys_updated_on",
-        "overwriteurl": "javascript:snuSetUpdateSet('$sysid')",
-        "inline_only" : true
-    },
+    // "su": {
+    //     "url": "sys_update_set_list.do?sysparm_query=sys_created_by=javascript:gs.getUserName()^state=in progress^application=javascript:gs.getCurrentApplicationId()^nameLIKE$0^ORDERBYDESCsys_updated_on",
+    //     "hint": "[BETA] Switch Updateset (created by me) <name>",
+    //     "fields": "name,sys_updated_on",
+    //     "overwriteurl": "javascript:snuSetUpdateSet('$sysid')",
+    //     "inline_only" : true
+    // },
     "rnd": {
         "url": "*",
         "hint": "Fill empty mandatory fields"
@@ -419,7 +423,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             else {
                 directlinks = `No access to data`;
             }
-            window.top.document.getElementById('snudirectlinks').innerHTML = directlinks; //DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
+            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
             window.top.document.getElementById('snudirectlinks');
             window.top.document.querySelectorAll("#snudirectlinks a").forEach(function (elm) { elm.addEventListener("click", hideSlashCommand) });
 

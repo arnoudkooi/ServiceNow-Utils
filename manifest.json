@@ -3,7 +3,7 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "5.2.0.8",
+    "version": "5.2.2.0",
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
@@ -93,10 +93,10 @@
         "js/purify.min.js",
         "inject.js",
         "inject_parent.js",
-        "inject_bgscript.js"
-    ],
+        "js/monaco/*"
+        ],
     "incognito": "split",
     "manifest_version": 2,
-    "content_security_policy": "default-src 'self'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
+    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
     
 }
