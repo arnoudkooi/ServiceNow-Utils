@@ -4,7 +4,7 @@ var s = document.body.firstChild;
 var editor;
 var div = document.createElement('div');
 
-if (!snusettings.nouielements) {
+if (snusettings.applybgseditor) {
 	var s = document.body.firstChild;
 	var editor;
 	var div = document.createElement('div');

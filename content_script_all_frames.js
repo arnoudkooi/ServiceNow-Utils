@@ -27,16 +27,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (location.pathname == "/sys.scripts.do") {
         setTimeout(function(){
             addScript('js/monaco/vs/loader.js', false);
-        },1000)
+        },200)
         setTimeout(function(){
             addScript('js/monaco/monaco.js', false);
-        },2000)
+        },600)
     }
-
-
-
-
-
 
 
     getFromSyncStorageGlobal("snusettings", function (snusettings) {

@@ -1029,6 +1029,7 @@ function snuAddSlashCommand(cmd) {
 
 function snuSettingsAdded() {
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
+    if (typeof snusettings.applybgseditor == 'undefined') snusettings.applybgseditor = true;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
     if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
@@ -1573,8 +1574,10 @@ function addTechnicalNames() {
 
     jQuery('th.list_hdr, th.table-column-header').each(function (index) {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
-        if (jQuery(this).find('a.list_hdrcell, a.sort-columns').text().indexOf('|') == -1)
-            jQuery(this).find('a.list_hdrcell, a.sort-columns').append(' | <span style="font-family:monospace; font-size:small;">' + tname + '</span> ');
+        if (!jQuery(this).hasClass("snutn")){
+            jQuery(this).addClass("snutn")
+            jQuery(this).find('a.list_hdrcell, a.sort-columns').parent().after('<div style="font-family:monospace;font-size:small;margin-left: 25px;margin-top: -3px; font-weight:normal">' + tname + '</div> ');
+        }
     });
 
     //also show viewname
@@ -2280,8 +2283,13 @@ function snuFillFields(query) {
             snuSetInfoText("Only available for admin, or when impersonating",false);
             return;
         }
-        var manFields = window.g_form.getMissingFields();        
-        setRandom(window.g_form.getTableName(), manFields, window);
+        var manFields = window.g_form.getMissingFields();
+        
+        
+        if (window.g_form.getTableName() != 'ni')
+            setRandom(window.g_form.getTableName(), manFields, window);
+        else 
+            snuSetInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog, try in Portal.<br />`, false);
     }
     else {
         Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
@@ -2292,7 +2300,11 @@ function snuFillFields(query) {
                     return;
                 }
                 var manFields = frm.contentWindow.g_form.getMissingFields();
-                setRandom(g_form.getTableName(), manFields, frm.contentWindow);
+                if (g_form.getTableName() != 'ni')
+                    setRandom(g_form.getTableName(), manFields, frm.contentWindow);
+                else 
+                    snuSetInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog.<br />`, false);
+
             }
         });
     }
@@ -2421,6 +2433,12 @@ function postToScriptSync(field) {
 
     }
     else { //bgscript
+        
+        try {
+            document.getElementById('runscript').style.display = "inline";
+            document.getElementById('container').style.display = "none";
+        } catch(e){};
+
         let date = new Date();
         let my_id = (date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2(date.getDate()) + '-' + pad2(date.getHours()) + pad2(date.getMinutes()) + pad2(date.getSeconds()));
         function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
@@ -3181,8 +3199,14 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
         var rows = request.getResponseHeader("X-Total-Count");
         var rnd = Math.floor(Math.random() * rows);
 
-        if (fullRecord)
-            snuSetInfoText(`- Found ${rows} matching rows<br />- Fetching data from match ${rnd}<br />`, true);
+        if (fullRecord){
+            if (Number(rows))
+                snuSetInfoText(`- Found ${rows} matching rows<br />- Fetching data from match ${rnd}<br />`, true);
+            else {
+                snuSetInfoText(`- No template found, try setting some values and run again<br />`, true);
+                return
+            }
+        }
 
 
         url = "/api/now/table/" + table + "?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
