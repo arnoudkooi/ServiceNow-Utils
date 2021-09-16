@@ -9,7 +9,7 @@ if (snusettings.applybgseditor) {
 	var editor;
 	var div = document.createElement('div');
 	div.setAttribute("id", "container");
-	div.setAttribute("style", "height:600px");
+	div.setAttribute("style", "height:400px");
 
 	var scrpt = document.getElementById('runscript');
 	scrpt.parentNode.insertBefore(div, scrpt);
