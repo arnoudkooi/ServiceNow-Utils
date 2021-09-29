@@ -1,0 +1,107 @@
+{
+    "name": "SN Utils - Tools for ServiceNow",
+    "short_name": "SN Utils for Edge",
+    "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
+    "author": "Arnoud Kooi / arnoudkooi.com",
+    "version": "0.0.0.0",
+    "permissions": [
+        "activeTab",
+        "https://*.service-now.com/*",
+        "https://*.servicenowservices.com/*",
+        "declarativeContent",
+        "storage",
+        "contextMenus",
+        "cookies"
+    ],
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "background": {
+        "scripts": [
+            "js/jquery.min.js",
+            "background.js"
+        ],
+        "persistent": true
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://*.service-now.com/*",
+                "https://*.servicenowservices.com/*"
+                
+            ],
+            "exclude_matches": [
+                "https://signon.service-now.com/*",
+                "https://*.service-now.com/*XML=*",
+                "https://*.service-now.com/*WSDL=*"
+            ],
+            "js": [
+                "js/purify.min.js",
+                "js/jquery.min.js",
+                "js/Tinycon.js",
+                "content_script_parent.js",
+                "content_script_all_frames.js"
+            ],
+            "all_frames": true
+        }
+        
+    ],
+    "commands": {
+        "_execute_page_action": {
+            "suggested_key": {
+                "default": "Ctrl+1",
+                "mac": "Command+1"
+            },
+            "description": "Activate Extension"
+        },
+        "pop": {
+            "suggested_key": {
+                "default": "Ctrl+2",
+                "mac": "Command+2"
+            },
+            "description": "Pop-In / Pop-Out"
+        },
+        "show-technical-names": {
+            "suggested_key": {
+                "default": "Ctrl+3",
+                "mac": "Command+3"
+            },
+            "description": "Show Technical Names"
+        },
+        "slashcommand-shortcut": {
+            "suggested_key": {
+                "default": "Ctrl+4",
+                "mac": "Command+4"
+            },
+            "description": "Run /shortcut slashcommand"
+        },
+        "slashcommand": {
+            "description": "Open slashcommand popup"
+        }
+    },
+    "page_action": {
+        "default_title": "SN Utils",
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "images/icon16.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        },
+        "show_matches": ["https://*.service-now.com/*", "https://*.servicenowservices.com/*"],
+        "hide_matches": ["https://signon.service-now.com/*"]
+    },
+    "web_accessible_resources": [
+        "js/purify.min.js",
+        "inject.js",
+        "inject_parent.js",
+        "js/monaco/*"
+    ],
+    "incognito": "split",
+    "manifest_version": 2,
+    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com https://*.servicenowservices.com ws://127.0.0.1:1978/"
+    
+}

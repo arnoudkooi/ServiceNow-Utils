@@ -1,0 +1,107 @@
+{
+    "name": "SN Utils OnPrem",
+    "short_name": "SN Utils Onprem",
+    "description": "ServiceNow Productivity tools. (Personal work, not affiliated to ServiceNow)",
+    "author": "Arnoud Kooi / arnoudkooi.com",
+    "version": "0.0.0.0",
+    "permissions": [
+        "activeTab",
+        "*://*/*",
+        "contextualIdentities",
+        "tabs",
+        "storage",
+        "menus",
+        "cookies"
+    ],
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "background": {
+        "scripts": [
+            "js/purify.min.js",
+            "js/jquery.min.js",
+            "background.js"
+        ],
+        "persistent": true
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*/*"
+            ],
+            "js": [
+                "js/purify.min.js",
+                "js/jquery.min.js",
+                "js/Tinycon.js",
+                "content_script_parent.js",
+                "content_script_all_frames.js"
+            ],
+            "all_frames": true
+        }
+    ],
+    "commands": {
+        "_execute_page_action": {
+            "suggested_key": {
+                "default": "Ctrl+1",
+                "mac": "Command+1"
+            },
+            "description": "Activate Extension"
+        },
+        "pop": {
+            "suggested_key": {
+                "default": "Ctrl+2",
+                "mac": "Command+2"
+            },
+            "description": "Pop-In / Pop-Out"
+        },
+        "show-technical-names": {
+            "suggested_key": {
+                "default": "Ctrl+3",
+                "mac": "Command+3"
+            },
+            "description": "Show Technical Names"
+        },
+        "slashcommand-shortcut": {
+            "suggested_key": {
+                "default": "Ctrl+4",
+                "mac": "Command+4"
+            },
+            "description": "Run /shortcut slashcommand"
+        },
+        "slashcommand": {
+            "description": "Open slashcommand popup"
+        }
+    },
+    "page_action": {
+        "default_title": "SN Utils",
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "images/icon16.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        },
+        "show_matches": [
+            "*://*/*"
+        ]
+    },
+    "options_ui": {
+        "page": "options.html",
+        "browser_style": true
+    },
+    "web_accessible_resources": [
+        "js/purify.min.js",
+        "inject.js",
+        "inject_parent.js",
+        "js/monaco/*"
+    ],
+    "manifest_version": 2,
+    "applications": {
+        "gecko": {
+            "id": "snutilsonprem@arnoudkooi.com"
+        }
+    }
+}

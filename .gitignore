@@ -3,8 +3,7 @@ fonts/.DS_Store
 .DS_Store
 
 # web-ext stuff
-.web-extension-id
-web-ext-artifacts/
 .jshintrc
-publish/
+publish/*
+!publish/*.json
 .vscode/settings.json
