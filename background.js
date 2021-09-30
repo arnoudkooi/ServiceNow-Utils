@@ -1173,21 +1173,29 @@ function setActiveNode(nodeId, nodeName) {
             var port = ($($.parseXML(jsn.result[0].stats)).find('servlet\\.port').text());
             var encodedPort = Math.floor(port / 256) + (port % 256) * 256;
             var encodeBIGIP = encodedIP + '.' + encodedPort + '.0000';
-            chrome.cookies.set({
-                "name": "BIGipServerpool_" + instance,
-                "url": new URL(url).origin,
-                "secure": true,
-                "httpOnly": true,
-                "value": encodeBIGIP
-            }, function (s) {
+            chrome.cookies.getAll({
+                url: new URL(url).origin
+            }, function (instanceCookies) {
+                var BIGipServerpoolCookie = instanceCookies.find(function (cookie) {
+                    // matches BIGipServerpool_<alphanumeric instance name>
+                    return cookie.name.match(/^(BIGipServerpool_[\w\d]+)$/);
+                });
                 chrome.cookies.set({
-                    "name": "glide_user_route",
+                    "name": BIGipServerpoolCookie.name,
                     "url": new URL(url).origin,
                     "secure": true,
                     "httpOnly": true,
-                    "value": 'glide.' + nodeId
+                    "value": encodeBIGIP
                 }, function (s) {
-                    getActiveNode(jsnNodes);
+                    chrome.cookies.set({
+                        "name": "glide_user_route",
+                        "url": new URL(url).origin,
+                        "secure": true,
+                        "httpOnly": true,
+                        "value": 'glide.' + nodeId
+                    }, function (s) {
+                        getActiveNode(jsnNodes);
+                    });
                 });
             });
         });
