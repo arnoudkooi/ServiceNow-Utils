@@ -1168,7 +1168,7 @@ function setActiveNode(nodeId, nodeName) {
         }
 
 
-        var myurl = url + '/api/now/table/sys_cluster_state?sysparm_query=node_id=' + nodeId + '&sysparm_fields=stats';
+        var myurl = url + '/api/now/table/sys_cluster_node_stats?sysparm_query=node_id=' + nodeId + '&sysparm_fields=stats';
         loadXMLDoc(g_ck, myurl, null, function (jsn) {
             var port = ($($.parseXML(jsn.result[0].stats)).find('servlet\\.port').text());
             var encodedPort = Math.floor(port / 256) + (port % 256) * 256;
