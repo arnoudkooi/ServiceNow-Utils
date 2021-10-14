@@ -606,7 +606,7 @@ function addSlashCommandListener() {
                 var sysid = (shortcut.length == 32) ? shortcut : query;
                 if (sysid.length != 32) return;
                 searchSysIdTables(sysid);
-                hideSlashCommand();
+                //hideSlashCommand();
                 return;
             }
             else if (shortcut == "help") {
@@ -639,7 +639,7 @@ function addSlashCommandListener() {
             }
             else if (shortcut == "token") {
                 postRequestToScriptSync();
-                showAlert("Trying to send current token to VS Code", "info");
+                snuSetInfoText("Trying to send current token to VS Code<br />", false);
                 hideSlashCommand();
                 return;
             }
@@ -2183,10 +2183,10 @@ function startBackgroundScript(script, callback) {
         }).done(function (rspns) {
             callback(rspns);
         }).fail(function (jqXHR, textStatus) {
-            showAlert('Background Script failed (' + jqXHR.statusText + ')', 'danger');
+            snuSetInfoText('Background Script failed (' + jqXHR.statusText + ')<br />', true);
         });
     } catch (error) {
-        showAlert('Background Script failed (' + error + ')', 'danger');
+        snuSetInfoText('Background Script failed (' + error + ')<br />', true);
     }
 }
 
@@ -2266,6 +2266,7 @@ function getSelectionText() {
 }
 
 function snuSetInfoText(msg, addText){
+    window.top.document.querySelector('div.snutils').style.display = '';
     var txt =  addText ? window.top.document.getElementById('snudirectlinks').innerHTML : "";
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(txt + msg);
 }
@@ -2403,10 +2404,10 @@ function postRequestToScriptSync(requestType) {
     client.open("post", "http://127.0.0.1:1977");
     client.onreadystatechange = function (m) {
         if (client.readyState == 4 && client.status != 200)
-            g_form.addErrorMessage(client.responseText.replace(/<\/?[^>]+(>|$)/g, ""));
+            snuSetInfoText(client.responseText.replace(/<\/?[^>]+(>|$)/g + "<br />", true));
     };
     client.onerror = function (e) {
-        alert("Error, please check if VS Code with SN SriptSync is running");
+        snuSetInfoText("Error, please check if VS Code with SN SriptSync is running<br />", true);
     };
     client.send(JSON.stringify(data));
 }
@@ -2772,7 +2773,7 @@ function sncWait(ms) { //dirty. but just need to wait a sec...
 
 function searchSysIdTables(sysId) {
     try {
-        showAlert('Searching for sys_id. This could take some seconds...')
+        snuSetInfoText("Searching for sys_id. This could take some seconds...<br />",false);
         var script = `      
             function findSysID(sysId) {
                 var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
@@ -2828,16 +2829,16 @@ function searchSysIdTables(sysId) {
         startBackgroundScript(script, function (rspns) {
             answer = rspns.match(/###(.*)###/);
             if (answer != null && answer[1]) {
-                showAlert('Opening in new tab: ' + answer[1].split('^')[1], 'success');
+                snuSetInfoText('Opening in new tab: ' + answer[1].split('^')[1] + "<br />",true);
                 var table = answer[1].split('^')[0];
                 var url = table + '.do?sys_id=' + sysId;
                 window.open(url, '_blank');
             } else {
-                showAlert('sys_id was not found in the system.', 'warning');
+                snuSetInfoText('sys_id was not found in the system.<br />', true);
             }
         });
     } catch (error) {
-        showAlert(error, 'danger');
+        snuSetInfoText(error + "<br />", true);
     }
 }
 
