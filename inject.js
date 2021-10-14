@@ -2789,10 +2789,18 @@ function searchSysIdTables(sysId) {
                 }
 
                 var tblsGr = new GlideRecord("sys_db_object");
-                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEsysx_^nameNOT LIKE00^nameNOT LIKEv_^nameNOT LIKE$^nameNOT LIKEsys_rollback_^nameNOT LIKEpa_^nameNOT INsys_metadata,task,cmdb_ci,sys_user")
+                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^nameNOT INsys_metadata,task,cmdb_ci,sys_user,cmdb_ire_partial_payloads_index");
                 tblsGr.query();
                 while (tblsGr.next()) {
-                    rtrn = findClass(tblsGr.getValue('name'), sysId);
+                    var tableName = tblsGr.getValue('name');
+                    var forbiddenPrefixes = ['ts_', 'sysx_', 'v_', 'sys_rollback_', 'pa_'];
+                    var hasForbiddenPrefix = forbiddenPrefixes.some(function(forbiddenPrefix) {
+                        return tableName.startsWith(forbiddenPrefix);
+                    });
+                    if (hasForbiddenPrefix) {
+                        continue;
+                    }
+                    rtrn = findClass(tableName, sysId);
                     if (rtrn) {
                         gs.print("###" + rtrn + "###")
                         return
@@ -2801,6 +2809,8 @@ function searchSysIdTables(sysId) {
                 function findClass(t, sysId) {
                     var s = new GlideRecord(t);
                     s.addQuery('sys_id', sysId);
+                    // Order is important: setWorkflow must be before setLimit.
+                    s.setWorkflow(false);
                     s.setLimit(1);
                     s.queryNoDomain();
                     s.query();
