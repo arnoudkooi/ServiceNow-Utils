@@ -1564,6 +1564,7 @@ function addTechnicalNames() {
         }
     }
 
+    //add link to UI actions behind UI Action button 
     if (jQuery('.snuiaction').length == 0) {
         jQuery('.action_context').each(function () {
             var si = jQuery(this).attr('gsft_id');
@@ -1572,6 +1573,7 @@ function addTechnicalNames() {
         });
     }
 
+    //add to names list and relatedlist
     jQuery('th.list_hdr, th.table-column-header').each(function (index) {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
         if (!jQuery(this).hasClass("snutn")){
@@ -1579,6 +1581,18 @@ function addTechnicalNames() {
             jQuery(this).find('a.list_hdrcell, a.sort-columns').parent().after('<div style="font-family:monospace;font-size:small;margin-left: 25px;margin-top: -3px; font-weight:normal">' + tname + '</div> ');
         }
     });
+
+    //add names to variables in form formatter
+    g_form.nameMap.each(vari => {
+    var elm = document.querySelector("div[id$='"+ vari.realName +"']");
+    if (!elm.classList.contains('snutn')){
+        var newElm = document.createElement('span');
+        var sysid = vari.realName.substr(vari.realName.length - 32);
+        newElm.innerHTML = " | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a>"; newElm.style = "font-family:monospace;";
+        elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
+        elm.classList.add('snutn');
+    }
+})
 
     //also show viewname
     var viewName = jQuery('input#sysparm_view').val();
@@ -2285,6 +2299,10 @@ function snuFillFields(query) {
             return;
         }
         var manFields = window.g_form.getMissingFields();
+
+        // if(['-xss'].includes(query) ){ //todo determine fieldtypes too fill
+        //     manFields = elNames.split(',');
+        // }
         
         
         if (window.g_form.getTableName() != 'ni')
@@ -3223,7 +3241,10 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
         url = "/api/now/table/" + table + "?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
 
         loadXMLDoc(g_ck, url, "", res => {
-            res = (fullRecord) ? res.result[0] : res.result[0].sys_id.value;
+            if (res.result[0])
+                res = (fullRecord) ? res.result[0] : res.result[0].sys_id.value;
+            else
+                res = 0;
             callback(res);
         });
 
@@ -3261,10 +3282,14 @@ function snuSetRandomPortal(allFields,iteration) {
             }
             else if (["reference","glide_list"].includes(fld.type)) {
                 snuGetRandomRecord(fld.ed.reference, fld.ed.qualifier, false, res => {
-                    snuSetInfoText(`- Setting random value to ${fld.type} field ${fldName}<br />`, true);
+                    if (res)
+                        snuSetInfoText(`- Setting random value to ${fld.type} field ${fldName}<br />`, true);
+                    else 
+                        snuSetInfoText(`- PROBLEM no value found for ${fld.type} field ${fldName}<br />`, true);
                     gf.setValue(fldName, res);
+                    cnt++;
                 })
-                cnt++;
+                
             }
             else if (["choice"].includes(fld.type)) {
                 snuSetInfoText(`- Setting random text choice field ${fldName}<br />`, true);
@@ -3273,7 +3298,12 @@ function snuSetRandomPortal(allFields,iteration) {
             }
             else if (["string","html", "textarea"].includes(fld.type)) {
                 snuSetInfoText(`- Setting filler value to ${fld.type} field ${fldName}<br />`, true);
-                gf.setValue(fldName, "Lorem Ipsum SN Utils Dolar /rnd Slashcommand");
+                var rndString = "Lorem Ipsum SN Utils Dolar /rnd Slashcommand";
+                if(allFields == "-xss") {
+                    rndString = `alert(“SNUTILS-XSS-TEST”)“>SNUTILS XSS TEST</a><img src=“a.jpg” onerror=“javascript:alert(“SNUTILS-XSS-TEST”)“/>`+
+                    `<img src=x onError=alert(“SNUTILS-XSS-TEST”)`;
+                }
+                gf.setValue(fldName,rndString);
                 cnt++;
             }
             else if (["email"].includes(fld.type)) {
@@ -3287,11 +3317,14 @@ function snuSetRandomPortal(allFields,iteration) {
         }
     })
 
-    if (cnt){
+    if (cnt && iteration < 20){
         setTimeout(function(){ snuSetRandomPortal(allFields,++iteration) }, 800);
     }
     else {
-        setTimeout(hideSlashCommand, 2500);
+            setTimeout(function(){
+                if (!window.top.document.getElementById('snudirectlinks').innerHTML.includes("- PROBLEM"))
+                hideSlashCommand();
+            }, 2500);
     }
 
 }
