@@ -89,16 +89,20 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/quebec/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/rome/All/$0",
         "hint": "Search developer portal <search>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=quebec",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=rome",
         "hint": "Search Docs <search>"
     },
     "env": {
         "url": "*",
         "hint": "Open this page in <instance>"
+    },
+    "esc": {
+        "url": "/esc",
+        "hint": "Employee Center"
     },
     "fd": {
         "url": "/$flow-designer.do",
@@ -625,7 +629,7 @@ function addSlashCommandListener() {
                 return;
             }
             else if (shortcut == "sa") {
-                snuGetLastScopes();
+                snuGetLastScopes(query);
                 return;
             }
             else if (shortcut == "rnd") {
@@ -1140,8 +1144,15 @@ function snuRemoveFromList(){
 function doubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("dblclick", function (event) {
-            if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
-                var elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+            if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text') || 
+                event.target.parentElement.classList.contains('sc_editor_label')) {
+                var elm;
+                try { //standard label
+                    elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                } catch {}
+                try { //variabel label
+                    elm = jQuery(event.target.parentElement).attr('for');
+                } catch {}
                 var val = g_form.getValue(elm);
                 if (NOW.user.roles.split(",").includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
                     var newValue = prompt('[SN Utils]\nValue of ' + elm, val);
@@ -1583,16 +1594,18 @@ function addTechnicalNames() {
     });
 
     //add names to variables in form formatter
-    g_form.nameMap.each(vari => {
-    var elm = document.querySelector("div[id$='"+ vari.realName +"']");
-    if (!elm.classList.contains('snutn')){
-        var newElm = document.createElement('span');
-        var sysid = vari.realName.substr(vari.realName.length - 32);
-        newElm.innerHTML = " | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a>"; newElm.style = "font-family:monospace;";
-        elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
-        elm.classList.add('snutn');
+    if (typeof g_form != 'undefined') {
+        g_form.nameMap.each(vari => {
+            var elm = document.querySelector("div[id$='"+ vari.realName +"']");
+            if (!elm.classList.contains('snutn')){
+                var newElm = document.createElement('span');
+                var sysid = vari.realName.substr(vari.realName.length - 32);
+                newElm.innerHTML = " | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a>"; newElm.style = "font-family:monospace;";
+                elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
+                elm.classList.add('snutn');
+            }
+        })
     }
-})
 
     //also show viewname
     var viewName = jQuery('input#sysparm_view').val();
@@ -3142,7 +3155,7 @@ function snuImpersonate(userName){
     client.send("");
 }
 
-function snuGetLastScopes() {
+function snuGetLastScopes(query) {
     var urlPref = "/api/now/table/sys_user_preference?sysparm_limit=10&sysparm_fields=sys_id,name,sys_updated_on&sysparm_display_value=true&sysparm_query=nameSTARTSWITHupdateSetForScope^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_updated_on";
     loadXMLDoc(g_ck, urlPref, null, res => {
         snuSetInfoText(`<b>Log</b><br />- Looking up recent scopes in preferences.<br />`, false);
@@ -3153,12 +3166,24 @@ function snuGetLastScopes() {
             scopes.push(scp.name.substring(17))
             scopesObj[scp.name.substring(17)] = scp.sys_updated_on;
         })
-        if (scopes.length < 2) {
+        if (scopes.length < 2 && !query) {
             snuSetInfoText(`- No results found.<br />`, true);
             return;
         }
         var urlScope = "/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=sys_idIN" + scopes.join(',');
+        if (query){
+            urlScope =`/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=nameLIKE${query}^ORscopeLIKE${query}`;
+        }
         loadXMLDoc(g_ck, urlScope, null, res => {
+
+            //this is a fix to suppor searching for scopes, instead of displaying last 10
+            if (query){
+                res.result.forEach(scp => {
+                    scopes.push(scp.sys_id)
+                    scopesObj[scp.sys_id] = '';
+                })
+            }
+
             var returnScopes = {};
             var idx = 0;
             var dispIdx = 0;
