@@ -1460,13 +1460,6 @@ function makeReadOnlyContentCopyable() { //this solves an issue where e.g. OOTB 
     }
 }
 
-function openReference(event, refTable, refField) {
-    var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + g_form.getValue(refField);
-    if ((event.ctrlKey || event.metaKey) && event.keyCode == 83)
-        url = '/' + refTable + '?sysparm_query=sys_idIN' + g_form.getValue(refField);
-    window.open(url, 'refTable');
-}
-
 function openConditions(fieldName) {
     var tableField = g_form.getControl(fieldName).attributes['data-dependent'].value || null;
     var conditions = g_form.getValue(fieldName);
@@ -1630,7 +1623,7 @@ function snuUiActionInfo(event, si) {
 function openReference(refTable, refField, evt) {
     var sysIds = g_form.getValue(refField);
     var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + sysIds;
-    if ((evt.ctrlKey || evt.metaKey || !sysIds.includes(',')) && sysIds)
+    if ((evt.ctrlKey || evt.metaKey) && sysIds && !sysIds.includes(','))
         url = '/' + refTable + '.do?sysparm_query=sys_idIN' + sysIds;
     window.open(url, 'refTable');
 }
