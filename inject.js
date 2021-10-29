@@ -1149,18 +1149,20 @@ function doubleClickToShowFieldOrReload() {
                 var elm;
                 try { //standard label
                     elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-                } catch {}
-                try { //variabel label
-                    elm = jQuery(event.target.parentElement).attr('for');
-                } catch {}
+                } catch {
+                    try { //variabel label
+                        elm = jQuery(event.target.parentElement).attr('for') || jQuery(event.target.parentElement).attr('data-for');
+                    } catch {}
+                }
+
                 var val = g_form.getValue(elm);
                 if (NOW.user.roles.split(",").includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
-                    var newValue = prompt('[SN Utils]\nValue of ' + elm, val);
+                    var newValue = prompt('[SN Utils]\nField Type: ' + g_form.getGlideUIElement(elm).type + '\nField: ' + elm + '\nValue:', val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
                 }
                 else {
-                    alert('Value of ' + elm + "\n\n" + val);
+                    alert('[SN Utils]\nField Type: ' + g_form.getGlideUIElement(elm).type + '\nField: ' + elm + '\nValue:' + val);
                 }
             }
 
@@ -1460,16 +1462,29 @@ function makeReadOnlyContentCopyable() { //this solves an issue where e.g. OOTB 
     }
 }
 
-function openConditions(fieldName) {
+function snuOpenConditions(fieldName) {
     var tableField = g_form.getControl(fieldName).attributes['data-dependent'].value || null;
     var conditions = g_form.getValue(fieldName);
     var url = '/' + g_form.getValue(tableField) + '_list.do?sysparm_query=' + conditions;
     window.open(url, 'condTable');
 }
 
-function openTable(fieldName) {
+function snuOpenTable(fieldName) {
     var url = '/' + g_form.getValue(fieldName) + '_list.do';
     window.open(url, 'condTable');
+}
+
+function snuViewTranslations(fieldName) {
+    var url = '/sys_translated_text_list.do?sysparm_query=tablenameINjavascript:new global.PAUtils().getTableAncestors("'+ g_form.getTableName() +'")^fieldname=' + fieldName + 
+    '^documentkey=' + g_form.getUniqueValue() ;
+    window.open(url, 'translation');
+}
+
+function snuViewTranslationsMeta(fieldName) {
+    var orig = document.querySelector('*[id^="sys_original"][id$="' + fieldName + '"]').value;
+    var url = '/sys_translated_list.do?sysparm_query=nameINjavascript:new global.PAUtils().getTableAncestors("'+ g_form.getTableName() +'")^element=' + fieldName + 
+    '^value=' + orig + '^idISEMPTY^ORid=' + g_form.getUniqueValue()
+    window.open(url, 'translation');
 }
 
 function unhideFields() {
@@ -1521,11 +1536,13 @@ function addTechnicalNames() {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
             jQuery("h1.navbar-title:not(:contains('|'))").append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
                 ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="For easier copying of field names" onclick="toggleLabel()">[toggle label]</a> </span>');
-            jQuery(".label-text:not(:contains('|'))").each(function (index, value) {
-                jQuery('label:not(.checkbox-label)').removeAttr('for'); //remove to easier select text
+            jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
+                jQuery(elem.parentElement).attr('data-for',jQuery(elem.parentElement).attr('for')); //copy for value
+                jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
+                var elm;
                 try {
-                    var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                    elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 } catch (e) {
                     return true; //issue #42
                 }
@@ -1535,21 +1552,35 @@ function addTechnicalNames() {
                 if (fieldType == 'reference' || fieldType == 'glide_list') {
                     var reftable = g_form.getGlideUIElement(elm).reference;
                     linkAttrs = {
-                        onclick: "openReference('" + reftable + "','" + elm + "',event);",
+                        onclick: "snuOpenReference('" + reftable + "','" + elm + "',event);",
                         title: 'Open reference table list (click) or record (ctrl+click): ' + reftable
                     };
                 }
                 else if (fieldType == 'conditions') {
                     linkAttrs = {
-                        onclick: "openConditions('" + elm + "');",
+                        onclick: "snuOpenConditions('" + elm + "');",
                         title: 'Preview condition in list'
                     };
                 }
                 else if (fieldType == 'table_name') {
                     linkAttrs = {
-                        onclick: 'openTable(\'' + elm + '\');',
+                        onclick: 'snuOpenTable(\'' + elm + '\');',
                         title: 'Open table in list'
                     };
+                }
+                else if (['translated_field'].includes(fieldType)) {
+                    linkAttrs = {
+                        onclick: 'snuViewTranslationsMeta(\'' + elm + '\');',
+                        title: `View translations of ${fieldType} field`
+                    };
+                    elm = '⚑ ' + elm;
+                }
+                else if (['translated_text','translated_html'].includes(fieldType)) {
+                    linkAttrs = {
+                        onclick: 'snuViewTranslations(\'' + elm + '\');',
+                        title: `View translations of ${fieldType} field`
+                    };
+                    elm = '⚑ ' + elm;
                 }
                 if (linkAttrs) {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
@@ -1590,13 +1621,15 @@ function addTechnicalNames() {
     if (typeof g_form != 'undefined') {
         g_form.nameMap.each(vari => {
             var elm = document.querySelector("div[id$='"+ vari.realName +"']");
-            if (!elm.classList.contains('snutn')){
-                var newElm = document.createElement('span');
-                var sysid = vari.realName.substr(vari.realName.length - 32);
-                newElm.innerHTML = " | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a>"; newElm.style = "font-family:monospace;";
-                elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
-                elm.classList.add('snutn');
-            }
+                if (elm && !elm.classList.contains('snutn')){
+                    try{
+                    var newElm = document.createElement('span');
+                    var sysid = vari.realName.substr(vari.realName.length - 32);
+                    newElm.innerHTML = " | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a>"; newElm.style = "font-family:monospace;";
+                    elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
+                    elm.classList.add('snutn');
+                    } catch {}
+                }
         })
     }
 
@@ -1620,7 +1653,7 @@ function snuUiActionInfo(event, si) {
     }
 }
 
-function openReference(refTable, refField, evt) {
+function snuOpenReference(refTable, refField, evt) {
     var sysIds = g_form.getValue(refField);
     var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + sysIds;
     if ((evt.ctrlKey || evt.metaKey) && sysIds && !sysIds.includes(','))
@@ -1722,7 +1755,7 @@ function searchLargeSelects() {
 
     var minItems = 15;
 
-    jQuery('select:not(.searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
+    jQuery('select:not(.list_action_option, .searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
         if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
             var input = document.createElement("input");
             input.type = "text";
