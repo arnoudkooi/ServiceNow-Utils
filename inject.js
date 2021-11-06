@@ -1071,6 +1071,7 @@ function snuSettingsAdded() {
         createHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
         snuAddGroupSortIcon();
+        snuAddErrorLogScriptLinks();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1200,6 +1201,23 @@ function snuAddGroupSortIcon(){
         })
 
     }
+}
+
+function snuAddErrorLogScriptLinks(){
+    if (location.pathname.includes("syslog_list.do")){
+    jQuery("td.vt:contains('Caused by error')").each(function(tableCellIndex, tableCell) {
+        var regex = /Caused by error in (([a-z_]+).([A-Za-z0-9]+).[a-z]+) at line ([0-9]+)/;
+        var found = tableCell.innerText.match(regex);
+        if(found !== null) {
+            tableCell.innerHTML = tableCell.innerHTML.replace(found[1], buildLink(found[2], found[3], found[1]));
+        }
+    });
+    }
+}
+  
+function buildLink(table, sysId, linkText) {
+    var link = '<a href="/'+ table + '?sys_id=' + sysId + '">' + linkText + '</a>';
+    return link;
 }
 
 function doubleClickToSetQueryListV2() { //dbl click to view and update filter condition
