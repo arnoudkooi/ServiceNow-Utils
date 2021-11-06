@@ -938,6 +938,12 @@ function getSlashcommands() {
 //set or refresh datatable with ServiceNow tables
 function setDataExplore(nme) {
 
+    Object.entries(nme).forEach( // add check of empty fields to be able to filter out
+        ([key, obj]) => {
+            nme[key].hasdata = (obj.value || obj.display_value) ? "hasdata" : "";
+        }
+    );
+    
     if (dtDataExplore) dtTables.destroy();
     //$('#dataexplore').html(nme);
     dtDataExplore = $('#dataexplore').DataTable({
@@ -958,7 +964,8 @@ function setDataExplore(nme) {
 
             },
             { "mDataProp": "value" },
-            { "mDataProp": "display_value" }
+            { "mDataProp": "display_value" },
+            { "mDataProp": "hasdata" }
         ],
         "language": {
             "info": "Matched: _TOTAL_ of _MAX_ fields | Hold down CMD or CTRL to keep window open after clicking a link",
@@ -984,10 +991,19 @@ function setDataExplore(nme) {
         ]
 
     });
+    
+    dtDataExplore.column(5).visible(false);
 
     $('#tbxdataexplore').keyup(function () {
-        dtDataExplore.search($(this).val()).draw();
+        var srch = ($('#cbxhideempty').prop('checked') ? "hasdata " : "") + $('#tbxdataexplore').val();
+        dtDataExplore.search(srch).draw();
     }).focus().trigger('keyup');
+
+    
+    $('#cbxhideempty').change(function (e) {
+        var srch = ($('#cbxhideempty').prop('checked') ? "hasdata " : "") + $('#tbxdataexplore').val();
+        dtDataExplore.search(srch).draw();
+    });
 
     $('a.referencelink').click(function () {
         event.preventDefault();

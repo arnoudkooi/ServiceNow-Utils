@@ -3,15 +3,18 @@
 var s = document.body.firstChild;
 var editor;
 var div = document.createElement('div');
+var divInfo = document.createElement('div');
+divInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bg to open this page | Editor and shortcut added by SN Utils';
+divInfo.style.fontSize = '9pt'; 
+divInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
+var scrpt = document.getElementById('runscript');
 
-if (snusettings.applybgseditor) {
-	var s = document.body.firstChild;
-	var editor;
-	var div = document.createElement('div');
+if (snusettings.applybgseditor && scrpt) {
 	div.setAttribute("id", "container");
 	div.setAttribute("style", "height:400px");
 
-	var scrpt = document.getElementById('runscript');
+
+	scrpt.parentNode.insertBefore(divInfo, scrpt);
 	scrpt.parentNode.insertBefore(div, scrpt);
 	scrpt.style.display = "none";
 
@@ -35,6 +38,19 @@ if (snusettings.applybgseditor) {
 		editor.onDidChangeModelContent((e) => {
 			scrpt.value = editor.getModel().getValue();
 		});
+
+        const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
+
+        editor.addAction({
+            id: "runScript",
+            label: "Run script",
+            keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+            contextMenuGroupId: "2_execution",
+            precondition: blockContext,
+            run: () => {
+                document.querySelector('input[name="runscript"]').click();
+            },
+        });
 
 	});
 }

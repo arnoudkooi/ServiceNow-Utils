@@ -200,6 +200,15 @@
                         <input type="search" id="tbxdataexplore" name="tbxdataexplore"
                             class="form-control form-control-sm sync" placeholder="Search data...">
                         <span class="input-group-append">
+                            <div id="divhideempty">
+                                <input class="form-check-input sync" type="checkbox" id="cbxhideempty" name="cbxhideempty">
+                                <label class="form-check-label" for="cbxhideempty"
+                                    title="Hide rows where the field is empty">
+                                    Hide empty rows.
+                                </label></input>
+                            </div>
+                        </span>
+                        <span class="input-group-append">
                             <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm"
                                 title="Refresh data" type="button">Refresh</button>
                         </span>
@@ -212,6 +221,7 @@
                                 <th>Type</th>
                                 <th>Value</th>
                                 <th>Display Value</th>
+                                <th>Has Data</th>
                             </tr>
                         </thead>
                     </table>

@@ -368,3 +368,10 @@ label {
     top: 10px;
     font-size: 18pt;
 }
+
+#divhideempty{
+    width: 150px; 
+    text-align:right; 
+    border:1px solid #ced4da;
+    padding-right: 5px;
+}
