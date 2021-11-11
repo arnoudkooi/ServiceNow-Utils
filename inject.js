@@ -323,7 +323,7 @@ if (typeof jQuery != "undefined") {
 }
 
 function snuEncodeHtml(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/\//g, '&#x2F;');
 }
 
 function snuDecodeHtml(html) {
@@ -1322,7 +1322,7 @@ function clickToList() {
                 var qryDisp = '';
                 for (var _elm in _qry) {
                     qry += _elm + _qry[_elm].operator + _qry[_elm].val + '^';
-                    qryDisp += _qry[_elm].elmDisp + ' ' + _qry[_elm].operator + ' <b>' + _qry[_elm].valDisp + '</b> > ';
+                    qryDisp += _qry[_elm].elmDisp + ' ' + _qry[_elm].operator + ' <b>' + snuEncodeHtml(_qry[_elm].valDisp) + '</b> > ';
                 }
 
                 var listurl = '/' + tbl + '_list.do?sysparm_query=' + qry;
