@@ -1510,10 +1510,23 @@ function unhideFields() {
     }
     for (var ij = 0; ij < g_form.elements.length; ij++) {
         try {
-            var hidden = g_form.elements[ij].elementParentNode.getAttribute("style").includes("none");
-            if (hidden) {
-                jQuery(g_form.elements[ij].elementParentNode).find('label:not(.checkbox-label)').prepend(bulb);
-                g_form.setDisplay(g_form.elements[ij].fieldName, true);
+            var element = g_form.elements[ij];
+            var fieldName = element.fieldName;
+            var isVariable = fieldName.startsWith('ni.');
+            if (!isVariable) {
+                var hidden = element.elementParentNode.getAttribute('style').includes('none');
+                if (hidden) {
+                    jQuery(element.elementParentNode).find('label:not(.checkbox-label)').prepend(bulb);
+                    g_form.setDisplay(fieldName, true);
+                }
+            } else {
+                var variableElement = g_sc_form.getSCUIElement(fieldName);
+                var hidden = variableElement.getElementParentNode().getAttribute('style').includes('none');
+                if (hidden) {
+                    // Variables have only one label. Unfortunately, in the case of a checkbox, the bulb will be on the right side.
+                    jQuery(variableElement.getElementParentNode()).find('label').prepend(bulb);
+                    g_form.setDisplay('variables.' + fieldName, true);
+                }
             }
         } catch (e) { };
     }
