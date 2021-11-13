@@ -100,7 +100,7 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Open this page in <instance>"
     },
-    "esc": {
+    "ec": {
         "url": "/esc",
         "hint": "Employee Center"
     },
