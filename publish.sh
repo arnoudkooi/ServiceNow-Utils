@@ -9,7 +9,10 @@ sed -i '' "6s/.*/$var/" publish/manifest-edge.json
 zip -r publish/chrome-snutils.zip . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
 mv manifest.json publish/manifest-chrome.json
 mv publish/manifest-firefox.json manifest.json
+mv js/monaco/vs/language/typescript/tsWorker.js publish/tsWorker.js 
+mv publish/tsWorkerDummy.js js/monaco/vs/language/typescript/tsWorker.js
 zip -r publish/firefox-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
+mv publish/tsWorker.js js/monaco/vs/language/typescript/tsWorker.js
 mv manifest.json publish/manifest-firefox.json
 
 mv publish/manifest-edge.json manifest.json

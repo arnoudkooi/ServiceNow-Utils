@@ -3134,7 +3134,7 @@ function snuGetUsersForImpersonate(query) {
     var client=new XMLHttpRequest();
     if (query)
         client.open("get","api/now/table/sys_user?sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20&" +
-        `sysparm_fields=sys_id,user_name,name&sysparm_query=user_nameLIKE${query}^ORnameLIKE${query}`);
+        `sysparm_fields=sys_id,user_name,name&sysparm_query=active=true^user_nameLIKE${query}^ORnameLIKE${query}`);
     else 
         try {
         client.open("get","/api/now/ui/impersonate/recent");
