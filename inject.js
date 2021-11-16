@@ -757,7 +757,7 @@ function addSlashCommandListener() {
                         else if (targeturl.startsWith("&")) {
                             var myurl = doc.location.href
                             if (targeturl.startsWith("&sysparm_group_sort=COUNT")) {
-                                myurl = myurl.replace("&sysparm_group_sort=COUNT", "").replace("&sysparm_group_sort=COUNT", "");
+                                myurl = myurl.replace("&sysparm_group_sort=COUNTDESC", "").replace("&sysparm_group_sort=COUNT", "");
                             }
                             doc.location = myurl + targeturl;
                         }
