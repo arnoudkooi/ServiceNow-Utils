@@ -1224,7 +1224,8 @@ function doubleClickToSetQueryListV2() { //dbl click to view and update filter c
         } else {
 
             var qry = GlideList2.get(jQuery('#sys_target').val());
-            var newValue = prompt('[SN Utils]\nFilter condition: ', qry.filter);
+            var orderBy = qry.orderBy.length ? '^' + qry.orderBy.join('^') : '';
+            var newValue = prompt('[SN Utils]\nFilter condition: ', qry.filter + orderBy);
             if (newValue !== qry.filter && newValue !== null) {
                 qry.setFilterAndRefresh(newValue);
             }
@@ -1973,7 +1974,7 @@ function bindPaste(showIcon) {
     if (typeof g_form != 'undefined') {
 
         if (showIcon && jQuery != 'undefined')
-            jQuery('#header_add_attachment').after('<button id="header_paste_image" title="Paste screenshot as attachment" class="btn btn-icon glyphicon glyphicon-paste navbar-btn" aria-label="Paste Image as Attachments" data-original-title="Paste Image as Attachments" onclick="tryPaste()"></button>');
+            jQuery('#header_add_attachment').after('<button id="header_paste_image" title="[SN Utils] Paste screenshot as attachment" class="btn btn-icon glyphicon glyphicon-paste navbar-btn" aria-label="Paste Image as Attachments" data-original-title="Paste Image as Attachments" onclick="tryPaste()"></button>');
         document.querySelector('body').addEventListener('paste', (e) => {
             if (e.clipboardData.items.length > 0 && e.clipboardData.items[0].kind == "file") {
                 if (g_form.isNewRecord()) {

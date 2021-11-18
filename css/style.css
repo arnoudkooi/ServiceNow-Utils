@@ -325,6 +325,16 @@ a.deletecmd {
     padding: .1rem .2rem;
 }
 
+#cmdformhelp{
+    border: #e3e3e3 1pt solid;
+    background-color: #F8F8F8;
+    font-size: 10pt;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    word-wrap: break-word;
+}
+
 .hidden{
     display: none;
 }

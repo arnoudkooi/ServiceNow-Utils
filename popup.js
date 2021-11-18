@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 //Set variables, called by BG page after calling getRecordVariables
 function setRecordVariables(obj) {
-
+    console.log(obj)
     isNoRecord = !obj.myVars.hasOwnProperty('NOWsysId');
     sys_id = obj.myVars.NOWsysId || obj.myVars.mySysId;
     table = obj.myVars.NOWtargetTable;
@@ -348,6 +348,7 @@ function setBrowserVariables(obj) {
                 break;
             case "#tabslashcommands":
                 getSlashcommands();
+                setSampleCommandHref();
                 break;
             case "#tabwhitelist":
                 getSettings(function(){});
@@ -450,6 +451,39 @@ function applyFavIconBadge(settings){
     document.getElementById("icontext").style.color = settings.iconcolortext; 
 
     chrome.tabs.sendMessage(tabid, { method: "setFavIconBadge", options: settings }, function () {});
+
+}
+
+function setSampleCommandHref() {
+    
+    var newHref = myFrameHref || urlFull;
+    if ((newHref.split('?')[0]).indexOf('_list.do') > 1) {
+        bgPage.getListUrl();
+    }
+    else {
+        if (newHref.includes('.do?')) //allow page with .do in url to default to the UI16 iframe
+            newHref = newHref.replace(url + '/','');
+        else 
+            newHref = newHref.replace(url,'');
+        setListUrl(newHref, '');
+    }
+}
+
+function setListUrl(listUrl, tableLabel){
+    var hrf = document.getElementById('cmdforma');
+    hrf.href = url + '/' + listUrl
+    hrf.innerText =listUrl;
+    hrf.setAttribute('data-tablelabel', tableLabel);
+
+    hrf.onclick = function(e) { 
+        e.preventDefault();
+        document.getElementById('tbxslashurl').value = this.innerText;
+        if (tableLabel)
+            document.getElementById('tbxslashhint').value = this.getAttribute('data-tablelabel') + ' <search>';
+        document.getElementById('tbxslashcmd').value = '';
+        document.getElementById('tbxslashcmd').focus();
+        slashCommandShowFieldField();
+    };
 
 }
 
@@ -868,6 +902,7 @@ function getSlashcommands() {
                         $('#tbxslashhint').val(snuDecodeHtml(row.hint));
                         $('#tbxslashfields').val(snuDecodeHtml(row.fields));
                         $('#tbxslashoverwriteurl').val(snuDecodeHtml(row.overwriteurl));
+                        $('#cmdformhelpprefill').hide();
                         slashCommandShowFieldField();
                     });
 

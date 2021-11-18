@@ -950,6 +950,31 @@ function getGRQueryForm(varName, template, templatelines, fullvarname) {
 
 }
 
+
+
+function getListUrl() {
+
+    popup = chrome.extension.getViews({
+        type: "popup"
+    })[0];
+
+        chrome.tabs.sendMessage(tabid, {
+            method: "getVars",
+            myVars: "g_list.title,g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir"
+        }, function (response) {
+            var tableName = response.myVars.g_listtableName;
+            var tableLabel = response.myVars.g_listtitle;
+            var encQuery = response.myVars.g_listfilter;
+            var orderBy = response.myVars.g_listsortBy;
+            var isDesc = response.myVars.g_listsortDir == "DESC" ? "DESC" : "";
+            if (orderBy)
+                encQuery += `^ORDERBY${isDesc}=${orderBy}`;
+            var listUrl = `${tableName}_list.do?sysparm_query=${encQuery}`;
+            popup.setListUrl(listUrl, tableLabel);
+        });
+}
+
+
 //Query servicenow for details of user, passhtml string to popup
 function getUserDetails(userName) {
 
