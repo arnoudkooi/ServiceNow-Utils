@@ -2238,6 +2238,21 @@ function loadXMLDoc(token, url, post, callback) {
     }
 }
 
+
+// async function snuFetch(pathToResource) {
+// todo: move rest api call to fetch api / async functions
+//     const snuHeaders = new Headers({
+//         'Cache-Control' :'no-cache',
+//         'Accept' : 'application/json',
+//         'Content-Type' : 'application/json',
+//         'X-UserToken' : token || ''
+//     });
+      
+//       const response = await fetch(pathToResource,  { headers: snuHeaders });
+//       console.log(response);
+//       return response;
+//   }
+
 /**
  * @function startBackgroundScript
  * @param  {String} script   {the script that should be executed}

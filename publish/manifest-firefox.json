@@ -7,6 +7,7 @@
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
+        "https://*.servicenowservices.com",
         "contextualIdentities",
         "tabs",
         "storage",
@@ -30,16 +31,20 @@
     "content_scripts": [
         {
             "matches": [
-                "https://*.service-now.com/*"
+                "https://*.service-now.com/*",
+                "https://*.servicenowservices.com"
             ],
             "exclude_matches": [
-                "https://signon.service-now.com/*",
                 "https://*.service-now.com/*?XML*",
                 "https://*.service-now.com/*&XML*",
                 "https://*.service-now.com/*?WSDL*",
                 "https://*.service-now.com/*&WSDL*",
-                "https://*.service-now.com/api/now*"
-            ],
+                "https://*.service-now.com/api/now*",
+                "https://*.servicenowservices.com/*?XML*",
+                "https://*.servicenowservices.com/*&XML*",
+                "https://*.servicenowservices.com/*?WSDL*",
+                "https://*.servicenowservices.com/*&WSDL*",
+                "https://*.servicenowservices.com/api/now*"            ],
             "js": [
                 "js/purify.min.js",
                 "js/jquery.min.js",
@@ -92,8 +97,7 @@
             "48": "images/icon48.png",
             "128": "images/icon128.png"
         },
-        "show_matches": ["https://*.service-now.com/*"],
-        "hide_matches": ["https://signon.service-now.com/*"]
+        "show_matches": ["https://*.service-now.com/*", "https://*.servicenowservices.com/*"]
     },
     "options_ui": {
         "page": "options.html",
@@ -112,5 +116,5 @@
             "id": "email@arnoudkooi.com"
         }
     },
-    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
+    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com https://*.servicenowservices.com ws://127.0.0.1:1978/"
 }
