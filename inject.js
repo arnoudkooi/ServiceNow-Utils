@@ -65,7 +65,7 @@ var snuslashcommands = {
     },
     "tab": {
         "url": "/$0",
-        "hint": "New tab <pag or portal ie. foo.do or csm>"
+        "hint": "New tab <page or portal ie. foo.do or csm>"
     },
     "hist": {
         "url": "*",
@@ -316,9 +316,10 @@ if (typeof jQuery != "undefined") {
         else
             doubleClickToSetQueryListV2();
 
-        doubleClickToShowFieldOrReload();
-        clickToList();
-        makeReadOnlyContentCopyable();
+        snuDoubleClickToShowFieldOrReload();
+        snuClickToList();
+        snuClickToOpenWidget();
+        snuMakeReadOnlyContentCopyable();
     });
 }
 
@@ -429,7 +430,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
             window.top.document.getElementById('snudirectlinks');
-            window.top.document.querySelectorAll("#snudirectlinks a").forEach(function (elm) { elm.addEventListener("click", hideSlashCommand) });
+            window.top.document.querySelectorAll("#snudirectlinks a").forEach(function (elm) { elm.addEventListener("click", snuHideSlashCommand) });
 
         })
     }
@@ -449,20 +450,20 @@ function snuEasyCompareTime() { //for our ITOM friends to easy select compare ti
 }
 snuEasyCompareTime();
 
-function addFilterListener() {
+function snuAddFilterListener() {
     if (document.getElementById('filter') == null) return;
     document.getElementById('filter').addEventListener('keyup', function (e) {
         if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') {//is a sys_id
-            searchSysIdTables(e.currentTarget.value);
+            snuSearchSysIdTables(e.currentTarget.value);
         }
         else if (e.currentTarget.value == "/") {
             e.preventDefault();
             e.currentTarget.value = "";
-            showSlashCommand('');
+            snuShowSlashCommand('');
         }
     });
 }
-function addSlashCommandListener() {
+function snuAddSlashCommandListener() {
     if (window.top.document.getElementById('snufilter') == null) return;
     if (window.top.document.getElementById('snufilter').classList.contains('snu-slashcommand')) return;
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
@@ -485,7 +486,7 @@ function addSlashCommandListener() {
         }
         if (e.key == 'Meta' || e.key == 'Control' || e.key == 'ArrowLeft') return;
         if (e.currentTarget.selectionStart < e.currentTarget.value.length && e.key == 'ArrowRight') return;
-        if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) hideSlashCommand();
+        if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) snuHideSlashCommand();
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
         if (!e.currentTarget.value.startsWith("/")) {
             e.currentTarget.value = "/" + e.currentTarget.value
@@ -609,8 +610,8 @@ function addSlashCommandListener() {
             if (shortcut.match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid") {//is a sys_id
                 var sysid = (shortcut.length == 32) ? shortcut : query;
                 if (sysid.length != 32) return;
-                searchSysIdTables(sysid);
-                //hideSlashCommand();
+                snuSearchSysIdTables(sysid);
+                //snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "help") {
@@ -625,7 +626,7 @@ function addSlashCommandListener() {
                     }
                 );
                 document.dispatchEvent(event);
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "sa") {
@@ -642,9 +643,9 @@ function addSlashCommandListener() {
                 return;
             }
             else if (shortcut == "token") {
-                postRequestToScriptSync();
+                snuPostRequestToScriptSync();
                 snuSetInfoText("Trying to send current token to VS Code<br />", false);
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "code") {
@@ -664,17 +665,17 @@ function addSlashCommandListener() {
                     }
                 );
                 window.top.document.dispatchEvent(event);
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "copycells") {
-                copySelectedCellValues(query);
-                hideSlashCommand();
+                snuCopySelectedCellValues(query);
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "s2") {
                 if (typeof snuS2Ify != 'undefined') snuS2Ify();
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "pop") {
@@ -688,7 +689,7 @@ function addSlashCommandListener() {
                     }
                 );
                 window.top.document.dispatchEvent(event);
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "env") {
@@ -710,7 +711,7 @@ function addSlashCommandListener() {
 
                 if (typeof g_form == 'undefined') {
                     //showAlert("No form found","warning",2000)
-                    hideSlashCommand();
+                    snuHideSlashCommand();
                     return;
                 }
                 // prefix URL with 'view-source:' so that browsers are forced to show the actual XML
@@ -730,19 +731,19 @@ function addSlashCommandListener() {
                     }
                 );
                 window.top.document.dispatchEvent(event);
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "tn") {
                 var iframes = window.top.document.querySelectorAll("iframe");
                 iframes.forEach((iframe) => {
-                    if (typeof iframe.contentWindow.addTechnicalNames != 'undefined')
-                        iframe.contentWindow.addTechnicalNames();
+                    if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
+                        iframe.contentWindow.snuAddTechnicalNames();
                 });
-                addTechnicalNames();
+                snuAddTechnicalNames();
 
                 window.top.document.getElementById('snufilter').value = '';
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut.startsWith("-")) {
@@ -764,7 +765,7 @@ function addSlashCommandListener() {
                         else {
                             var newQ = qry.filter.replace(targeturl, "")
                             qry.setFilterAndRefresh(newQ + targeturl);
-                            hideSlashCommand();
+                            snuHideSlashCommand();
                             return;
                         }
                     }
@@ -780,7 +781,7 @@ function addSlashCommandListener() {
                         window.open(targeturl, '_blank');
                 }
                 if (!targeturl.startsWith("$random")) {
-                    hideSlashCommand();
+                    snuHideSlashCommand();
                     return;
                 }
             }
@@ -792,7 +793,7 @@ function addSlashCommandListener() {
                 });
                 unhideFields();
                 window.top.document.getElementById('snufilter').value = '';
-                hideSlashCommand();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "unimp") {
@@ -849,7 +850,7 @@ function addSlashCommandListener() {
                             window.open(shortcut, '_blank');
                         }
                     }
-                    hideSlashCommand();
+                    snuHideSlashCommand();
                     return;
                 }
                 else if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
@@ -867,7 +868,7 @@ function addSlashCommandListener() {
                             window.open(url, '_blank');
                         }
                     }
-                    hideSlashCommand();
+                    snuHideSlashCommand();
                     return;
                 }
                 else {
@@ -893,7 +894,7 @@ function addSlashCommandListener() {
                         jQuery('#gsft_main').attr('src', targeturl);
                     else
                         window.open(targeturl, '_blank');
-                    hideSlashCommand();
+                    snuHideSlashCommand();
                 })
             }
             else if (inIFrame) {
@@ -916,7 +917,7 @@ function addSlashCommandListener() {
                     }
                 }
             }
-            hideSlashCommand();
+            snuHideSlashCommand();
         }
         else {
             snuShowSlashCommandHints(originalShortcut, selectFirst, switchText, e);
@@ -990,11 +991,11 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
     window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length + "/" + Object.keys(snuslashcommands).length);
 
-    window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
+    window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter )});
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
 }
 
-function setSnuFilter() {
+function setSnuFilter(ev) {
     var slshcmd = this.querySelector('.cmdkey').innerText;
     if (!window.top.document.getElementById('snufilter').value.startsWith(slshcmd)) {
         window.top.document.getElementById('snufilter').focus();
@@ -1002,7 +1003,9 @@ function setSnuFilter() {
         snuIndex = parseInt(this.dataset.index || 0);
     }
     else {
-        window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Enter' }));
+        obj = { 'key': 'Enter' };
+        if (event.ctrlKey || event.metaKey) obj.ctrlKey = true;
+        window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', obj));
     }
 }
 
@@ -1052,8 +1055,8 @@ function snuSettingsAdded() {
         addBGScriptButton();
     }
     if (snusettings.slashoption != "off") {
-        addFilterListener();
-        addSlashCommandListener();
+        snuAddFilterListener();
+        snuAddSlashCommandListener();
     }
     if (snusettings.s2ify) {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
@@ -1061,14 +1064,14 @@ function snuSettingsAdded() {
 
     if (snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
-        addStudioSearch();
-        addSgStudioPlatformLink();
-        enhanceNotFound();
+        snuAddStudioSearch();
+        snuAddSgStudioPlatformLink();
+        snuEnhanceNotFound();
         snuPaFormulaLinks();
         snuRemoveLinkLess();
         snuTableCollectionLink();
-        newFromPopupToTab();
-        createHyperLinkForGlideLists();
+        snuNewFromPopupToTab();
+        snuCreateHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
         snuAddGroupSortIcon();
         snuAddErrorLogScriptLinks();
@@ -1093,12 +1096,12 @@ function snuSettingsAdded() {
     }
 
     if (snusettings.addtechnicalnames == true) {
-        addTechnicalNames();
-        setTimeout(addTechnicalNamesPortal, 5000);
+        snuAddTechnicalNames();
+        setTimeout(snuAddTechnicalNamesPortal, 5000);
     }
 }
 
-function createHyperLinkForGlideLists() {
+function snuCreateHyperLinkForGlideLists() {
     try {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
@@ -1139,10 +1142,10 @@ function snuRemoveFromList(){
     var oldArr = g_form.getValue(fld).split(',');
     var newArr = oldArr.filter(item => item !== val);
     g_form.setValue(fld, newArr.join(','));
-    setTimeout(createHyperLinkForGlideLists,1000);
+    setTimeout(snuCreateHyperLinkForGlideLists,1000);
 }
 
-function doubleClickToShowFieldOrReload() {
+function snuDoubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("dblclick", function (event) {
             if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text') || 
@@ -1179,7 +1182,7 @@ function mouseEnterToConvertToHyperlink() {
     if (typeof g_form != 'undefined') {
         document.querySelectorAll('div[type="glide_list"]').forEach(
             div => div.parentElement.addEventListener('mouseenter', 
-                createHyperLinkForGlideLists
+                snuCreateHyperLinkForGlideLists
             ));
     }
 }
@@ -1197,7 +1200,7 @@ function snuAddGroupSortIcon(){
 
         jQuery(`th[name="${gb}"] a span.snuexeccmd`).on('click',function(elm){
             elm.preventDefault();
-            showSlashCommand(elm.currentTarget.dataset.slashcommand);
+            snuShowSlashCommand(elm.currentTarget.dataset.slashcommand);
         })
 
     }
@@ -1242,7 +1245,21 @@ var qry = '';
 var qryDisp = '';
 var _qry = {};
 
-function clickToList() {
+function snuClickToOpenWidget() {
+    if (location.pathname == "/$pa_dashboard.do" && typeof DashboardMessageHandler != 'undefined') {
+        document.querySelectorAll('.grid-widget-header-title').forEach((function(el){ 
+            el.setAttribute("title","[SN Utils] CTRL or CMD-Click to open source");
+        }));
+        document.addEventListener("click", function (event) {
+            if ((event.ctrlKey || event.metaKey)) {
+                var lnk = event.target.closest('.grid-stack-item').querySelector('decoration').getAttribute("editlink");
+                window.open(lnk) ;
+            }
+        });
+    }
+}
+
+function snuClickToList() {
 
     if (typeof g_form != 'undefined') {
         document.addEventListener("click", function (event) {
@@ -1337,7 +1354,7 @@ function clickToList() {
     }
 }
 
-function enhanceNotFound(advanced) {
+function snuEnhanceNotFound(advanced) {
 
     if (typeof jQuery == 'undefined') return;
     if (!jQuery('#not_the_droids').length) return;
@@ -1349,9 +1366,9 @@ function enhanceNotFound(advanced) {
     var addedQuery = '_list.do' + ((query.length > 1) ? query[1] : '');
     var html = '<div id="snutils-suggestions" style="margin-top:20px"><h4>SN Utils \'did you mean\' table suggestions</h4>';
     if (advanced)
-        html += 'Mode: <a href="javascript:enhanceNotFound(0)">starts with: ' + query[0] + '</a> | contains: ' + query[0].replace(/_/g, ' & ') + '<br />';
+        html += 'Mode: <a href="javascript:snuEnhanceNotFound(0)">starts with: ' + query[0] + '</a> | contains: ' + query[0].replace(/_/g, ' & ') + '<br />';
     else
-        html += 'Mode: starts with: ' + query[0] + ' | <a title="splits by underscore and does a contains for each word" href="javascript:enhanceNotFound(1)">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
+        html += 'Mode: starts with: ' + query[0] + ' | <a title="splits by underscore and does a contains for each word" href="javascript:snuEnhanceNotFound(1)">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
 
     html += '<br /><ul>';
     var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^EORDERBYlabel^nameSTARTSWITH' + query[0];
@@ -1464,7 +1481,7 @@ function delQry() {
     g_form.clearMessages();
 }
 
-function makeReadOnlyContentCopyable() { //this solves an issue where e.g. OOTB read-only Script Include content was not copyable
+function snuMakeReadOnlyContentCopyable() { //this solves an issue where e.g. OOTB read-only Script Include content was not copyable
     try {
         if (typeof g_glideEditorArray != 'undefined' && g_glideEditorArray instanceof Array) {
             for (var i = 0; i < g_glideEditorArray.length; i++) {
@@ -1541,7 +1558,7 @@ function toggleLabel() {
     jQuery('span.label-orig, span.label-tech, span.label-snu').toggle();
 }
 
-function addTechnicalNamesPortal() {
+function snuAddTechnicalNamesPortal() {
     if (typeof window?.NOW?.sp != 'undefined') { //basic serviceportal names
         document.querySelectorAll('label.field-label, span.type-boolean').forEach(function (lbl) {
             try {
@@ -1554,11 +1571,11 @@ function addTechnicalNamesPortal() {
     }
 }
 
-function addTechnicalNames() {
-    addTechnicalNamesWorkspace();
+function snuAddTechnicalNames() {
+    snuAddTechnicalNamesWorkspace();
     if (typeof jQuery == 'undefined') return; //not in studio
 
-    addTechnicalNamesPortal();
+    snuAddTechnicalNamesPortal();
     if (typeof g_form != 'undefined') {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
@@ -1668,7 +1685,7 @@ function addTechnicalNames() {
 
     showSelectFieldValues();
     searchLargeSelects();
-    createHyperLinkForGlideLists();
+    snuCreateHyperLinkForGlideLists();
 }
 
 function snuUiActionInfo(event, si) {
@@ -1881,10 +1898,10 @@ function setShortCuts() {
     htmlFilter.innerHTML = cleanHTML
     if (!window.top.document.querySelectorAll('#snufilter').length) { //prevent reinject 
         window.top.document.body.appendChild(htmlFilter);
-        window.top.document.getElementById('cmdhidedot').addEventListener('click', hideSlashCommand);
+        window.top.document.getElementById('cmdhidedot').addEventListener('click', snuHideSlashCommand);
         window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
     }
-    addSlashCommandListener();
+    snuAddSlashCommandListener();
 
     document.addEventListener("keydown", function (event) {
 
@@ -1895,7 +1912,7 @@ function setShortCuts() {
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') && !event.srcElement.tagName.includes("-") ||
                     (event.ctrlKey || event.metaKey) && !event.srcElement.hasAttribute('aria-describedby')) { //not when form element active
                     event.preventDefault();
-                    showSlashCommand('');
+                    snuShowSlashCommand('');
                 }
             }
         }
@@ -2019,7 +2036,7 @@ function bindPaste(showIcon) {
 }
 
 //Because we dont like creating records in a popup with sys_ref_list view
-function newFromPopupToTab() {
+function snuNewFromPopupToTab() {
     return //buggy
     if (typeof jQuery == 'undefined') return; //not in studio
 
@@ -2315,7 +2332,7 @@ function showAlert(msg, type, timeout) {
 function hideAlert() {
     jQuery('.service-now-util-alert').removeClass('visible');
 }
-function hideSlashCommand() {
+function snuHideSlashCommand() {
     window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
@@ -2330,9 +2347,13 @@ function hideSlashCommand() {
     return true;
 }
 
-function showSlashCommand(initialCommand) {
+function showSlashCommand(initialCommand){
+    alert('Function showSlashCommand is renamed to snuShowSlashCommand, update your code!')
+}
+
+function snuShowSlashCommand(initialCommand) {
     snuReceivedCommand = initialCommand;
-    window.top.document.snuSelection = getSelectionText();
+    window.top.document.snuSelection = snuGetSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
@@ -2351,7 +2372,7 @@ function showSlashCommand(initialCommand) {
     }
 }
 
-function getSelectionText() {
+function snuGetSelectionText() {
     var text = "";
     if (window.getSelection) {
         text = window.getSelection().toString();
@@ -2427,13 +2448,13 @@ function snuFillFields(query) {
 
                 var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string") && doc.g_form.getControl(fld).tagName != "SELECT") ? "RANDOM TESTDATA " : "") + res[fld].value;
                 doc.g_form.setValue(fld, val, res[fld].display_value);
-                setTimeout(hideSlashCommand,3000);
+                setTimeout(snuHideSlashCommand,3000);
             })
         })
     }
 };
 
-function copySelectedCellValues(copySysIDs) {
+function snuCopySelectedCellValues(copySysIDs) {
     var hasCopied = false;
     var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell');
     if (selCells.length > 0) {
@@ -2470,7 +2491,7 @@ function copySelectedCellValues(copySysIDs) {
     }
 };
 
-function postRequestToScriptSync(requestType) {
+function snuPostRequestToScriptSync(requestType) {
 
     snuScriptSync();
 
@@ -2512,7 +2533,7 @@ function postRequestToScriptSync(requestType) {
     client.send(JSON.stringify(data));
 }
 
-function postToScriptSync(field) {
+function snuPostToScriptSync(field) {
     snuScriptSync();
     var data = {};
     var instance = {};
@@ -2568,7 +2589,7 @@ function postToScriptSync(field) {
 
 }
 
-function postLinkRequestToScriptSync(field) {
+function snuPostLinkRequestToScriptSync(field) {
     snuScriptSync();
 
     var instance = {};
@@ -2624,7 +2645,7 @@ function addFieldSyncButtons() {
             }
         });
         jQuery('span.scriptSync').on('click', function () {
-            postToScriptSync(jQuery(this).data('field'));
+            snuPostToScriptSync(jQuery(this).data('field'));
             jQuery(this).css('color', '#81B5A1');
         });
 
@@ -2637,7 +2658,7 @@ function addFieldSyncButtons() {
             if (!newValue) {
                 setTimeout(function () {
                     $('#vscode-btn').remove()
-                    let btn = `<button id='vscode-btn' class="btn btn-info btn-group" onclick="postRequestToScriptSync('widget')" title="Edit widget in VS Code (SN ScriptSync)">
+                    let btn = `<button id='vscode-btn' class="btn btn-info btn-group" onclick="snuPostRequestToScriptSync('widget')" title="Edit widget in VS Code (SN ScriptSync)">
                     <span class="glyphicon glyphicon-floppy-save"></span></button>`;
                     if (!$('#vscode-btn').length) $('button[type=submit]').before(btn);
                 }, 500);
@@ -2649,7 +2670,7 @@ function addFieldSyncButtons() {
 function addBGScriptButton() {
     if (!location.href.includes("/sys.scripts.do")) return; //only in bg script
     g_ck = document.getElementsByName('sysparm_ck')[0].value;
-    document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:postToScriptSync();'>[Mirror in sn-scriptsync]</a>");
+    document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();'>[Mirror in sn-scriptsync]</a>");
 }
 
 function setAllMandatoryFieldsToFalse() {
@@ -2666,7 +2687,7 @@ function setAllMandatoryFieldsToFalse() {
     }
 }
 
-function addSgStudioPlatformLink() {
+function snuAddSgStudioPlatformLink() {
     if (!location.href.includes("$sg-studio.do")) return; //only in studio
     if (location.hash.split("/").length < 2) return;
 
@@ -2701,7 +2722,7 @@ function addSgStudioPlatformLink() {
         }
 
         if (!document.querySelector('.snu-platformlink'))
-            addSgStudioPlatformLink(); //do again until loaded
+            snuAddSgStudioPlatformLink(); //do again until loaded
 
     }, 2000);
 }
@@ -2723,7 +2744,7 @@ function snuAddDblClick() {
 }
 
 function sortStudioLists() {
-    doGroupSearch(""); //call to remove var__m_ from flowdesigner 
+    snuDoGroupSearch(""); //call to remove var__m_ from flowdesigner 
 
     var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
 
@@ -2760,7 +2781,7 @@ function sortStudioLists() {
     }
 }
 
-function addStudioSearch() {
+function snuAddStudioSearch() {
     if (!location.href.includes("$studio.do")) return; //only in studio
     if (typeof g_ck == 'undefined') {
         if (typeof InitialState != 'undefined') {
@@ -2768,7 +2789,7 @@ function addStudioSearch() {
         }
     }
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
-    var snuGroupFilter = '<input autocomplete="off" onfocus="sortStudioLists(); this.select();" onkeyup="doGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
+    var snuGroupFilter = '<input autocomplete="off" onfocus="sortStudioLists(); this.select();" onkeyup="snuDoGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter);
 }
 
@@ -2783,12 +2804,12 @@ function addStudioScriptSync() {
 
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
 
-    var snuScriptSyncLink = '<a style="color:white; margin-left:10px;" href="javascript:postLinkRequestToScriptSync();"> <span class="icon icon-save"></span> Link VS Code via sn-scriptsync</a>'
+    var snuScriptSyncLink = '<a style="color:white; margin-left:10px;" href="javascript:snuPostLinkRequestToScriptSync();"> <span class="icon icon-save"></span> Link VS Code via sn-scriptsync</a>'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuScriptSyncLink);
 }
 
 //Some magic to filter the file tree in studio
-function doGroupSearch(search) {
+function snuDoGroupSearch(search) {
     //expand all when searching
     Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
         el.classList.remove('collapsed');
@@ -2871,7 +2892,7 @@ function sncWait(ms) { //dirty. but just need to wait a sec...
     }
 }
 
-function searchSysIdTables(sysId) {
+function snuSearchSysIdTables(sysId) {
     try {
         snuSetInfoText("Searching for sys_id. This could take some seconds...<br />",false);
         var script = `      
@@ -2942,7 +2963,7 @@ function searchSysIdTables(sysId) {
     }
 }
 
-function doFileSearch(srch) {
+function snuDoFileSearch(srch) {
 
     //expand all when searching
     Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
@@ -3065,7 +3086,7 @@ function snuGetNavHints(shortcut, srch) {
     return '<br />' + hit + ' Matches:<br />' + html;
 }
 
-function addTechnicalNamesWorkspace() {
+function snuAddTechnicalNamesWorkspace() {
     //in workspace, iterate through the components, and dive into their shadowroots.
     document.querySelectorAll("sn-workspace-content").forEach(function (elm1) {
         elm1.shadowRoot.querySelectorAll("now-record-form-connected").forEach(function (elm2) {
@@ -3218,7 +3239,7 @@ function snuImpersonate(userName){
     client.onreadystatechange = function() { 
         if(this.readyState == this.DONE) {
             location.reload();
-            hideSlashCommand();
+            snuHideSlashCommand();
         }
     }; 
     client.send("");
@@ -3417,7 +3438,7 @@ function snuSetRandomPortal(allFields,iteration) {
     else {
             setTimeout(function(){
                 if (!window.top.document.getElementById('snudirectlinks').innerHTML.includes("- PROBLEM"))
-                hideSlashCommand();
+                snuHideSlashCommand();
             }, 2500);
     }
 

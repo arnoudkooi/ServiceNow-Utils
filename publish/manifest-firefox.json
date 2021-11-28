@@ -32,7 +32,7 @@
         {
             "matches": [
                 "https://*.service-now.com/*",
-                "https://*.servicenowservices.com"
+                "https://*.servicenowservices.com/*"
             ],
             "exclude_matches": [
                 "https://*.service-now.com/*?XML*",
@@ -44,7 +44,8 @@
                 "https://*.servicenowservices.com/*&XML*",
                 "https://*.servicenowservices.com/*?WSDL*",
                 "https://*.servicenowservices.com/*&WSDL*",
-                "https://*.servicenowservices.com/api/now*"            ],
+                "https://*.servicenowservices.com/api/now*"
+            ],
             "js": [
                 "js/purify.min.js",
                 "js/jquery.min.js",

@@ -384,7 +384,7 @@ function addTechnicalNames() {
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
-                myVars: "addTechnicalNames()"
+                myVars: "snuAddTechnicalNames()"
             });
         });
 
@@ -399,7 +399,7 @@ function slashCommand(cmd) {
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
-                myVars: "showSlashCommand('"+ cmd +"')"
+                myVars: "snuShowSlashCommand('"+ cmd +"')"
             });
         });
 
