@@ -133,7 +133,7 @@ var menuItems = [{
     "parentId": "tools",
     "title": "PopIn / PopOut (/pop)",
     "contexts": ["all"],
-    "onclick": togglePop
+    "onclick": pop
 },
 {
     "id": "shownames",
@@ -362,12 +362,9 @@ function insertSnippet(e, f) {
     });
 }
 
-
-
-
 chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
     if (clickData.menuItemId == "popinout")
-        togglePop(clickData, tab.id);
+        pop();
     else if (clickData.menuItemId == "clearcookies")
         clearCookies(clickData, tabid, "");
     else if (clickData.menuItemId == "clearcookiessidedoor")
@@ -568,23 +565,35 @@ function cancelTransactions(e) {
     });
 }
 
-function togglePop(clickData, tid) {
-
-    var frameHref = clickData.frameUrl || '';
-    var urlFull = '' + clickData.pageUrl.match(/([^;]*\/){3}/)[0];
-    if (clickData.pageUrl.includes('nav_to.do')) {
-        chrome.tabs.update(tid.id, {
-            url: frameHref
-        });
-    } else {
-        var newHref = encodeURIComponent(clickData.pageUrl.replace(urlFull, ''));
-        var newUrl = urlFull + '/nav_to.do?uri=' + newHref;
-        chrome.tabs.update(tid.id, {
-            url: newUrl
-        });
-    }
-
+function pop() {
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function (tabs) {
+        var pth;
+        var u = new URL(tabs[0].url);
+        var tid = tabs[0].id;
+        var baseUrl = u.origin
+        var navToIdx = u.href.indexOf("nav_to.do?uri=") 
+        if (navToIdx == -1) navToIdx = u.href.indexOf('now/nav/ui/classic/params/target/');
+        if (navToIdx > -1) {
+            if (u.href.includes("nav_to.do?uri="))
+                pth = decodeURIComponent(u.search.substring(5));
+            else { //polaris
+                pth = decodeURIComponent(u.pathname.replace("now/nav/ui/classic/params/target/","") + u.search);
+            }
+            chrome.tabs.update(tid, {
+                url: baseUrl + pth
+            });
+        } else {
+            pth = "/nav_to.do?uri=" + encodeURIComponent(u.pathname + u.search);
+            chrome.tabs.update(tid, {
+                url: baseUrl + pth
+            });
+        }
+    });
 }
+
 
 function clearCookies(e, tabid, target) {
 
@@ -641,9 +650,6 @@ function openSearch(e, f) {
 }
 
 function contextCodeSearch(e, f) {
-
-
-
     chrome.tabs.query({
         active: true,
         currentWindow: true
@@ -725,31 +731,6 @@ function openPropertie(e, f) {
     }
 
 }
-
-function pop() {
-    chrome.tabs.query({
-        active: true,
-        currentWindow: true
-    }, function (tabs) {
-        var pth;
-        var u = new URL(tabs[0].url);
-        var tid = tabs[0].id;
-        var baseUrl = u.origin
-        var navToIdx = u.href.indexOf("nav_to.do?uri=");
-        if (navToIdx > -1) {
-            pth = decodeURIComponent(u.search.substring(5));
-            chrome.tabs.update(tid, {
-                url: baseUrl + pth
-            });
-        } else {
-            pth = "/nav_to.do?uri=" + encodeURIComponent(u.pathname + u.search);
-            chrome.tabs.update(tid, {
-                url: baseUrl + pth
-            });
-        }
-    });
-}
-
 
 //This listens for messages from FileSyncer and saves back scripts to the instance.
 chrome.runtime.onMessageExternal.addListener(

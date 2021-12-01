@@ -450,19 +450,18 @@ function snuEasyCompareTime() { //for our ITOM friends to easy select compare ti
 }
 snuEasyCompareTime();
 
-function snuAddFilterListener() {
+function snuAddFilterListener() { 
     if (document.getElementById('filter') == null) return;
     document.getElementById('filter').addEventListener('keyup', function (e) {
-        if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') {//is a sys_id
+        if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') { //is a sys_id
             snuSearchSysIdTables(e.currentTarget.value);
-        }
-        else if (e.currentTarget.value == "/") {
-            e.preventDefault();
-            e.currentTarget.value = "";
-            snuShowSlashCommand('');
-        }
+        } 
+        //adjusted for polaris compatability, 
+        //moved logic to global keydown evnt to dectect '/' in filter
+
     });
 }
+
 function snuAddSlashCommandListener() {
     if (window.top.document.getElementById('snufilter') == null) return;
     if (window.top.document.getElementById('snufilter').classList.contains('snu-slashcommand')) return;
@@ -736,6 +735,9 @@ function snuAddSlashCommandListener() {
             }
             else if (shortcut == "tn") {
                 var iframes = window.top.document.querySelectorAll("iframe");
+                if (!iframes.length) //try to find iframe in case of polaris
+                    iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe")
+
                 iframes.forEach((iframe) => {
                     if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
                         iframe.contentWindow.snuAddTechnicalNames();
@@ -1904,13 +1906,14 @@ function setShortCuts() {
     snuAddSlashCommandListener();
 
     document.addEventListener("keydown", function (event) {
-
         if (event.key == '/') {
             if (snusettings.slashoption == 'off') return;
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
-                if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.srcElement.tagName) && !event.srcElement.hasAttribute('contenteditable') && !event.srcElement.tagName.includes("-") ||
-                    (event.ctrlKey || event.metaKey) && !event.srcElement.hasAttribute('aria-describedby')) { //not when form element active
+                if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
+                    (event.ctrlKey || event.metaKey) && !event.target.hasAttribute('aria-describedby') ||
+                     event.path[0].id == 'filter' && event.path[0].value == ''
+                    ) { //not when form element active, except filter
                     event.preventDefault();
                     snuShowSlashCommand('');
                 }
@@ -2395,7 +2398,7 @@ function snuFillFields(query) {
         return;
     }
 
-    if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do') {
+    if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do' && !location.pathname.startsWith('/now/nav/ui/classic/params/target/')) {
         if (!(window.NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)))
         {
             snuSetInfoText("Only available for admin, or when impersonating",false);

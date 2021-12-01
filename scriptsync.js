@@ -321,7 +321,8 @@ function mirrorBgScript(scriptObj) {
     }, function (arrayOfTabs) {
         if (arrayOfTabs.length){
             scriptTabCreated = false;
-            var prefix = arrayOfTabs[0].url.includes("nav_to.do?uri=%2Fsys.scripts.do") ? "gsft_main." : "";
+            var prefix = (arrayOfTabs[0].url.includes("nav_to.do?uri=%2Fsys.scripts.do") ||
+            arrayOfTabs[0].url.includes("now/nav/ui/classic/params/target/sys.scripts.do")) ? "gsft_main." : "";
             chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": prefix + "document.getElementById('runscript').value = String.raw`" + scriptObj.content + "`" });
         }
         else if (!scriptTabCreated){
