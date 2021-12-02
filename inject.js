@@ -1910,9 +1910,10 @@ function setShortCuts() {
             if (snusettings.slashoption == 'off') return;
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
+                var path = event.path || (event.composedPath && event.composedPath());
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
                     (event.ctrlKey || event.metaKey) && !event.target.hasAttribute('aria-describedby') ||
-                     event.path[0].id == 'filter' && event.path[0].value == ''
+                     path[0].id == 'filter' && path[0].value == ''
                     ) { //not when form element active, except filter
                     event.preventDefault();
                     snuShowSlashCommand('');
