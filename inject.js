@@ -1042,6 +1042,7 @@ function snuSettingsAdded() {
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
     if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
+    if (typeof snusettings.allowsavefromotherscope == 'undefined') snusettings.allowsavefromotherscope = true;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
@@ -1063,7 +1064,9 @@ function snuSettingsAdded() {
     if (snusettings.s2ify) {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
     }
-
+    if (snusettings.allowsavefromotherscope){
+        snuAllowSaveFromOtherScope();
+    }
     if (snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
         snuAddStudioSearch();
@@ -1258,6 +1261,15 @@ function snuClickToOpenWidget() {
                 window.open(lnk) ;
             }
         });
+    }
+}
+
+function snuAllowSaveFromOtherScope(){
+    if (typeof g_form != 'undefined') { //set sysparm_transaction_scope to current scope value, this way a record can be saved even when scope was changed
+        if (document.querySelector('#sysparm_transaction_scope') && document.querySelector('input[id$="sys_scope"]')){
+            document.querySelector('#sysparm_transaction_scope').value = 
+                document.querySelector('input[id$="sys_scope"]').value
+         }
     }
 }
 
