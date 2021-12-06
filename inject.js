@@ -239,6 +239,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Stop impersonating and reload page"
     },
+    "um": {
+        "url": "javascript:snuSetAllMandatoryFieldsToFalse()",
+        "hint": "UnManadtory; Set all mandatory fields to false (Admin only)"
+    },
     "up": {
         "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "UI Policies <name>",
@@ -349,7 +353,7 @@ function snuGetTables(shortcut) {
     }
 
     var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE$^nameNOT LIKE00' + qry + '^EORDERBYname' + shortcut;
-    loadXMLDoc(g_ck, myurl, null, function (jsn) {
+    snuLoadXMLDoc(g_ck, myurl, null, function (jsn) {
 
         if (jsn.hasOwnProperty('result')) {
             var results = jsn.result;
@@ -391,7 +395,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             "&sysparm_fields=sys_id," + fields;
 
         var table = url.match(/.*\/(.*)\?/)[1]
-        loadXMLDoc(g_ck, url, null, function (jsn) {
+        snuLoadXMLDoc(g_ck, url, null, function (jsn) {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
                 var results = jsn.result;
@@ -709,7 +713,7 @@ function snuAddSlashCommandListener() {
             else if (shortcut === 'xmlsrc') {
 
                 if (typeof g_form == 'undefined') {
-                    //showAlert("No form found","warning",2000)
+                    //snuShowAlert("No form found","warning",2000)
                     snuHideSlashCommand();
                     return;
                 }
@@ -749,7 +753,8 @@ function snuAddSlashCommandListener() {
                 return;
             }
             else if (shortcut.startsWith("-")) {
-                var doc = document.gsft_main || window;
+                var gsft = document.querySelector("#gsft_main");
+                var doc = gsft ? gsft.contentWindow : window;
                 if (typeof doc.GlideList2 != 'undefined') {
                     var qry = doc.GlideList2.get(doc.jQuery('#sys_target').val());
                     if (typeof qry != 'undefined') {
@@ -874,7 +879,7 @@ function snuAddSlashCommandListener() {
                     return;
                 }
                 else {
-                    //showAlert("Shortcut not defined: /" + shortcut, "warning");
+                    //snuShowAlert("Shortcut not defined: /" + shortcut, "warning");
                     return;
                 }
             }
@@ -1042,7 +1047,7 @@ function snuSettingsAdded() {
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
     if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
-    if (typeof snusettings.allowsavefromotherscope == 'undefined') snusettings.allowsavefromotherscope = true;
+    if (typeof snusettings.allowsavefromotherscope == 'undefined') snusettings.allowsavefromotherscope = false;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
@@ -1053,9 +1058,9 @@ function snuSettingsAdded() {
         bindPaste(snusettings.nouielements == false);
     }
     if (snusettings.vsscriptsync == true) {
-        addFieldSyncButtons();
-        addStudioScriptSync();
-        addBGScriptButton();
+        snuAddFieldSyncButtons();
+        snuAddStudioScriptSync();
+        snuAddBGScriptButton();
     }
     if (snusettings.slashoption != "off") {
         snuAddFilterListener();
@@ -1396,7 +1401,7 @@ function snuEnhanceNotFound(advanced) {
         }
     }
 
-    loadXMLDoc(g_ck, myurl, null, function (jsn) {
+    snuLoadXMLDoc(g_ck, myurl, null, function (jsn) {
         var results = jsn.result;
         if (results.length == 0) html += '<li>None found...</li>'
         for (var i = 0; i < results.length; i++) {
@@ -2229,7 +2234,7 @@ function loadIframe(url) {
 
 var elNames = ''; //used in background.js
 
-function getFormElementNames() {
+function snuGetFormElementNames() {
     if (typeof g_form !== 'undefined') {
         var elArr = [];
         for (i = 0; i < g_form.elements.length; i++) {
@@ -2239,9 +2244,9 @@ function getFormElementNames() {
     }
 
 }
-getFormElementNames();
+snuGetFormElementNames();
 
-function loadXMLDoc(token, url, post, callback) {
+function snuLoadXMLDoc(token, url, post, callback) {
     try {
 
         var method = "GET";
@@ -2287,12 +2292,12 @@ function loadXMLDoc(token, url, post, callback) {
 //   }
 
 /**
- * @function startBackgroundScript
+ * @function snuStartBackgroundScript
  * @param  {String} script   {the script that should be executed}
  * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
  * @return {undefined}
  */
-function startBackgroundScript(script, callback) {
+function snuStartBackgroundScript(script, callback) {
     try {
         jQuery.ajax({
             url: 'sys.scripts.do',
@@ -2320,20 +2325,20 @@ function startBackgroundScript(script, callback) {
 }
 
 /**
- * @function showAlert
+ * @function snuShowAlert
  * @param  {String} msg  {Message to show}
  * @param  {String} type {types: success, info, warning, danger (defaults to 'info')}
  * @param  {Integer} timeout {time to close the flash message in ms (defaults to '3000')}
  * @return {undefined}
  */
-function showAlert(msg, type, timeout) {
+function snuShowAlert(msg, type, timeout) {
 
     if (window.top.document.getElementById('filter') == null || typeof jQuery == 'undefined') {
         alert("FALLBACK MESSAGE GO TO CLASSIC UI FOR FORMATTED MESSAGE\n\n" + msg.replace(/<br \/>/g, "\n"));
         return false;
     }
 
-    msg = '<a href="javascript:hideAlert()">[x] </a> SN Utils: ' + msg;
+    msg = '<a href="javascript:snuHideAlert()">[x] </a> SN Utils: ' + msg;
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
     window.top.jQuery('.service-now-util-alert>div>span').html(msg);
@@ -2345,7 +2350,7 @@ function showAlert(msg, type, timeout) {
     }, timeout);
 }
 
-function hideAlert() {
+function snuHideAlert() {
     jQuery('.service-now-util-alert').removeClass('visible');
 }
 function snuHideSlashCommand() {
@@ -2633,7 +2638,7 @@ function snuPostLinkRequestToScriptSync(field) {
     client.send(JSON.stringify(data));
 }
 
-function addFieldSyncButtons() {
+function snuAddFieldSyncButtons() {
 
     var fieldTypes = ["script", "xml", "html", "template", "json", "css"];
     if (typeof jQuery == 'undefined') return; //not in studio
@@ -2683,22 +2688,22 @@ function addFieldSyncButtons() {
     }
 }
 
-function addBGScriptButton() {
+function snuAddBGScriptButton() {
     if (!location.href.includes("/sys.scripts.do")) return; //only in bg script
     g_ck = document.getElementsByName('sysparm_ck')[0].value;
     document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();'>[Mirror in sn-scriptsync]</a>");
 }
 
-function setAllMandatoryFieldsToFalse() {
+function snuSetAllMandatoryFieldsToFalse() {
     if (typeof g_form != 'undefined' && typeof g_user != 'undefined') {
         if (g_user.hasRole('admin')) {
             var fields = g_form.getEditableFields();
             for (var x = 0; x < fields.length; x++) {
                 g_form.setMandatory(fields[x], false);
             }
-            showAlert('Removed mandatory restriction from all fields.', 'success');
+            snuShowAlert('Removed mandatory restriction from all fields.', 'success');
         } else {
-            showAlert('Admin rights required.', 'danger');
+            snuShowAlert('Admin rights required.', 'danger');
         }
     }
 }
@@ -2759,7 +2764,7 @@ function snuAddDblClick() {
     $('.snu-add-dblclick').text('Doubleblclick enabled');
 }
 
-function sortStudioLists() {
+function snuSortStudioLists() {
     snuDoGroupSearch(""); //call to remove var__m_ from flowdesigner 
 
     var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
@@ -2805,11 +2810,11 @@ function snuAddStudioSearch() {
         }
     }
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
-    var snuGroupFilter = '<input autocomplete="off" onfocus="sortStudioLists(); this.select();" onkeyup="snuDoGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
+    var snuGroupFilter = '<input autocomplete="off" onfocus="snuSortStudioLists(); this.select();" onkeyup="snuDoGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter);
 }
 
-function addStudioScriptSync() {
+function snuAddStudioScriptSync() {
 
     if (!location.href.includes("$studio.do")) return; //only in studio
     if (typeof g_ck == 'undefined') {
@@ -2845,7 +2850,7 @@ function snuDoGroupSearch(search) {
 
     Array.prototype.forEach.call(elms, function (el, i) {
 
-        var parents = getParents(el, 'ul').reverse();
+        var parents = snuGetParents(el, 'ul').reverse();
         el.setAttribute("title", el.innerText);
         var text = (search.length == 1) ? el.innerText.toLowerCase() + ' ' : '';
         var pars = [];
@@ -2963,7 +2968,7 @@ function snuSearchSysIdTables(sysId) {
             }
             findSysID('`+ sysId + `')
         `;
-        startBackgroundScript(script, function (rspns) {
+        snuStartBackgroundScript(script, function (rspns) {
             answer = rspns.match(/###(.*)###/);
             if (answer != null && answer[1]) {
                 snuSetInfoText('Opening in new tab: ' + answer[1].split('^')[1] + "<br />",true);
@@ -2999,7 +3004,7 @@ function snuDoFileSearch(srch) {
  * @param  {String} selector Selector to match against [optional]
  * @return {Array}           The parent elements
  */
-var getParents = function (elem, selector) {
+var snuGetParents = function (elem, selector) {
     // Setup parents array
     var parents = [];
     // Get matching parent elements
@@ -3263,7 +3268,7 @@ function snuImpersonate(userName){
 
 function snuGetLastScopes(query) {
     var urlPref = "/api/now/table/sys_user_preference?sysparm_limit=10&sysparm_fields=sys_id,name,sys_updated_on&sysparm_display_value=true&sysparm_query=nameSTARTSWITHupdateSetForScope^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_updated_on";
-    loadXMLDoc(g_ck, urlPref, null, res => {
+    snuLoadXMLDoc(g_ck, urlPref, null, res => {
         snuSetInfoText(`<b>Log</b><br />- Looking up recent scopes in preferences.<br />`, false);
 
         var scopes = []
@@ -3280,7 +3285,7 @@ function snuGetLastScopes(query) {
         if (query){
             urlScope =`/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=nameLIKE${query}^ORscopeLIKE${query}`;
         }
-        loadXMLDoc(g_ck, urlScope, null, res => {
+        snuLoadXMLDoc(g_ck, urlScope, null, res => {
 
             //this is a fix to suppor searching for scopes, instead of displaying last 10
             if (query){
@@ -3371,7 +3376,7 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
 
         url = "/api/now/table/" + table + "?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
 
-        loadXMLDoc(g_ck, url, "", res => {
+        snuLoadXMLDoc(g_ck, url, "", res => {
             if (res.result[0])
                 res = (fullRecord) ? res.result[0] : res.result[0].sys_id.value;
             else
@@ -3493,7 +3498,7 @@ function snuSetUpdateSet(sysid) {
     }
     else { //via the API
         var myurl = '/api/now/ui/concoursepicker/updateset';
-        loadXMLDoc(g_ck, myurl, `{"sysId": "${sysid}"}`, function (jsn) {
+        snuLoadXMLDoc(g_ck, myurl, `{"sysId": "${sysid}"}`, function (jsn) {
 
         });
     }

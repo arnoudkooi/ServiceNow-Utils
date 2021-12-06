@@ -26,9 +26,12 @@ if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatab
 chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
     var version = chrome.runtime.getManifest().version;
-    if (details.reason == "install" || (details.reason == "update" && version == ("5.0.0.0"))) {
+    if (details.reason == "install" || (details.reason == "update" && version == ("5.1.8.0"))) {
         openFile("welcome.html");
+        //openFile("https://www.arnoudkooi.com/");
+
     }
+    
 
     if (typeof chrome.declarativeContent === 'undefined')
         return;
@@ -460,7 +463,7 @@ function codeSearch(message, cookieStoreId) {
 }
 
 function openFile(link) {
-    var url = chrome.runtime.getURL(link);
+    var url = link.startsWith('http') ? link : chrome.runtime.getURL(link);
     var createObj = {
         'url': url,
         'active': true
