@@ -739,9 +739,10 @@ function snuAddSlashCommandListener() {
             }
             else if (shortcut == "tn") {
                 var iframes = window.top.document.querySelectorAll("iframe");
-                if (!iframes.length) //try to find iframe in case of polaris
-                    iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe")
+                if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+                    iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
+                
                 iframes.forEach((iframe) => {
                     if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
                         iframe.contentWindow.snuAddTechnicalNames();
