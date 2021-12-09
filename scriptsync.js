@@ -424,6 +424,18 @@ function updateRecord(scriptObj, canRefreshToken) {
                         });
                     }
                 }
+                if (document.querySelector('#reloadactivetab').checked) {
+                    chrome.tabs.query({
+                        active: true, 
+                        currentWindow: true
+                    }, function (arrayOfTabs) {
+                        console.log(arrayOfTabs[0]);
+                        console.log(scriptObj);
+
+                        if (arrayOfTabs.length  && arrayOfTabs[0].hasOwnProperty("url") && arrayOfTabs[0].url.startsWith(scriptObj.instance.url) )
+                            chrome.tabs.reload(arrayOfTabs[0].id);
+                    });
+                }
 
 
             } else {
