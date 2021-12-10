@@ -104,7 +104,8 @@ var suggestedtables = [
   ['sys_web_service', 'script', 'active=true'],
   ['sys_widgets', 'name,script', 'active=true'],
   ['sys_ws_operation', 'operation_script', 'active=true'],
-  ['wf_activity_definition', 'name,script', '']
+  ['wf_activity_definition', 'name,script', ''],
+  ['sys_rte_eb_script_operation', 'script,conditional_script', '']
 ];
 
 var missingtables = [];
