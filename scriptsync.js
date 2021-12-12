@@ -101,7 +101,11 @@ $(document).ready(function () {
                 } else if (wsObj.action == 'linkAppToVSCode') {
                     // no need to log more..
                 } else if ('instance' in wsObj) {
-                    updateRecord(wsObj, true);
+
+                    if (wsObj.fieldName.startsWith("inputs."))
+                        updateVar(wsObj);
+                    else 
+                        updateRecord(wsObj, true);
                 } else {
                     t.row.add([
                         new Date(), 'WebSocket', JSON.parse(evt.data)                        
@@ -507,3 +511,95 @@ function changeFavicon(src) {
     }
     document.head.appendChild(link);
 }
+
+
+
+
+// async function snuFetch(pathToResource) {
+// todo: move rest api call to fetch api / async functions
+
+      
+//       const response = await fetch(pathToResource,  { headers: snuHeaders });
+//       console.log(response);
+//       return response;
+//   }
+
+/**
+ * @function snuStartBackgroundScript
+ * @param  {String} script   {the script that should be executed}
+ * @param  {String} g_ck   {token required for authentication}
+ * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
+ * @return {undefined}
+ */
+ function snuStartBackgroundScript(script, instance, callback) {
+    document.querySelector('base').setAttribute('href',instance.url + '/');
+
+    try {
+        fetch(instance.url + '/sys.scripts.do', {
+            method: 'POST', //POST does not work somehow
+            headers: {
+                'Cache-Control': 'no-cache',
+                "Content-Type" : "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+                script: script,
+                runscript: "Run script",
+                sysparm_ck: instance.g_ck,
+                sys_scope: "e24e9692d7702100738dc0da9e6103dd",
+                quota_managed_transaction: "on" 
+            }).toString()
+        }).then(response => response.text())
+        .then((data) => {
+            console.log(data);
+            t.row.add([
+                new Date(), 'VS Code', 'Background Script Executed: <br />' + data.replace("<HTML><BODY>","").replace("</BODY><HTML>","")
+            ]).draw(false);
+        })
+        .catch((error) => {
+            console.log(error);
+            t.row.add([
+                new Date(), 'VS Code', 'Background Script failed (' + error + ')<br />'
+            ]).draw(false);
+        });
+
+    } catch (error) {
+        t.row.add([
+            new Date(), 'VS Code', 'Background Script failed (' + error + ')<br />'
+        ]).draw(false);
+    }
+}
+
+function updateVar(wsObj){
+
+var field = wsObj.fieldName.split(".")[2];
+var val = wsObj.content || "";
+val = JSON.stringify(val).slice(1, -1);
+
+var scrpt = `
+var grVar = new GlideRecord('sys_variable_value');
+grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${field}");
+grVar.setLimit(1);
+grVar.query();
+while (grVar.next()) {
+    grVar.setValue('value', "${val}");
+    grVar.update();
+}
+//keep the updates in sync...
+var rec = new GlideRecord('${wsObj.tableName}');
+rec.get('${wsObj.sys_id}');
+var um = new GlideUpdateManager2();
+um.saveRecord(rec);
+`;
+snuStartBackgroundScript(scrpt, wsObj.instance);
+
+}
+
+function getFormData(object) {
+    const formData = new FormData();
+    Object.keys(object).forEach(key => formData.append(key, object[key]));
+    return formData;
+}
+
+
+
+
