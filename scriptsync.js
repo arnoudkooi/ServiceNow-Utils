@@ -102,7 +102,7 @@ $(document).ready(function () {
                     // no need to log more..
                 } else if ('instance' in wsObj) {
 
-                    if (wsObj.fieldName.startsWith("inputs."))
+                    if (wsObj.fieldName.includes(".var__"))
                         updateVar(wsObj);
                     else 
                         updateRecord(wsObj, true);
