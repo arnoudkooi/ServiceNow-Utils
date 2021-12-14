@@ -321,7 +321,7 @@ if (typeof jQuery != "undefined") {
             doubleClickToSetQueryListV2();
 
         snuDoubleClickToShowFieldOrReload();
-        snuClickToList();
+        snuCaptureFormClick();
         snuClickToOpenWidget();
         snuMakeReadOnlyContentCopyable();
     });
@@ -1279,7 +1279,7 @@ function snuAllowSaveFromOtherScope(){
     }
 }
 
-function snuClickToList() {
+function snuCaptureFormClick() {
 
     if (typeof g_form != 'undefined') {
         document.addEventListener("click", function (event) {
@@ -1370,6 +1370,12 @@ function snuClickToList() {
                     g_form.addInfoMessage('Filter for ' + tbl + ' <a href="javascript:delQry()">Hide</a> :<a href="' + listurl + '" target="' + tbl + '">List filter: ' + qryDisp2 + '</a>');
                 }
             }
+
+            if (event.target.className.includes('scriptSync icon-save')){
+                snuPostToScriptSync(jQuery(event.target).data('field'));
+                jQuery(event.target).css('color', '#81B5A1');
+            }
+
         }, true);
     }
 }
@@ -2556,6 +2562,7 @@ function snuPostRequestToScriptSync(requestType) {
 }
 
 function snuPostToScriptSync(field) {
+    event.preventDefault();
     snuScriptSync();
     var data = {};
     var instance = {};
@@ -2666,11 +2673,6 @@ function snuAddFieldSyncButtons() {
 
             }
         });
-        jQuery('span.scriptSync').on('click', function () {
-            snuPostToScriptSync(jQuery(this).data('field'));
-            jQuery(this).css('color', '#81B5A1');
-        });
-
     } else if (location.href.includes("sp_config/?id=widget_editor") ||
         location.href.includes("sp_config?id=widget_editor")) {
 
