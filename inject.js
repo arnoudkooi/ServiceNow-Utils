@@ -1284,12 +1284,12 @@ function snuCaptureFormClick() {
     if (typeof g_form != 'undefined') {
         document.addEventListener("click", function (event) {
 
-            if ((event.ctrlKey || event.metaKey)) {
+            if (event.ctrlKey || event.metaKey) {
                 var tpe = '';
                 var tbl = g_form.getTableName();
                 var elm = '';
                 var elmDisp = '';
-                var val = 'none';
+                var val;
                 var valDisp = '';
                 var operator = '=';
                 if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
@@ -1306,7 +1306,7 @@ function snuCaptureFormClick() {
                     elmDisp = 'DisplayValue';
                     valDisp = g_form.getDisplayValue();
                 }
-                if (val == 'none') return;
+                if (typeof val == 'undefined') return;
 
                 if (tpe == 'glide_list' && elm != 'sys_id') {
                     operator = 'LIKE';
