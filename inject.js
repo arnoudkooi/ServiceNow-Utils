@@ -1605,9 +1605,16 @@ function snuAddTechnicalNames() {
     if (typeof g_form != 'undefined') {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
-            jQuery("h1.navbar-title:not(:contains('|'))").append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
+            jQuery("h1.navbar-title:not(:contains('|'))").first().append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
                 ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="For easier copying of field names" onclick="toggleLabel()">[toggle label]</a> </span>');
-            jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
+                document.querySelectorAll("#related_lists_wrapper h1.navbar-title").forEach(lr => { 
+                    var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
+                    if (tbl.startsWith("REL:")){
+                        tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:','')}' >[scripted relation]</a>`;
+                    }
+                    lr.innerHTML += DOMPurify.sanitize('&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span>', { ADD_ATTR: ['target'] })
+                })          
+                jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
                 jQuery(elem.parentElement).attr('data-for',jQuery(elem.parentElement).attr('for')); //copy for value
                 jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
@@ -2562,7 +2569,7 @@ function snuPostRequestToScriptSync(requestType) {
 }
 
 function snuPostToScriptSync(field) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     snuScriptSync();
     var data = {};
     var instance = {};
