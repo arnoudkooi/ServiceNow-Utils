@@ -8,9 +8,29 @@ setTimeout(function () { //be sure dompurify is loaded
 },1500);
 
 
+function addDblClickToPin(){
+
+    setTimeout(function () {
+        var snuHeader = document.querySelector("macroponent-f51912f4c700201072b211d4d8c26010")?.
+        shadowRoot?.querySelector("sn-polaris-layout")?.
+        shadowRoot?.querySelector("sn-polaris-header");
+        snuHeader?.shadowRoot?.querySelectorAll(".sn-polaris-tab:not(.tab-overflow)").forEach(div => {
+            div.title = '[SN Utils] Doubleclick to pin';
+            div.addEventListener('dblclick', evt => {
+                evt.preventDefault();
+                snuHeader.dispatch('MAIN_MENU#PINNED', { "isPrimary": false,
+                    "primaryMenuId": "all",
+                    "secondaryMenuId": div.id,
+                    "doPinning": true})
+            })
+        })
+    },6500);
+}
+
 
 function addStudioLink() {
 
+    if (typeof jQuery == 'undefined') return;
     waitForEl('#concourse_application_tree li', function () {
 
         var addStudio = jQuery('a[href*="$studio.do"]').length;
@@ -72,7 +92,7 @@ function snuS2Ify(){
 
 
 function waitForEl(selector, callback) {
-    if (jQuery(selector).length) {
+    if (document.querySelectorAll(selector).length) {
         callback();
     } else {
         setTimeout(function () {

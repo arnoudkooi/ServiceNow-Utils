@@ -1075,6 +1075,7 @@ function snuSettingsAdded() {
     }
     if (snusettings.nouielements == false) {
         if (typeof addStudioLink != 'undefined') addStudioLink();
+        if (typeof addDblClickToPin != 'undefined') addDblClickToPin();
         snuAddStudioSearch();
         snuAddSgStudioPlatformLink();
         snuEnhanceNotFound();
@@ -2313,25 +2314,25 @@ function snuLoadXMLDoc(token, url, post, callback) {
  */
 function snuStartBackgroundScript(script, callback) {
     try {
-        jQuery.ajax({
-            url: 'sys.scripts.do',
-            method: 'GET', //POST does not work somehow
+        fetch('sys.scripts.do' , {
+            method: 'POST', //POST does not work somehow
             headers: {
-                'X-UserToken': g_ck,
                 'Cache-Control': 'no-cache',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                "Content-Type" : "application/x-www-form-urlencoded"
             },
-            data: {
+            body: new URLSearchParams({
                 script: script,
                 runscript: "Run script",
                 sysparm_ck: g_ck,
-                sys_scope: 'e24e9692d7702100738dc0da9e6103dd'
-            }
-        }).done(function (rspns) {
-            callback(rspns);
-        }).fail(function (jqXHR, textStatus) {
-            snuSetInfoText('Background Script failed (' + jqXHR.statusText + ')<br />', true);
+                sys_scope: "e24e9692d7702100738dc0da9e6103dd",
+                quota_managed_transaction: "on" 
+            }).toString()
+        }).then(response => response.text())
+        .then(data => {
+            console.log(data);
+            callback(data);
+        }).catch(error => {
+            snuSetInfoText('Background Script failed (' + error + ')<br />', true);
         });
     } catch (error) {
         snuSetInfoText('Background Script failed (' + error + ')<br />', true);
@@ -2960,19 +2961,21 @@ function snuSearchSysIdTables(sysId) {
                     };
                 }
                 function findClass(t, sysId) {
-                    var s = new GlideRecord(t);
-                    s.addQuery('sys_id', sysId);
-                    // Order is important: setWorkflow must be before setLimit.
-                    s.setWorkflow(false);
-                    s.setLimit(1);
-                    s.queryNoDomain();
-                    s.query();
-                    if (s.hasNext()) {
-                        s.next();
-                        return s.getRecordClassName() + "^" 
-                        + s.getClassDisplayValue() + " - " 
-                        + s.getDisplayValue() ;
-                    }
+                    try {
+                        var s = new GlideRecord(t);
+                        s.addQuery('sys_id', sysId);
+                        // Order is important: setWorkflow must be before setLimit.
+                        s.setWorkflow(false);
+                        s.setLimit(1);
+                        s.queryNoDomain();
+                        s.query();
+                        if (s.hasNext()) {
+                            s.next();
+                            return s.getRecordClassName() + "^" 
+                            + s.getClassDisplayValue() + " - " 
+                            + s.getDisplayValue() ;
+                        }
+                    } catch(err) {  }
                     return false;
                 }
             }
@@ -2980,13 +2983,15 @@ function snuSearchSysIdTables(sysId) {
         `;
         snuStartBackgroundScript(script, function (rspns) {
             answer = rspns.match(/###(.*)###/);
-            if (answer != null && answer[1]) {
+            if (rspns.length == 0)
+                snuSetInfoText('Could not search for sys_id. (are you an Admin?)<br />', true);
+            else if (answer != null && answer[1]) {
                 snuSetInfoText('Opening in new tab: ' + answer[1].split('^')[1] + "<br />",true);
                 var table = answer[1].split('^')[0];
                 var url = table + '.do?sys_id=' + sysId;
                 window.open(url, '_blank');
             } else {
-                snuSetInfoText('sys_id was not found in the system.<br />', true);
+                snuSetInfoText('sys_id was not found...<br />', true);
             }
         });
     } catch (error) {
