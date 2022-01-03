@@ -317,9 +317,12 @@ if (typeof jQuery != "undefined") {
             }, 2000);
 
         }
-        else
-            doubleClickToSetQueryListV2();
 
+        // We have to call the function twice since we don't know what type of related list loading is selected by a user (with the form or after forms loads).
+        doubleClickToSetQueryListV2();
+        CustomEvent.observe('related_lists.ready', function () {
+            doubleClickToSetQueryListV2();
+        });
         snuDoubleClickToShowFieldOrReload();
         snuCaptureFormClick();
         snuClickToOpenWidget();
@@ -1232,13 +1235,23 @@ function snuAddErrorLogScriptLinks(){
 }
 
 function doubleClickToSetQueryListV2() { //dbl click to view and update filter condition
-    jQuery('div.breadcrumb_container').on("dblclick", function (event) {
-
+    jQuery('div.breadcrumb_container').on('dblclick', function (event) {
         if (event.shiftKey) {
-            splitContainsToAnd();
+            splitContainsToAnd(event);
         } else {
-
-            var qry = GlideList2.get(jQuery('#sys_target').val());
+            var listName;
+            if (typeof g_form == 'undefined') {
+                listName = jQuery('#sys_target').val();
+            } else {
+                var breadcrumbs = event.currentTarget.querySelector('span[list_id]');
+                if (breadcrumbs) {
+                    listName = breadcrumbs.getAttribute('list_id');
+                }
+            }
+            if (!listName) {
+                return;
+            }
+            var qry = GlideList2.get(listName);
             var orderBy = qry.orderBy.length ? '^' + qry.orderBy.join('^') : '';
             var newValue = prompt('[SN Utils]\nFilter condition: ', qry.filter + orderBy);
             if (newValue !== qry.filter && newValue !== null) {
@@ -1246,9 +1259,9 @@ function doubleClickToSetQueryListV2() { //dbl click to view and update filter c
             }
         }
     });
-    jQuery('div.breadcrumb_container').on("click", function (event) {
+    jQuery('div.breadcrumb_container').on('click', function (event) {
         if (event.shiftKey) {
-            splitContainsToAnd();
+            splitContainsToAnd(event);
         }
     });
 }
@@ -1985,23 +1998,34 @@ function setShortCuts() {
     }, false);
 }
 
-function splitContainsToAnd() {
-    var qry = GlideList2.get(jQuery('#sys_target').val());
-    var qa = qry.filter.split("^");
+function splitContainsToAnd(event) {
+    var listName;
+    if (typeof g_form == 'undefined') {
+        listName = jQuery('#sys_target').val();
+    } else {
+        var breadcrumbs = event.currentTarget.querySelector('span[list_id]');
+        if (breadcrumbs) {
+            listName = breadcrumbs.getAttribute('list_id');
+        }
+    }
+    if (!listName) {
+        return;
+    }
+    var qry = GlideList2.get(listName);
+    var qa = qry.filter.split('^');
     var qaNew = [];
     for (var i = 0; i < qa.length; i++) {
         var re = qa[i].match(/LIKE(.*)/);
         if (re) {
-            var words = re[1].split(" ");
+            var words = re[1].split(' ');
             for (var j = 0; j < words.length; j++) {
-                var qs = re.input.substring(0, re.index) + "LIKE" + words[j];
+                var qs = re.input.substring(0, re.index) + 'LIKE' + words[j];
                 qaNew.push(qs);
             }
         } else
             qaNew.push(qa[i]);
     }
-    qry.setFilterAndRefresh(qaNew.join("^"));
-
+    qry.setFilterAndRefresh(qaNew.join('^'));
 }
 
 function enhanceTinMCE() {
