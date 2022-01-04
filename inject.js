@@ -1132,7 +1132,7 @@ function snuCreateHyperLinkForGlideLists() {
             var sysIDRegex = /[0-9a-f]{32}/i;
             for (var i = 0; i < labels.length; i++) {
                 if (values[i] != ""){
-                    var rmvBtn = (!isReadOnly) ? `<span style='white-space: nowrap' id='${field}-${values[i]}' data-field="${field}" data-remove="false" data-value="${values[i]}" data-fieldid="${fieldId}"><a title='Remove' class="remove icon icon-cross" href="#" style="font-size:6pt; color:red; padding-right:3px; vertical-align: middle;" aria-hidden="true"></a>` : "<span>";
+                    var rmvBtn = (!isReadOnly) ? `<span style='white-space: nowrap' id='${field}-${values[i]}' data-field="${field}" data-remove="false" data-value="${values[i]}" data-fieldid="${fieldId}"><a title='[SN Utils] Remove' class="remove icon icon-cross" href="#" style="font-size:6pt; color:red; padding-right:3px; vertical-align: middle;" aria-hidden="true"></a>` : "<span>";
                 if (hasReferenceTable && sysIDRegex.test(values[i])) 
                     links.push(`${rmvBtn}<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a></span>`);
                 else
