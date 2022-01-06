@@ -1354,6 +1354,19 @@ function snuCaptureFormClick() {
                 // But since this feature is mainly used with other types of fields, we can ignore the support of multiline scripts.
                 val = val.replace(/%0A/g, '%0D%0A');
 
+                if (event.altKey) {
+                    var reverseOperator = {
+                        '=': '!=',
+                        'LIKE': 'NOT LIKE',
+                        'ISEMPTY': 'ISNOTEMPTY',
+                        'ON': 'NOTON',
+                    };
+                    if (operator == '=' || operator == 'LIKE' || operator == 'ON') {
+                        val += '^OR' + elm + '=NULL';
+                    }
+                    operator = reverseOperator[operator];
+                }
+
                 _qry = typeof _qry == 'object' ? _qry : {};
 
                 var subCondition = {
@@ -1366,7 +1379,7 @@ function snuCaptureFormClick() {
                 if (_qry[elm] && _qry[elm].val == subCondition.val && _qry[elm].operator == subCondition.operator) {
                     // Double function call in case of no changes removes the subcondition
                     delete _qry[elm];
-                } else {
+                } else if (!_qry[elm] || (_qry[elm].val != subCondition.val || _qry[elm].operator != subCondition.operator)) {
                     _qry[elm] = subCondition;
                 }
 
