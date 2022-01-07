@@ -827,12 +827,13 @@ function getSlashcommands() {
             var source = "2builtin";
             var url = snuslashcommands[key].url;
             var fields = snuslashcommands[key].fields;
+            var order = snuslashcommands[key].order;
             var overwriteurl = snuslashcommands[key].overwriteurl;
             if (url.startsWith('*')) {
                 source = "3script";
                 url = 'Built in scripted command, cannot be overwritten';
             };
-            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "fields": fields, "overwriteurl" : overwriteurl,  "source": source  };
+            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "fields": fields, "overwriteurl" : overwriteurl,  "source": source, "order" : order  };
         });
 
         try {
@@ -840,7 +841,7 @@ function getSlashcommands() {
         } catch (e) { };
 
         Object.keys(objCustomCommands).forEach(function (key) {
-            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "fields": objCustomCommands[key].fields, "overwriteurl" : objCustomCommands[key].overwriteurl,  "source": "1custom" });
+            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "fields": objCustomCommands[key].fields, "overwriteurl" : objCustomCommands[key].overwriteurl, "order" : objCustomCommands[key].order,  "source": "1custom" });
         });
 
 
@@ -878,11 +879,12 @@ function getSlashcommands() {
                         if (row.source == "1custom") {
                             html += "<a class='deletecmd' href='#' data-cmd='"+ row.command +"' ><i class='far fa-trash-alt ' aria-hidden='true'></i></a>"
                         }
-
+                        html += `<div class='snucmdurl'>${(row.order || 100)}</div>`;
                         return html;
                     },
                     "width": "10%",
-                    "searchable": false
+                    "searchable": false,
+                    "mDataProp": "order"
                 }
 
             ],
@@ -901,6 +903,7 @@ function getSlashcommands() {
                         $('#tbxslashurl').val(row.url);
                         $('#tbxslashhint').val(snuDecodeHtml(row.hint));
                         $('#tbxslashfields').val(snuDecodeHtml(row.fields));
+                        $('#tbxslashorder').val(snuDecodeHtml(row.order));
                         $('#tbxslashoverwriteurl').val(snuDecodeHtml(row.overwriteurl));
                         $('#cmdformhelpprefill').hide();
                         slashCommandShowFieldField();
@@ -956,6 +959,7 @@ function getSlashcommands() {
                 "url": $('#tbxslashurl').val(),
                 "hint": $('#tbxslashhint').val(),
                 "fields" : $('#tbxslashfields').val(),
+                "order" : Number($('#tbxslashorder').val()),
                 "overwriteurl" : $('#tbxslashoverwriteurl').val()
             };
             $('#slashcommands').val(JSON.stringify(cmds));

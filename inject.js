@@ -956,7 +956,9 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
         if (startswith)
             return propertyName.indexOf(shortcut) === 0;
         return propertyName.indexOf(shortcut) > -1;
-    }).sort();
+    }).sort(function(a, b) { 
+        return (snuslashcommands[a].order || 100) - (snuslashcommands[b].order || 100);
+    });
 
     var fltr = window.top.document.getElementById('snufilter');
 
@@ -970,11 +972,14 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     }
 
     var html = "";
+    var lastfavorite = 0;
     for (i = 0; i < snuPropertyNames.length && i < snuMaxHints; i++) {
         var cssclass = (snuIndex == i) ? 'active' : '';
         var lbl = ((snuslashcommands[snuPropertyNames[i]].fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]].hint);
-        html += "<li id='cmd" + snuPropertyNames[i] + "' data-index='" + i + "' class='cmdfilter " + cssclass + "' ><span class='cmdkey'>/" + snuPropertyNames[i] + "</span> " +
-            "<span class='cmdlabel'>" + lbl + "</span></li>"
+        html += `<li id='cmd${snuPropertyNames[i]}' data-index='${i}' class='cmdfilter ${cssclass} nth${(snuslashcommands[snuPropertyNames[i]].order || 100)}' >
+                 <span class='cmdkey'>/${snuPropertyNames[i]}</span>
+                 <span class='cmdlabel'>${lbl}</span></li>`;
+        
         if (fltr.value.includes(" ")) {
             break;
         }
@@ -1001,6 +1006,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
     window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length + "/" + Object.keys(snuslashcommands).length);
+    window.top.document.querySelector('li.nth100').style['margin-top'] = '7px'; //add a visual clue between favorites
 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter )});
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });

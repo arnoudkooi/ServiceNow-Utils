@@ -112,7 +112,7 @@ var missingtables = [];
 var searchGroups = [];
 //dummy data so it doesnt brake :)
 var selectedGroup = {
-  sys_id: '9a44f352d7120200b6bddb0c82520376'
+  sys_id: 'c2f8a6a2d7120200b6bddb0c825203cd'
 };
 
 var header = document.getElementById('fixheader');
@@ -120,7 +120,7 @@ var sticky = 30; //header.offsetTop;
 
 /**
  * getSearchGroup so you can choose the search group
- * is sn_codesearch.Default Search Group
+ * is sn_codesearch.Studio Search Group
  */
 function getSearchGroups(url, g_ck) {
   var endpoint = `${url}/api/now/table/sn_codesearch_search_group`;
@@ -132,7 +132,7 @@ function getSearchGroups(url, g_ck) {
         description: group.description
       };
 
-      if (group.name === 'sn_codesearch.Default Search Group') {
+      if (group.name === 'sn_codesearch.Studio Search Group') {
         selectedGroup = groupObj;
         searchGroups.unshift(groupObj);
       } else {
@@ -254,7 +254,7 @@ function doSearch() {
 
 
 function missingTablesVisible(sys_id) {
-  if (sys_id == '9a44f352d7120200b6bddb0c82520376')
+  if (sys_id == 'c2f8a6a2d7120200b6bddb0c825203cd')
     $('#missingtables').show();
   else
     $('#missingtables').hide();
@@ -353,8 +353,13 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
     return;
   }
 
-  // var endpoint = url + '/api/sn_codesearch/code_search/search?term=' + searchTerm + '&limit=500&search_all_scopes=true&search_group=sn_codesearch.Default Search Group';
-  var endpoint = `${url}/api/sn_codesearch/code_search/search?term=${searchTerm}&limit=500&search_all_scopes=true&search_group=${selectedGroup.sys_id}`;
+  var urlParms = new URLSearchParams();
+  urlParms.append('term', searchTerm);
+  urlParms.append('limit', 500);
+  urlParms.append('search_all_scopes', 'true');
+  urlParms.append('search_group', selectedGroup.name);
+
+  var endpoint = `${url}/api/sn_codesearch/code_search/search?${urlParms.toString()}`;
 
   function searchLocation(idx) {
     if (idx == 0) {
@@ -410,8 +415,7 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
 function loadXMLDoc(token, url, post) {
   var hdrs = {
     'Cache-Control': 'no-cache',
-    Accept: 'application/json',
-    'Content-Type': 'application/json'
+    'Accept': 'application/json, text/plain, */*'
   };
 
   if (token)
