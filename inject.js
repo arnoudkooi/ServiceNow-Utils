@@ -1168,33 +1168,57 @@ function snuRemoveFromList(){
 
 function snuDoubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
-        document.addEventListener("dblclick", function (event) {
+        document.addEventListener('dblclick', function (event) {
             if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text') || 
                 event.target.parentElement.classList.contains('sc_editor_label')) {
                 var elm;
-                try { //standard label
-                    elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-                } catch {
-                    try { //variabel label
-                        elm = jQuery(event.target.parentElement).attr('for') || jQuery(event.target.parentElement).attr('data-for');
-                    } catch {}
+
+                var formGroup = event.target.closest('div.form-group');
+                if (formGroup) {
+                    var id = formGroup.getAttribute('id');
+                    if (id) {
+                        if (id.startsWith('variable_ni.VE') && formGroup.querySelector('div.slushbucket')) {
+                            // List Collector is the most tricky because it has a weird value of the 'for' argument.
+                            elm = 'ni.' + id.split('.')[1];
+                        } else {
+                            // Form fields.
+                            elm = id.split('.').slice(2).join('.');
+                        }
+                    }
+                }
+
+                // If the element is still not found it can be a catalog item variable.
+                if (!elm) {
+                    var forLabel = event.target.parentElement.getAttribute('for');
+                    if (forLabel) {
+                        var temp = forLabel.split('.');
+                        if (temp.length == 3) {
+                            // Reference, Requested for (same as the Reference but always references the User table) and Masked catalog variables types.
+                            elm = temp.slice(1).join('.');
+                        } else {
+                            // All other types of catalog item variables.
+                            elm = temp.join('.');
+                        }
+                    }
+                }
+
+                // Check if the found value is a valid field/variable.
+                var glideUIElement = g_form.getGlideUIElement(elm);
+                if (!glideUIElement) {
+                    return;
                 }
 
                 var val = g_form.getValue(elm);
-                if (NOW.user.roles.split(",").includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
-                    var newValue = prompt('[SN Utils]\nField Type: ' + g_form.getGlideUIElement(elm).type + '\nField: ' + elm + '\nValue:', val);
+                if (NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
+                    var newValue = prompt('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + '\nValue:', val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
+                } else {
+                    alert('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + '\nValue:' + val);
                 }
-                else {
-                    alert('[SN Utils]\nField Type: ' + g_form.getGlideUIElement(elm).type + '\nField: ' + elm + '\nValue:' + val);
-                }
-            }
-
-            else if (jQuery(event.target).hasClass('container-fluid')) {
+            } else if (event.target.classList.contains('container-fluid')) {
                 location.reload();
             }
-
         }, true);
     }
 }
