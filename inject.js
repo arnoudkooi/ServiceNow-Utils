@@ -1168,20 +1168,43 @@ function snuRemoveFromList(){
 
 function snuDoubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined') {
-        document.addEventListener("dblclick", function (event) {
+        document.addEventListener('dblclick', function (event) {
             if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text') || 
                 event.target.parentElement.classList.contains('sc_editor_label')) {
                 var elm;
-                try { //standard label
-                    elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-                } catch {
-                    try { //variabel label
-                        elm = jQuery(event.target.parentElement).attr('for') || jQuery(event.target.parentElement).attr('data-for');
+
+                try {
+                    var temp = jQuery(event.target).closest('div.form-group').attr('id').split('.');
+                    if (temp.length == 2) {
+                        if (temp[0] == 'variable_ni') {
+                            elm = 'ni.' + temp[1];
+                        } else if (temp[0] == 'ni') {
+                            elm = temp.join('.');
+                        }
+                    } else {
+                        // Form fields
+                        elm = temp.slice(2).join('.');
+                    }
+                } catch {}
+
+                if (!elm) {
+                    try {
+                        var temp = jQuery(event.target.parentElement).attr('for').split('.');
+                        // Reference variable
+                        if (temp.length == 3 && temp[1] == 'ni') {
+                            elm = temp.slice(1).join('.');
+                        } else {
+                            elm = temp.join('.');
+                        }
                     } catch {}
                 }
 
+                if (!elm) {
+                    return;
+                }
+
                 var val = g_form.getValue(elm);
-                if (NOW.user.roles.split(",").includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
+                if (NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
                     var newValue = prompt('[SN Utils]\nField Type: ' + g_form.getGlideUIElement(elm).type + '\nField: ' + elm + '\nValue:', val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
