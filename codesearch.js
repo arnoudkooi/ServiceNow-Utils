@@ -396,8 +396,8 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
             jQuery('#searchmsgtablelinks').html(statisticsObj.tableNames || '');
 
             var missingTablesHtml =
-              `<div class='card-body'><a class='anchor' name='suggestedtables'></a>Condsider adding the following tables to code search. (Credit: <a href='https://jace.pro' target='_blank'>Jace Benson</a>)<br />
-              Click link to open preffiled record. Note this will be tracked in current scope / updateset<br /><br /><ul>`;
+              `<div class='card-body'><a class='anchor' name='suggestedtables'></a>Consider adding the following tables to code search. (Credit: <a href='https://jace.pro' target='_blank'>Jace Benson</a>)<br />
+              Click link to open prefilled record. Note this will be tracked in current scope / updateset<br /><br /><ul>`;
             missingtables.forEach((tbl) => {
               missingTablesHtml += `<li><a href='${tbl[3]}' target='tbls'>${tbl[0]}</a></li>`;
             });
