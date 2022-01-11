@@ -320,9 +320,11 @@ if (typeof jQuery != "undefined") {
 
         // We have to call the function twice since we don't know what type of related list loading is selected by a user (with the form or after forms loads).
         doubleClickToSetQueryListV2();
-        CustomEvent.observe('related_lists.ready', function () {
-            doubleClickToSetQueryListV2();
-        });
+        if (typeof CustomEvent.observe == 'function'){
+            CustomEvent.observe('related_lists.ready', function () {
+                doubleClickToSetQueryListV2();
+            });
+        }
         snuDoubleClickToShowFieldOrReload();
         snuCaptureFormClick();
         snuClickToOpenWidget();
