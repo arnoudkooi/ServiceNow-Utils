@@ -542,7 +542,7 @@ function snuAddSlashCommandListener() {
                 window.top.document.getElementById('snufilter').value = targeturl.substring(1);
                 window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowDown' }));
             }
-            var idx = snufilter.indexOf(' ')
+            idx = snufilter.indexOf(' ');
             if (idx == -1) idx = snufilter.length;
             shortcut = snufilter.slice(0, idx).toLowerCase();
             query = snufilter.slice(idx + 1).replace(/ .*/, '');;
@@ -933,13 +933,23 @@ function snuAddSlashCommandListener() {
             snuHideSlashCommand();
         }
         else {
-            snuShowSlashCommandHints(originalShortcut, selectFirst, switchText, e);
+            if (e.key == " ") idx = shortcut.length;
+            else if (e.key == "Backspace") idx = -1;
+            snuShowSlashCommandHints(originalShortcut, selectFirst, idx, switchText, e);
         }
+
+    });
+
+    window.top.document.getElementById('snufilter').addEventListener('paste', function (e) {
+        setTimeout(function(){
+            obj = { 'key': 'ArrowRight' };
+            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', obj));
+        },30 );
 
     });
 }
 
-function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
+function snuShowSlashCommandHints(shortcut, selectFirst, spaceIndex, switchText, e) {
     if (!["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key) || snuIndex > snuPropertyNames.length) {
         snuIndex = 0;
     }
@@ -962,9 +972,13 @@ function snuShowSlashCommandHints(shortcut, selectFirst, switchText, e) {
         return (snuslashcommands[a].order || 100) - (snuslashcommands[b].order || 100);
     });
 
+    if (spaceIndex > 0){
+        snuPropertyNames = [shortcut];
+    }
+
     var fltr = window.top.document.getElementById('snufilter');
 
-    if (snuPropertyNames.length > 0 && selectFirst) { //select first hit when tap or space pressed
+    if (snuPropertyNames.length > 0 && selectFirst && !snuPropertyNames.includes(shortcut)) { //select first hit when tap or space pressed
         if (e) e.preventDefault();
         shortcut = snuPropertyNames[snuIndex];
         snuPropertyNames = [snuPropertyNames[snuIndex]];
@@ -1033,7 +1047,7 @@ function snuExpandHints(shortcut) {
     shortcut = shortcut || this.dataset.shortcut;
     snuMaxHints = 1000;
     var e = new KeyboardEvent('keypress', { 'key': 'KeyDown' });
-    snuShowSlashCommandHints(shortcut, false, '', e);
+    snuShowSlashCommandHints(shortcut, false, -1, '', e);
     var elm = window.top.document.getElementById('snufilter');
     elm.focus();
     elm.selectionStart = elm.selectionEnd = elm.value.length;
@@ -2463,7 +2477,7 @@ function snuShowSlashCommand(initialCommand) {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints((initialCommand || "").substring(1), false, "", false);
+        snuShowSlashCommandHints((initialCommand || "").substring(1), false, -1, "", false);
         if (initialCommand) {
             window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Enter' }));
             setTimeout(function () {
