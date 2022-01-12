@@ -508,6 +508,7 @@ function snuAddSlashCommandListener() {
         var noSpace = (snufilter.indexOf(' ') == -1);
         var selectFirst = (e.key == " " || e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
         var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
+        var thisKeyWithSpace = (e.key.trim().length == 1 || e.key == " ") ? e.key : ""; //now 
         if (e.key == '\\') {
             e.currentTarget.value = (e.currentTarget.value + window.top.document.snuSelection).trim();
             thisKey = "";
@@ -558,7 +559,7 @@ function snuAddSlashCommandListener() {
         if (['nav', 'fav', 'hist'].includes(shortcut)) {
 
             snuGetNav(shortcut);
-            switchText = snuGetNavHints(shortcut, query + thisKey);
+            switchText = snuGetNavHints(shortcut, query + thisKeyWithSpace);
         }
         if (targeturl.includes('sysparm_query=') || originalShortcut.startsWith("-")) {
             if (originalShortcut.startsWith("-")) query = shortcut;
@@ -935,7 +936,7 @@ function snuAddSlashCommandListener() {
         else {
             if (e.key == " ") idx = shortcut.length;
             else if (e.key == "Backspace") idx = -1;
-            snuShowSlashCommandHints(originalShortcut, selectFirst, idx, switchText, e);
+            snuShowSlashCommandHints(originalShortcut, selectFirst, snufilter + thisKey, switchText, e);
         }
 
     });
@@ -949,7 +950,7 @@ function snuAddSlashCommandListener() {
     });
 }
 
-function snuShowSlashCommandHints(shortcut, selectFirst, spaceIndex, switchText, e) {
+function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, e) {
     if (!["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key) || snuIndex > snuPropertyNames.length) {
         snuIndex = 0;
     }
@@ -972,7 +973,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, spaceIndex, switchText,
         return (snuslashcommands[a].order || 100) - (snuslashcommands[b].order || 100);
     });
 
-    if (spaceIndex > 0){
+    if (snufilter.trim().split(' ').length > 1 ){
         snuPropertyNames = [shortcut];
     }
 
@@ -991,8 +992,8 @@ function snuShowSlashCommandHints(shortcut, selectFirst, spaceIndex, switchText,
     var lastfavorite = 0;
     for (i = 0; i < snuPropertyNames.length && i < snuMaxHints; i++) {
         var cssclass = (snuIndex == i) ? 'active' : '';
-        var lbl = ((snuslashcommands[snuPropertyNames[i]].fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]].hint);
-        html += `<li id='cmd${snuPropertyNames[i]}' data-index='${i}' class='cmdfilter ${cssclass} nth${(snuslashcommands[snuPropertyNames[i]].order || 100)}' >
+        var lbl = ((snuslashcommands[snuPropertyNames[i]]?.fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]]?.hint);
+        html += `<li id='cmd${snuPropertyNames[i]}' data-index='${i}' class='cmdfilter ${cssclass} nth${(snuslashcommands[snuPropertyNames[i]]?.order || 100)}' >
                  <span class='cmdkey'>/${snuPropertyNames[i]}</span>
                  <span class='cmdlabel'>${lbl}</span></li>`;
         
@@ -1022,7 +1023,9 @@ function snuShowSlashCommandHints(shortcut, selectFirst, spaceIndex, switchText,
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
     window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length + "/" + Object.keys(snuslashcommands).length);
-    window.top.document.querySelector('li.nth100').style['margin-top'] = '7px'; //add a visual clue between favorites
+    try{
+        window.top.document.querySelector('li.nth100').style['margin-top'] = '7px'; //add a visual clue between favorites
+    } catch(e){};
 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter )});
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
@@ -1047,7 +1050,7 @@ function snuExpandHints(shortcut) {
     shortcut = shortcut || this.dataset.shortcut;
     snuMaxHints = 1000;
     var e = new KeyboardEvent('keypress', { 'key': 'KeyDown' });
-    snuShowSlashCommandHints(shortcut, false, -1, '', e);
+    snuShowSlashCommandHints(shortcut, false,'','', e);
     var elm = window.top.document.getElementById('snufilter');
     elm.focus();
     elm.selectionStart = elm.selectionEnd = elm.value.length;
@@ -1982,7 +1985,7 @@ function setShortCuts() {
         span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
         input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:100%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
         span.cmdlabel { color: #FFFFFF; font-size:7pt; }
-        a.cmdlink { font-size:10pt; color: #1f8476; }
+        a.cmdlink { font-size:10pt; color: #1f8476; } 
         span.semihidden { font-size:6pt; color: #999; }
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey  { border-color: yellow}
         ul#snuhelper li.active span.cmdlabel { color: yellow}
@@ -1995,12 +1998,12 @@ function setShortCuts() {
     var htmlFilter = document.createElement('div');
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.patreon.com/snutils" target="_blank">Support SN Utils!</a>&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.twitter.com/sn_utils" target="_blank">Newsfeed</a>&nbsp;</span></div>
     <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
     <div id="snuswitches"></div>
-    </div>`, { FORCE_BODY: true });
+    </div>`, { FORCE_BODY: true, ADD_ATTR: ['target'] });
     htmlFilter.innerHTML = cleanHTML
     if (!window.top.document.querySelectorAll('#snufilter').length) { //prevent reinject 
         window.top.document.body.appendChild(htmlFilter);
@@ -2477,7 +2480,7 @@ function snuShowSlashCommand(initialCommand) {
         window.top.document.querySelector('div.snutils').style.display = '';
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
-        snuShowSlashCommandHints((initialCommand || "").substring(1), false, -1, "", false);
+        snuShowSlashCommandHints((initialCommand || "").substring(1), false, "", "", false);
         if (initialCommand) {
             window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Enter' }));
             setTimeout(function () {
