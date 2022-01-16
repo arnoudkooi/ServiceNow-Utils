@@ -308,6 +308,16 @@ var snuslashswitches = {
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD",
     "IN", "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
 
+document.addEventListener('snuUpdateSettingsEvent', function (e)
+{
+    if (e.type == "snuUpdateSettingsEvent"){
+        if (e?.detail?.action == "updateSlashCommand"){
+            snuslashcommands[e.detail.cmdname] = e.detail.cmd;
+            snuShowSlashCommand('/' + e.detail.cmdname + ' ',0);
+        }
+    }
+});
+
 if (typeof jQuery != "undefined") {
     jQuery(function () {
         if (typeof angular != "undefined") {
@@ -410,7 +420,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                 Object.entries(results).forEach(([key, val]) => {
                     var fieldArr = fields.replace(/ /g, '').split(',');
                     var txtArr = [];
-                    for (var i = 0; i < fieldArr.length; i++) {
+                    for (var i = 0; i < fieldArr.length && i < 2; i++) {
                         txtArr.push(val[fieldArr[i]])
                     }
                     var txt = txtArr.join(' | ');
@@ -418,6 +428,9 @@ function snuGetDirectLinks(targeturl, shortcut) {
                     var target = "gsft_main"
                     if (overwriteurl) {
                         link = overwriteurl.replace(/\$sysid/g, val.sys_id)
+                        for (var i = 0; i < fieldArr.length; i++) {
+                            link = link.replaceAll('$' + fieldArr[i], val[fieldArr[i]]);
+                        }                     
                         target = (!overwriteurl.startsWith("http") && !overwriteurl.startsWith("/")) ? "gsft_main" : "_blank";
                     }
                     var idattr
@@ -525,7 +538,10 @@ function snuAddSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if ((e.key == 'ArrowRight' || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 || tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { snuGetTables(tmpshortcut) };
+        if (((e.key == 'ArrowRight' && noSpace) || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 || 
+            tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { 
+                snuGetTables(tmpshortcut);
+        };
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
@@ -966,6 +982,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
     }
 
     snuPropertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
+        shortcut = shortcut.trim();
         if (startswith)
             return propertyName.indexOf(shortcut) === 0;
         return propertyName.indexOf(shortcut) > -1;
@@ -1264,7 +1281,7 @@ function snuAddGroupSortIcon(){
 
         jQuery(`th[name="${gb}"] a span.snuexeccmd`).on('click',function(elm){
             elm.preventDefault();
-            snuShowSlashCommand(elm.currentTarget.dataset.slashcommand);
+            snuShowSlashCommand(elm.currentTarget.dataset.slashcommand,1);
         })
 
     }
@@ -2023,7 +2040,7 @@ function setShortCuts() {
                      path[0].id == 'filter' && path[0].value == ''
                     ) { //not when form element active, except filter
                     event.preventDefault();
-                    snuShowSlashCommand('');
+                    snuShowSlashCommand('',false);
                 }
             }
         }
@@ -2473,7 +2490,7 @@ function showSlashCommand(initialCommand){
     alert('Function showSlashCommand is renamed to snuShowSlashCommand, update your code!')
 }
 
-function snuShowSlashCommand(initialCommand) {
+function snuShowSlashCommand(initialCommand, autoRun) {
     snuReceivedCommand = initialCommand;
     window.top.document.snuSelection = snuGetSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
@@ -2481,7 +2498,7 @@ function snuShowSlashCommand(initialCommand) {
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
         snuShowSlashCommandHints((initialCommand || "").substring(1), false, "", "", false);
-        if (initialCommand) {
+        if (initialCommand && autoRun ) {
             window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Enter' }));
             setTimeout(function () {
                 window.top.document.getElementById('snufilter').selectionStart =
@@ -2489,7 +2506,11 @@ function snuShowSlashCommand(initialCommand) {
             }, 10);
         }
         else {
-            setTimeout(function () { window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }, 10);
+            setTimeout(function () { 
+                if (autoRun === 0)
+                    window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowRight' }));
+                window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }
+            , 10);
         }
     }
 }

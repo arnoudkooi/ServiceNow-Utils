@@ -469,7 +469,7 @@ function setSampleCommandHref() {
     }
 }
 
-function setListUrl(listUrl, tableLabel){
+function setListUrl(listUrl, tableLabel, fields){
     var hrf = document.getElementById('cmdforma');
     hrf.href = url + '/' + listUrl
     hrf.innerText =listUrl;
@@ -481,6 +481,7 @@ function setListUrl(listUrl, tableLabel){
         if (tableLabel)
             document.getElementById('tbxslashhint').value = this.getAttribute('data-tablelabel') + ' <search>';
         document.getElementById('tbxslashcmd').value = '';
+        document.getElementById('tbxslashfields').value = fields;
         document.getElementById('tbxslashcmd').focus();
         slashCommandShowFieldField();
     };
@@ -898,6 +899,7 @@ function getSlashcommands() {
                 if (data.source != '3script') {
 
                     $(row).on('click', function (e) {
+                        $('#divslashmsg').text('');
                         var row = dtSlashcommands.row(this).data();
                         $('#tbxslashcmd').val(row.command);
                         $('#tbxslashurl').val(row.url);
@@ -951,11 +953,17 @@ function getSlashcommands() {
         $('button#btnsaveslashcommand').click(function () {
 
             event.preventDefault();
+            $('#divslashmsg').text('');
             var cmds = {};
             try {
                 cmds = JSON.parse($('#slashcommands').val());
             } catch (e) { };
-            cmds[$('#tbxslashcmd').val().replace(/[^a-zA-Z0-9]/gi, '').toLowerCase()] = {
+            var cmdname = $('#tbxslashcmd').val().replace(/[^a-zA-Z0-9]/gi, '').toLowerCase();
+            if (!cmdname){
+                $('#divslashmsg').text('No command name defined');
+                return;
+            }
+            cmds[cmdname] = {
                 "url": $('#tbxslashurl').val(),
                 "hint": $('#tbxslashhint').val(),
                 "fields" : $('#tbxslashfields').val(),
@@ -965,6 +973,20 @@ function getSlashcommands() {
             $('#slashcommands').val(JSON.stringify(cmds));
 
             objSettings.slashcommands = cmds;
+
+            //send the update command direct to the browser, without need for reload
+            var details = {
+                "action" : "updateSlashCommand",
+                "cmdname" : cmdname,
+                "cmd" : cmds[cmdname]
+            }
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, { 
+                    "method" : "snuUpdateSettingsEvent", 
+                    "detail" : details }, 
+                response => { });
+            });
+
             setSettings();
             getSlashcommands();
 

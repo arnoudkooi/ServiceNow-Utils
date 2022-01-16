@@ -347,6 +347,11 @@ a.deletecmd {
     outline: none;
 }
 
+#divslashmsg {
+    font-size: 8pt;
+    color:red;
+}
+
 .refname{
     font-family:monospace;
     font-size:small;

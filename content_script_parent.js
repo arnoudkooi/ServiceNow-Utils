@@ -24,7 +24,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         sendResponse({ url: location.origin, frameHref: getFrameHref() });
     else if (request.method == "toggleSearch") {
         toggleSearch();
-    }
+    } 
+    else if (request.method == "snuUpdateSettingsEvent") { //pass settings to page
+        var event = new CustomEvent(
+            request.method, request
+        );
+        document.dispatchEvent(event);
+    } 
     //else
     //sendResponse({ url: location.origin });
 

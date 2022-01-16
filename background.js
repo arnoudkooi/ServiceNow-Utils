@@ -399,7 +399,7 @@ function slashCommand(cmd) {
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
-                myVars: "snuShowSlashCommand('"+ cmd +"')"
+                myVars: "snuShowSlashCommand('"+ cmd +"',1)"
             });
         });
 
@@ -949,17 +949,18 @@ function getListUrl() {
 
         chrome.tabs.sendMessage(tabid, {
             method: "getVars",
-            myVars: "g_list.title,g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir"
+            myVars: "g_list.title,g_list.filter,g_list.tableName,g_list.fields,g_list.sortBy,g_list.sortDir"
         }, function (response) {
             var tableName = response.myVars.g_listtableName;
             var tableLabel = response.myVars.g_listtitle;
             var encQuery = response.myVars.g_listfilter;
             var orderBy = response.myVars.g_listsortBy;
+            var fields = response.myVars.g_listfields.split(',').slice(0, 2).join(',');
             var isDesc = response.myVars.g_listsortDir == "DESC" ? "DESC" : "";
             if (orderBy)
-                encQuery += `^ORDERBY${isDesc}=${orderBy}`;
+                encQuery += `^ORDERBY${isDesc}${orderBy}`;
             var listUrl = `${tableName}_list.do?sysparm_query=${encQuery}`;
-            popup.setListUrl(listUrl, tableLabel);
+            popup.setListUrl(listUrl, tableLabel, fields);
         });
 }
 

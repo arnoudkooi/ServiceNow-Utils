@@ -479,9 +479,9 @@
                           <div class="form-group col-md-7">
                             <label for="tbxslashurl">URL</label>
                             <textarea class="form-control form-control-sm" id="tbxslashurl" ></textarea>
-                            <label class="showfields" for="tbxslashfields" title="Fields to return for inline search ie: name,sys_updated_on">Fields</label>
+                            <label class="showfields" for="tbxslashfields" title="Fields to return for inline search ie: name,sys_updated_on">Fields (comma separated, first 2 show in popup)</label>
                             <input type="text" class="form-control form-control-sm showfields" id="tbxslashfields" placeholder="Fields to return for inline search ie: name,sys_updated_on" />
-                            <label class="showfields" for="tbxslashoverwriteurl" title="Optional, overwrite target URL for inline results">Overwrite target URL (supported variable: $sysid)</label>
+                            <label class="showfields" for="tbxslashoverwriteurl" title="Optional, overwrite target URL for inline results">Overwrite target URL (variables: $sysid and defined fields as $fieldname)</label>
                             <input type="text" class="form-control form-control-sm showfields" id="tbxslashoverwriteurl" placeholder="Optional, overwrite URL of inline results" />
                             <div id="cmdformhelp">
                                 Variables:<br />
@@ -499,6 +499,7 @@
                             <label title="Initial order when opening the popup" for="tbxslashorder">Order</label>
                             <input title="Initial order when opening the popup" type="number" class="form-control form-control-sm" id="tbxslashorder" />
                             <button id="btnsaveslashcommand" class="btn btn-primary btn-sm float-right" >Save</button>
+                            <div id="divslashmsg"></div>
                           </div>
                         </div>
                     </form>               
