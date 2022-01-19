@@ -124,9 +124,18 @@ var snuslashcommands = {
         "url": "sys_user.do?sys_id=javascript:gs.getUserID()",
         "hint": "Open My User profile"
     },
+    "me": {
+        "url": "/now/mobile-app-builder",
+        "hint": "Mobile Application Builder"
+    },
     "p": {
         "url": "sys_properties_list.do?sysparm_query=nameLIKE$0",
         "hint": "Filter Properties <name>",
+        "fields": "name"
+    },
+    "pad": {
+        "url": "/now/process/home",
+        "hint": "Process Automation Designer",
         "fields": "name"
     },
     "plug": {
@@ -1203,10 +1212,10 @@ function snuRemoveFromList(){
 }
 
 function snuDoubleClickToShowFieldOrReload() {
-    if (typeof g_form != 'undefined') {
+    if (typeof g_form != 'undefined'  || typeof GlideList2 != 'undefined') {
         document.addEventListener('dblclick', function (event) {
-            if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text') || 
-                event.target.parentElement.classList.contains('sc_editor_label')) {
+            if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') || 
+                event?.target?.parentElement.classList.contains('sc_editor_label')) {
                 var elm;
 
                 var formGroup = event.target.closest('div.form-group');
@@ -1254,6 +1263,11 @@ function snuDoubleClickToShowFieldOrReload() {
                 }
             } else if (event.target.classList.contains('container-fluid')) {
                 location.reload();
+            } else if (event.target.classList.contains('breadcrumb_container')){
+                //placeholder maybe move breadcrumb doubleclick here
+            }
+            else if (['div','li'].includes(event.target.localName) ) {
+                snuAddTechnicalNames();
             }
         }, true);
     }
@@ -1683,7 +1697,7 @@ function snuAddTechnicalNamesPortal() {
             try {
                 var fld = angular.element(lbl).scope().field.name;
                 if (!lbl.innerText.includes('|')) {
-                    jQuery(lbl).append(' | <span style="font-family:monospace; font-size:small;">' + fld + '</span> ');
+                    jQuery(lbl).append('<span class="snuwrap"> | <span style="font-family:monospace; font-size:small;">' + fld + '</span></span> ');
                 }
             } catch (e) { }
         })
@@ -1691,6 +1705,9 @@ function snuAddTechnicalNamesPortal() {
 }
 
 function snuAddTechnicalNames() {
+
+    var hasRun = document.querySelectorAll('.snuwrap').length > 0; //helper var to allow toggle technical names
+
     snuAddTechnicalNamesWorkspace();
     if (typeof jQuery == 'undefined') return; //not in studio
 
@@ -1698,14 +1715,16 @@ function snuAddTechnicalNames() {
     if (typeof g_form != 'undefined') {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
-            jQuery("h1.navbar-title:not(:contains('|'))").first().append('&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
-                ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="For easier copying of field names" onclick="toggleLabel()">[toggle label]</a> </span>');
+            jQuery("h1.navbar-title:not(:contains('|'))").first().append('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
+                ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="For easier copying of field names" onclick="toggleLabel()">[toggle label]</a> </span></span>');
                 document.querySelectorAll("#related_lists_wrapper h1.navbar-title").forEach(lr => { 
+                    if (!lr.querySelectorAll(".snuwrap").length){
                     var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
                     if (tbl.startsWith("REL:")){
                         tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:','')}' >[scripted relation]</a>`;
                     }
-                    lr.innerHTML += DOMPurify.sanitize('&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span>', { ADD_ATTR: ['target'] })
+                    lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
+                    }
                 })          
                 jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
                 jQuery(elem.parentElement).attr('data-for',jQuery(elem.parentElement).attr('for')); //copy for value
@@ -1757,7 +1776,7 @@ function snuAddTechnicalNames() {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
                         linkAttrs.title + '" target="_blank">' + elm + '</a>';
                 }
-                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + ' | </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span>');
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span></span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
@@ -1775,7 +1794,7 @@ function snuAddTechnicalNames() {
         jQuery('.action_context').each(function () {
             var si = jQuery(this).attr('gsft_id');
             if (si)
-                jQuery("<a class='snuiaction' onclick='snuUiActionInfo(event, \"" + si + "\")' title='SN Utils: Click to open UI Action\nCTRL/CMD Click to view sys_id' style='margin-left:-2px'>? </a>").insertAfter(this);
+                jQuery("<a class='snuiaction snuwrap' onclick='snuUiActionInfo(event, \"" + si + "\")' title='SN Utils: Click to open UI Action\nCTRL/CMD Click to view sys_id' style='margin-left:-2px'>? </a>").insertAfter(this);
         });
     }
 
@@ -1784,7 +1803,7 @@ function snuAddTechnicalNames() {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
         if (!jQuery(this).hasClass("snutn")){
             jQuery(this).addClass("snutn")
-            jQuery(this).find('a.list_hdrcell, a.sort-columns').parent().after('<div style="font-family:monospace;font-size:small;margin-left: 25px;margin-top: -3px; font-weight:normal">' + tname + '</div> ');
+            jQuery(this).find('a.list_hdrcell, a.sort-columns').parent().after('<div class="snuwrap" style="font-family:monospace;font-size:small;margin-left: 25px;margin-top: -3px; font-weight:normal">' + tname + '</div> ');
         }
     });
 
@@ -1796,7 +1815,7 @@ function snuAddTechnicalNames() {
                     try{
                     var newElm = document.createElement('span');
                     var sysid = vari.realName.substr(vari.realName.length - 32);
-                    newElm.innerHTML = " | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a>"; newElm.style = "font-family:monospace;";
+                    newElm.innerHTML = "<span class='snuwrap'> | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a></span>"; newElm.style = "font-family:monospace;";
                     elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
                     elm.classList.add('snutn');
                     } catch {}
@@ -1807,11 +1826,22 @@ function snuAddTechnicalNames() {
     //also show viewname
     var viewName = jQuery('input#sysparm_view').val();
     if (viewName && !jQuery('i.viewName').length)
-        jQuery('.section-content').first().prepend('<i class="viewName">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> ');
+        jQuery('.section-content').first().prepend('<i class="viewName snuwrap">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> ');
 
     showSelectFieldValues();
     searchLargeSelects();
     snuCreateHyperLinkForGlideLists();
+
+
+    //toggle the Technical names function
+    if (hasRun){
+        var display = (document.querySelector('.snuwrap')?.style?.display == 'none') ? '' : 'none';
+        document.querySelectorAll('.snuwrap').forEach(cls => {
+            cls.style.display = display;
+        });
+    }
+
+
 }
 
 function snuUiActionInfo(event, si) {
@@ -2506,10 +2536,12 @@ function snuShowSlashCommand(initialCommand, autoRun) {
             }, 10);
         }
         else {
+            if (autoRun === 0)
+                window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowRight' }));
             setTimeout(function () { 
-                if (autoRun === 0)
-                    window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowRight' }));
-                window.top.document.getElementById('snufilter').setSelectionRange(2, 2); }
+                window.top.document.getElementById('snufilter').selectionStart =
+                window.top.document.getElementById('snufilter').selectionEnd = 10000;
+            }
             , 10);
         }
     }
