@@ -11,7 +11,7 @@ var scrpt = document.getElementById('runscript');
 
 if (snusettings.applybgseditor && scrpt) {
 	div.setAttribute("id", "container");
-	div.setAttribute("style", "height:400px");
+	div.setAttribute("style", "height:400px; border:1pt solid #cccccc");
 
 
 	scrpt.parentNode.insertBefore(divInfo, scrpt);
@@ -28,9 +28,11 @@ if (snusettings.applybgseditor && scrpt) {
 		monaco.languages.typescript.javascriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true });
 		monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource);
 
+        var theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
+
 		editor = monaco.editor.create(document.getElementById('container'), {
 			value: scrpt.value ,
-			theme: 'vs-dark',
+			theme: theme,
 			lineNumbers: "on",
 			language: "javascript"
 		});

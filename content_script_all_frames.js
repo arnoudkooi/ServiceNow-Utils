@@ -23,14 +23,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 (function () {
     addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
     addScript('inject.js', true);
-    
-    if (location.pathname == "/sys.scripts.do") {
+
+    if (location.pathname.startsWith("/now/"))
+        addScript('inject_next.js', false);
+    else if (location.pathname == "/sys.scripts.do") {
         setTimeout(function(){
             addScript('js/monaco/vs/loader.js', false);
         },200)
         setTimeout(function(){
             addScript('js/monaco/monaco.js', false);
         },600)
+    }
+    else if (location.pathname.startsWith("/merge_form_")) {
+        addScript('js/monaco/compare.js', false);
     }
 
 

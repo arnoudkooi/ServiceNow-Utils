@@ -462,6 +462,15 @@ function codeSearch(message, cookieStoreId) {
     chrome.tabs.create(createObj);
 }
 
+function openCodeDiff(message) {
+    var url = chrome.runtime.getURL("diff.html");
+    var createObj = {
+        'url': url,
+        'active': true
+    }
+    chrome.tabs.create(createObj);
+}
+
 function openFile(link) {
     var url = link.startsWith('http') ? link : chrome.runtime.getURL(link);
     var createObj = {
@@ -911,8 +920,20 @@ function getGRQueryForm(varName, template, templatelines, fullvarname) {
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
         var tableName = response.myVars.g_formtableName;
-        varName = varName || grVarName(tableName, fullvarname);
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
+        if (!tableName) { //try to find table and sys_id in workspace
+            var myurl = new URL(response.frameHref)
+            var parts = myurl.pathname.split("/");
+            var idx = parts.indexOf("sub") // show subrecord if available
+            if (idx != -1) parts = parts.slice(idx);
+            idx = parts.indexOf("record")
+            if (idx > -1 && parts.length >= idx + 2) {
+                tableName = parts[idx + 1];
+                sysId = parts[idx + 2];
+            }
+        }
+        
+        varName = varName || grVarName(tableName, fullvarname);
         var fields = ('' + response.myVars.elNames).split(',');
         var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
         queryStr += "if (" + varName + ".get('" + sysId + "')) {\n";
@@ -1117,6 +1138,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
     else if (message.event == "codesearch") {
         codeSearch(message, cookieStoreId);
+    }
+    else if (message.event == "opencodediff") {
+        openCodeDiff(message);
     }
     else if (message.event == "openfile") {
         openFile(message.command);

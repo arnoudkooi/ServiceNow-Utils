@@ -543,7 +543,7 @@ function snuAddSlashCommandListener() {
         var shortcut = snufilter.slice(0, idx).toLowerCase();
         if (snuPropertyNames.length > 1 && snuIndex >= 0 && ["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key)) {
             shortcut = snuPropertyNames[snuIndex];
-            idx = snufilter.indexOf(' ');
+           // idx = snufilter.indexOf(' '); //why is this line here?
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
@@ -1212,7 +1212,7 @@ function snuRemoveFromList(){
 }
 
 function snuDoubleClickToShowFieldOrReload() {
-    if (typeof g_form != 'undefined'  || typeof GlideList2 != 'undefined') {
+    if (typeof g_form != 'undefined'  || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
         document.addEventListener('dblclick', function (event) {
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') || 
                 event?.target?.parentElement.classList.contains('sc_editor_label')) {
@@ -1266,7 +1266,7 @@ function snuDoubleClickToShowFieldOrReload() {
             } else if (event.target.classList.contains('breadcrumb_container')){
                 //placeholder maybe move breadcrumb doubleclick here
             }
-            else if (['div','li'].includes(event.target.localName) ) {
+            else if (['div','li','body'].includes(event.target.localName) ) {
                 snuAddTechnicalNames();
             }
         }, true);
@@ -1709,6 +1709,7 @@ function snuAddTechnicalNames() {
     var hasRun = document.querySelectorAll('.snuwrap').length > 0; //helper var to allow toggle technical names
 
     snuAddTechnicalNamesWorkspace();
+    if (typeof snuAddTechnicalNamesNext != 'undefined') snuAddTechnicalNamesNext();
     if (typeof jQuery == 'undefined') return; //not in studio
 
     snuAddTechnicalNamesPortal();
@@ -3636,7 +3637,7 @@ function snuImpersonater(doc){
     if (!impersonatingUser){
         try {
             var client=new XMLHttpRequest();
-            client.open("get","notfoundthispage", false);
+            client.open("get","notfoundthispage.do", false);
             client.send();
             impersonatingUser = client.response.match(/(\'user.impersonation\', \')([^&]*)\'\)/)[2];
         } catch (e){}
