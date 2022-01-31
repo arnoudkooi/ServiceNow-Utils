@@ -572,7 +572,7 @@ function setDataTableUpdateSets(nme) {
         ],
         "drawCallback": function () {
             var row0 = $("#updatesets tbody tr a.iscurrent").closest('tr').clone();
-            $('#updatesets tbody tr:first').before(row0.css('background-color', '#5ebeff'));
+            $('#updatesets tbody tr:first').before(row0.css('background-color', '#86ED78'));
         },
         "language": {
             "info": "Matched: _TOTAL_ of _MAX_ updatesets | Hold down CMD or CTRL to keep window open after clicking a link",

@@ -12,6 +12,12 @@ table {
 
 }
 
+input {
+    accent-color: #5274FF;
+}
+
+
+
 #snuVersion{
     font-size: 12pt;
 }
@@ -23,8 +29,8 @@ a.iscurrent {
 }
  
 ul.nav {
-    background-color: #293e40;
-    border-bottom: #5a7f71 5px solid;
+    background-color: #032D42;
+    border-bottom: #86ED78 5px solid;
     padding-top: 7px;
 }
 
@@ -32,8 +38,8 @@ ul.nav {
 .nav-tabs .nav-link.active {
     border-radius: 0;
     color: #fff !important;
-    background-color: #2f4f4e;
-    border-color: #5a7f71 #5a7f71 #293e40;
+    background-color: #000000;
+    border-color: #86ED78;
     border-width: 5px 5px 8px;
     margin-top: -7px;
     margin-bottom: -4px;
@@ -98,18 +104,22 @@ span.waiting {
 
 
 a {
-    color: #278efc;
+    color: #009156;
+}
+a:hover {
+    color: #009156;
 }
 
+
 .btn-primary {
-    color: #fff;
-    background-color: #278efc;
-    border-color: #0368d4;
+    color: #000000;
+    background-color: #86ED78;
+    border-color: #86ED78;
 }
 
 .btn-primary:hover,
 .btn-primary.hover {
-    background-color: #278efc;
+    background-color: #009156;
     box-shadow: 0 6px 18px -9px #000000;
     transition: box-shadow 0.2s;
 }

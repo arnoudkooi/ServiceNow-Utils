@@ -93,7 +93,9 @@
     "web_accessible_resources": [
         "js/purify.min.js",
         "inject.js",
+        "inject_next.js",
         "inject_parent.js",
+        "css/inject.css",
         "js/monaco/*"
     ],
     "incognito": "split",
