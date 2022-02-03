@@ -14,12 +14,16 @@ document.querySelectorAll("td.left[onclick]").forEach(td => {
 
 document.querySelectorAll("td.left:not([onclick]):not(.spacer)").forEach(td => {
     let field = td.id.replace('td-pulled-', '');
+    let fieldSplit = field.split('.');
+    //TODO: There should be a check here weather ther elements with dummy. and comaprator exists before sending this to a comparator
+    setupForNonEditableFields('dummy\.' + fieldSplit[1] + '\.' + fieldSplit[2], fieldSplit[1] + '\.' + fieldSplit[2], field, td);
 
-    if (field.includes('css')) {
-        setupForNonEditableFields('dummy\.' + field.split('.')[1] + '\.css', field.split('.')[1] + '\.css', field, td);
-    } else if (field.includes('option_schema')) {
-        setupForNonEditableFields('dummy\.' + field.split('.')[1] + '\.option_schema', field.split('.')[1] + '\.option_schema', field, td);
-    }
+    // Old way but it only limits the feature after utilizing split
+    // if (field.includes('css')) {
+    //     setupForNonEditableFields('dummy\.' + fieldSplit[1] + '\.' + fieldSplit[2], fieldSplit[1] + '\.' + fieldSplit[2], field, td);
+    // } else if (field.includes('option_schema')) {
+    //     setupForNonEditableFields('dummy\.' + fieldSplit[1] + '\.' + fieldSplit[2], fieldSplit[1] + '\.' + fieldSplit[2], field, td);
+    // }
 });
 
 function setupForNonEditableFields(leftBody, rightBody, field, td) {
