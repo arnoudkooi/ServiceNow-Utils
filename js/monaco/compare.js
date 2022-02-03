@@ -48,8 +48,8 @@ function openMonaceDiff(field_name, context) {
         var leftBody = context ? context.leftBody : _getElementByPrefix('pulled', field_name).value;
 
         var data = {
-            rightBody: leftBody, //reverse so left is local right remote as it is in SN
-            leftBody: rightBody
+            rightBody: rightBody,
+            leftBody: leftBody
         };
         var event = new CustomEvent(
             "snutils-event", {
