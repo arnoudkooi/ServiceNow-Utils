@@ -1,5 +1,4 @@
 document.querySelectorAll("td.left[onclick]").forEach(td => {
-
     let field = td.id.replace('td-pulled-', '');
     let lnk = document.createElement('a');
     let linkText = document.createTextNode("[SN Utils Compare]");
@@ -17,13 +16,6 @@ document.querySelectorAll("td.left:not([onclick]):not(.spacer)").forEach(td => {
     let fieldSplit = field.split('.');
     //TODO: There should be a check here weather ther elements with dummy. and comaprator exists before sending this to a comparator
     setupForNonEditableFields('dummy\.' + fieldSplit[1] + '\.' + fieldSplit[2], fieldSplit[1] + '\.' + fieldSplit[2], field, td);
-
-    // Old way but it only limits the feature after utilizing split
-    // if (field.includes('css')) {
-    //     setupForNonEditableFields('dummy\.' + fieldSplit[1] + '\.' + fieldSplit[2], fieldSplit[1] + '\.' + fieldSplit[2], field, td);
-    // } else if (field.includes('option_schema')) {
-    //     setupForNonEditableFields('dummy\.' + fieldSplit[1] + '\.' + fieldSplit[2], fieldSplit[1] + '\.' + fieldSplit[2], field, td);
-    // }
 });
 
 function setupForNonEditableFields(leftBody, rightBody, field, td) {
@@ -42,8 +34,6 @@ function setupForNonEditableFields(leftBody, rightBody, field, td) {
 
 
 function openMonaceDiff(field_name, context) {
-
-
     var event = new CustomEvent(
         "snutils-event", {
         detail: {
@@ -70,7 +60,6 @@ function openMonaceDiff(field_name, context) {
         }
         );
         window.top.document.dispatchEvent(event);
-
     }, 400);
 
 
