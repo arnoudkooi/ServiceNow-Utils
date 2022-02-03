@@ -1,0 +1,54 @@
+/* popover */
+
+a.snuelm{
+    color: var(--now-text-link--primary--color);
+}
+
+details.snupopover {
+    display: inline;
+    position: relative;
+}
+
+details.snupopover>summary:focus {
+    outline: none;
+}
+
+details.snupopover>summary::-webkit-details-marker {
+    display: none;
+}
+
+details.snupopover>summary {
+    list-style: none;
+    display: inline;
+}
+
+details.snupopover>summary+* {
+    position: absolute;
+    display: block;
+    z-index: 1;
+    min-width: 250px;
+    border: solid 1px #000000;
+    padding: 10px;
+    background-color: RGB(var(--now-chrome-tabs--background-color,var(--now-color_background--tertiary,var(--now-color--neutral-2,228,230,231))));
+}
+
+details.snupopover>*+* {
+    /* hide detail elements that would ruin the popover */
+    display: none;
+}
+
+details.snupopover>summary+* {
+    top: calc(0.5rem + 100%);
+    right: 20%;
+    transform: translateX(50%);
+}
+
+
+.snuelement {
+    font-family: monospace;
+    font-size: small;
+}
+
+.snupopover div {
+    padding: 3px 0;
+}
