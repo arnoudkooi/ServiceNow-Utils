@@ -6,7 +6,6 @@ document.querySelectorAll("td.left[onclick]").forEach(td => {
     lnk.href = "#";
     lnk.addEventListener('click', evt => {
         openMonaceDiff(field);
-
     });
     td.previousSibling.append(lnk);
 });
@@ -32,6 +31,14 @@ function setupForNonEditableFields(leftBody, rightBody, field, td) {
     td.previousSibling.append(lnk);
 }
 
+function getCompareNames() {
+    let nodeList = [...document.querySelectorAll("thead th.main")].map(el => el.innerHTML);
+
+    return {
+        leftTitle: nodeList[0],
+        rightTitle: nodeList[1]
+    };
+}
 
 function openMonaceDiff(field_name, context) {
     var event = new CustomEvent(
@@ -46,11 +53,15 @@ function openMonaceDiff(field_name, context) {
     setTimeout(function () {
         var rightBody = context ? context.rightBody : gel(field_name).value;
         var leftBody = context ? context.leftBody : _getElementByPrefix('pulled', field_name).value;
-
+        var names = getCompareNames();
         var data = {
+            leftBody: leftBody,
+            leftTitle: names.leftTitle,
             rightBody: rightBody,
-            leftBody: leftBody
+            rightTitle: names.rightTitle,
+            snusettings: snusettings
         };
+
         var event = new CustomEvent(
             "snutils-event", {
             detail: {
@@ -61,6 +72,4 @@ function openMonaceDiff(field_name, context) {
         );
         window.top.document.dispatchEvent(event);
     }, 400);
-
-
 }

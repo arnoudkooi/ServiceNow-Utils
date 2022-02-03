@@ -1,23 +1,53 @@
-body, html {
-	padding: 0;
-	margin: 0;
-	height: calc(100vh - 2em);
+body,
+html {
+  padding: 0;
+  margin: 0;
+  height: calc(100vh - 2em);
 }
+
 #container {
-	height: 100%;
-	width: 100%;
-	box-sizing: border-box;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .actions {
-	height: 2em;
-	display: flex;
-	align-items: center;
-	border-top: 1px solid #aaa;
-	padding: 0.2em;
-	box-sizing: border-box;
+  height: 2em;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #aaa;
+  padding: 0.2em;
+  box-sizing: border-box;
 }
 
 label {
-	padding-right: 0.3em;
+  padding-right: 0.3em;
+}
+
+#compare-details > hr {
+  margin: 1em 0;
+}
+
+#compare-details #titles {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 0;
+  padding: 0;
+}
+
+#compare-details #titles span {
+  font-size: 2em;
+  line-height: 2em;
+  margin: 0;
+  padding: 0;
+}
+
+#compare-details.vs-dark {
+  box-shadow: inset 0 -6px 5px -5px #000000;
+  background-color: #1e1e1e;
+  color: white;
+}
+
+#compare-details.vs-light {
+	box-shadow: inset 0 -6px 5px -5px #dddddd;
 }

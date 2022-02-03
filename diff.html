@@ -7,12 +7,19 @@
     <title>Code Diff</title>
 
     <link rel="stylesheet" href="css/diff.css">
+    <script src="/js/jquery.min.js"></script>
     <script src="js/monaco/vs/loader.js"></script>
     <script src="js/monaco/diff.js"></script>
 
 </head>
 
 <body>
+    <section id="compare-details">
+        <div class="titles" id="titles">
+            <span id="left"></span>
+            <span id="right"></span>
+        </div>
+    </section>
     <section id="container"></section>
     <section class="actions">
         <label>Inline</label>
