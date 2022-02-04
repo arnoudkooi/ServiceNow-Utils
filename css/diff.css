@@ -22,6 +22,13 @@ html {
 
 label {
 	padding-right: 0.3em;
+	min-width: 70px;
+    display: inline-block;
+}
+
+h3{
+	font-size: 12pt;
+	margin-block: 3px;
 }
 
 #compare-details>hr {
@@ -37,18 +44,27 @@ label {
 }
 
 #compare-details #titles span {
-	font-size: 1.3em;
-	line-height: 2em;
-	margin: 0;
-	padding: 0;
+	padding: 4px 3px 8px 3px;
+
 }
 
 section.vs-dark {
 	box-shadow: inset 0 -6px 5px -5px #000000;
-	background-color: #1e1e1e;
+	background-color: #000000;
 	color: white;
+}
+
+section.vs-dark a {
+	color: #86ED78;
+	font-weight: normal;
 }
 
 section.vs-light {
 	box-shadow: inset 0 -6px 5px -5px #dddddd;
+}
+
+img.favicon{
+	width:16px;
+	height: 16px;
+	margin-right: 5px;
 }

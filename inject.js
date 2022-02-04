@@ -1094,8 +1094,10 @@ function snuDiffXml(shortcut){
 
 
     let thisUrl =  `${window.location.origin}/${g_form.getTableName()}.do?XML=&sys_id=${g_form.getUniqueValue()}`;
+    let delay = 0;
 
     if (shortcut == 'diff1'){
+        delay = 400;
         let event = new CustomEvent(
             "snutils-event",
             {
@@ -1109,7 +1111,11 @@ function snuDiffXml(shortcut){
 
     setTimeout(function () {
         let data = {
-            url : thisUrl
+            url : thisUrl,
+            tableName : g_form.getTableName(),
+            displayValue : g_form.getDisplayValue(),
+            sysId : g_form.getUniqueValue(),
+            host: location.host
         };
         let event = new CustomEvent(
             "snutils-event", {
@@ -1120,7 +1126,7 @@ function snuDiffXml(shortcut){
             }
         );
         window.top.document.dispatchEvent(event);
-    }, 400);
+    }, delay);
 
 
 
