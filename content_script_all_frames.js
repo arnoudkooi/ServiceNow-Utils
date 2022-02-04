@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if ((new Date()).getTime() - lastCommand < 500) {
         //dont trigger twice
     }
-    if (request.method == "runFunction") {
+    else if (request.method == "runFunction") {
         runFunction(request.myVars);
     } else if (request.method == "runFunctionChild") {
         runFunction(request.myVars, 'child');
