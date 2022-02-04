@@ -88,7 +88,8 @@ function runFunction(f, context) {
     if (typeof document === 'undefined' || document == null) return;
 
     let inParent = document.querySelector('iframe#gsft_main') != null && document.querySelector('iframe#gsft_main').contentDocument != null;
-    if (context == 'child' && inParent) {
+    //if (context == 'child' && inParent) { // see issue #171 if this works ok remove all runFunctionChild stuff
+    if (inParent) {
         // don't run function meant for content frame if we're not in it
         return;
     }

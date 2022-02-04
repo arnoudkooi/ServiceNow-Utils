@@ -92,6 +92,14 @@ var snuslashcommands = {
         "url": "https://developer.servicenow.com/dev.do#!/search/rome/All/$0",
         "hint": "Search developer portal <search>"
     },
+    "diff1": {
+        "url": "*",
+        "hint": "Send XML of record to left side of diff viewer"
+    },
+    "diff2": {
+        "url": "*",
+        "hint": "Send XML of record to right side of diff viewer"
+    },
     "docs": {
         "url": "https://docs.servicenow.com/search?q=$0&labelkey=rome",
         "hint": "Search Docs <search>"
@@ -120,13 +128,13 @@ var snuslashcommands = {
         "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0^ORsourceLIKE$0",
         "hint": "Filter System Log Created Today <search>"
     },
+    "mab": {
+        "url": "/now/mobile-app-builder",
+        "hint": "Mobile Application Builder"
+    },
     "me": {
         "url": "sys_user.do?sys_id=javascript:gs.getUserID()",
         "hint": "Open My User profile"
-    },
-    "me": {
-        "url": "/now/mobile-app-builder",
-        "hint": "Mobile Application Builder"
     },
     "p": {
         "url": "sys_properties_list.do?sysparm_query=nameLIKE$0",
@@ -741,8 +749,11 @@ function snuAddSlashCommandListener() {
                 }
                 return;
             }
+            else if (['diff1','diff2'].includes(shortcut)){
+                snuDiffXml(shortcut)
+                return;
+            }
             else if (shortcut === 'xmlsrc') {
-
                 if (typeof g_form == 'undefined') {
                     //snuShowAlert("No form found","warning",2000)
                     snuHideSlashCommand();
@@ -1069,6 +1080,53 @@ function setSnuFilter(ev) {
         if (event.ctrlKey || event.metaKey) obj.ctrlKey = true;
         window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', obj));
     }
+}
+
+function snuDiffXml(shortcut){
+    if (typeof g_form == 'undefined' &&  typeof gsft_main?.g_form == 'undefined' ) {
+        //snuShowAlert("No form found","warning",2000)
+        snuHideSlashCommand();
+        return;
+    }
+    else if (typeof g_form == 'undefined' ) {
+        g_form = gsft_main.g_form;
+    }
+
+
+    let thisUrl =  `${window.location.origin}/${g_form.getTableName()}.do?XML=&sys_id=${g_form.getUniqueValue()}`;
+
+    if (shortcut == 'diff1'){
+        let event = new CustomEvent(
+            "snutils-event",
+            {
+                detail: {
+                    event: "opencodediff"
+                }
+            }
+        );
+        window.top.document.dispatchEvent(event);
+    }
+
+    setTimeout(function () {
+        let data = {
+            url : thisUrl
+        };
+        let event = new CustomEvent(
+            "snutils-event", {
+                detail: {
+                    event: "fetch" + shortcut,
+                    command: data
+                }
+            }
+        );
+        window.top.document.dispatchEvent(event);
+    }, 400);
+
+
+
+
+    snuHideSlashCommand();
+    return;
 }
 
 function snuExpandHints(shortcut) {

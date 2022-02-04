@@ -35,7 +35,7 @@ class SnuNextManager {
             elms.forEach(elm => {
                 if (elm['dictionary']) {
 
-                    console.dir(elm);
+                    //console.dir(elm);
                     let lbl = querySelectorShadowDom.querySelectorDeep('label:not(.snutnwrap)', elm);
                     if (lbl) {
                         let tmplt =
