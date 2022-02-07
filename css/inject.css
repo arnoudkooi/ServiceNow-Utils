@@ -52,3 +52,7 @@ details.snupopover>summary+* {
 .snupopover div {
     padding: 3px 0;
 }
+
+div.snufrm{
+    margin-left: 4px;
+}

@@ -1773,7 +1773,7 @@ function snuAddTechnicalNames() {
     var hasRun = document.querySelectorAll('.snuwrap').length > 0; //helper var to allow toggle technical names
 
     snuAddTechnicalNamesWorkspace();
-    if (typeof snuAddTechnicalNamesNext != 'undefined') snuAddTechnicalNamesNext();
+    if (typeof snuNextManager != 'undefined') snuNextManager.addTechnicalNames();
     if (typeof jQuery == 'undefined') return; //not in studio
 
     snuAddTechnicalNamesPortal();
@@ -2131,7 +2131,7 @@ function setShortCuts() {
             if (isActive) {
                 var path = event.path || (event.composedPath && event.composedPath());
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
-                    (event.ctrlKey || event.metaKey) && !event.target.hasAttribute('aria-describedby') ||
+                    (event.ctrlKey || event.metaKey)  ||
                      path[0].id == 'filter' && path[0].value == ''
                     ) { //not when form element active, except filter
                     event.preventDefault();

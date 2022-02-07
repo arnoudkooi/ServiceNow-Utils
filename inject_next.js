@@ -4,32 +4,29 @@ class SnuNextManager {
     constructor() {
         document.addEventListener('dblclick', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-            //console.dir(eventPath[0]);
+            console.dir(eventPath);
             if (['textarea', 'input', 'select'].includes(eventPath[0].localName)) return; //not in form elements
-
-            if (!eventPath[0].className.includes('snuelm'))
+            if (eventPath[0]?.className?.includes('snunodblclk') || eventPath[1]?.className?.includes('snunodblclk')) return; //not in list header with classname
+            if (!eventPath[0]?.className?.includes('snuelm'))
                 if (!this._snuShowUpdateFieldNext(eventPath))
-                    this.snuAddTechnicalNamesNext();
+                    this.addTechnicalNames();
             // snuSetInfoText('No dblclick action found', false);
             // setTimeout(snuHideSlashCommand, 2500);
 
         });
     }
 
-
-
-    snuAddTechnicalNamesNext() {
+    addTechnicalNames() {
         let namesAdded = 0;
         let frms = querySelectorShadowDom.querySelectorAllDeep('sn-form-data-connected, sn-form-data-connected');
         frms.forEach(frm => {
             if (!querySelectorShadowDom.querySelectorAllDeep('.snufrm',frm).length){ //only add once
                 let uiab = querySelectorShadowDom.querySelectorAllDeep('.uiaction-bar-wrapper',frm);
-                let spn = document.createElement("div");
-                spn.className = 'snutn snufrm';
-                spn.innerHTML = `${frm.table} ${frm.view}`;
-               // uiab.parentNode.insertBefore(spn, uiab.firstChild )
-
-
+                let div = document.createElement("div");
+                div.className = 'snutn snufrm snunodblclk';
+                div.style = 'margin-left: 4px;';
+                div.innerHTML = `<a title='SN Utils - Open in platform' href='/${frm.table}.do?sys_id=${frm.nowRecordFormBlob.config.sysId}' target='_blank'>${frm.table}</a> ${frm.view}`;
+                frm.insertBefore(div, frm.firstChild );
             }
             let elms = querySelectorShadowDom.collectAllElementsDeep('*', frm);
             elms.forEach(elm => {
@@ -65,22 +62,26 @@ class SnuNextManager {
             })
 
             if (frm.nowRecordFormBlob.fieldElements.forEach(elm => {
-                    if (elm.choices) {
-                        elm.choices.forEach(choice => {
-                            if (!choice.snuOrigValue) { //firsttime
-                                choice.snuOrigValue = "" + choice.displayValue;
-                                choice.displayValue = "" + choice.displayValue + ' | ' + choice.value;
-                            } else if (choice.displayValue == choice.snuOrigValue) { //toggle //doesnt work :(
-                                choice.displayValue = "" + choice.displayValue + ' | ' + choice.value;
-                            } else {
-                                choice.displayValue = "" + choice.snuOrigValue;
-                            }
-                        });
-                        let val = frm.nowRecordFormBlob.gForm.getValue(elm.name);
-                        frm.nowRecordFormBlob.gForm.setValue(elm.name, val, 'refresh') //refresh dispalyvalue
-                    }
-                }));
+                if (elm.choices) {
+                    elm.choices.forEach(choice => {
+                        if (!choice.snuOrigValue) { //firsttime
+                            choice.snuOrigValue = "" + choice.displayValue;
+                            choice.displayValue = "" + choice.displayValue + ' | ' + choice.value;
+                        } else if (choice.displayValue == choice.snuOrigValue) { //toggle //doesnt work :(
+                            choice.displayValue = "" + choice.displayValue + ' | ' + choice.value;
+                        } else {
+                            choice.displayValue = "" + choice.snuOrigValue;
+                        }
+                    });
+                    let val = frm.nowRecordFormBlob.gForm.getValue(elm.name);
+                    frm.nowRecordFormBlob.gForm.setValue(elm.name, val, 'refresh') //refresh dispalyvalue
+                }
+            }));
+
+             
         })
+
+        namesAdded += this.addTechnicalNamesLists();  
 
         //toogle visibility
         querySelectorShadowDom.querySelectorAllDeep('.snutn').forEach(cls => {
@@ -88,6 +89,26 @@ class SnuNextManager {
         });
 
         return (frms.length == 0);
+    }
+
+    addTechnicalNamesLists() {
+        let namesAdded = 0;
+        let lists = querySelectorShadowDom.querySelectorAllDeep("now-record-list-connected, now-record-list-connected-related");
+        lists.forEach(list => {
+            if (!querySelectorShadowDom.querySelectorAllDeep('.snulist', list).length) {
+                querySelectorShadowDom.querySelectorAllDeep('th:not(.snuth)', list).forEach(th => {
+                    let name = th.id.substring(0, th.id.lastIndexOf("_"));
+                    let div = document.createElement("div");
+                    div.className = 'snutn snuelm';
+                    div.style = 'margin-left: 18px; font-weight: lighter; font-size: 9pt; margin-top: -10pt;'
+                    div.innerText = name;
+                    th.append(div);
+                    th.classList.add('snuth','snunodblclk');
+                    namesAdded++;
+                })
+            }
+        })
+        return namesAdded;
     }
 
 
