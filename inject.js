@@ -322,8 +322,8 @@ var snuslashswitches = {
     "p": { "description": "Filter Pinned", "value": "&sysparm_filter_pinned=true", "type": "querypart" },
 }
 
-var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD",
-    "IN", "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
+var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD", //"IN", //removed, to common ie: INC00010001
+     "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
 
 document.addEventListener('snuUpdateSettingsEvent', function (e)
 {
@@ -1205,6 +1205,7 @@ function snuSettingsAdded() {
         mouseEnterToConvertToHyperlink();
         snuAddGroupSortIcon();
         snuAddErrorLogScriptLinks();
+        snuAddFormDesignScopeChange();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1375,6 +1376,32 @@ function snuAddErrorLogScriptLinks(){
                 tableCell.innerHTML = DOMPurify.sanitize(newHtml,{ ADD_ATTR: ['target'] }) ;
             }
         });
+    }
+}
+
+function snuAddFormDesignScopeChange(){
+    if (location.pathname == "/$ng_fd.do" ){
+        setTimeout( f => {
+            if (document.querySelectorAll('dd-section-item').length){ //recursive until page loaded.
+                var section = document.querySelector('dd-section-item[drop-disabled=true]');
+                if (section){
+                    var scope = section.getAttribute('form-scope');
+                    var urlScope = '/api/now/table/sys_scope?sysparm_fields=sys_id&sysparm_display_value=true&sysparm_query=scope=' + scope;
+                    snuLoadXMLDoc(g_ck, urlScope, null, res => {
+                        var scopeId = res.result[0].sys_id;
+                        snuSetInfoText(`<br />Switch to scope of this view: <a id='snuswitcscope' href='#'  >${scope}</a>`);
+                        document.querySelector('#snuswitcscope').addEventListener('click', e => {
+                            e.preventDefault();
+                            snuSetScope(scopeId);
+                        });
+
+                    })
+                }
+            }
+            else{
+                snuAddFormDesignScopeChange(); //try if its loaded after timeout
+            }
+        },1000);
     }
 }
 

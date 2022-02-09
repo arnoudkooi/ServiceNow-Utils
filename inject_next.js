@@ -25,7 +25,7 @@ class SnuNextManager {
                 let div = document.createElement("div");
                 div.className = 'snutn snufrm snunodblclk';
                 div.style = 'margin-left: 4px;';
-                div.innerHTML = `<a title='SN Utils - Open in platform' href='/${frm.table}.do?sys_id=${frm.nowRecordFormBlob.config.sysId}' target='_blank'>${frm.table}</a> ${frm.view}`;
+                div.innerHTML = `<a title='SN Utils - Open in platform' href='/${frm.table}.do?sys_id=${frm.nowRecordFormBlob.sysId}' target='_blank'>${frm.table}</a> ${frm.view}`;
                 frm.insertBefore(div, frm.firstChild );
             }
             let elms = querySelectorShadowDom.collectAllElementsDeep('*', frm);
