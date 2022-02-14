@@ -1503,7 +1503,8 @@ function snuCaptureFormClick() {
                     operator = 'ON';
                     var dte = val.substring(0, 10); //do some magic to get encodedquery to generate date
                     valDisp = dte;
-                    var dateNumber = getDateFromFormat(g_form.getValue(elm), g_user_date_time_format);
+                    var userDateFormat = tpe == 'glide_date_time' ? g_user_date_time_format : g_user_date_format;
+                    var dateNumber = getDateFromFormat(val, userDateFormat);
                     var dateJs = new Date(dateNumber);
                     dte = dateJs.getFullYear() + '-' +
                         ("0" + (dateJs.getMonth() + 1)).slice(-2) + '-' +
