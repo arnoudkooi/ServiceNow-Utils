@@ -4,7 +4,7 @@ class SnuNextManager {
     constructor() {
         document.addEventListener('dblclick', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-            console.dir(eventPath);
+            //console.dir(eventPath);
             if (['textarea', 'input', 'select'].includes(eventPath[0].localName)) return; //not in form elements
             if (eventPath[0]?.className?.includes('snunodblclk') || eventPath[1]?.className?.includes('snunodblclk')) return; //not in list header with classname
             if (!eventPath[0]?.className?.includes('snuelm'))
@@ -23,10 +23,26 @@ class SnuNextManager {
             if (!querySelectorShadowDom.querySelectorAllDeep('.snufrm',frm).length){ //only add once
                 let uiab = querySelectorShadowDom.querySelectorAllDeep('.uiaction-bar-wrapper',frm);
                 let div = document.createElement("div");
+                let view = querySelectorShadowDom.querySelectorDeep('now-record-form-section-column-layout',frm)?.view || frm.view; 
                 div.className = 'snutn snufrm snunodblclk';
-                div.style = 'margin-left: 4px;';
-                div.innerHTML = `<a title='SN Utils - Open in platform' href='/${frm.table}.do?sys_id=${frm.nowRecordFormBlob.sysId}' target='_blank'>${frm.table}</a> ${frm.view}`;
+                div.style = 'margin-left: 4px; font-size:9pt; text-decration:none';
+                div.innerHTML = `<a title='SN Utils - Open view in platform' href='/${frm.table}.do?sys_id=${frm.nowRecordFormBlob.sysId}&sysparm_view=${view}' target='_blank'>${frm.table} - ${view}</a>
+                <a id='snureload' title='SN Utils - Reload this form' href='#' >⟳</a>
+                <a id='snuconsole' title='SN Utils - Show object data in console' href='#' >↷</a>`;
                 frm.insertBefore(div, frm.firstChild );
+                frm.querySelector('#snureload').addEventListener('click' , e =>{
+                    e.preventDefault();
+                    frm.nowRecordFormBlob.gForm.reload();
+                })
+                frm.querySelector('#snuconsole').addEventListener('click' , e =>{
+                    e.preventDefault();
+                    console.log('SN Utils: sn-form-data-connected');
+                    console.dir(frm);
+                    console.log('SN Utils: sn-form-data-connected.nowRecordFormBlob');
+                    console.dir(frm.nowRecordFormBlob);
+                    console.log('SN Utils: sn-form-data-connected.nowRecordFormBlob.gForm');
+                    console.dir(frm.nowRecordFormBlob.gForm);
+                })
             }
             let elms = querySelectorShadowDom.collectAllElementsDeep('*', frm);
             elms.forEach(elm => {
