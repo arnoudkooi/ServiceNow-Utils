@@ -1467,7 +1467,7 @@ function snuAllowSaveFromOtherScope(){
 function snuCaptureFormClick() {
 
     if (typeof g_form != 'undefined') {
-        document.addEventListener("click", function (event) {
+        document.addEventListener('click', function (event) {
 
             if (event.ctrlKey || event.metaKey) {
                 var tpe = '';
@@ -1478,13 +1478,23 @@ function snuCaptureFormClick() {
                 var valDisp = '';
                 var operator = '=';
                 if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
-                    elm = jQuery(event.target).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                    elm = event.target.closest('div.form-group').getAttribute('id').split('.').slice(2).join('.');
                     tpe = g_form.getGlideUIElement(elm).type;
                     val = g_form.getValue(elm);
-                    elmDisp = jQuery(event.target).text();
+                    elmDisp = event.target.textContent;
                     valDisp = g_form.getDisplayBox(elm) && g_form.getDisplayBox(elm).value || g_form.getValue(elm);
-                }
-                if (jQuery(event.target).hasClass('container-fluid')) {
+                } else if (event.target.parentElement.classList.contains('sc_editor_label')) {
+                    elm = event.target.closest('tr').getAttribute('id').split('.').slice(1).join('.');
+                    tpe = g_sc_form.getSCUIElement(elm).type;
+                    // Make no sense to work with labels.
+                    if (tpe == 'label') return;
+                    val = g_sc_form.getValue(elm);
+                    elmDisp = 'Variable.' + event.target.textContent;
+                    valDisp = g_sc_form.getDisplayBox(elm) && g_sc_form.getDisplayBox(elm).value || g_sc_form.getValue(elm);
+                    var variableID = g_sc_form.nameMap.find((el) => el.realName == elm).questionID;
+                    // In the query we must use the variable sys_id.
+                    elm = 'variables.' + variableID;
+                } else if (event.target.classList.contains('container-fluid')) {
                     elm = 'sys_id';
                     val = g_form.getUniqueValue();
 
@@ -1503,7 +1513,7 @@ function snuCaptureFormClick() {
                     operator = 'ON';
                     var dte = val.substring(0, 10); //do some magic to get encodedquery to generate date
                     valDisp = dte;
-                    var userDateFormat = tpe == 'glide_date_time' ? g_user_date_time_format : g_user_date_format;
+                    var userDateFormat = (tpe == 'glide_date_time') ? g_user_date_time_format : g_user_date_format;
                     var dateNumber = getDateFromFormat(val, userDateFormat);
                     var dateJs = new Date(dateNumber);
                     dte = dateJs.getFullYear() + '-' +
@@ -1571,8 +1581,8 @@ function snuCaptureFormClick() {
             }
 
             if (event.target.className.includes('scriptSync icon-save')){
-                snuPostToScriptSync(jQuery(event.target).data('field'));
-                jQuery(event.target).css('color', '#81B5A1');
+                snuPostToScriptSync(event.target.dataset.field);
+                event.target.style.color = '#81B5A1';
             }
 
         }, true);
