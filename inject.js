@@ -1237,7 +1237,7 @@ function snuCreateHyperLinkForGlideLists() {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
             var fieldId = elm.id.replace('label.','');
-            var isReadOnly = (g_form.getElement(field).getAttribute("class") || "").includes("readonly");
+            var isReadOnly = (g_form.getElement(field).getAttribute("class") || "").includes("readonly") || g_form.getElement(field).getAttribute("writeaccess") == "false";
             var table = g_form.getGlideUIElement(field).reference;
             var hasReferenceTable = table && table !== 'null';
             if (!hasReferenceTable) return; // if there's no Reference Table, there's no use adding links, values are to be used as-is 
