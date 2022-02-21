@@ -2189,7 +2189,7 @@ function setShortCuts() {
                 if (event.shiftKey) {
                     doInsertStay = document.querySelectorAll('#sysverb_insert_and_stay').length;
                     if (!doInsertStay) {
-                        g_form.addWarningMessage("Insert and Stay not available for this record (SN Utils Exentsion)");
+                        g_form.addWarningMessage("Insert and Stay not available for this record (SN Utils Extension)");
                         return false;
                     }
                 }
@@ -2325,7 +2325,7 @@ function snuNewFromPopupToTab() {
 function tryPaste() {
     if (!document.execCommand('paste')) {
         g_form.clearMessages();
-        g_form.addInfoMessage("Please hit cmd-v or ctrl-v if you want to paste a copied screenshot as attachment to this record. (SN Utils Exentsion)");
+        g_form.addInfoMessage("Please hit cmd-v or ctrl-v if you want to paste a copied screenshot as attachment to this record. (SN Utils Extension)");
     }
 }
 
