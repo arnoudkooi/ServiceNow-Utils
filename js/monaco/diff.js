@@ -4,8 +4,6 @@ let leftXml;
 let theme;
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     {
-        console.log(message)
-        console.log(sender);
         if (message.event == 'fillcodediff') {
             if (hasLoaded) return;
             hasLoaded = true; //only reply to first incoming event.
@@ -33,9 +31,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 editor = monaco.editor.createDiffEditor(document.getElementById('container'), {
                     theme: theme
                 });
+
+                var lang = '';
+                if (message.command.fieldName.includes('script')) lang = 'javascript';
+                else if (message.command.fieldName.includes('css')) lang = 'scss';
+                else if (message.command.fieldName.includes('xml')) lang = 'xml';
+                else if (message.command.fieldName.includes('html')) lang = 'html';
+
                 editor.setModel({
-                    original: monaco.editor.createModel(message.command.leftBody, 'javascript'),
-                    modified: monaco.editor.createModel(message.command.rightBody, 'javascript')
+                    original: monaco.editor.createModel(message.command.leftBody, lang),
+                    modified: monaco.editor.createModel(message.command.rightBody, lang)
                 });
 
                 document.querySelector('.inline-it').addEventListener('change', (e) => {

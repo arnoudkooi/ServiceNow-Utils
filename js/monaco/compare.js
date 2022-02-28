@@ -55,7 +55,7 @@ function getCompareNames() {
 }
 
 
-function openMonaceDiff(field_name, context) {
+function openMonaceDiff(fieldName, context) {
     let event = new CustomEvent(
         "snutils-event", {
             detail: {
@@ -66,11 +66,12 @@ function openMonaceDiff(field_name, context) {
     window.top.document.dispatchEvent(event);
 
     setTimeout(function () {
-        let rightBody = context ? context.rightBody : gel(field_name).value;
-        let leftBody = context ? context.leftBody : _getElementByPrefix('pulled', field_name).value;
+        let rightBody = context ? context.rightBody : gel(fieldName).value;
+        let leftBody = context ? context.leftBody : _getElementByPrefix('pulled', fieldName).value;
 
         let names = getCompareNames();
         let data = {
+            fieldName : fieldName,
             leftBody: leftBody,
             leftTitle: names.leftTitle,
             rightBody: rightBody,
