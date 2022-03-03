@@ -1447,9 +1447,16 @@ function snuClickToOpenWidget() {
             el.setAttribute("title","[SN Utils] CTRL or CMD-Click to open source");
         }));
         document.addEventListener("click", function (event) {
-            if ((event.ctrlKey || event.metaKey)) {
+            if ((event.ctrlKey || event.metaKey) && event.target.tagName != 'A') {
+                event.preventDefault();
+                try{
                 var lnk = event.target.closest('.grid-stack-item').querySelector('decoration').getAttribute("editlink");
                 window.open(lnk) ;
+                }
+                catch(e){
+                    snuSetInfoText('CTRL-Click only works in same scope',false);
+                }
+                return true;
             }
         });
     }
