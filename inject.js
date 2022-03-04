@@ -1280,7 +1280,7 @@ function snuDoubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined'  || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
         document.addEventListener('dblclick', function (event) {
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') || 
-                event?.target?.parentElement.classList.contains('sc_editor_label')) {
+                event?.target?.parentElement?.classList.contains('sc_editor_label')) {
                 var elm;
 
                 var formGroup = event.target.closest('div.form-group');
