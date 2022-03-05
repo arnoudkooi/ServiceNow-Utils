@@ -319,6 +319,7 @@ var snuslashswitches = {
     "m": { "description": "Updated or Created by Me", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
     "ou": { "description": "Order by Updated Descending", "value": "^ORDERBYDESCsys_updated_on", "type": "encodedquerypart" },
     "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on", "type": "encodedquerypart" },
+    "pf": { "description": "Use Polaris = False", "value": "&sysparm_use_polaris=false", "type": "querypart" },
     "p": { "description": "Filter Pinned", "value": "&sysparm_filter_pinned=true", "type": "querypart" },
 }
 
@@ -525,7 +526,8 @@ function snuAddSlashCommandListener() {
         if (e.key == 'Meta' || e.key == 'Control' || e.key == 'ArrowLeft') return;
         if (e.currentTarget.selectionStart < e.currentTarget.value.length && e.key == 'ArrowRight') return;
         if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) snuHideSlashCommand();
-        var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null);
+        var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null ||
+            window.top.location.pathname.startsWith('/now/nav/ui/classic/params/target/'));
         if (!e.currentTarget.value.startsWith("/")) {
             e.currentTarget.value = "/" + e.currentTarget.value
         }
@@ -566,7 +568,9 @@ function snuAddSlashCommandListener() {
 
         if (typeof g_form == 'undefined') {
             try { //get if in iframe
-                g_form = document.getElementById('gsft_main').contentWindow.g_form;
+                g_form =  
+                (document.querySelector("#gsft_main") || document.querySelector("[component-id]")
+                .shadowRoot.querySelector("#gsft_main")).contentWindow.g_form;
             } catch (e) { }
         }
 
@@ -796,10 +800,10 @@ function snuAddSlashCommandListener() {
                 return;
             }
             else if (shortcut.startsWith("-")) {
-                var gsft = document.querySelector("#gsft_main");
+                var gsft =  (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main"));
                 var doc = gsft ? gsft.contentWindow : window;
                 if (typeof doc.GlideList2 != 'undefined') {
-                    var qry = doc.GlideList2.get(doc.jQuery('#sys_target').val());
+                    var qry = doc.GlideList2.get(doc.document.querySelector('#sys_target')?.value);
                     if (typeof qry != 'undefined') {
                         if (targeturl.includes("{}")) {
                             targeturl = targeturl.replace('{}', qry.getTableName());
@@ -889,7 +893,7 @@ function snuAddSlashCommandListener() {
 
                 if (shortcut.includes('.do')) {
                     if (inIFrame) {
-                        jQuery('#gsft_main').attr('src', shortcut);
+                        (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = shortcut;
                     }
                     else {
                         if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
@@ -907,7 +911,7 @@ function snuAddSlashCommandListener() {
                     var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=" + query;
 
                     if (inIFrame) {
-                        jQuery('#gsft_main').attr('src', url);
+                        (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = url;
                     }
                     else {
                         if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
@@ -941,14 +945,14 @@ function snuAddSlashCommandListener() {
                 snuGetRandomRecord(targeturl, "", false, res => {
                     targeturl = targeturl + ".do?sys_id=" + res;
                     if (inIFrame)
-                        jQuery('#gsft_main').attr('src', targeturl);
+                        (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = targeturl;
                     else
                         window.open(targeturl, '_blank');
                     snuHideSlashCommand();
                 })
             }
             else if (inIFrame) {
-                jQuery('#gsft_main').attr('src', targeturl);
+                (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = targeturl;
             }
             else {
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
@@ -1170,11 +1174,13 @@ function snuSettingsAdded() {
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
+    if (typeof snusettings.listfields == 'undefined') snusettings.listfields = 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
+
 
     setShortCuts();
 
     if (!snusettings.nopasteimage) {
-        bindPaste(snusettings.nouielements == false);
+        snuBindPaste(snusettings.nouielements == false);
     }
     if (snusettings.vsscriptsync == true) {
         snuAddFieldSyncButtons();
@@ -1206,6 +1212,7 @@ function snuSettingsAdded() {
         snuAddGroupSortIcon();
         snuAddErrorLogScriptLinks();
         snuAddFormDesignScopeChange();
+        snuAddPersonaliseListHandler();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1349,7 +1356,7 @@ function mouseEnterToConvertToHyperlink() {
 
 function snuAddGroupSortIcon(){
     if (location.pathname.includes("_list.do") && location.search.includes("GROUPBY")){
-        var qry = GlideList2.get(jQuery('#sys_target').val());
+        var qry = GlideList2.get(document.querySelector('#sys_target')?.value);
         var gb = qry.getGroupBy().replace("GROUPBY","");
         var elm = document.querySelector(`th[name="${gb}"] a`);
         var descstyle = location.search.includes("sysparm_group_sort=COUNTDESC") ? 'font-weight:bold; color:blue !important' : '';
@@ -1412,7 +1419,7 @@ function doubleClickToSetQueryListV2() { //dbl click to view and update filter c
         } else {
             var listName;
             if (typeof g_form == 'undefined') {
-                listName = jQuery('#sys_target').val();
+                listName = document.querySelector('#sys_target')?.value;
             } else {
                 var breadcrumbs = event.currentTarget.querySelector('span[list_id]');
                 if (breadcrumbs) {
@@ -2220,7 +2227,7 @@ function setShortCuts() {
 function splitContainsToAnd(event) {
     var listName;
     if (typeof g_form == 'undefined') {
-        listName = jQuery('#sys_target').val();
+        listName = document.querySelector('#sys_target')?.value;
     } else {
         var breadcrumbs = event.currentTarget.querySelector('span[list_id]');
         if (breadcrumbs) {
@@ -2265,7 +2272,7 @@ function enhanceTinMCE() {
     bg.append(editor.buttons['snexp']);
 }
 
-function bindPaste(showIcon) {
+function snuBindPaste(showIcon) {
 
     if (typeof g_form != 'undefined') {
 
@@ -3766,4 +3773,48 @@ function snuSetUpdateSet(sysid) {
 
         });
     }
+}
+
+
+function snuAddPersonaliseListHandler(){
+    if (typeof GlideList2 == 'undefined') return;
+    let tableName = document.querySelector('#sys_target')?.value;
+    if (!tableName) return;
+    let g_list = GlideList2.get(tableName);
+    let missingFields = snusettings.listfields.split(',').filter(x => !g_list.fields.split(',').includes(x)).join(',');
+    if (!missingFields || (missingFields == 'sys_scope' && !g_list.tableName.startsWith('sys_'))) return; //do not show if not needed, fields already in list (best try)
+
+    let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
+    if (!btn) return;
+
+    let icon = document.createElement('i');
+    icon.className = 'snuPersonaliseList icon-endpoint btn btn-icon table-btn-lg';
+    icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open`;
+    icon.role = 'button';
+    icon.addEventListener('click', evt =>{
+        let autoclose = !(evt.metaKey || evt.ctrlKey);
+        snuPersonaliseList(autoclose);
+    });
+    btn.parentNode.insertBefore(icon, btn.nextSibling);
+}
+
+function snuPersonaliseList(autoclose){
+    let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
+    if (btn) btn.click();
+    else return true;
+
+    setTimeout(() => {
+        let add = snusettings.listfields.split(',');
+        let addCount = 0;
+        add.each(fld =>{
+            let option = document.querySelector(`#slush_left option[value=${fld}]`)
+            if (option){
+                option.style.backgroundColor = '#5274FF';
+                document.querySelector('#slush_right').appendChild(option);
+                addCount++;
+            }
+        })
+        if (autoclose && addCount) setTimeout(actionOK, 1000); 
+
+    }, 1000);
 }

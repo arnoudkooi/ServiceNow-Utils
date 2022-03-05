@@ -15,17 +15,14 @@ class SnuNextManager {
 
         });
         document.addEventListener('mouseup', evt => {
-
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-            console.log(eventPath);
-            
+            //console.log(eventPath);
             if (eventPath[0].className.includes('sn-polaris-tab')){ //save a click, select input
                 setTimeout(() => {
                     var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
                     if (fltr) fltr.select();
                 }, 200);
             }
-
         });
     }
 
