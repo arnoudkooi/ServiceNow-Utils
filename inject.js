@@ -3777,7 +3777,7 @@ function snuSetUpdateSet(sysid) {
 
 
 function snuAddPersonaliseListHandler(){
-    if (typeof GlideList2 == 'undefined') return;
+    if (typeof GlideList2 == 'undefined' || typeof g_form != 'undefined') return; //only lists for now
     let tableName = document.querySelector('#sys_target')?.value;
     if (!tableName) return;
     let g_list = GlideList2.get(tableName);
