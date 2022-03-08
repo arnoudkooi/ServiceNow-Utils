@@ -800,7 +800,7 @@ function snuAddSlashCommandListener() {
                 return;
             }
             else if (shortcut.startsWith("-")) {
-                var gsft =  (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main"));
+                var gsft =  (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
                 var doc = gsft ? gsft.contentWindow : window;
                 if (typeof doc.GlideList2 != 'undefined') {
                     var qry = doc.GlideList2.get(doc.document.querySelector('#sys_target')?.value);
@@ -2038,6 +2038,10 @@ function snuTableCollectionLink() {
 }
 
 function searchLargeSelects() {
+
+    var mdl = document.querySelector('#list_mechanic .modal-dialog');
+    if (mdl) mdl.style = 'width:80% !important; padding:20px'; //give it more width...
+
     if (typeof jQuery.fn.filterByText == 'undefined') {
         jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
             return this.each(function () {
@@ -2074,36 +2078,45 @@ function searchLargeSelects() {
     var minItems = 15;
 
     jQuery('select:not(.list_action_option, .searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
-        if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
-            var input = document.createElement("input");
-            input.type = "text";
-            input.placeholder = "Filter choices...";
-            input.className = "form-control";
-            input.style.marginBottom = "2px";
-
-            jQuery(el).before(input).filterByText(input, true).addClass('searchified');
-        }
-
-        if (el.id == 'slush_right') {
-            var input = document.createElement("input");
-            input.type = "text";
-            input.placeholder = "Add dotwalk field";
-            input.className = "form-control";
-            input.style.marginTop = "2px";
-            input.style.marginLeft = "2px";
-            el.onclick = function (ev) { input.value = ev.target.value + '.'; input.focus() }
-            input.onkeydown = function (ev) {
-                if (ev.which == 13) {
-                    ev.preventDefault();
-                    var opt = document.createElement('option');
-                    opt.value = input.value;
-                    opt.innerHTML = DOMPurify.sanitize(input.value);
-                    el.appendChild(opt);
-                }
+        try {
+            if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
+                //document.querySelector('.slushbucket-top').style.display = 'inline';
+                var input = document.createElement("input");
+                input.type = "text";
+                input.placeholder = "Filter choices...";
+                input.className = "form-control";
+                input.style.marginBottom = "2px";
+                snuInsertAfter(input,document.querySelector('label[for=slush_left]'))
+                jQuery('select#slush_left').filterByText(input, true).addClass('searchified');
             }
-            jQuery(el).after(input).addClass('searchified');
-        }
-    });
+
+            if (el.id == 'slush_right') {
+                //document.querySelector('.slushbucket-top.slushbody').style.display = 'inline';
+                var input = document.createElement("input");
+                input.type = "text";
+                input.placeholder = "Add dotwalk field (conform with enter)";
+                input.className = "form-control";
+                input.style.marginTop = "2px";
+                input.style.marginLeft = "2px";
+                el.onclick = function (ev) { input.value = ev.target.value + '.'; input.focus() }
+                input.onkeydown = function (ev) {
+                    if (ev.which == 13) {
+                        ev.preventDefault();
+                        var opt = document.createElement('option');
+                        opt.value = input.value;
+                        opt.innerHTML = DOMPurify.sanitize(input.value);
+                        el.appendChild(opt);
+                    }
+                }
+                
+                snuInsertAfter(input, document.querySelectorAll('.glide-list')[1]);
+                jQuery('select#slush_right').addClass('searchified');
+            }
+        } catch (e) { } //nice try
+     });
+
+
+
 }
 
 function setShortCuts() {
@@ -3393,7 +3406,7 @@ function snuAddTechnicalNamesWorkspace() {
                         lnk.href = '/sys_ui_action.do?sys_id=' + uiact.appendToPayload.item.sysId;
                         lnk.target = 'uia';
                         lnk.title = 'SN Utils - Open the UI Action definition';
-                        insertAfter(lnk, uiact);
+                        snuInsertAfter(lnk, uiact);
                         console.dir(uiact);
                     });
 
@@ -3450,9 +3463,11 @@ function snuAddTechnicalNamesWorkspace() {
         }
     }
 
-    function insertAfter(newNode, referenceNode) {
-        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-    }
+
+}
+
+function snuInsertAfter(newNode, referenceNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
 
 function snuGetUsersForImpersonate(query) {
@@ -3798,23 +3813,38 @@ function snuAddPersonaliseListHandler(){
     btn.parentNode.insertBefore(icon, btn.nextSibling);
 }
 
-function snuPersonaliseList(autoclose){
+function snuPersonaliseList(autoclose) {
     let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
     if (btn) btn.click();
     else return true;
 
-    setTimeout(() => {
-        let add = snusettings.listfields.split(',');
-        let addCount = 0;
-        add.each(fld =>{
-            let option = document.querySelector(`#slush_left option[value=${fld}]`)
-            if (option){
-                option.style.backgroundColor = '#5274FF';
-                document.querySelector('#slush_right').appendChild(option);
-                addCount++;
-            }
-        })
-        if (autoclose && addCount) setTimeout(actionOK, 1000); 
+    let loops = 0 //check if options are (async) loaded
+    loop();
 
-    }, 1000);
+    function loop() {
+        setTimeout(() => {
+            console.log("len " + document.querySelectorAll(`#slush_left option, #slush_right option`).length);
+
+            if (document.querySelectorAll(`#slush_left option, #slush_right option`).length < 3 && loops < 10) {
+                loops++;
+                loop(); //not loaded, try again after xx ms
+                return;
+            } 
+
+            let add = snusettings.listfields.split(',');
+            let addCount = 0;
+            add.each(fld => {
+                let option = document.querySelector(`#slush_left option[value=${fld}]`)
+                if (option) {
+                    option.style.backgroundColor = '#5274FF';
+                    document.querySelector('#slush_right').appendChild(option);
+                    addCount++;
+                }
+            })
+            if (autoclose && addCount) setTimeout(actionOK,500);
+            
+
+        }, 300);
+    }
+
 }
