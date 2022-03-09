@@ -2970,8 +2970,10 @@ function snuAddFieldSyncButtons() {
 
 function snuAddBGScriptButton() {
     if (!location.href.includes("/sys.scripts.do")) return; //only in bg script
-    g_ck = document.getElementsByName('sysparm_ck')[0].value;
-    document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();'>[Mirror in sn-scriptsync]</a>");
+    g_ck = document.getElementsByName('sysparm_ck')[0]?.value;
+    if (g_ck) {
+        document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();'>[Mirror in sn-scriptsync]</a>");
+    }
 }
 
 function snuSetAllMandatoryFieldsToFalse() {
