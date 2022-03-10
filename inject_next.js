@@ -21,7 +21,7 @@ class SnuNextManager {
                 setTimeout(() => {
                     var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
                     if (fltr) fltr.select();
-                }, 200);
+                }, 400);
             }
         });
     }
