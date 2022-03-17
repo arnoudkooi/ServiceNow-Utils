@@ -525,7 +525,8 @@ function snuAddSlashCommandListener() {
         }
         if (e.key == 'Meta' || e.key == 'Control' || e.key == 'ArrowLeft') return;
         if (e.currentTarget.selectionStart < e.currentTarget.value.length && e.key == 'ArrowRight') return;
-        if (e.key == 'Escape' || (e.currentTarget.value.length <= 1 && e.key == 'Backspace')) snuHideSlashCommand();
+        if (e.key == 'Escape') snuHideSlashCommand();
+        if (e.currentTarget.value.length <= 1 && e.key == 'Backspace') snuHideSlashCommand(true);
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null ||
             window.top.location.pathname.startsWith('/now/nav/ui/classic/params/target/'));
         if (!e.currentTarget.value.startsWith("/")) {
@@ -823,6 +824,11 @@ function snuAddSlashCommandListener() {
                             return;
                         }
                     }
+                }
+                if (targeturl.startsWith("&") && typeof doc?.g_form != 'undefined') {
+                    doc.location = doc.location.href + targeturl;
+                    snuHideSlashCommand();
+                    return;
                 }
                 if (typeof doc.g_form != 'undefined') {
                     if (targeturl.includes("{}")) {
@@ -1598,6 +1604,10 @@ function snuCaptureFormClick() {
                 snuPostToScriptSync(event.target.dataset.field);
                 event.target.style.color = '#81B5A1';
             }
+            if (event.target.className.includes('scriptSync icon-code')){
+                snuPostToMonaco(event.target.dataset.field);
+                event.target.style.color = '#81B5A1';
+            }
 
         }, true);
     }
@@ -1836,11 +1846,12 @@ function snuAddTechnicalNames() {
                 ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="For easier copying of field names" onclick="toggleLabel()">[toggle label]</a> </span></span>');
                 document.querySelectorAll("#related_lists_wrapper h1.navbar-title").forEach(lr => { 
                     if (!lr.querySelectorAll(".snuwrap").length){
-                    var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
-                    if (tbl.startsWith("REL:")){
-                        tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:','')}' >[scripted relation]</a>`;
-                    }
-                    lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
+                        lr.style.display = 'inline';
+                        var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
+                        if (tbl.startsWith("REL:")){
+                            tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:','')}' >[scripted relation]</a>`;
+                        }
+                        lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
                     }
                 })          
                 jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
@@ -2631,16 +2642,26 @@ function snuShowAlert(msg, type, timeout) {
 function snuHideAlert() {
     jQuery('.service-now-util-alert').removeClass('visible');
 }
-function snuHideSlashCommand() {
+function snuHideSlashCommand(navFocus = false) {
     window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
-        if (window.top.document.getElementById('filter') != null) {
-            try {
-                if (event.currentTarget.value.length <= 1) {
-                    window.top.document.getElementById('filter').focus();
-                }
-            } catch (e) { }
+        if (navFocus === true){
+            if (window.top.document.getElementById('filter') != null) {
+                try {
+                    if (event.currentTarget.value.length <= 1) {
+                        var flt = window.top.document.querySelector('#filter');
+                        if (flt) flt.focus();
+                    }
+                } catch (e) { }
+            }
+            if (window.top?.querySelectorShadowDom != 'undefined'){
+                window.top.querySelectorShadowDom.querySelectorDeep('div#all.sn-polaris-tab').click();
+                setTimeout(() => {
+                    var fltr = window.top.querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.all input#filter`);
+                    if (fltr) fltr.select();
+                }, 400);
+            }
         }
     }
     return true;
@@ -2838,6 +2859,30 @@ function snuPostRequestToScriptSync(requestType) {
     client.send(JSON.stringify(data));
 }
 
+function snuPostToMonaco(field) {
+    if (event) event.preventDefault();
+    snuScriptEditor();
+    var data = {};
+    var instance = {};
+    instance.name = window.location.host.split('.')[0];
+    instance.url = window.location.origin;
+    instance.g_ck = g_ck;
+
+    data.action = 'saveFieldAsFile';
+    data.instance = instance;
+
+    g_form.clearMessages();
+    data.field = field;
+    data.table = g_form.getTableName();
+    data.sys_id = g_form.getUniqueValue();
+    data.content = g_form.getValue(field);
+    data.fieldType = g_form.getGlideUIElement(field).type;
+    data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
+
+    console.log(data);
+
+}
+
 function snuPostToScriptSync(field) {
     if (event) event.preventDefault();
     snuScriptSync();
@@ -2932,23 +2977,15 @@ function snuAddFieldSyncButtons() {
         if (g_form.isNewRecord()) return;
         jQuery(".label-text").each(function (index, value) {
             try {
-
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
-                var fieldType = jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
+                var fieldType = g_form.getGlideUIElement(elm).type || jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var txt = this.innerText.toLowerCase();
-                if (txt == 'script' || txt == 'css') {
-                    jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
+                if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType)) {
+                    jQuery(this).after(`<span style="color: #293E40; cursor:pointer" data-field="${elm}" class="icon scriptSync icon-save"></span>`);
+                    //<span style="color: #293E40; cursor:pointer" data-field="${elm}" class="icon scriptSync icon-code"></span>`);
                     return true;
                 }
-                for (var i = 0; i < fieldTypes.length; i++) {
-                    if (fieldType.indexOf(fieldTypes[i]) > -1) {
-                        jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
-                        break;
-                    }
-                }
-            } catch (error) {
-
-            }
+            } catch (error) { }
         });
     } else if (location.href.includes("sp_config/?id=widget_editor") ||
         location.href.includes("sp_config?id=widget_editor")) {
@@ -3171,6 +3208,20 @@ function snuDoGroupSearch(search) {
             el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
         });
     }
+}
+
+
+
+function snuScriptEditor() {
+    let event = new CustomEvent(
+        "snutils-event",
+        {
+            detail: {
+                event: "opencodeeditor"
+            }
+        }
+    );
+    window.top.document.dispatchEvent(event);
 }
 
 function snuScriptSync() {

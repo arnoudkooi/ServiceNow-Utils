@@ -4,25 +4,25 @@ class SnuNextManager {
     constructor() {
         document.addEventListener('dblclick', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-            //console.dir(eventPath);
-            if (['textarea', 'input', 'select'].includes(eventPath[0].localName)) return; //not in form elements
-            if (eventPath[0]?.className?.includes('snunodblclk') || eventPath[1]?.className?.includes('snunodblclk')) return; //not in list header with classname
+            if (eventPath[0].tagName == "svg") return;
+            if (['textarea', 'input', 'select'].includes(eventPath[0]?.localName)) return; //not in form elements
+            if (eventPath[0].eventPath[0]?.className?.includes('snunodblclk') || eventPath[1]?.className?.includes('snunodblclk')) return; //not in list header with classname
             if (!eventPath[0]?.className?.includes('snuelm'))
                 if (!this._snuShowUpdateFieldNext(eventPath))
                     this.addTechnicalNames();
-            // snuSetInfoText('No dblclick action found', false);
-            // setTimeout(snuHideSlashCommand, 2500);
 
         });
         document.addEventListener('mouseup', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-            //console.log(eventPath);
-            if (eventPath[0].className.includes('sn-polaris-tab')){ //save a click, select input
-                setTimeout(() => {
-                    var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
-                    if (fltr) fltr.select();
-                }, 400);
-            }
+            try{
+                if (eventPath[0].tagName == "svg") return;
+                if (eventPath[0]?.className.includes('sn-polaris-tab')){ //save a click, select input
+                    setTimeout(() => {
+                        var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
+                        if (fltr) fltr.select();
+                    }, 400);
+                }
+            } catch (ex) {};
         });
     }
 

@@ -462,6 +462,15 @@ function codeSearch(message, cookieStoreId) {
     chrome.tabs.create(createObj);
 }
 
+function openCodeEditor(message) {
+    var url = chrome.runtime.getURL("codeeditor.html");
+    var createObj = {
+        'url': url,
+        'active': true
+    }
+    chrome.tabs.create(createObj);
+}
+
 function openCodeDiff(message) {
     var url = chrome.runtime.getURL("diff.html");
     var createObj = {
@@ -1141,6 +1150,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
     else if (message.event == "opencodediff") {
         openCodeDiff(message);
+    }
+    else if (message.event == "opencodeeditor") {
+        openCodeEditor(message);
     }
     else if (message.event == "openfile") {
         openFile(message.command);

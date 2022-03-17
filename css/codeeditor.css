@@ -1,0 +1,70 @@
+body,
+html {
+	padding: 0;
+	margin: 0;
+	height: calc(100vh - 2em);
+}
+
+#container {
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.actions {
+	height: 2em;
+	display: flex;
+	align-items: center;
+	border-top: 1px solid #aaa;
+	padding: 0.2em;
+	box-sizing: border-box;
+}
+
+label {
+	padding-right: 0.3em;
+	min-width: 70px;
+    display: inline-block;
+}
+
+h3{
+	font-size: 12pt;
+	margin-block: 3px;
+}
+
+#compare-details>hr {
+	margin: 1em 0;
+}
+
+#compare-details #titles {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin: 0;
+	padding: 0;
+}
+
+#compare-details #titles span {
+	padding: 4px 3px 8px 3px;
+
+}
+
+section.vs-dark {
+	box-shadow: inset 0 -6px 5px -5px #000000;
+	background-color: #000000;
+	color: white;
+}
+
+section.vs-dark a {
+	color: #86ED78;
+	font-weight: normal;
+}
+
+section.vs-light {
+	box-shadow: inset 0 -6px 5px -5px #dddddd;
+}
+
+img.favicon{
+	width:16px;
+	height: 16px;
+	margin-right: 5px;
+}
