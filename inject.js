@@ -2910,6 +2910,7 @@ function snuPostToScriptSync(field) {
         try {
             document.getElementById('runscript').style.display = "inline";
             document.getElementById('container').style.display = "none";
+
         } catch(e){};
 
         let date = new Date();
@@ -2984,6 +2985,12 @@ function snuAddFieldSyncButtons() {
                     jQuery(this).after(`<span style="color: #293E40; cursor:pointer" data-field="${elm}" class="icon scriptSync icon-save"></span>`);
                     //<span style="color: #293E40; cursor:pointer" data-field="${elm}" class="icon scriptSync icon-code"></span>`);
                     return true;
+                }
+                for (var i = 0; i < fieldTypes.length; i++) {
+                    if (fieldType.indexOf(fieldTypes[i]) > -1) {
+                        jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
+                        break;
+                    }
                 }
             } catch (error) { }
         });
