@@ -3,6 +3,14 @@ html {
 	padding: 0;
 	margin: 0;
 	height: calc(100vh - 2em);
+	font-size:12pt;
+}
+
+#header {
+	width: 100%;
+	padding: 5px;
+	display: flex;
+	flex-direction: row;
 }
 
 #container {
@@ -11,14 +19,6 @@ html {
 	box-sizing: border-box;
 }
 
-.actions {
-	height: 2em;
-	display: flex;
-	align-items: center;
-	border-top: 1px solid #aaa;
-	padding: 0.2em;
-	box-sizing: border-box;
-}
 
 label {
 	padding-right: 0.3em;
@@ -31,19 +31,22 @@ h3{
 	margin-block: 3px;
 }
 
-#compare-details>hr {
+#header>hr {
 	margin: 1em 0;
 }
 
-#compare-details #titles {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-around;
-	margin: 0;
-	padding: 0;
+#header #title {
+	padding: 20px;
+	width:50%;
 }
 
-#compare-details #titles span {
+#header #state {
+	padding: 20px;
+	width:50%;
+}
+
+
+#header #title span {
 	padding: 4px 3px 8px 3px;
 
 }
@@ -68,3 +71,22 @@ img.favicon{
 	height: 16px;
 	margin-right: 5px;
 }
+
+button {
+	background-color: #4CAF50; /* Green */
+	border: none;
+	display:block !important;
+	border-radius: 4px;;
+	color: white;
+	padding: 12px 20px;
+	margin-bottom: 10px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 15px;
+	cursor: pointer;
+  }
+
+  #response{
+	  font-size: 10pt;
+  }

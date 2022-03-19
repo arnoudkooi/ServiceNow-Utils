@@ -325,9 +325,14 @@ function mirrorBgScript(scriptObj) {
     }, function (arrayOfTabs) {
         if (arrayOfTabs.length){
             scriptTabCreated = false;
-            var prefix = (arrayOfTabs[0].url.includes("nav_to.do?uri=%2Fsys.scripts.do") ||
-            arrayOfTabs[0].url.includes("now/nav/ui/classic/params/target/sys.scripts.do")) ? "gsft_main." : "";
-            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": prefix + "document.getElementById('runscript').value = String.raw`" + scriptObj.content + "`" });
+            var prefix = "document.";
+            if (arrayOfTabs[0].url.includes("nav_to.do?uri=%2Fsys.scripts.do")) prefix = "gsft_main.document.";
+            else if (arrayOfTabs[0].url.includes("now/nav/ui/classic/params/target/sys.scripts.do")) prefix =  "document.querySelector('[component-id]').shadowRoot.querySelector('#gsft_main').contentDocument.";
+            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": prefix + "querySelector('#runscript').value = String.raw`" + scriptObj.content + "`" });
+            if (scriptObj?.executeScript){
+                chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": prefix + `querySelector('input[name="runscript"]').click();` });
+            }
+        
         }
         else if (!scriptTabCreated){
             var createObj = {
@@ -337,6 +342,10 @@ function mirrorBgScript(scriptObj) {
             chrome.tabs.create(createObj,
                 function(tab) {
                     chrome.tabs.executeScript(tab.id, { "code": "document.getElementById('runscript').value = String.raw`" + scriptObj.content + "`" });
+                    if (scriptObj?.executeScript){
+                        chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": `document.querySelector('input[name="runscript"]').click();` });
+                    }
+                
                 }
             );
 
@@ -346,6 +355,11 @@ function mirrorBgScript(scriptObj) {
 
             scriptTabCreated = true;
         }
+
+        if (scriptObj?.executeScript){
+
+        }
+
     });
 
     // chrome.tabs.query({ //not in iframe

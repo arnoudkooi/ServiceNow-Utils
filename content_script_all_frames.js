@@ -31,6 +31,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             addScript('js/monaco/vs/loader.js', false);
         },200)
         setTimeout(function(){
+            addScript('js/monaco/libsource.js', false);
             addScript('js/monaco/monaco.js', false);
         },600)
     }

@@ -8,14 +8,19 @@
 
     <link rel="stylesheet" href="css/codeeditor.css">
     <script src="js/monaco/vs/loader.js"></script>
+    <script src="js/monaco/libsource.js"></script>
     <script src="js/monaco/codeeditor.js"></script>
 
 </head>
 
 <body>
-    <section id="compare-details">
-        <div class="titles" id="titles">
-            <span id="editor"></span>
+    <section id="header">
+        <div class="title" id="title">
+            Reloading doesn't work :(
+        </div>
+        <div id="state">
+            <button id="save">Save</button>
+            <span id="response"></span>
         </div>
     </section>
     <section id="container"></section>

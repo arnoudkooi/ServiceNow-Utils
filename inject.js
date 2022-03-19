@@ -1175,6 +1175,7 @@ function snuSettingsAdded() {
     if (typeof snusettings.applybgseditor == 'undefined') snusettings.applybgseditor = true;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
     if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;
+    if (typeof snusettings.codeeditor == 'undefined') snusettings.codeeditor = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
     if (typeof snusettings.allowsavefromotherscope == 'undefined') snusettings.allowsavefromotherscope = false;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
@@ -1188,11 +1189,16 @@ function snuSettingsAdded() {
     if (!snusettings.nopasteimage) {
         snuBindPaste(snusettings.nouielements == false);
     }
+
     if (snusettings.vsscriptsync == true) {
         snuAddFieldSyncButtons();
         snuAddStudioScriptSync();
         snuAddBGScriptButton();
     }
+    else if (snusettings.codeeditor == true) {
+        snuAddFieldSyncButtons();
+    }
+
     if (snusettings.slashoption != "off") {
         snuAddFilterListener();
         snuAddSlashCommandListener();
@@ -2862,14 +2868,16 @@ function snuPostRequestToScriptSync(requestType) {
 function snuPostToMonaco(field) {
     if (event) event.preventDefault();
     snuScriptEditor();
+    sncWait(400);
     var data = {};
     var instance = {};
     instance.name = window.location.host.split('.')[0];
     instance.url = window.location.origin;
     instance.g_ck = g_ck;
 
-    data.action = 'saveFieldAsFile';
+    data.action = 'openFieldInMonaco';
     data.instance = instance;
+    data.snusettings = snusettings;
 
     g_form.clearMessages();
     data.field = field;
@@ -2879,7 +2887,16 @@ function snuPostToMonaco(field) {
     data.fieldType = g_form.getGlideUIElement(field).type;
     data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
 
-    console.log(data);
+    let evt = new CustomEvent(
+        "snutils-event",
+        {
+            detail: {
+                event: "fillcodeeditor",
+                command: data
+            }
+        }
+    );
+    window.top.document.dispatchEvent(evt);
 
 }
 
@@ -2910,6 +2927,7 @@ function snuPostToScriptSync(field) {
         try {
             document.getElementById('runscript').style.display = "inline";
             document.getElementById('container').style.display = "none";
+            document.querySelector('form').target = '_blank';
 
         } catch(e){};
 
@@ -2981,15 +2999,21 @@ function snuAddFieldSyncButtons() {
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var fieldType = g_form.getGlideUIElement(elm).type || jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var txt = this.innerText.toLowerCase();
+
+                var btns = '';
+                if (snusettings.vsscriptsync == true) 
+                    btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
+                if (snusettings.codeeditor == true) 
+                    btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
+
                 if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType)) {
-                    jQuery(this).after(`<span style="color: #293E40; cursor:pointer" data-field="${elm}" class="icon scriptSync icon-save"></span>`);
-                    //<span style="color: #293E40; cursor:pointer" data-field="${elm}" class="icon scriptSync icon-code"></span>`);
+                    jQuery(this).after(btns);
                     return true;
                 }
                 for (var i = 0; i < fieldTypes.length; i++) {
                     if (fieldType.indexOf(fieldTypes[i]) > -1) {
-                        jQuery(this).after(' <span style="color: #293E40; cursor:pointer" data-field="' + elm + '" class="icon scriptSync icon-save"></span>');
-                        break;
+                        jQuery(this).after(btns);
+                    break;
                     }
                 }
             } catch (error) { }
