@@ -10,9 +10,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         if (hasLoaded) return;
         hasLoaded = true; //only reply to first incoming event.
 
+        var extensionUrl = chrome.runtime.getURL('/');
+        if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134
+            extensionUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
+        }
+
         require.config({
             paths: {
-                'vs': chrome.runtime.getURL('/') + 'js/monaco/vs'
+                'vs': extensionUrl + 'js/monaco/vs'
             }
         });
 

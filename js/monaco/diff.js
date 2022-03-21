@@ -4,6 +4,17 @@ let leftXml;
 let theme;
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     {
+        var extensionUrl = chrome.runtime.getURL('/');
+        if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue #134
+            extensionUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
+        }
+        
+        require.config({
+            paths: {
+                'vs': extensionUrl + 'js/monaco/vs'
+            }
+        });
+
         if (message.event == 'fillcodediff') {
             if (hasLoaded) return;
             hasLoaded = true; //only reply to first incoming event.
@@ -20,12 +31,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             // compensate for the details page space
             document.querySelector('#container').style.height = `calc(100% - ${detailsHeight}px)`;
-
-            require.config({
-                paths: {
-                    'vs': chrome.runtime.getURL('/') + 'js/monaco/vs'
-                }
-            });
 
             require(['vs/editor/editor.main'], () => {
                 editor = monaco.editor.createDiffEditor(document.getElementById('container'), {
@@ -84,12 +89,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                             let tabId = Number(a.hash.replace('#',''));
                             chrome.tabs.update(tabId, { active: true });
                         })
-                    });
-
-                    require.config({
-                        paths: {
-                            'vs': chrome.runtime.getURL('/') + 'js/monaco/vs'
-                        }
                     });
 
                     require(['vs/editor/editor.main'], () => {

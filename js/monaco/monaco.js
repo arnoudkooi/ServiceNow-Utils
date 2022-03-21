@@ -10,6 +10,18 @@ divInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
 var scrpt = document.getElementById('runscript');
 
 if (snusettings.applybgseditor && scrpt) {
+
+	var extensionUrl = snusettings.extensionUrl;
+	if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue #134
+		extensionUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
+	}
+	
+	require.config({
+		paths: {
+			'vs': extensionUrl + 'js/monaco/vs'
+		}
+	});
+
 	div.setAttribute("id", "container");
 	div.setAttribute("style", "height:400px; border:1pt solid #cccccc");
 
@@ -17,12 +29,7 @@ if (snusettings.applybgseditor && scrpt) {
 	scrpt.parentNode.insertBefore(divInfo, scrpt);
 	scrpt.parentNode.insertBefore(div, scrpt);
 	scrpt.style.display = "none";
-
-	require.config({
-		paths: {
-			'vs': snusettings.extensionUrl + 'js/monaco/vs'
-		}
-	});
+	
 	require(['vs/editor/editor.main'], () => {
 
 		monaco.languages.typescript.javascriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true });
