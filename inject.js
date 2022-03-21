@@ -1607,11 +1607,11 @@ function snuCaptureFormClick() {
             }
 
             if (event.target.className.includes('scriptSync icon-save')){
-                snuPostToScriptSync(event.target.dataset.field);
+                snuPostToScriptSync(event.target.dataset.field, event.target.dataset.fieldtype);
                 event.target.style.color = '#81B5A1';
             }
             if (event.target.className.includes('scriptSync icon-code')){
-                snuPostToMonaco(event.target.dataset.field);
+                snuPostToMonaco(event.target.dataset.field, event.target.dataset.fieldtype);
                 event.target.style.color = '#81B5A1';
             }
 
@@ -2865,7 +2865,7 @@ function snuPostRequestToScriptSync(requestType) {
     client.send(JSON.stringify(data));
 }
 
-function snuPostToMonaco(field) {
+function snuPostToMonaco(field, fieldType) {
     if (event) event.preventDefault();
     snuScriptEditor();
     sncWait(400);
@@ -2884,7 +2884,7 @@ function snuPostToMonaco(field) {
     data.table = g_form.getTableName();
     data.sys_id = g_form.getUniqueValue();
     data.content = g_form.getValue(field);
-    data.fieldType = g_form.getGlideUIElement(field).type;
+    data.fieldType = fieldType;
     data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
 
     let evt = new CustomEvent(
@@ -2900,7 +2900,7 @@ function snuPostToMonaco(field) {
 
 }
 
-function snuPostToScriptSync(field) {
+function snuPostToScriptSync(field, fieldType) {
     if (event) event.preventDefault();
     snuScriptSync();
     var data = {};
@@ -2918,7 +2918,7 @@ function snuPostToScriptSync(field) {
         data.table = g_form.getTableName();
         data.sys_id = g_form.getUniqueValue();
         data.content = g_form.getValue(field);
-        data.fieldType = g_form.getGlideUIElement(field).type;
+        data.fieldType = fieldType;
         data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
 
     }
@@ -3000,22 +3000,27 @@ function snuAddFieldSyncButtons() {
                 var fieldType = g_form.getGlideUIElement(elm).type || jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var txt = this.innerText.toLowerCase();
 
-                var btns = '';
-                if (snusettings.vsscriptsync == true) 
-                    btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
-                if (snusettings.codeeditor == true) 
-                    btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
-
                 if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType)) {
-                    jQuery(this).after(btns);
+                    jQuery(this).after(getBtns(elm,fieldType));
                     return true;
                 }
                 for (var i = 0; i < fieldTypes.length; i++) {
-                    if (fieldType.indexOf(fieldTypes[i]) > -1) {
-                        jQuery(this).after(btns);
-                    break;
+                    if (fieldType.includes(fieldTypes[i]) || elm.includes(fieldTypes[i])) {
+                        fieldType = fieldTypes[i];
+                        jQuery(this).after(getBtns(elm,fieldType));
+                        break;
                     }
                 }
+
+                function getBtns(elm,fieldType){
+                    var btns = '';
+                    if (snusettings.vsscriptsync == true) 
+                        btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
+                    if (snusettings.codeeditor == true) 
+                        btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
+                    return btns;
+                }
+
             } catch (error) { }
         });
     } else if (location.href.includes("sp_config/?id=widget_editor") ||
