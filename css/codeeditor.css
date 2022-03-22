@@ -16,6 +16,7 @@ html {
 	margin: 0;
 	height: calc(100vh - 2em);
 	font-size: var(--base-font-size);
+	font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
 }
 
 #snUtilsMonocoEditor {
