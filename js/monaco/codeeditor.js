@@ -80,7 +80,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 function getMessage(data, tab) {
     return ` 
-        <h3><img class='favicon' src='${tab.favIconUrl}' alt='favicon' />${data.name} <a href='#${tab.id}' class='callingtab'>goto tab</a></h3>
+        <h3><img class='favicon' src='${tab.favIconUrl}' alt='favicon' />${data.name} <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a></h3>
         <label>Instance: </label><span>${data.instance.name}</span><br />
         <label>Record: </label><span>${data.table} - ${data.sys_id}</span><br />
         <label>Field: </label><span>${data.field}</span>`;
