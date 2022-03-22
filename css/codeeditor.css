@@ -1,19 +1,49 @@
+:root {
+	--base-font-size: 16px;
+	--button-font-size: 14px;
+	--header-text-color: #fff;
+	--header-bg-color: #222;
+	--header-border-bottom-color: #353535;
+	--button-bg-color: #51cf66;
+	--button-bg-color-hover: #37b24d;
+	--transition-prop: all 100ms ease-in;
+	--padding: 1rem;
+}
+
 body,
 html {
 	padding: 0;
 	margin: 0;
 	height: calc(100vh - 2em);
-	font-size:12pt;
+	font-size: var(--base-font-size);
 }
 
-#header {
-	width: 100%;
-	padding: 5px;
+#snUtilsMonocoEditor {
+	display: flex;
+	flex-flow: column nowrap;
+	height: 100vh;
+}
+
+#snUtilsMonocoEditor>#header {
+	align-items: center;
+	background: var(--header-bg-color);
+	border-bottom: 1px solid var(--header-border-bottom-color);
+	box-shadow: var(--header-box-shadow);
+	color: var(--header-text-color);
 	display: flex;
 	flex-direction: row;
+	padding: 5px;
+}
+#snUtilsMonocoEditor.monoco-bottom > #header {
+	border-bottom:0;
+	border-top: 1px solid var(--header-border-bottom-color);
+	order:2;
+}
+#snUtilsMonocoEditor.monoco-bottom>#container {
+	order: 1;
 }
 
-#container {
+#snUtilsMonocoEditor>#container {
 	height: 100%;
 	width: 100%;
 	box-sizing: border-box;
@@ -23,11 +53,12 @@ html {
 label {
 	padding-right: 0.3em;
 	min-width: 70px;
-    display: inline-block;
+	display: inline-block;
+	font-weight: 600;
 }
 
-h3{
-	font-size: 12pt;
+h3 {
+	font-size: 16px;
 	margin-block: 3px;
 }
 
@@ -36,13 +67,25 @@ h3{
 }
 
 #header #title {
-	padding: 20px;
-	width:50%;
+	padding: var(--padding);
+	width: 50%;
+
+}
+#header #title h3{
+
+}
+#header #title h3 a:link {
+	color: #ced4da;
+	transition: var(--transition-prop);
+}
+#header #title h3 a:hover {
+	color: #ced4da;
+	opacity: 0.5;
 }
 
 #header #state {
-	padding: 20px;
-	width:50%;
+	padding: var(--padding);
+	width: 50%;
 }
 
 
@@ -66,27 +109,31 @@ section.vs-light {
 	box-shadow: inset 0 -6px 5px -5px #dddddd;
 }
 
-img.favicon{
-	width:16px;
+img.favicon {
+	width: 16px;
 	height: 16px;
 	margin-right: 5px;
 }
 
 button {
-	background-color: #4CAF50; /* Green */
+	background-color: var(--button-bg-color);
 	border: none;
-	display:block !important;
-	border-radius: 4px;;
+	border-radius: 4px;
 	color: white;
-	padding: 12px 20px;
-	margin-bottom: 10px;
+	padding: 12px var(--padding);
 	text-align: center;
 	text-decoration: none;
 	display: inline-block;
-	font-size: 15px;
+	font-size: var(--button-font-size, var(--base-font-size));
 	cursor: pointer;
-  }
+	margin-left: auto;
+	display: block;
+	transition: var(--transition-prop);
+}
+button:hover {
+	background-color: var(--button-bg-color-hover);
+}
 
-  #response{
-	  font-size: 10pt;
-  }
+#response {
+	font-size: 10pt;
+}
