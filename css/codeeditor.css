@@ -1,5 +1,5 @@
 :root {
-	--base-font-size: 16px;
+	--base-font-size: 14px;
 	--button-font-size: 14px;
 	--header-text-color: #fff;
 	--header-bg-color: #222;
@@ -34,11 +34,13 @@ html {
 	flex-direction: row;
 	padding: 5px;
 }
-#snUtilsMonocoEditor.monoco-bottom > #header {
-	border-bottom:0;
+
+#snUtilsMonocoEditor.monoco-bottom>#header {
+	border-bottom: 0;
 	border-top: 1px solid var(--header-border-bottom-color);
-	order:2;
+	order: 2;
 }
+
 #snUtilsMonocoEditor.monoco-bottom>#container {
 	order: 1;
 }
@@ -71,19 +73,23 @@ h3 {
 	width: 50%;
 
 }
-#header #title h3{
 
-}
+#header #title h3 {}
+
 #header #title h3 a:link {
-	color: #ced4da;
+	color: var(--button-bg-color);
 	transition: var(--transition-prop);
 }
+
 #header #title h3 a:hover {
-	color: #ced4da;
+	color: var(--button-bg-color-hover);
 	opacity: 0.5;
 }
 
 #header #state {
+	align-items: center;
+	display: flex;
+	flex-flow: row;
 	padding: var(--padding);
 	width: 50%;
 }
@@ -126,14 +132,17 @@ button {
 	display: inline-block;
 	font-size: var(--button-font-size, var(--base-font-size));
 	cursor: pointer;
-	margin-left: auto;
+
 	display: block;
 	transition: var(--transition-prop);
 }
+
 button:hover {
 	background-color: var(--button-bg-color-hover);
 }
 
 #response {
-	font-size: 10pt;
+	margin-left: auto;
+	font-size: var(--base-font-size);
+	margin-right: 1rem;
 }
