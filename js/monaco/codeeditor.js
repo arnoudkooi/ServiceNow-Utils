@@ -53,6 +53,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     updateRecord();
                 },
             });
+            
+            editor.focus();
         });
 
         document.querySelector('#header').classList.add(theme);
