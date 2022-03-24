@@ -84,7 +84,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 function generateHeader(data, tab){
     getFavIcon(tab.favIconUrl);
     return `
-    <h3><img class='favicon' src='${tab.favIconUrl}' alt='favicon' />${data.name} <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a></h3>
+    <h3><span class='favicon-wrap'></span>${data.name} <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a></h3>
     `;
 
 }
@@ -117,8 +117,13 @@ const getFavIcon = function(url){
     fetch(r)
         .then(response => response.blob())
         .then(function (blob) {
+            var img = document.createElement("img")
             var srcUrl = URL.createObjectURL(blob);
-            document.querySelector('.favicon').src = srcUrl;
+            //document.querySelector('.favicon').src = srcUrl;
+            img.src = srcUrl;
+            img.alt = "Favicon";
+            img.className = 'favicon';
+            document.querySelector('.favicon-wrap').appendChild(img);
         });
 }
 
