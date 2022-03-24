@@ -36,6 +36,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             else if (message.command.fieldType.includes('html')) lang = 'html';
 
             editor = monaco.editor.create(document.getElementById('container'), {
+                automaticLayout: true,
                 value: message.command.content,
                 language: lang,
                 theme: theme
@@ -52,10 +53,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     updateRecord();
                 },
             });
+            
+            editor.focus();
         });
 
         document.querySelector('#header').classList.add(theme);
-        document.querySelector('#title').innerHTML = getMessage(message.command, sender.tab);
+        document.querySelector('.record-meta').innerHTML = getMessage(message.command, sender.tab);
+        document.querySelector('#title').innerHTML = generateHeader(message.command, sender.tab);
+        
         let a = document.querySelector('a.callingtab');
         a.addEventListener('click', e => {
             e.preventDefault();
@@ -71,18 +76,24 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         document.title = data.instance.name + ' ' + data.table + ' ' + data.name;
         changeFavicon(sender.tab.favIconUrl);
-        // console.log(message);
-        // console.log(sender);
 
     }
 });
 
+
+function generateHeader(data, tab){
+    getFavIcon(tab.favIconUrl);
+    return `
+    <h3><span class='favicon-wrap'></span>${data.name} <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a></h3>
+    `;
+
+}
+
 function getMessage(data, tab) {
     return ` 
-        <h3><img class='favicon' src='${tab.favIconUrl}' alt='favicon' />${data.name} <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a></h3>
-        <label>Instance: </label><span>${data.instance.name}</span><br />
-        <label>Record: </label><span>${data.table} - ${data.sys_id}</span><br />
-        <label>Field: </label><span>${data.field}</span>`;
+        <label class="record-meta--label">Instance: </label><span class="record-meta--detail"><a href='${data.instance.url}' title='Open Instance' target='_blank'>${data.instance.name}</a></span>
+        <label class="record-meta--label">Record: </label><span class="record-meta--detail">${data.table} - ${data.sys_id}</span>
+        <label class="record-meta--label">Field: </label><span class="record-meta--detail">${data.field}</span>`;
 }
 
 
@@ -99,6 +110,21 @@ const changeFavicon = link => {
         $favicon.href = link
         document.head.appendChild($favicon)
     }
+}
+
+const getFavIcon = function(url){
+    let r = new Request(url);
+    fetch(r)
+        .then(response => response.blob())
+        .then(function (blob) {
+            var img = document.createElement("img")
+            var srcUrl = URL.createObjectURL(blob);
+            //document.querySelector('.favicon').src = srcUrl;
+            img.src = srcUrl;
+            img.alt = "Favicon";
+            img.className = 'favicon';
+            document.querySelector('.favicon-wrap').appendChild(img);
+        });
 }
 
 function updateRecord() {

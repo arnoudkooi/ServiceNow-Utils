@@ -1,22 +1,33 @@
 :root {
-	--base-font-size: 16px;
+	--base-font-size: 14px;
 	--button-font-size: 14px;
 	--header-text-color: #fff;
-	--header-bg-color: #222;
-	--header-border-bottom-color: #353535;
+	--header-bg-color: var(--sn-brand-blue);
+	--header-border-bottom-color: var(--sn-brand-blue);
 	--button-bg-color: #51cf66;
 	--button-bg-color-hover: #37b24d;
 	--transition-prop: all 100ms ease-in;
 	--padding: 1rem;
+	--sn-brand-blue: #032d42;
 }
 
 body,
 html {
 	padding: 0;
 	margin: 0;
-	height: calc(100vh - 2em);
+	height: calc(100vh - 3rem);
 	font-size: var(--base-font-size);
 	font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
+}
+
+a:link, a:visited {
+	color:var(--button-bg-color);
+}
+a:hover {
+	color:var(--button-bg-color-hover);
+}
+a:active {
+	color:#fff;
 }
 
 #snUtilsMonocoEditor {
@@ -33,30 +44,30 @@ html {
 	color: var(--header-text-color);
 	display: flex;
 	flex-direction: row;
-	padding: 5px;
-}
-#snUtilsMonocoEditor.monoco-bottom > #header {
-	border-bottom:0;
-	border-top: 1px solid var(--header-border-bottom-color);
-	order:2;
-}
-#snUtilsMonocoEditor.monoco-bottom>#container {
-	order: 1;
 }
 
 #snUtilsMonocoEditor>#container {
-	height: 100%;
+	height: calc((100vh - 5.1rem));
 	width: 100%;
 	box-sizing: border-box;
 }
 
-
-label {
-	padding-right: 0.3em;
-	min-width: 70px;
-	display: inline-block;
-	font-weight: 600;
+#snUtilsMonocoEditor>footer {
+	display: flex;
+	padding:.5rem 1rem;
+	background-color: var(--sn-brand-blue);
+	color: #fff;
 }
+.record-meta label.record-meta--label {
+	font-weight: 600;
+	display: inline-block;
+	padding-right:0.5rem;
+}
+.record-meta span.record-meta--detail {
+	display: inline-block;
+	margin-right:1rem;
+}
+
 
 h3 {
 	font-size: 16px;
@@ -68,24 +79,27 @@ h3 {
 }
 
 #header #title {
-	padding: var(--padding);
+	margin-left:.5rem;
 	width: 50%;
 
 }
-#header #title h3{
 
-}
+#header #title h3 {}
+
 #header #title h3 a:link {
-	color: #ced4da;
+	color: var(--button-bg-color);
 	transition: var(--transition-prop);
 }
+
 #header #title h3 a:hover {
-	color: #ced4da;
+	color: var(--button-bg-color-hover);
 	opacity: 0.5;
 }
 
 #header #state {
-	padding: var(--padding);
+	align-items: center;
+	display: flex;
+	flex-flow: row;
 	width: 50%;
 }
 
@@ -119,7 +133,6 @@ img.favicon {
 button {
 	background-color: var(--button-bg-color);
 	border: none;
-	border-radius: 4px;
 	color: white;
 	padding: 12px var(--padding);
 	text-align: center;
@@ -131,10 +144,13 @@ button {
 	display: block;
 	transition: var(--transition-prop);
 }
+
 button:hover {
 	background-color: var(--button-bg-color-hover);
 }
 
 #response {
-	font-size: 10pt;
+	margin-left: auto;
+	font-size: var(--base-font-size);
+	margin-right: 1rem;
 }
