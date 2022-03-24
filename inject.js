@@ -2866,7 +2866,7 @@ function snuPostRequestToScriptSync(requestType) {
 }
 
 function snuPostToMonaco(field, fieldType) {
-    if (event) event.preventDefault();
+    if (event && typeof event.preventDefault !== 'undefined') event?.preventDefault();
     snuScriptEditor();
     sncWait(400);
     var data = {};
@@ -2901,7 +2901,7 @@ function snuPostToMonaco(field, fieldType) {
 }
 
 function snuPostToScriptSync(field, fieldType) {
-    if (event) event.preventDefault();
+    if (event && typeof event.preventDefault !== 'undefined') event?.preventDefault();
     snuScriptSync();
     var data = {};
     var instance = {};
@@ -3005,7 +3005,7 @@ function snuAddFieldSyncButtons() {
                     return true;
                 }
                 for (var i = 0; i < fieldTypes.length; i++) {
-                    if (fieldType.includes(fieldTypes[i]) || elm.includes(fieldTypes[i])) {
+                    if (fieldType.includes(fieldTypes[i]) || elm.startsWith(fieldTypes[i])) {
                         fieldType = fieldTypes[i];
                         jQuery(this).after(getBtns(elm,fieldType));
                         break;

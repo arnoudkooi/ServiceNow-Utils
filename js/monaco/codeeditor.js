@@ -11,9 +11,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         hasLoaded = true; //only reply to first incoming event.
 
         var monacoUrl = chrome.runtime.getURL('/') + 'js/monaco/vs';
-        if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134
-            monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
-        }
+        // if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134
+        //     monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
+        // }
 
         require.config({
             paths: {
@@ -69,9 +69,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             updateRecord();
         });
 
-        document.title = data.instance.name + ' ' + data.table + ' ' + data.instance.name;
+        document.title = data.instance.name + ' ' + data.table + ' ' + data.name;
         changeFavicon(sender.tab.favIconUrl);
-
         // console.log(message);
         // console.log(sender);
 
