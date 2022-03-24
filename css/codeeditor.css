@@ -15,7 +15,7 @@ body,
 html {
 	padding: 0;
 	margin: 0;
-	height: calc(100vh - 2em);
+	height: calc(100vh - 3rem);
 	font-size: var(--base-font-size);
 	font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
 }
@@ -46,18 +46,8 @@ a:active {
 	flex-direction: row;
 }
 
-#snUtilsMonocoEditor.monoco-bottom>#header {
-	border-bottom: 0;
-	border-top: 1px solid var(--header-border-bottom-color);
-	order: 2;
-}
-
-#snUtilsMonocoEditor.monoco-bottom>#container {
-	order: 1;
-}
-
 #snUtilsMonocoEditor>#container {
-	height: 100%;
+	height: calc((100vh - 5.1rem));
 	width: 100%;
 	box-sizing: border-box;
 }

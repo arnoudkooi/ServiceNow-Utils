@@ -36,6 +36,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             else if (message.command.fieldType.includes('html')) lang = 'html';
 
             editor = monaco.editor.create(document.getElementById('container'), {
+                automaticLayout: true,
                 value: message.command.content,
                 language: lang,
                 theme: theme
@@ -79,7 +80,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 
 function generateHeader(data, tab){
-    getFavicon(tab.favIconUrl);
+    getFavIcon(tab.favIconUrl);
     return `
     <h3><img class='favicon' src='${tab.favIconUrl}' alt='favicon' />${data.name} <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a></h3>
     `;
@@ -109,14 +110,14 @@ const changeFavicon = link => {
     }
 }
 
-function getFavicon(url) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.responseType = 'blob';
-    xhr.onload = function (e) {
-        document.querySelector('.favicon').src = window.URL.createObjectURL(this.response);
-    };
-    xhr.send();
+const getFavIcon = function(url){
+    let r = new Request(url);
+    fetch(r)
+        .then(response => response.blob())
+        .then(function (blob) {
+            var srcUrl = URL.createObjectURL(blob);
+            document.querySelector('.favicon').src = srcUrl;
+        });
 }
 
 function updateRecord() {
