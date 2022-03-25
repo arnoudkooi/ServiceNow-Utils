@@ -3711,20 +3711,28 @@ function snuGetLastScopes(query) {
 }
 
 function snuSetScope(scopeId) {
-    var payload = { "app_id": scopeId }
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
+    var payload = { "app_id": scopeId };
+    fetch("/api/now/ui/concoursepicker/application", {
+        method: 'PUT', // or 'PUT'
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept' : 'application/json, text/plain, */*',
+          'Content-Type' : 'application/json;charset=UTF-8',
+          'X-UserToken' : g_ck
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data?.error)
+            snuSetInfoText('Error switching app:' + data.error.detail, false);
+          else 
             location.reload();
-        }
-    };
-    xhttp.open("PUT", "/api/now/ui/concoursepicker/application", true);
-    xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
-    xhttp.setRequestHeader("Cache-Control", "no-cache");
-    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    if (g_ck) xhttp.setRequestHeader('X-UserToken', g_ck);
-    xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
-    xhttp.send(JSON.stringify(payload));
+
+      })
+      .catch((error) => {
+          snuSetInfoText('Error switching app:', error, false);
+      });
 }
 
 function snuGetRandomRecord(table, query, fullRecord, callback) {
