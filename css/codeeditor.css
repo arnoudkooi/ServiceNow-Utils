@@ -84,8 +84,6 @@ h3 {
 
 }
 
-#header #title h3 {}
-
 #header #title h3 a:link {
 	color: var(--button-bg-color);
 	transition: var(--transition-prop);

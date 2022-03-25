@@ -6,9 +6,10 @@ let theme;
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.event == 'fillcodeeditor') {
 
-        data = message.command;
         if (hasLoaded) return;
         hasLoaded = true; //only reply to first incoming event.
+        
+        data = message.command;
 
         var monacoUrl = chrome.runtime.getURL('/') + 'js/monaco/vs';
         // if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134
@@ -58,8 +59,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         });
 
         document.querySelector('#header').classList.add(theme);
-        document.querySelector('.record-meta').innerHTML = getMessage(message.command, sender.tab);
         document.querySelector('#title').innerHTML = generateHeader(message.command, sender.tab);
+        document.querySelector('.record-meta').innerHTML = generateFooter(message.command, sender.tab);
         
         let a = document.querySelector('a.callingtab');
         a.addEventListener('click', e => {
@@ -82,14 +83,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 
 function generateHeader(data, tab){
-    getFavIcon(tab.favIconUrl);
     return `
-    <h3><span class='favicon-wrap'></span>${data.name} <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a></h3>
-    `;
-
+    <h3>
+        <img id='favicon-img' class='favicon' src='${tab.favIconUrl}' onerror='/images/icon16.png' alt='instance favicon'>
+        ${data.name} 
+        <a href='#${tab.id}' class='callingtab'>goto tab &#8599;</a>
+    </h3>`;
 }
 
-function getMessage(data, tab) {
+function generateFooter(data, tab) {
     return ` 
         <label class="record-meta--label">Instance: </label><span class="record-meta--detail"><a href='${data.instance.url}' title='Open Instance' target='_blank'>${data.instance.name}</a></span>
         <label class="record-meta--label">Record: </label><span class="record-meta--detail">${data.table} - ${data.sys_id}</span>
@@ -112,20 +114,6 @@ const changeFavicon = link => {
     }
 }
 
-const getFavIcon = function(url){
-    let r = new Request(url);
-    fetch(r)
-        .then(response => response.blob())
-        .then(function (blob) {
-            var img = document.createElement("img")
-            var srcUrl = URL.createObjectURL(blob);
-            //document.querySelector('.favicon').src = srcUrl;
-            img.src = srcUrl;
-            img.alt = "Favicon";
-            img.className = 'favicon';
-            document.querySelector('.favicon-wrap').appendChild(img);
-        });
-}
 
 function updateRecord() {
     var client = new XMLHttpRequest();
