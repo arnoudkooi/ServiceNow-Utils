@@ -642,6 +642,13 @@ function snuAddSlashCommandListener() {
             switchText = '<br />Encodedquery detected<br /><br />'
         }
         targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
+        if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
+            var queryArr = query.split(" ");
+            for (var i = 0; i <= queryArr.length; i++) {
+                var re = new RegExp("\\$" + (i + 1), "g");
+                targeturl = targeturl.replace(re, queryArr[i] || "");
+            }
+        }
         if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly)) snuGetDirectLinks(targeturl, shortcut);
 
         else if (e.key == 'Enter') {
@@ -939,13 +946,6 @@ function snuAddSlashCommandListener() {
 
             var inIFrame = !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
             if (e.target.className == "snutils") inIFrame = false;
-            if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
-                var queryArr = query.split(" ");
-                for (var i = 0; i <= queryArr.length; i++) {
-                    var re = new RegExp("\\$" + (i + 1), "g");
-                    targeturl = targeturl.replace(re, queryArr[i] || "");
-                }
-            }
             if (targeturl.startsWith("$random")) {
                 targeturl = targeturl.substring(8)
                 snuGetRandomRecord(targeturl, "", false, res => {
@@ -2885,6 +2885,7 @@ function snuPostToMonaco(field, fieldType) {
     data.sys_id = g_form.getUniqueValue();
     data.content = g_form.getValue(field);
     data.fieldType = fieldType;
+    data.scope = g_form.getValue('sys_scope') || 'global';
     data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
 
     let evt = new CustomEvent(

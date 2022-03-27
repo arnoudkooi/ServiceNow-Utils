@@ -12,9 +12,9 @@ var scrpt = document.getElementById('runscript');
 if (snusettings.applybgseditor && scrpt) {
 
 	var monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
-	if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134
-		monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
-	}
+	// if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134, didnt work :(
+	// 	monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
+	// }
 
 	require.config({
 		paths: {
@@ -33,7 +33,8 @@ if (snusettings.applybgseditor && scrpt) {
 	require(['vs/editor/editor.main'], () => {
 
 		monaco.languages.typescript.javascriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true });
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource);
+		monaco.languages.typescript.javascriptDefaults.addExtraLib(serverglobal);
+		monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
 
         var theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
 

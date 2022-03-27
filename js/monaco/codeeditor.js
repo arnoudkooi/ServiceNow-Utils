@@ -1,6 +1,7 @@
 let hasLoaded = false;
 let data;
 let editor;
+let versionid;
 let theme;
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -8,7 +9,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         if (hasLoaded) return;
         hasLoaded = true; //only reply to first incoming event.
-        
+
         data = message.command;
 
         var monacoUrl = chrome.runtime.getURL('/') + 'js/monaco/vs';
@@ -28,7 +29,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 noLib: true,
                 allowNonTsExtensions: true
             });
-            monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource);
+
+            if (data.table.includes('client') || data.field.includes('client')){ //best shot to determine if it is a client script
+                monaco.languages.typescript.javascriptDefaults.addExtraLib(client);
+            }
+            else { //it is server
+                if (data.scope == 'global')
+                    monaco.languages.typescript.javascriptDefaults.addExtraLib(serverglobal);
+                else 
+                    monaco.languages.typescript.javascriptDefaults.addExtraLib(serverscoped);
+                monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
+            }
+
+            //monaco.languages.typescript.typescriptDefaults.setExtraLibs(libs.serverglobal); //doesnt work...
 
             var lang = '';
             if (message.command.fieldType.includes('script')) lang = 'javascript';
@@ -54,14 +67,26 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     updateRecord();
                 },
             });
-            
+
+            editor.addAction({
+                id: "google",
+                label: "Search Google",
+                contextMenuGroupId: "2_execution",
+                precondition : "editorHasSelection",
+                run: (editor) => {
+                    let selection = editor.getModel().getValueInRange(editor.getSelection());
+                    window.open('https://www.google.com/search?q=' + selection);
+                }
+              })
+
             editor.focus();
+            versionid = editor.getModel().getAlternativeVersionId();
         });
 
         document.querySelector('#header').classList.add(theme);
         document.querySelector('#title').innerHTML = generateHeader(message.command, sender.tab);
         document.querySelector('.record-meta').innerHTML = generateFooter(message.command, sender.tab);
-        
+
         let a = document.querySelector('a.callingtab');
         a.addEventListener('click', e => {
             e.preventDefault();
@@ -82,7 +107,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 
-function generateHeader(data, tab){
+function generateHeader(data, tab) {
     return `
     <h3>
         <img id='favicon-img' class='favicon' src='${tab.favIconUrl}' onerror='/images/icon16.png' alt='instance favicon'>
@@ -116,6 +141,18 @@ const changeFavicon = link => {
 
 
 function updateRecord() {
+
+    //check for errors, exclude service portal client script first line
+    var errorCount = monaco.editor.getModelMarkers().filter(function (marker) {
+        return marker.severity > 3 && !(marker.startLineNumber == 1 && marker.code == '1003');
+    }).length;
+
+    if (errorCount){
+        if (!confirm('Your code has errors!\nContinue with save action?')) return;
+    }
+
+
+
     var client = new XMLHttpRequest();
     client.open("put", data.instance.url + '/api/now/table/' +
         data.table + '/' + data.sys_id +
@@ -132,15 +169,22 @@ function updateRecord() {
             var resp = JSON.parse(this.response);
             if (resp.hasOwnProperty('result')) {
                 document.querySelector('#response').innerHTML = 'Saved: ' + new Date().toLocaleTimeString();
-
+                versionid = editor.getModel().getAlternativeVersionId();
             } else {
                 var resp = JSON.parse(this.response);
                 if (resp.hasOwnProperty('error')) {
-                    document.querySelector('#response').innerHTML = 'Error: ' + new Date().toLocaleTimeString() + '<br />' + 
-                    JSON.stringify(resp.error);
+                    document.querySelector('#response').innerHTML = 'Error: ' + new Date().toLocaleTimeString() + '<br />' +
+                        JSON.stringify(resp.error);
                 }
             }
         }
     };
     client.send(JSON.stringify(postData));
 }
+
+
+window.onbeforeunload = function (e) {
+    if(versionid == editor.getModel().getAlternativeVersionId()) return null
+    e = e || window.event;
+    return 'Closing tab will loose unsaved work, continue?';
+};

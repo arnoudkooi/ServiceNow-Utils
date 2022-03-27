@@ -6,6 +6,8 @@
 	--header-border-bottom-color: var(--sn-brand-blue);
 	--button-bg-color: #51cf66;
 	--button-bg-color-hover: #37b24d;
+	--button-info-bg-color: #5274FF;
+	--button-info-bg-color-hover: #3970b3;
 	--transition-prop: all 100ms ease-in;
 	--padding: 1rem;
 	--sn-brand-blue: #032d42;
@@ -80,7 +82,7 @@ h3 {
 
 #header #title {
 	margin-left:.5rem;
-	width: 50%;
+	width: 100%;
 
 }
 
@@ -98,9 +100,8 @@ h3 {
 	align-items: center;
 	display: flex;
 	flex-flow: row;
-	width: 50%;
+	width: 100%;
 }
-
 
 #header #title span {
 	padding: 4px 3px 8px 3px;
@@ -126,6 +127,24 @@ img.favicon {
 	width: 16px;
 	height: 16px;
 	margin-right: 5px;
+}
+
+.btns{
+	display: flex;
+}
+
+.btns button div{
+	font-size: 7pt;
+
+}
+
+.btns button{
+	background-color: var(--button-info-bg-color);
+	padding: 5px var(--padding);
+	border: 1px var(--sn-brand-blue);
+}
+.btns button:hover {
+	background-color: var(--button-info-bg-color-hover);
 }
 
 button {
