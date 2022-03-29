@@ -765,7 +765,7 @@ function openMessage(e, f) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
     var srch = e.selectionText;
     var createObj = {
-        'url': tokens.join('/') + "/sys_ui_message_list.do?sysparm_query=key=" + srch
+        'url': tokens.join('/') + "/sys_ui_message_list.do?sysparm_query=keyLIKE" + srch
     }
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
