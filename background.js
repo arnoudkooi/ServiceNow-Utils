@@ -127,6 +127,13 @@ var menuItems = [{
     "onclick": openPropertie
 },
 {
+    "id": "message",
+    "parentId": "goto",
+    "title": "Message: %s",
+    contexts: ["selection"],
+    "onclick": openMessage
+},
+{
     "id": "tools",
     "contexts": ["all"],
     "title": "Tools"
@@ -743,6 +750,22 @@ function openPropertie(e, f) {
     var srch = e.selectionText;
     var createObj = {
         'url': tokens.join('/') + "/sys_properties_list.do?sysparm_query=name=" + srch
+    }
+    if (f.hasOwnProperty('cookieStoreId')) {
+        createObj.cookieStoreId = f.cookieStoreId;
+    }
+    if (srch.length < 50) {
+        chrome.tabs.create(createObj);
+    }
+
+}
+
+function openMessage(e, f) {
+
+    var tokens = e.pageUrl.split('/').slice(0, 3);
+    var srch = e.selectionText;
+    var createObj = {
+        'url': tokens.join('/') + "/sys_ui_message_list.do?sysparm_query=key=" + srch
     }
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
