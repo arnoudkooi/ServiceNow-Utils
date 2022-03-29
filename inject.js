@@ -3714,11 +3714,11 @@ function snuGetLastScopes(query) {
 function snuSetScope(scopeId) {
     var payload = { "app_id": scopeId };
     fetch("/api/now/ui/concoursepicker/application", {
-        method: 'PUT', // or 'PUT'
+        method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           'Accept' : 'application/json, text/plain, */*',
           'Content-Type' : 'application/json;charset=UTF-8',
+          'X-WantSessionNotificationMessages': false,
           'X-UserToken' : g_ck
         },
         body: JSON.stringify(payload),
