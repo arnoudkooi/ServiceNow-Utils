@@ -6,7 +6,7 @@ class SnuNextManager {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
             if (eventPath[0].tagName == "svg") return;
             if (['textarea', 'input', 'select'].includes(eventPath[0]?.localName)) return; //not in form elements
-            if (eventPath[0].eventPath[0]?.className?.includes('snunodblclk') || eventPath[1]?.className?.includes('snunodblclk')) return; //not in list header with classname
+            if (eventPath[0]?.className?.includes('snunodblclk') || eventPath[1]?.className?.includes('snunodblclk')) return; //not in list header with classname
             if (!eventPath[0]?.className?.includes('snuelm'))
                 if (!this._snuShowUpdateFieldNext(eventPath))
                     this.addTechnicalNames();

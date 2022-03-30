@@ -58,10 +58,12 @@ function addScript(filePath, processSettings) {
             getFromSyncStorageGlobal("snusettings", function (settings) {
                 if (!settings) settings = {};
                 settings.extensionUrl = chrome.runtime.getURL('/');
-                var script = document.createElement('script');
-                script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
-                (document.head || document.documentElement).appendChild(script);
-                //script.remove();
+                var event = new CustomEvent('snuEvent', {
+                    detail : { "type" : "code", 
+                               "content" : 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()'
+                             }
+                });
+                document.dispatchEvent(event);
             });
         }
     };

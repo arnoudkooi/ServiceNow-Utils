@@ -1,4 +1,3 @@
-var bgPage;
 var tabid;
 var g_ck;
 var url;
@@ -13,6 +12,7 @@ var dtTables;
 var dtDataExplore;
 var dtSlashcommands;
 var objCustomCommands = {};
+var ipArr = [];
 
 var objSettings;
 var tablesloaded = false;
@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function () {
         tabid = tabs[0].id;
         var cookieStoreId = tabs[0].cookieStoreId || '';
         urlFull = tabs[0].url;
-        bgPage = chrome.extension.getBackgroundPage();
-        bgPage.getBrowserVariables(tabid, cookieStoreId);
+        getBrowserVariables(tabid,cookieStoreId);
+
     });
     document.querySelector('#firefoxoptions').href = chrome.runtime.getURL("options.html");
 
@@ -44,6 +44,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+//Retrieve variables from browser tab, passing them back to popup
+function getBrowserVariables(tid, cStoreId, callback) {
+    tabid = tid;
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "g_ck,g_user_date_time_format,NOW.user.roles,NOW.user.name,NOW.user_name"
+    }, function (response) {
+        if (response == null || typeof response !== 'object') return;
+        g_ck = response.myVars.g_ck || '';
+        url = response.url;
+        instance = (new URL(url)).host.replace(".service-now.com", "");
+        nme = response.myVars.NOWusername || response.myVars.NOWuser_name;
+        setBrowserVariables(response);
+        //callback(response);
+    });
+}
+
+//Try to retrieve current table and syid from browser tab, passing them back to popup
+function getRecordVariables() {
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "NOW.targetTable,NOW.sysId,mySysId,document.cookie"
+    }, function (response) {
+        setRecordVariables(response);
+    });
+}
 
 //Set variables, called by BG page after calling getRecordVariables
 function setRecordVariables(obj) {
@@ -75,25 +101,6 @@ function setRecordVariables(obj) {
 }
 
 
-//Place the key value pair in the chrome local storage, with metafield for date added.
-function setToChromeStorage(theName, theValue) {
-    var myobj = {};
-    myobj[instance + "-" + theName] = theValue;
-    myobj[instance + "-" + theName + "-date"] = new Date().toDateString();
-    chrome.storage.local.set(myobj, function () {
-
-    });
-}
-
-//Place the key value pair in the chrome sync storage.
-function setToChromeSyncStorage(theName, theValue) {
-    var myobj = {};
-    myobj[instance + "-" + theName] = theValue;
-    chrome.storage.sync.set(myobj, function () {
-
-    });
-}
-
 //Try to get saved form state and set it
 function setFormFromSyncStorage(callback) {
     var query = instance + "-formvalues";
@@ -107,7 +114,7 @@ function setFormFromSyncStorage(callback) {
 
 //Try to get json with servicenow tables, first from chrome storage, else via REST api
 function prepareJsonTable() {
-    var dataset = $('#slctdataset').val();
+    var dataset = document.querySelector('#slctdataset').value;
     var query = [instance + "-tables-" + dataset, instance + "-tables-" + dataset + "-date"];
     chrome.storage.local.get(query, function (result) {
         try {
@@ -115,14 +122,103 @@ function prepareJsonTable() {
             if (thedate == result[query[1]].toString()) {
                 setDataTableTables(result[query[0]]);
             }
-            else
-                bgPage.getTables(dataset);
+            else{
+                getTables(dataset);
+            }
+                
         }
         catch (err) {
-            bgPage.getTables(dataset);
+            getTables(dataset);
         }
     });
 }
+
+//Query ServiceNow for nodes
+function getNodes() {
+    var myurl = url + '/api/now/table/sys_cluster_state?sysparm_query=ORDERBYsystem_id&sysparm_fields=system_id,node_id,status&sysparm_display_value=false';
+    snuFetch(g_ck, myurl, null, function (jsn) {
+        setNodes(jsn.result);
+    });
+}
+
+function setActiveNode(node) {
+
+    if (ipArr.length) //subsequent time when popup is open. Becose of cookie changes, avoid server call to stats.do
+        setActiveNodeInner(node)
+    else { //first time when popup is open
+        fetch(url + '/stats.do')
+        .then(response => response.text())
+        .then(statsDo => { 
+            statsDo = statsDo.replaceAll('<br />', '<br/>');
+            ipArr = statsDo
+                .match(/IP address: ([\s\S]*?)\<br\/>/g)[0]
+                .replace('IP address: ', '')
+                .replace('<br/>', '')
+                .replace('<br />', '')
+                .split('.');
+                setActiveNodeInner(node);
+        });
+    }
+
+
+    function setActiveNodeInner(node) {
+        var nodeArr = node.nodeName.split(".");
+        var ip34 = nodeArr[0].replace("app", ""); //ie: 28125
+        var ipSegments = [ipArr[0], ipArr[1], Number(ip34.slice(0, -3)), Number(ip34.slice(3))];
+
+        var encodedIP = 0;
+        for (var i = 0; i < ipSegments.length; i++) {
+            var n = (ipSegments[i] * Math.pow(256, i));
+            encodedIP += n;
+        }
+
+
+        var myurl = url + '/api/now/table/sys_cluster_node_stats?sysparm_query=node_id=' + node.nodeId + '&sysparm_fields=stats';
+        snuFetch(g_ck, myurl, null, function (jsn) {
+            var port = ($($.parseXML(jsn.result[0].stats)).find('servlet\\.port').text());
+            var encodedPort = Math.floor(port / 256) + (port % 256) * 256;
+            var encodeBIGIP = encodedIP + '.' + encodedPort + '.0000';
+            chrome.cookies.getAll({
+                url: new URL(url).origin
+            }, function (instanceCookies) {
+                var BIGipServerpoolCookie = instanceCookies.find(function (cookie) {
+                    // matches BIGipServerpool_<alphanumeric instance name>
+                    return cookie.name.match(/^(BIGipServerpool_[\w\d]+)$/);
+                });
+                chrome.cookies.set({
+                    "name": BIGipServerpoolCookie.name,
+                    "url": new URL(url).origin,
+                    "secure": true,
+                    "httpOnly": true,
+                    "value": encodeBIGIP
+                }, s => {
+                    chrome.cookies.set({
+                        "name": "glide_user_route",
+                        "url": new URL(url).origin,
+                        "secure": true,
+                        "httpOnly": true,
+                        "value": 'glide.' + node.nodeId
+                    }, s => {
+                        getActiveNode(jsnNodes);
+                    });
+                });
+            });
+        });
+    }
+
+}
+
+
+function getActiveNode(jsn) {
+    jsnNodes = jsn;
+    chrome.cookies.get({
+        "name": "glide_user_route",
+        "url": new URL(url).origin
+    }, cookie => {
+        setDataTableNodes(jsnNodes, cookie.value.replace('glide.', ''));
+    });
+}
+
 
 //Try to get json with instance nodes, first from chrome storage, else via REST api
 function prepareJsonNodes() {
@@ -131,13 +227,14 @@ function prepareJsonNodes() {
         try {
             var thedate = new Date().toDateString();
             if (thedate == result[query[1]].toString()) {
-                bgPage.getActiveNode(result[query[0]]);
+                getActiveNode(result[query[0]]);
             }
-            else
-                bgPage.getNodes($('#btnrefreshtables').val());
+            else{
+                getNodes(); 
+            }
         }
         catch (err) {
-            bgPage.getNodes($('#btnrefreshtables').val());
+            getNodes();      
         }
     });
 }
@@ -186,12 +283,13 @@ function setBrowserVariables(obj) {
     });
     $('#btnrefreshtables').click(function () {
         $('#waitingtables').show();
-        bgPage.getTables($('#slctdataset').val());
+        var dataset = document.querySelector('#slctdataset').value;
+        getTables(dataset);
     });
     $('#slctdataset').on('change', function () {
         $('#waitingtables').show();
-        bgPage.getTables(this.value);
-        console.log(this.value);
+        var dataset = document.querySelector('#slctdataset').value;
+        getTables(dataset);
     });
     $('#btnSendXplore').click(function () {
         var script = $('#txtgrquery').val();
@@ -216,7 +314,7 @@ function setBrowserVariables(obj) {
 
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
-        bgPage.getNodes();
+        getNodes(); 
     });
 
     $('input').on('blur', function () {
@@ -253,12 +351,6 @@ function setBrowserVariables(obj) {
        iconSettingsDiv($(this).prop('checked'));
     })
 
-    // $('#addtechnicalnames').on('change', function (e) {
-    //     technicalNamesShowRegex();
-    // });
-
-    
-
 
     $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
     $.fn.dataTable.moment(datetimeformat);
@@ -273,7 +365,7 @@ function setBrowserVariables(obj) {
             case "#tabupdatesets":
                 if (!updatesetsloaded) {
                     $('#waitingupdatesets').show();
-                    bgPage.getUpdateSets();
+                    getUpdateSets();
                     updatesetsloaded = true;
                 }
                 $('#tbxupdatesets').focus(function () {
@@ -283,7 +375,7 @@ function setBrowserVariables(obj) {
             case "#tabupdates":
                 if (!updatesloaded) {
                     $('#waitingupdates').show();
-                    bgPage.getUpdates(userName);
+                    getUpdates(userName);
 
                     updatesloaded = true;
                 }
@@ -315,7 +407,7 @@ function setBrowserVariables(obj) {
             case "#tabdataexplore":
                 if (!dataexploreloaded) {
                     $('#waitingdataexplore').show();
-                    bgPage.getExploreData();
+                    getExploreData();
                     dataexploreloaded = true;
                 }
                 $('#tbxdataexplore').focus(function () {
@@ -324,7 +416,7 @@ function setBrowserVariables(obj) {
                 break;
             case "#tablink":
                 $('#waitinglink').show();
-                bgPage.getRecordVariables();
+                getRecordVariables();
                 break;
             case "#tabgr":
                 getGRQuery();
@@ -371,8 +463,29 @@ function setBrowserVariables(obj) {
 
 }
 
+//Query ServiceNow for updatsets, pass JSON back to popup
+function getUpdateSets() {
+    var myurl = url + '/api/now/ui/concoursepicker/updateset';
+    snuFetch(g_ck, myurl, null, function (jsn) {
+        setDataTableUpdateSets(jsn);
+    });
+}
 
+//Set active updateset and refresh list on popup after it
+function setUpdateSet(data) {
+    var myurl = url + '/api/now/ui/concoursepicker/updateset';
+    snuFetch(g_ck, myurl, data, function (jsn) {
+        getUpdateSets();
+    });
+}
 
+//Query ServiceNow for updaes by current user, pass JSON back to popup
+function getUpdates(username) {
+    var myurl = url + '/api/now/table/sys_update_xml?sysparm_display_value=true&sysparm_fields=sys_id%2Ctype%2Cname%2Ctarget_name%2Cupdate_set.name%2Csys_updated_on%2Csys_updated_by&sysparm_query=sys_updated_byLIKE' + username + '%5EORDERBYDESCsys_updated_on&sysparm_limit=20';
+    snuFetch(g_ck, myurl, null, function (jsn) {
+        setDataTableUpdates(jsn);
+    });
+}
 
 //Set message, on about tab, callback from getInfoMessage
 function setInfoMessage(html) {
@@ -380,7 +493,7 @@ function setInfoMessage(html) {
 }
 
 function getSettings(callback) {
-    bgPage.getFromSyncStorageGlobal("snusettings", function (settings) {
+    getFromSyncStorageGlobal("snusettings", function (settings) {
         objSettings = settings || {};
         for (var setting in settings) {
 
@@ -394,7 +507,6 @@ function getSettings(callback) {
             }
         };
         iconSettingsDiv($('#iconallowbadge').prop('checked')); 
-        //technicalNamesShowRegex();
         callback();
     })
 }
@@ -410,7 +522,7 @@ function setSettings() {
         }
 
     });
-    bgPage.setToChromeSyncStorageGlobal("snusettings", snusettings);
+    setToChromeSyncStorageGlobal("snusettings", snusettings);
 }
 
 function setInstanceSettings() {
@@ -418,13 +530,13 @@ function setInstanceSettings() {
     $('.snu-instance-setting').each(function (index, item) {
         snuinstancesettings[this.id] = this.value;
     });
-    bgPage.setToChromeSyncStorage("snuinstancesettings", snuinstancesettings);
+    setToChromeSyncStorage("snuinstancesettings", snuinstancesettings);
     applyFavIconBadge(snuinstancesettings);
 }
 
 function getInstanceSettings() {
 
-    bgPage.getFromSyncStorage("snuinstancesettings", function(settings){
+    getFromSyncStorage("snuinstancesettings", function(settings){
         objSettings = settings || {};
         for (var setting in settings) {
 
@@ -449,16 +561,14 @@ function iconSettingsDiv(visible){
 function applyFavIconBadge(settings){
     document.getElementById("icontext").style.backgroundColor = settings.iconcolorbg; 
     document.getElementById("icontext").style.color = settings.iconcolortext; 
-
     chrome.tabs.sendMessage(tabid, { method: "setFavIconBadge", options: settings }, function () {});
-
 }
 
 function setSampleCommandHref() {
     
     var newHref = myFrameHref || urlFull;
     if ((newHref.split('?')[0]).indexOf('_list.do') > 1) {
-        bgPage.getListUrl();
+        getListUrl();
     }
     else {
         if (newHref.includes('.do?')) //allow page with .do in url to default to the UI16 iframe
@@ -467,6 +577,25 @@ function setSampleCommandHref() {
             newHref = newHref.replace(url,'');
         setListUrl(newHref, '');
     }
+}
+
+function getListUrl() {
+
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "g_list.title,g_list.filter,g_list.tableName,g_list.fields,g_list.sortBy,g_list.sortDir"
+    }, function (response) {
+        var tableName = response.myVars.g_listtableName;
+        var tableLabel = response.myVars.g_listtitle;
+        var encQuery = response.myVars.g_listfilter;
+        var orderBy = response.myVars.g_listsortBy;
+        var fields = response.myVars.g_listfields.split(',').slice(0, 2).join(',');
+        var isDesc = response.myVars.g_listsortDir == "DESC" ? "DESC" : "";
+        if (orderBy)
+            encQuery += `^ORDERBY${isDesc}${orderBy}`;
+        var listUrl = `${tableName}_list.do?sysparm_query=${encQuery}`;
+        setListUrl(listUrl, tableLabel, fields);
+    });
 }
 
 function setListUrl(listUrl, tableLabel, fields){
@@ -488,19 +617,134 @@ function setListUrl(listUrl, tableLabel, fields){
 
 }
 
+function getGRQueryList(varName, template, templatelines, fullvarname) {
+
+    chrome.tabs.sendMessage(tabid, {
+        method: "runFunction",
+        myVars: "getListV3Fields()"
+    }, function () {
+
+        chrome.tabs.sendMessage(tabid, {
+            method: "getVars",
+            myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
+        }, function (response) {
+            var tableName = response.myVars.g_listtableName;
+            if (typeof tableName == 'undefined'){ //dealing with a table that ends with _list, like sys_ui_list
+                getGRQueryForm(varName, template, templatelines, fullvarname);
+                return;
+            }
+
+            varName = varName || grVarName(tableName, fullvarname);
+            var encQuery = response.myVars.g_listfilter;
+            var orderBy = response.myVars.g_listsortBy;
+            var isDesc = (response.myVars.g_listsortDir == "DESC");
+            var fields = ('' + response.myVars.g_listfields).split(',');
+            var rowsPerPage = response.myVars.g_listrowsPerPage;
+            var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
+            queryStr += varName + ".addEncodedQuery(\"" + encQuery + "\");\n";
+            if (isDesc)
+                queryStr += varName + ".orderByDesc('" + orderBy + "');\n";
+            else
+                queryStr += varName + ".orderBy('" + orderBy + "');\n";
+            queryStr += varName + ".setLimit(" + rowsPerPage + ");\n";
+            queryStr += varName + ".query();\n";
+            queryStr += "while (" + varName + ".next()) {\n";
+            if (templatelines) {
+                queryStr += "    //" + varName + ".initialize();\n";
+            }
+            if (template) {
+                for (var i = 0; i < fields.length; i++) {
+                    queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
+                }
+            } else
+                queryStr += "\n\n    //todo: code ;)\n\n";
+            if (templatelines) {
+
+                queryStr += "    //" + varName + ".autoSysFields(false);\n";
+                queryStr += "    //" + varName + ".setWorkflow(false);\n";
+                queryStr += "    //" + varName + ".update();\n";
+                queryStr += "    //" + varName + ".insert();\n";
+                queryStr += "    //" + varName + ".deleteRecord();\n";
+            }
+            queryStr += "}";
+
+            setGRQuery(queryStr);
+        });
+    });
+}
+
+function getGRQueryForm(varName, template, templatelines, fullvarname) {
+
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
+    }, function (response) {
+        var tableName = response.myVars.g_formtableName;
+        var sysId = response.myVars.NOWsysId || response.myVars.mySysId;
+        if (!tableName) { //try to find table and sys_id in workspace
+            var myurl = new URL(response.frameHref)
+            var parts = myurl.pathname.split("/");
+            var idx = parts.indexOf("sub") // show subrecord if available
+            if (idx != -1) parts = parts.slice(idx);
+            idx = parts.indexOf("record")
+            if (idx > -1 && parts.length >= idx + 2) {
+                tableName = parts[idx + 1];
+                sysId = parts[idx + 2];
+            }
+        }
+        
+        varName = varName || grVarName(tableName, fullvarname);
+        var fields = ('' + response.myVars.elNames).split(',');
+        var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
+        queryStr += "if (" + varName + ".get('" + sysId + "')) {\n";
+        if (templatelines) {
+            queryStr += "    //" + varName + ".initialize();\n";
+        }
+        if (template) {
+            for (var i = 0; i < fields.length; i++) {
+                queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
+            }
+        } else
+            queryStr += "\n\n    //todo: code ;)\n\n";
+        if (templatelines) {
+            queryStr += "    //" + varName + ".autoSysFields(false);\n";
+            queryStr += "    //" + varName + ".setWorkflow(false);\n";
+            queryStr += "    //" + varName + ".update();\n";
+            queryStr += "    //" + varName + ".insert();\n";
+            queryStr += "    //" + varName + ".deleteRecord();\n";
+        }
+        queryStr += "}";
+
+        setGRQuery(queryStr);
+    });
+
+}
+
+
 function getGRQuery() {
 
     var newHref = myFrameHref || urlFull;
     if ((newHref.split('?')[0]).indexOf('_list.do') > 1) {
-        bgPage.getGRQuery($('#tbxgrname').val(), $('#tbxgrtemplate').val(),
+        getGRQueryList($('#tbxgrname').val(), $('#tbxgrtemplate').val(),
             document.getElementById('cbxtemplatelines').checked,
             document.getElementById('cbxfullvarname').checked);
     }
     else {
-        bgPage.getGRQueryForm($('#tbxgrname').val(), $('#tbxgrtemplate').val(),
+        getGRQueryForm($('#tbxgrname').val(), $('#tbxgrtemplate').val(),
             document.getElementById('cbxtemplatelines').checked,
             document.getElementById('cbxfullvarname').checked);
     }
+}
+
+function grVarName(tableName, fullvarname) {
+    grVar = ('' + tableName).replace(/[-_]([a-z])/g, function (g) {
+        return g[1].toUpperCase();
+    });
+
+    var varName = grVar.charAt(0).toUpperCase() + grVar.slice(1);
+    if (varName.length >= 10 && !fullvarname)
+        varName = varName.replace(/[a-z]/g, '');
+    return 'gr' + varName;
 }
 
 function setGRQuery(gr) {
@@ -508,18 +752,39 @@ function setGRQuery(gr) {
     $('#txtgrquery').val(gr).select();
 }
 
-
-
-
-
-
 //Initiate Call to servicenow rest api
-function getUserDetails(usr) {
-    if (!usr) usr = $('#tbxname').val();
-    $('#tbxname').val(usr);
+function getUserDetails(userName) {
+    if (!userName) userName = $('#tbxname').val();
+    $('#tbxname').val(userName);
     $('#waitinguser').show();
-    bgPage.getUserDetails(usr);
+
+    var myurl = url + "/api/now/table/sys_user?sysparm_display_value=all&sysparm_query=user_name%3D" + userName;
+    snuFetch(g_ck, myurl, null, function (fetchResult) {
+        var listhyperlink = " <a target='_blank' href='" + url + "/sys_user_list.do?sysparm_query=user_nameLIKE" + userName + "%5EORnameLIKE" + userName + "'> <i class='fa fa-list' aria-hidden='true'></i></a>";
+        var html;
+        if (fetchResult.result.length > 0) {
+            var usr = fetchResult.result[0];
+            html = "<br /><table class='table table-condensed table-bordered table-striped'>" +
+                "<tr><th>User details</th><th>" + usr.user_name.display_value + listhyperlink + "</th></tr>" +
+
+                "<tr><td>Name:</td><td><a href='" + url + "/nav_to.do?uri=sys_user.do?sys_id=" +
+                usr.sys_id.display_value + "' target='_user'>" +
+                usr.name.display_value + "</a></td></tr>" +
+                "<tr><td>Active:</td><td>" + usr.active.display_value + "</td></tr>" +
+                "<tr><td>Last login:</td><td>" + usr.last_login_time.display_value + "</td></tr>" +
+                "<tr><td>Created:</td><td>" + usr.sys_created_on.display_value + "</td></tr>" +
+                "<tr><td>Created by:</td><td>" + usr.sys_created_by.display_value + " <a id='createdby' data-username='" + usr.sys_created_by.display_value + "' href='#'> <i class='fa fa-sign-out fa-1' aria-hidden='true'></i></a></td></tr>" +
+                "<tr><td>Phone:</td><td>" + usr.phone.display_value + "</td></tr>" +
+                "<tr><td>E-mail:</td><td><a href='mailto:" + usr.email.display_value + "'>" + usr.email.display_value + "</a></td></tr></table>";
+            setUserDetails(html);
+        } else {
+            html = "<br /><table class='table table-condensed table-bordered table-striped'><tr><th>User details</th><th>" + userName + listhyperlink + "</th></tr>" +
+                "<tr><td>Result:</td><td>No exact match, try clicking the list icon.</td></tr></table>";
+            setUserDetails(html);
+        }
+    });
 }
+
 
 //Set the user details table
 function setUserDetails(html) {
@@ -533,7 +798,7 @@ function setUserDetails(html) {
                 $(this).select();
             });
 
-            bgPage.getUserDetails(usr);
+            getUserDetails(usr);
         });
     }
     else
@@ -598,7 +863,7 @@ function setDataTableUpdateSets(nme) {
 
     $('a.setcurrent').click(function () {
         $('#waitingupdatesets').show();
-        bgPage.setUpdateSet($(this).data('post'));
+        setUpdateSet($(this).data('post'));
     });
 
     $('#waitingupdatesets').hide();
@@ -615,7 +880,7 @@ function setNodes(jsn) {
     }
 
     setToChromeStorage("nodes", jsn);
-    bgPage.getActiveNode(jsn);
+    getActiveNode(jsn);
 }
 
 //set or refresh datatable with ServiceNow updatesets
@@ -654,7 +919,8 @@ function setDataTableNodes(nme, node) {
     }).focus().trigger('keyup');
 
     $('a.setnode').click(function () {
-        bgPage.setActiveNode(this.id, $(this).attr('data-node'));
+        var node = {"nodeId" : this.id, "nodeName" : $(this).attr('data-node') };
+        setActiveNode(node)
     });
 
     $('#waitingnodes').hide();
@@ -718,8 +984,42 @@ function setDataTableUpdates(nme) {
 }
 
 
+//Query ServiceNow for tables, pass JSON back to popup
+function getTables(dataset) {
+
+    var fields = 'name,label';
+    var query = 'sys_update_nameISNOTEMPTY^nameNOT LIKElog00^nameNOT LIKEevent00%5EORDERBYlabel';
+
+    if (dataset == 'advanced') {
+        fields = 'name,label,super_class.name,sys_scope.scope';
+    }
+    else
+        if (dataset == 'customtables') {
+            fields = 'name,label,super_class.name,sys_scope.scope';
+            var query =
+                "nameSTARTSWITHu_^ORnameSTARTSWITHx_^nameNOT LIKE_cmdb^super_class.name!=scheduled_data_import^super_class.name!=sys_portal_page" +
+                "^super_class.name!=cmn_location^super_class.name!=sf_state_flow^super_class.name!=sys_report_import_table_parent" +
+                "^super_class.name!=cmn_schedule_condition^super_class.name!=sys_auth_profile^super_class.name!=sys_transform_script" +
+                "^super_class.name!=dl_definition^super_class.name!=sys_dictionary^super_class.name!=sys_transform_map" +
+                "^super_class.name!=dl_matcher^super_class.name!=sys_filter^super_class.name!=sys_user_preference" +
+                "^super_class.name!=kb_knowledge^super_class.name!=sys_hub_action_type_base^super_class.name!=sysauto sc_cat_item_delivery_task" +
+                "^super_class.name!=sys_import_set_row^super_class.name!=syslog^NQnameSTARTSWITHu_^ORnameSTARTSWITHx_^super_classISEMPTY" +
+                "^sys_update_nameISNOTEMPTY^nameNOT LIKElog00^nameNOT LIKEevent00%5EORDERBYlabel";
+        }
+
+
+    var myurl = url + '/api/now/table/sys_db_object?sysparm_fields=' + fields + '&sysparm_query=' + query;
+    snuFetch(g_ck, myurl, null, function (jsn) {
+        var res = JSON.stringify(jsn.result).
+            replace(/super_class.name/g, 'super_classname').
+            replace(/sys_scope.scope/g, 'sys_scopescope'); //hack to get rid of . in object key names
+        setTables(JSON.parse(res));
+    });
+}
+
 //add object to storage and refresh datatable
-function setTables(dataset, jsn) {
+function setTables(jsn) {
+    var dataset = document.querySelector('#slctdataset').value;
     setToChromeStorage("tables-" + dataset, jsn);
     setDataTableTables(jsn);
 }
@@ -996,6 +1296,89 @@ function getSlashcommands() {
 
 }
 
+//Query ServiceNow for tables, pass JSON back to popup
+function getExploreData() {
+
+    chrome.tabs.sendMessage(tabid, {
+        method: "getVars",
+        myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
+    }, function (response) {
+        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref);
+        var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id", response.frameHref);
+
+        if (!tableName) { //try to find table and sys_id in workspace
+            var myurl = new URL(response.frameHref)
+            var parts = myurl.pathname.split("/");
+            var idx = parts.indexOf("sub") // show subrecord if available
+            if (idx != -1) parts = parts.slice(idx);
+            idx = parts.indexOf("record")
+            if (idx > -1 && parts.length >= idx + 2) {
+                tableName = parts[idx + 1];
+                sysId = parts[idx + 2];
+            }
+        }
+
+
+        if (!(tableName && sysId)) {
+            setDataExplore([]);
+            return true;
+        }
+
+        var myurl = url + '/api/now/ui/meta/' + tableName;
+        snuFetch(g_ck, myurl, null, function (metaData) {
+            var query = '';
+            if (sysId)
+                query = '&sysparm_query=sys_id%3D' + sysId;
+            var myurl = url + '/api/now/table/' + tableName + '?sysparm_display_value=all&sysparm_limit=1' + query;
+            snuFetch(g_ck, myurl, null, function (jsn) {
+
+                var dataExplore = [];
+                var propObj = {};
+                propObj.name = "#TABLE / SYS_ID";
+                propObj.meta = {
+                    "label": "#TABLE / SYS_ID",
+                    "type": "TABLE"
+                };
+                propObj.display_value = "<a class='referencelink' href='" + url + "/" + tableName + ".do?sys_id=" + sysId + "' target='_blank'>" + tableName + " / " + sysId + "</a>";
+                propObj.value = tableName + " / " + sysId;
+                dataExplore.push(propObj);
+
+                var rows = {}
+
+                try {
+                    rows = jsn.result[0];
+                } catch (e) {
+                    rows = { "Error": { "display_value": e.message, "value": "Record data not retrieved." } };
+                }
+
+                for (var key in rows) {
+                    var propObj = {};
+                    if (!rows.hasOwnProperty(key)) continue;
+
+                    var display_value = rows[key].display_value;
+                    var link = propObj.link = rows[key].link;
+                    if (link) {
+                        var linksplit = link.split('/');
+                        var href = url + '/' + linksplit[6] + '.do?sys_id=' + linksplit[7];
+                        display_value = "<a href='" + href + "' target='_blank'>" + display_value + "</a>";
+                    }
+
+                    propObj.name = key;
+                    propObj.meta = (metaData && metaData != "error") ? metaData.result.columns[key] : { "label": "Error" };
+                    propObj.display_value = display_value;
+                    propObj.value = (display_value != rows[key].value) ? rows[key].value : '';
+
+
+                    dataExplore.push(propObj);
+                }
+
+                setDataExplore(dataExplore);
+            });
+        });
+    });
+
+}
+
 //set or refresh datatable with ServiceNow tables
 function setDataExplore(nme) {
 
@@ -1015,9 +1398,9 @@ function setDataExplore(nme) {
             { "mDataProp": "name" },
             {
                 mRender: function (data, type, row) {
-                    var reference = "<div class='refname'>" + row.meta.reference + "</div>";
+                    var reference = "<div class='refname'>" + row?.meta?.reference + "</div>";
                     if (reference.includes('undefined')) reference = '';
-                    return row.meta.type + reference;
+                    return row?.meta?.type + reference;
                 },
 
                 "bSearchable": true,
@@ -1101,11 +1484,72 @@ function downloadCommands() {
     document.body.removeChild(element);
   }
 
-  function technicalNamesShowRegex(){
-        // if (document.getElementById('addtechnicalnames').checked){
-        //     $('#technicalnamesregexdiv').show();
-        // }
-        // else{
-        //     $('#technicalnamesregexdiv').hide();
-        // }       
+
+//Place the key value pair in the chrome local storage, with metafield for date added.
+function setToChromeStorage(theName, theValue) {
+    var myobj = {};
+    myobj[instance + "-" + theName] = theValue;
+    myobj[instance + "-" + theName + "-date"] = new Date().toDateString();
+    chrome.storage.local.set(myobj, function () {
+
+    });
+}
+
+function setToChromeSyncStorage(theName, theValue) {
+    var myobj = {};
+    myobj[instance + "-" + theName] = theValue;
+    chrome.storage.sync.set(myobj, function () {
+    });
+}
+
+//get an instance sync parameter
+function getFromSyncStorage(theName, callback) {
+    chrome.storage.sync.get(instance + "-" + theName, function (result) {
+        callback(result[instance + "-" + theName]);
+    });
+}
+
+//set an instance independent sync parameter
+function setToChromeSyncStorageGlobal(theName, theValue) {
+    var myobj = {};
+    myobj[theName] = theValue;
+    chrome.storage.sync.set(myobj, function () {
+
+    });
+}
+    
+//get an instance independent sync parameter
+function getFromSyncStorageGlobal(theName, callback) {
+    chrome.storage.sync.get(theName, function (result) {
+        callback(result[theName]);
+    });
+}
+
+
+//Function to query Servicenow API
+function snuFetch(token, url, post, callback) {
+    var hdrs = {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+    if (token) //only for instances with high security plugin enabled
+        hdrs['X-UserToken'] = token; 
+
+    var requestInfo = {
+        method : 'get',
+        headers : hdrs
     }
+
+    if (post){
+        requestInfo.method = 'PUT';
+        requestInfo.body = post;
+    }
+
+    fetch(url, requestInfo)
+    .then(response => response.json())
+    .then(data => { 
+        callback(data);
+    });
+
+}

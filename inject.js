@@ -3946,3 +3946,12 @@ function snuPersonaliseList(autoclose) {
     }
 
 }
+
+document.addEventListener('snuEvent', function (e)
+{
+    if (e.detail.type == "code"){
+        var script = document.createElement('script');
+        script.textContent = e.detail.content;
+        (document.head || document.documentElement).appendChild(script);
+    }
+});

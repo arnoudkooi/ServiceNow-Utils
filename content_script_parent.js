@@ -101,7 +101,7 @@ function setGList() {
     else
         doc = document;
 
-    var scriptContent = "try{ var g_list = GlideList2.get(jQuery('#sys_target').val()); } catch(err){console.log(err);}";
+    var scriptContent = "try{ var g_list = GlideList2.get(document.querySelector('#sys_target').value); } catch(err){console.log(err);}";
     var script = doc.createElement('script');
     script.appendChild(doc.createTextNode(scriptContent));
     doc.body.appendChild(script);
@@ -126,10 +126,10 @@ function getVars(varstring) {
     else if (document.querySelectorAll('div.tab-pane.active').length == 1) {
 
         try{
-        ret.g_ck = jQuery('input#sysparm_ck').val();
+        ret.g_ck = document.querySelector('input#sysparm_ck').value;
         jQuery('iframe').removeClass('activetab');
         jQuery('div.tab-pane.active iframe').addClass('activetab');
-        doc = jQuery('iframe.activetab')[0].contentWindow.document;
+        doc = document.querySelector('iframe.activetab').contentWindow.document;
         }
         catch(ex){
             doc = document;
