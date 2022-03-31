@@ -58,12 +58,20 @@ function addScript(filePath, processSettings) {
             getFromSyncStorageGlobal("snusettings", function (settings) {
                 if (!settings) settings = {};
                 settings.extensionUrl = chrome.runtime.getURL('/');
-                var event = new CustomEvent('snuEvent', {
-                    detail : { "type" : "code", 
-                               "content" : 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()'
-                             }
-                });
-                document.dispatchEvent(event);
+                if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
+                    var script = document.createElement('script');
+                    script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
+                    (document.head || document.documentElement).appendChild(script);
+                }
+                else{
+                    var event = new CustomEvent('snuEvent', {
+                        detail : { "type" : "code", 
+                                   "content" : 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()'
+                                 }
+                    });
+                    document.dispatchEvent(event);
+                }
+
             });
         }
     };
