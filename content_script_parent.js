@@ -102,9 +102,20 @@ function setGList() {
         doc = document;
 
     var scriptContent = "try{ var g_list = GlideList2.get(document.querySelector('#sys_target').value); } catch(err){console.log(err);}";
-    var script = doc.createElement('script');
-    script.appendChild(doc.createTextNode(scriptContent));
-    doc.body.appendChild(script);
+    
+    if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
+        var script = doc.createElement('script');
+        script.appendChild(doc.createTextNode(scriptContent));
+        doc.body.appendChild(script);
+    }
+    else{
+        var event = new CustomEvent('snuEvent', {
+            detail : { "type" : "code", 
+                       "content" : scriptContent
+                     }
+        });
+        document.dispatchEvent(event);
+    }
 
 }
 
@@ -148,10 +159,20 @@ function getVars(varstring) {
     }
 
 
-    var script = doc.createElement('script');
-    script.id = 'tmpScript';
-    script.appendChild(doc.createTextNode(scriptContent));
-    doc.body.appendChild(script);
+    if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
+        var script = doc.createElement('script');
+        script.id = 'tmpScript';
+        script.appendChild(doc.createTextNode(scriptContent));
+        doc.body.appendChild(script);
+    }
+    else{
+        var event = new CustomEvent('snuEvent', {
+            detail : { "type" : "code", 
+                       "content" : scriptContent
+                     }
+        });
+        document.dispatchEvent(event);
+    }
 
     for (var i = 0; i < variables.length; i++) {
         var currVariable = variables[i];

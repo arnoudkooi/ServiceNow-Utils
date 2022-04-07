@@ -2209,6 +2209,8 @@ function setShortCuts() {
     document.addEventListener("keydown", function (event) {
         if (event.key == '/') {
             if (snusettings.slashoption == 'off') return;
+            let eventPath = event.path || (event.composedPath && event.composedPath());
+            if (eventPath[0]?.className?.includes('CodeMirror-code')) return; //allow commenting wit ctrl-/
             var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
                 var path = event.path || (event.composedPath && event.composedPath());
@@ -2671,10 +2673,6 @@ function snuHideSlashCommand(navFocus = false) {
         }
     }
     return true;
-}
-
-function showSlashCommand(initialCommand){
-    alert('Function showSlashCommand is renamed to snuShowSlashCommand, update your code!')
 }
 
 function snuShowSlashCommand(initialCommand, autoRun) {
