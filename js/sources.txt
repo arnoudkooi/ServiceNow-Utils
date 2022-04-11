@@ -3,7 +3,7 @@ datatables-datetime.js https://cdn.datatables.net/plug-ins/1.10.21/dataRender/da
 datatables.min.js https://cdn.datatables.net/v/dt/dt-1.10.21/af-2.3.4/b-1.6.1/b-html5-1.6.1/datatables.min.js
 datetime-moment.js https://cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js
 jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js
-moment.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js
+moment.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js
 jquery.deserialize.js https://raw.githubusercontent.com/kflorence/jquery-deserialize/master/src/jquery.deserialize.js
 purify.min.js https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.6/purify.min.js
 Tinycon.js https://github.com/tommoor/tinycon/blob/master/tinycon.js
