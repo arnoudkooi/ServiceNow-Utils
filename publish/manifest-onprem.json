@@ -30,12 +30,28 @@
             "matches": [
                 "*://*/*"
             ],
+            "exclude_matches": [
+                "*://*/*XML=*",
+                "*://*/*WSDL=*"
+            ],
             "js": [
                 "js/purify.min.js",
                 "js/jquery.min.js",
-                "js/Tinycon.js",
-                "content_script_parent.js",
                 "content_script_all_frames.js"
+            ],
+            "all_frames": true
+        },
+        {
+            "matches": [
+                "*://*/*"
+            ],
+            "exclude_matches": [
+                "*://*/*XML=*",
+                "*://*/*WSDL=*"
+            ],
+            "js": [
+                "js/Tinycon.js",
+                "content_script_parent.js"
             ],
             "all_frames": true
         }

@@ -11,6 +11,14 @@
         (document.head || document.documentElement).appendChild(c);
     }
 
+    getFromSyncStorageGlobal("snusettings", function (snusettings) {
+        if (snusettings && snusettings.hasOwnProperty('iconallowbadge') && !snusettings.iconallowbadge) return;
+
+        getFromSyncStorage("snuinstancesettings", function (settings) {
+            setFavIconBadge(settings);
+        });
+    });
+
 })();
 
 
@@ -18,6 +26,8 @@
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.method == "getSelection")
         sendResponse({ selectedText: getSelection() });
+    else if (request.method == "setFavIconBadge")
+        setFavIconBadge(request.options);
     else if (request.method == "getVars")
         sendResponse({ myVars: getVars(request.myVars), url: location.origin, frameHref: getFrameHref() });
     else if (request.method == "getLocation")
@@ -51,6 +61,22 @@ function toggleSearch() {
     document.getElementById(nextFocus).select();
 }
 
+function setFavIconBadge(settings) {
+    Tinycon.reset();
+
+    if (!(settings && settings.hasOwnProperty("icontext") && settings.icontext)) return;
+
+    Tinycon.setOptions({
+        width: settings.iconwidth,
+        height: settings.iconheight,
+        font: settings.iconfontsize + 'pt arial',
+        color: settings.iconcolortext,
+        background: settings.iconcolorbg,
+        fallback: true
+    });
+    Tinycon.setBubble(settings.icontext);
+}
+
 
 //get the selected text, user has selected with mouse.
 function getSelection() {
@@ -73,34 +99,27 @@ function getSelection() {
 
 //get the href of the contentframe gsft_main
 function getFrameHref() {
-    var frameHref = '';
-
-    if (document.querySelectorAll('#gsft_main').length)
+    var frameHref = document.location.href;
+    if (document.querySelectorAll('#gsft_main').length) //ui16
         frameHref = document.getElementById("gsft_main").contentWindow.location.href;
-    else if (document.querySelectorAll('div.tab-pane.active').length == 1) {
+    else if (document.querySelectorAll("[component-id]").length && //polaris ui
+             document.querySelector("[component-id]").shadowRoot.querySelectorAll("#gsft_main").length) {
+        frameHref = document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main").contentWindow.location.href;  
+    }
+    else if (document.querySelectorAll('div.tab-pane.active').length == 1) { //studio
         try{
-            frameHref = document.querySelectorAll('iframe.activetab')[0].contentWindow.location.href;
+            frameHref = document.querySelector('div.tab-pane.active iframe').contentWindow.ocation.href;
         }
-        catch (e){
-            frameHref = document.location.href;
+        catch(ex){
+            
         }
     }
-    else
-        frameHref = document.location.href;
-
     return frameHref;
 }
 
 
 //initialize g_list variable 
-function setGList() {
-
-    var doc;
-    if ($('#gsft_main').length)
-        doc = $('#gsft_main')[0].contentWindow.document;
-    else
-        doc = document;
-
+function setGList(doc) {
     var scriptContent = "try{ var g_list = GlideList2.get(document.querySelector('#sys_target').value); } catch(err){console.log(err);}";
     
     if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
@@ -114,9 +133,8 @@ function setGList() {
                        "content" : scriptContent
                      }
         });
-        document.dispatchEvent(event);
+        doc.dispatchEvent(event);
     }
-
 }
 
 
@@ -124,31 +142,26 @@ function setGList() {
 //try to return the window variables, defined in the comma separated varstring string
 function getVars(varstring) {
 
-    // if(window.frameElement && window.frameElement.nodeName == "IFRAME")
-    //     return; //dont run in iframes
-
-    if (varstring.indexOf('g_list') > -1)
-        setGList();
-
-    var doc;
+    var doc = document;
     var ret = {};
-    if (document.querySelectorAll('#gsft_main').length)
-        doc = document.querySelectorAll('#gsft_main')[0].contentWindow.document;
-    else if (document.querySelectorAll('div.tab-pane.active').length == 1) {
-
+    if (document.querySelectorAll('#gsft_main').length) //ui16
+        doc = document.querySelector('#gsft_main').contentWindow.document;
+    else if (document.querySelectorAll("[component-id]").length && //polaris ui
+             document.querySelector("[component-id]").shadowRoot.querySelectorAll("#gsft_main").length) {
+        doc = document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main").contentWindow.document;  
+    }
+    else if (document.querySelectorAll('div.tab-pane.active').length == 1) { //studio
         try{
-        ret.g_ck = document.querySelector('input#sysparm_ck').value;
-        jQuery('iframe').removeClass('activetab');
-        jQuery('div.tab-pane.active iframe').addClass('activetab');
-        doc = document.querySelector('iframe.activetab').contentWindow.document;
+            doc = document.querySelector('div.tab-pane.active iframe').contentWindow.document;
+            ret.g_ck = doc.querySelector('input#sysparm_ck').value;
         }
         catch(ex){
             doc = document;
         }
-
     }
-    else
-        doc = document;
+
+    if (varstring.indexOf('g_list') > -1)
+        setGList(doc);
 
 
     var variables = varstring.replace(/ /g, "").split(",");
@@ -171,7 +184,7 @@ function getVars(varstring) {
                        "content" : scriptContent
                      }
         });
-        document.dispatchEvent(event);
+        doc.dispatchEvent(event);
     }
 
     for (var i = 0; i < variables.length; i++) {

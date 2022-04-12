@@ -10,8 +10,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         runFunction(request.myVars);
     } else if (request.method == "runFunctionChild") {
         runFunction(request.myVars, 'child');
-    } else if (request.method == "setFavIconBadge") {
-        setFavIconBadge(request.options);
     } else if (request.snippet) {
         insertTextAtCursor(request.snippet);
     }
@@ -24,7 +22,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
     addScript('inject.js', true);
 
-    if (location.pathname.startsWith("/now/"))
+    if (location.pathname.startsWith("/now/") || location.pathname.startsWith("/x/"))
         addScript('inject_next.js', false);
     else if (location.pathname == "/sys.scripts.do") {
         setTimeout(function(){
@@ -39,14 +37,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         addScript('js/monaco/compare.js', false);
     }
 
-
-    getFromSyncStorageGlobal("snusettings", function (snusettings) {
-        if (snusettings && snusettings.hasOwnProperty('iconallowbadge') && !snusettings.iconallowbadge) return;
-
-        getFromSyncStorage("snuinstancesettings", function (settings) {
-            setFavIconBadge(settings);
-        });
-    });
 })();
 
 
@@ -79,21 +69,6 @@ function addScript(filePath, processSettings) {
     (document.head || document.documentElement).appendChild(s);
 }
 
-function setFavIconBadge(settings) {
-    Tinycon.reset();
-
-    if (!(settings && settings.hasOwnProperty("icontext") && settings.icontext)) return;
-
-    Tinycon.setOptions({
-        width: settings.iconwidth,
-        height: settings.iconheight,
-        font: settings.iconfontsize + 'pt arial',
-        color: settings.iconcolortext,
-        background: settings.iconcolorbg,
-        fallback: true
-    });
-    Tinycon.setBubble(settings.icontext);
-}
 
 function runFunction(f, context) {
     if (typeof document === 'undefined' || document == null) return;

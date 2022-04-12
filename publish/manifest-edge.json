@@ -34,18 +34,31 @@
                 
             ],
             "exclude_matches": [
-                "https://signon.service-now.com/*",
                 "https://*.service-now.com/*XML=*",
                 "https://*.service-now.com/*WSDL=*"
             ],
             "js": [
                 "js/purify.min.js",
                 "js/jquery.min.js",
-                "js/Tinycon.js",
-                "content_script_parent.js",
                 "content_script_all_frames.js"
             ],
             "all_frames": true
+        },
+        {
+            "matches": [
+                "https://*.service-now.com/*",
+                "https://*.servicenowservices.com/*"
+                
+            ],
+            "exclude_matches": [
+                "https://*.service-now.com/*XML=*",
+                "https://*.service-now.com/*WSDL=*"
+            ],
+            "js": [
+                "js/Tinycon.js",
+                "content_script_parent.js"
+            ],
+            "all_frames": false
         }
         
     ],

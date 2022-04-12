@@ -2993,16 +2993,29 @@ function snuAddFieldSyncButtons() {
 
     if (typeof g_form != 'undefined') {
         if (g_form.isNewRecord()) return;
+        var isSysTable = g_form.getTableName().startsWith('sys_')
         jQuery(".label-text").each(function (index, value) {
             try {
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var fieldType = g_form.getGlideUIElement(elm).type || jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var txt = this.innerText.toLowerCase();
 
-                if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType)) {
+                if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType))  {
                     jQuery(this).after(getBtns(elm,fieldType));
                     return true;
                 }
+                if (isSysTable && fieldType.includes('string')){ //probably a JSON file
+                    var len = 0;
+                    try{
+                        var el = document.getElementById(g_form.getTableName() + '.' + elm);
+                        len = Number(el.dataset.length);
+                    } catch(e){}
+                    if (len >= 4000){
+                        jQuery(this).after(getBtns(elm,fieldType));
+                        return true;
+                    }
+                }
+
                 for (var i = 0; i < fieldTypes.length; i++) {
                     if (fieldType.includes(fieldTypes[i]) || elm.startsWith(fieldTypes[i])) {
                         fieldType = fieldTypes[i];
@@ -3014,9 +3027,9 @@ function snuAddFieldSyncButtons() {
                 function getBtns(elm,fieldType){
                     var btns = '';
                     if (snusettings.vsscriptsync == true) 
-                        btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
+                        btns += `<span style="color: #293E40; cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
                     if (snusettings.codeeditor == true) 
-                        btns += `<span style="color: #293E40; cursor:pointer" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
+                        btns += `<span style="color: #293E40; cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
                     return btns;
                 }
 

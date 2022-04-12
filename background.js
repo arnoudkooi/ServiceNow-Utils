@@ -27,7 +27,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
     var version = chrome.runtime.getManifest().version;
     if (details.reason == "install" || (details.reason == "update" && version == ("5.6.3.3"))) {
         //openFile("welcome.html");
-        openFile("https://bit.ly/3JdjBq4");
+       
     }
     
 
