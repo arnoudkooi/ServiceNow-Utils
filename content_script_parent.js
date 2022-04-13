@@ -108,7 +108,7 @@ function getFrameHref() {
     }
     else if (document.querySelectorAll('div.tab-pane.active').length == 1) { //studio
         try{
-            frameHref = document.querySelector('div.tab-pane.active iframe').contentWindow.ocation.href;
+            frameHref = document.querySelector('div.tab-pane.active iframe').contentWindow.location.href;
         }
         catch(ex){
             
