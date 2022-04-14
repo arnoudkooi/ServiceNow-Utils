@@ -61,6 +61,6 @@ if (snusettings.applybgseditor && scrpt) {
                 document.querySelector('input[name="runscript"]').click();
             },
         });
-
+		editor.focus();
 	});
 }
