@@ -864,6 +864,22 @@ function setToChromeStorage(theName, theValue) {
     });
 }
 
+//set an instance independent parameter
+function setToChromeStorageGlobal(theName, theValue) {
+    console.log(theName, theValue)
+    var myobj = {};
+    myobj[theName] = theValue;
+    chrome.storage.local.set(myobj, function () {
+    });
+}
+
+//get an instance independent global parameter
+function getFromChromeStorageGlobal(theName, callback) {
+    chrome.storage.local.get(theName, function (result) {
+        callback(result[theName]);
+    });
+}
+
 function setToChromeSyncStorage(theName, theValue) {
     var myobj = {};
     myobj[instance + "-" + theName] = theValue;
@@ -889,8 +905,13 @@ function setToChromeSyncStorageGlobal(theName, theValue) {
 
 //get an instance independent sync parameter
 function getFromSyncStorageGlobal(theName, callback) {
-    chrome.storage.sync.get(theName, function (result) {
-        callback(result[theName]);
+    chrome.storage.sync.get(theName, function (resSync) {
+        var objSync = resSync[theName];
+        getFromChromeStorageGlobal(theName,function (resLocal) {
+            var objLocal = (resLocal && resLocal.hasOwnProperty(theName)) ? resLocal[theName] : {};
+            var objMerged = { ...objSync, ...objLocal};
+            callback(objMerged);
+        });
     });
 }
 

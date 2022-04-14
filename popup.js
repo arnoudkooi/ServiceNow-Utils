@@ -512,17 +512,25 @@ function getSettings(callback) {
 }
 
 function setSettings() {
-    var snusettings = {};
+    var snusettingsSync = {};
+    var snusettings = {}
     $('.snu-setting').each(function (index, item) {
         if (this.type == 'checkbox') {
-            snusettings[this.id] = this.checked;
+            snusettingsSync[this.id] = this.checked;
         }
         else {
-            snusettings[this.id] = this.value;
+            if (this.value.length < 6000) 
+                snusettingsSync[this.id] = this.value;
+            else { //overflow to local storage #204
+                snusettingsSync[this.id] = '';
+                snusettings[this.id] = this.value;
+            }
         }
 
     });
-    setToChromeSyncStorageGlobal("snusettings", snusettings);
+    setToChromeSyncStorageGlobal("snusettings", snusettingsSync);
+    setToChromeStorageGlobal("snusettings", snusettings);
+    
 }
 
 function setInstanceSettings() {
@@ -1517,11 +1525,32 @@ function setToChromeSyncStorageGlobal(theName, theValue) {
 
     });
 }
+
+//set an instance independent parameter
+function setToChromeStorageGlobal(theName, theValue) {
+    console.log(theName, theValue)
+    var myobj = {};
+    myobj[theName] = theValue;
+    chrome.storage.local.set(myobj, function () {
+    });
+}
+
+//get an instance independent global parameter
+function getFromChromeStorageGlobal(theName, callback) {
+    chrome.storage.local.get(theName, function (result) {
+        callback(result[theName]);
+    });
+}
     
 //get an instance independent sync parameter
 function getFromSyncStorageGlobal(theName, callback) {
-    chrome.storage.sync.get(theName, function (result) {
-        callback(result[theName]);
+    chrome.storage.sync.get(theName, function (resSync) {
+        var objSync = resSync[theName];
+        getFromChromeStorageGlobal(theName,function (resLocal) {
+            var objLocal = (resLocal && resLocal.hasOwnProperty(theName)) ? resLocal[theName] : {};
+            var objMerged = { ...objSync, ...objLocal};
+            callback(objMerged);
+        });
     });
 }
 

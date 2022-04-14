@@ -1524,8 +1524,8 @@ function snuCaptureFormClick() {
                     elm = 'sys_id';
                     val = g_form.getUniqueValue();
 
-                    elmDisp = 'DisplayValue';
-                    valDisp = g_form.getDisplayValue();
+                    elmDisp = 'Sys ID';
+                    valDisp = '[record sys_id]';
                 }
                 if (typeof val == 'undefined') return;
 
