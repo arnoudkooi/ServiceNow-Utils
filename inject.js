@@ -1949,7 +1949,10 @@ function snuAddTechnicalNames() {
                     try{
                     var newElm = document.createElement('span');
                     var sysid = vari.realName.substr(vari.realName.length - 32);
-                    newElm.innerHTML = "<span class='snuwrap'> | <a target='_blank' href='/sc_item_option.do?sys_id=" + sysid + "'>" + vari.prettyName + "</a></span>"; newElm.style = "font-family:monospace;";
+                    var tableName = g_form.getTableName();
+                    // The variable definition table in case of the order form and the variable storage table in other cases
+                    var linkTableName = tableName == 'ni' ? 'item_option_new' : 'sc_item_option';
+                    newElm.innerHTML = "<span class='snuwrap'> | <a target='_blank' href='/" + linkTableName + ".do?sys_id=" + sysid + "'>" + vari.prettyName + "</a></span>"; newElm.style = "font-family:monospace;";
                     elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
                     elm.classList.add('snutn');
                     } catch {}
