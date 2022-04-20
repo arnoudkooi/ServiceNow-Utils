@@ -11,6 +11,7 @@ var jsnNodes;
 var urlFull;
 var updateSetTables = [];
 var lastCommand = (new Date()).getTime();
+var cmd = {};
 
 var urlContains = ".service-now.com";
 var urlPattern = "https://*.service-now.com/*"
@@ -18,6 +19,10 @@ if (onprem) {
     urlContains = ".";
     urlPattern = "*://*/*";
 }
+
+var defaultMenuConf = {
+    "documentUrlPatterns": [urlPattern]
+};
 
 if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatability
 
@@ -27,7 +32,6 @@ chrome.runtime.onInstalled.addListener(function (details) {
     var version = chrome.runtime.getManifest().version;
     if (details.reason == "install" || (details.reason == "update" && version == ("5.6.3.3"))) {
         //openFile("welcome.html");
-       
     }
     
 
@@ -46,6 +50,43 @@ chrome.runtime.onInstalled.addListener(function (details) {
             actions: [new chrome.declarativeContent.ShowPageAction()]
         }]);
     });
+
+    for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
+        chrome.contextMenus.create(Object.assign(menuItems[itemIdx], defaultMenuConf));
+    }
+
+    for (var snip in snippets) {
+        chrome.contextMenus.create(Object.assign({
+            "id": snip,
+            "parentId": snippets[snip][0],
+            "contexts": ["editable"],
+            "title": snippets[snip][1]
+        },
+            defaultMenuConf));
+    }
+
+    getFromSyncStorageGlobal("snusettings", function (snusettings) {
+        if (!snusettings) snusettings = {};
+        if (snusettings.hasOwnProperty("slashcommands")) {
+            try {
+                var customCommands = JSON.parse(snusettings.slashcommands || "{}");
+                Object.keys(customCommands).forEach(function (key) {
+                    //contexts =  (customCommands[key].url.includes("$0") ? "selection" : "all");
+                    if (customCommands[key].url.includes("contextmenu")){
+                        chrome.contextMenus.create(Object.assign({
+                            "id": "sc" + key,
+                            "contexts": ["all"],
+                            "title": customCommands[key].hint + ":%s"
+                        },
+                            defaultMenuConf));
+                    }
+                });
+            }
+            catch (e) { }
+        }
+    });
+
+
 });
 
 // chrome.runtime.onUpdateAvailable.addListener(function () {
@@ -136,7 +177,8 @@ chrome.commands.onCommand.addListener(function (command) {
 
 
 var menuItems = [{
-    "type": "separator"
+    "type": "separator",
+    "id" : "sep1"
 },
 
 {
@@ -148,36 +190,31 @@ var menuItems = [{
     "id": "instancesearch",
     "parentId": "goto",
     "title": "Instance Search: %s",
-    contexts: ["selection"],
-    "onclick": openSearch
+    "contexts": ["selection"]
 },
 {
     "id": "codesearch",
     "parentId": "goto",
     "title": "SN Utils Code Search: %s",
-    contexts: ["selection"],
-    "onclick": contextCodeSearch
+    "contexts": ["selection"]
 },
 {
     "id": "openscript",
     "parentId": "goto",
     "title": "Script Include: %s",
-    contexts: ["selection"],
-    "onclick": openScriptInclude
+    "contexts": ["selection"]
 },
 {
     "id": "opentablelist",
     "parentId": "goto",
     "title": "Table list: %s",
-    contexts: ["selection"],
-    "onclick": openTableList
+    contexts: ["selection"]
 },
 {
     "id": "propertie",
     "parentId": "goto",
     "title": "Property: %s",
-    contexts: ["selection"],
-    "onclick": openPropertie
+    "contexts": ["selection"]
 },
 {
     "id": "tools",
@@ -185,34 +222,28 @@ var menuItems = [{
     "title": "Tools"
 },
 {
+    "id": "showtechnicalnames",
+    "parentId": "tools",
+    "title": "Show technical names (/tn)",
+    "contexts": ["all"]
+},
+{
     "id": "popinout",
     "parentId": "tools",
     "title": "PopIn / PopOut (/pop)",
-    "contexts": ["all"],
-    "onclick": pop
-},
-{
-    "id": "shownames",
-    "parentId": "tools",
-    "title": "Show technical names (/tn)",
-    "contexts": ["all"],
-    "onclick": addTechnicalNames
+    "contexts": ["all"]
 },
 {
     "id": "unhidefields",
     "parentId": "tools",
     "title": "Show hidden fields and sections (/uh)",
-    "contexts": ["all"],
-    "onclick": unhideFields
+    "contexts": ["all"]
 },
 {
     "id": "canceltransaction",
     "parentId": "tools",
     "title": "Cancel transactions",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-        openUrl(e, f, '/cancel_my_transactions.do');
-    }
+    "contexts": ["all"]
 },
 {
     "id": "clearcookies",
@@ -226,42 +257,29 @@ var menuItems = [{
     "title": "Clear cookies (Logout > login.do)",
     "contexts": ["all"]
 },
-//{ "id": "canceltransaction", "parentId": "tools", "title": "Cancel transactions", "contexts": ["all"], "onclick": function (e, f) { cancelTransactions(e); } },
 {
     "id": "props",
     "parentId": "tools",
     "title": "Properties (/p)",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-        openUrl(e, f, '/sys_properties_list.do');
-    }
+    "contexts": ["all"]
 },
 {
     "id": "updates",
     "parentId": "tools",
     "title": "Today's Updates",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-        openUrl(e, f, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on');
-    }
+    "contexts": ["all"]
 },
 {
     "id": "versions",
     "parentId": "tools",
     "title": "Update Versions",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-        openVersions(e, f);
-    }
+    "contexts": ["all"]
 },
 {
     "id": "stats",
     "parentId": "tools",
     "title": "stats.do",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-        openUrl(e, f, '/stats.do');
-    }
+    "contexts": ["all"]
 },
 {
     "id": "codesnippets",
@@ -276,27 +294,14 @@ var menuItems = [{
 {
     "id": "opentabscriptsync",
     "title": "Open ScriptSync Helper Tab",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-        createScriptSyncTab();
-    }
+    "contexts": ["all"]
 },
 {
     "id": "copyselectedcellvalues",
     "title": "Copy Selected Cell Values from List",
-    "contexts": ["all"],
-    "onclick": function (e, f) {
-        slashCommand('copycells');
-    }
+    "contexts": ["all"]
 }
 ];
-
-var defaultMenuConf = {
-    "documentUrlPatterns": [urlPattern]
-};
-for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
-    chrome.contextMenus.create(Object.assign(menuItems[itemIdx], defaultMenuConf));
-}
 
 var snippets = {
     "codesnippet1": ["codesnippets", "GlideAggregate Count", `var count = new GlideAggregate('incident');
@@ -364,41 +369,58 @@ var snippets = {
 
 };
 
-for (var snip in snippets) {
-    chrome.contextMenus.create(Object.assign({
-        "id": snip,
-        "parentId": snippets[snip][0],
-        "contexts": ["editable"],
-        "title": snippets[snip][1],
-        "onclick": insertSnippet
-    },
-        defaultMenuConf));
-}
-
-
-getFromSyncStorageGlobal("snusettings", function (snusettings) {
-    if (!snusettings) snusettings = {};
-    if (snusettings.hasOwnProperty("slashcommands")) {
-        try {
-            var customCommands = JSON.parse(snusettings.slashcommands || "{}");
-            Object.keys(customCommands).forEach(function (key) {
-                //contexts =  (customCommands[key].url.includes("$0") ? "selection" : "all");
-                if (customCommands[key].url.includes("contextmenu")){
-                    chrome.contextMenus.create(Object.assign({
-                        "id": "sc" + key,
-                        "contexts": ["all"],
-                        "title": customCommands[key].hint + ":%s",
-                        "onclick": function (e, f) {
-                            openUrl(e, f, customCommands[key].url);
-                        }
-                    },
-                        defaultMenuConf));
-                }
-            });
-        }
-        catch (e) { }
+chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
+    if (clickData.menuItemId == "popinout")
+        pop();
+    else if (clickData.menuItemId == "clearcookies")
+        clearCookies(clickData, tabid, "");
+    else if (clickData.menuItemId == "showtechnicalnames")
+        addTechnicalNames();
+    else if (clickData.menuItemId == "clearcookiessidedoor")
+        clearCookies(clickData, tabid, "/login.do");
+    else if (clickData.menuItemId == "instancesearch")
+        openSearch(clickData, tab);
+    else if (clickData.menuItemId == "codesearch")
+        contextCodeSearch(clickData, tab);
+    else if (clickData.menuItemId == "openscript")
+        openScriptInclude();
+    else if (clickData.menuItemId == "opentablelist")
+        openTableList(clickData, tab);
+    else if (clickData.menuItemId == "propertie")
+        openPropertie(clickData, tab);
+    else if (clickData.menuItemId == "unhideFields")
+        unhideFields(clickData, tab);
+    else if (clickData.menuItemId == "canceltransaction")
+        openUrl(clickData, tab, '/cancel_my_transactions.do');
+    else if (clickData.menuItemId == "props")
+        openUrl(clickData, tab, '/sys_properties_list.do')
+    else if (clickData.menuItemId == "updates")
+        openUrl(clickData, tab, '/sys_update_xml_list.do?sysparm_query=sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on');
+    else if (clickData.menuItemId == "versions")
+        openVersions(clickData, tab);
+    else if (clickData.menuItemId == "stats")
+        openUrl(clickData, tab, '/stats.do');
+    else if (clickData.menuItemId == "opentabscriptsync")
+        createScriptSyncTab();
+    else if (clickData.menuItemId == "copyselectedcellvalues")
+        slashCommand('copycells');
+    else if (clickData.menuItemId.startsWith('codesnippet'))
+        insertSnippet(clickData, tab);
+    else if (clickData.menuItemId.startsWith('sc')){
+        getFromSyncStorageGlobal("snusettings", function (snusettings) {
+            if (!snusettings) snusettings = {};
+            if (snusettings.hasOwnProperty("slashcommands")) {
+                var cmd = clickData.menuItemId.slice(2);
+                var cmds = JSON.parse(snusettings.slashcommands);
+                openUrl(clickData, tab,cmds[cmd].url);
+            }
+        })
     }
+
 });
+
+
+
 
 
 
@@ -417,15 +439,6 @@ function insertSnippet(e, f) {
         });
     });
 }
-
-chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
-    if (clickData.menuItemId == "popinout")
-        pop();
-    else if (clickData.menuItemId == "clearcookies")
-        clearCookies(clickData, tabid, "");
-    else if (clickData.menuItemId == "clearcookiessidedoor")
-        clearCookies(clickData, tabid, "/login.do");
-});
 
 
 function addTechnicalNames() {
@@ -906,10 +919,16 @@ function setToChromeSyncStorageGlobal(theName, theValue) {
 //get an instance independent sync parameter
 function getFromSyncStorageGlobal(theName, callback) {
     chrome.storage.sync.get(theName, function (resSync) {
-        var objSync = resSync[theName];
+        var dataSync = resSync[theName];
+
+        if (typeof dataSync !== 'object'){ //only objects can become large and merged.
+            callback(dataSync);
+            return;
+        }
+
         getFromChromeStorageGlobal(theName,function (resLocal) {
             var objLocal = (resLocal && resLocal.hasOwnProperty(theName)) ? resLocal[theName] : {};
-            var objMerged = { ...objSync, ...objLocal};
+            var objMerged = { ...dataSync, ...objLocal};
             callback(objMerged);
         });
     });
