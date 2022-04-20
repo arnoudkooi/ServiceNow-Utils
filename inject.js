@@ -795,7 +795,6 @@ function snuAddSlashCommandListener() {
                 var iframes = window.top.document.querySelectorAll("iframe");
                 if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
                     iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
-
                 
                 iframes.forEach((iframe) => {
                     if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
@@ -854,6 +853,9 @@ function snuAddSlashCommandListener() {
             }
             else if (shortcut == "uh") {
                 var iframes = window.top.document.querySelectorAll("iframe");
+                if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+                    iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+
                 iframes.forEach((iframe) => {
                     if (typeof iframe.contentWindow.unhideFields != 'undefined')
                         iframe.contentWindow.unhideFields();
@@ -2106,8 +2108,8 @@ function searchLargeSelects() {
                 input.placeholder = "Filter choices...";
                 input.className = "form-control";
                 input.style.marginBottom = "2px";
-                snuInsertAfter(input,document.querySelector('label[for=slush_left]'))
-                jQuery('select#slush_left').filterByText(input, true).addClass('searchified');
+                snuInsertAfter(input,document.querySelector('label[for=slush_left], label[for=select_0]'))
+                jQuery('select#slush_left, select#select_0').filterByText(input, true).addClass('searchified');
             }
 
             if (el.id == 'slush_right') {
@@ -2747,7 +2749,10 @@ function snuFillFields(query) {
             snuSetInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog, try in Portal.<br />`, false);
     }
     else {
-        Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
+        var iframes = window.top.document.querySelectorAll("iframe");
+        if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+            iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+        Array.from(iframes).forEach(function (frm) {
             if (typeof frm.contentWindow.g_form != 'undefined') {
                 if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow)) ) 
                 {
@@ -2794,7 +2799,11 @@ function snuCopySelectedCellValues(copySysIDs) {
         doCopy(selCells);
         hasCopied = true;
     } else {
-        Array.from(window.top.document.getElementsByTagName('iframe')).forEach(function (frm) {
+        var iframes = window.top.document.querySelectorAll("iframe");
+        if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+            iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+
+        Array.from(iframes).forEach(function (frm) {
             selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell');
             if (selCells.length > 0) {
                 doCopy(selCells, frm);

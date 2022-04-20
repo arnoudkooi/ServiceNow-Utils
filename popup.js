@@ -1545,10 +1545,16 @@ function getFromChromeStorageGlobal(theName, callback) {
 //get an instance independent sync parameter
 function getFromSyncStorageGlobal(theName, callback) {
     chrome.storage.sync.get(theName, function (resSync) {
-        var objSync = resSync[theName];
+        var dataSync = resSync[theName];
+
+        if (typeof dataSync !== 'object'){ //only objects can become large and merged.
+            callback(dataSync);
+            return;
+        }
+
         getFromChromeStorageGlobal(theName,function (resLocal) {
             var objLocal = (resLocal && resLocal.hasOwnProperty(theName)) ? resLocal[theName] : {};
-            var objMerged = { ...objSync, ...objLocal};
+            var objMerged = { ...dataSync, ...objLocal};
             callback(objMerged);
         });
     });

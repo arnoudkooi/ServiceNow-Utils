@@ -47,12 +47,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 });
 
 
-document.addEventListener("snutils-event", function(data) {
-    chrome.runtime.sendMessage(data.detail); //forward the customevent message to the bg script.
-    return true;
-})
-
-
 
 function toggleSearch() {
     let nextFocus = (document.activeElement.id == "filter")
@@ -171,7 +165,6 @@ function getVars(varstring) {
         scriptContent += "try{ if (typeof window." + currVariable + " !== 'undefined') document.body.setAttribute('tmp_" + currVariable.replace(/\./g, "") + "', window." + currVariable + "); } catch(err){console.log(err);}\n"
     }
 
-
     if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
         var script = doc.createElement('script');
         script.id = 'tmpScript';
@@ -189,11 +182,12 @@ function getVars(varstring) {
 
     for (var i = 0; i < variables.length; i++) {
         var currVariable = variables[i];
-        ret[currVariable.replace(/\./g, "")] = $(doc.body).attr("tmp_" + currVariable.replace(/\./g, ""));
-        $(doc.body).removeAttr("tmp_" + currVariable.replace(/\./g, ""));
+        ret[currVariable.replace(/\./g, "")] = doc.body.getAttribute("tmp_" + currVariable.replace(/\./g, ""));
+        doc.body.removeAttribute("tmp_" + currVariable.replace(/\./g, ""));
     }
 
-    $(doc.body).find("#tmpScript").remove();
-
+    if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
+        doc.body.querySelector("#tmpScript").remove();
+    }
     return ret;
 }
