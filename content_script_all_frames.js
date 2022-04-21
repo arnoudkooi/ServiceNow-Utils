@@ -120,7 +120,7 @@ function getFromSyncStorageGlobal(theName, callback) {
         }
 
         getFromChromeStorageGlobal(theName,function (resLocal) {
-            var objLocal = (resLocal && resLocal.hasOwnProperty(theName)) ? resLocal[theName] : {};
+            var objLocal = resLocal || {};
             var objMerged = { ...dataSync, ...objLocal};
             callback(objMerged);
         });

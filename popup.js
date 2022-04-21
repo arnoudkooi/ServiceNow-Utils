@@ -567,8 +567,8 @@ function iconSettingsDiv(visible){
 }
 
 function applyFavIconBadge(settings){
-    document.getElementById("icontext").style.backgroundColor = settings.iconcolorbg; 
-    document.getElementById("icontext").style.color = settings.iconcolortext; 
+    document.getElementById("icontext").style.backgroundColor = settings?.iconcolorbg; 
+    document.getElementById("icontext").style.color = settings?.iconcolortext; 
     chrome.tabs.sendMessage(tabid, { method: "setFavIconBadge", options: settings }, function () {});
 }
 
@@ -1553,7 +1553,7 @@ function getFromSyncStorageGlobal(theName, callback) {
         }
 
         getFromChromeStorageGlobal(theName,function (resLocal) {
-            var objLocal = (resLocal && resLocal.hasOwnProperty(theName)) ? resLocal[theName] : {};
+            var objLocal = resLocal || {};
             var objMerged = { ...dataSync, ...objLocal};
             callback(objMerged);
         });
