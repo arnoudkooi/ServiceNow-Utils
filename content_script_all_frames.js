@@ -48,20 +48,15 @@ function addScript(filePath, processSettings) {
             getFromSyncStorageGlobal("snusettings", function (settings) {
                 if (!settings) settings = {};
                 settings.extensionUrl = chrome.runtime.getURL('/');
-                if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
-                    var script = document.createElement('script');
-                    script.textContent = 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()';
-                    (document.head || document.documentElement).appendChild(script);
-                }
-                else{
-                    var event = new CustomEvent('snuEvent', {
-                        detail : { "type" : "code", 
-                                   "content" : 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()'
-                                 }
-                    });
-                    document.dispatchEvent(event);
-                }
-
+                var detail = { 
+                    "detail" : {
+                        "type" : "code", 
+                        "content" : 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()' 
+                    }
+                };
+                if (typeof cloneInto != 'undefined') detail = cloneInto(detail, document.defaultView); //required for ff
+                var event = new CustomEvent('snuEvent', detail);
+                document.dispatchEvent(event);
             });
         }
     };
@@ -85,11 +80,15 @@ function runFunction(f, context) {
         // don't run function meant for content frame if we're not in it
         return;
     }
-
-    let doc = inParent ? document.querySelector('iframe#gsft_main').contentDocument : document;
-    let script = doc.createElement('script');
-    script.appendChild(doc.createTextNode(f));
-    doc.body.appendChild(script);
+    var detail = { 
+        "detail" : {
+            "type" : "code", 
+            "content" : f 
+        }
+    };
+    if (typeof cloneInto != 'undefined') detail = cloneInto(detail, document.defaultView); //required for ff
+    var event = new CustomEvent('snuEvent', detail);
+    document.dispatchEvent(event);
 
 }
 

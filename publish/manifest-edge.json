@@ -1,122 +1,131 @@
 {
-    "name": "SN Utils - Tools for ServiceNow",
-    "short_name": "SN Utils for Edge",
-    "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
-    "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "0.0.0.0",
-    "permissions": [
-        "activeTab",
+  "name": "SN Utils - Tools for ServiceNow",
+  "short_name": "SN Utils for Edge",
+  "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
+  "author": "Arnoud Kooi / arnoudkooi.com",
+  "version": "0.0.0.0",
+  "manifest_version": 3,
+  "permissions": [
+    "activeTab",
+    "declarativeContent",
+    "storage",
+    "contextMenus",
+    "cookies"
+  ],
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
         "https://*.service-now.com/*",
-        "https://*.servicenowservices.com/*",
-        "declarativeContent",
-        "storage",
-        "contextMenus",
-        "cookies"
-    ],
-    "icons": {
-        "16": "images/icon16.png",
-        "32": "images/icon32.png",
-        "48": "images/icon48.png",
-        "128": "images/icon128.png"
+        "https://*.servicenowservices.com/*"
+      ],
+      "exclude_matches": [
+        "*://*/*?XML*",
+        "*://*/*&XML*",
+        "*://*/*?WSDL*",
+        "*://*/*&WSDL*"
+      ],
+      "js": [
+        "js/purify.min.js",
+        "js/jquery.min.js",
+        "content_script_all_frames.js"
+      ],
+      "all_frames": true
     },
-    "background": {
-        "scripts": [
-            "js/jquery.min.js",
-            "background.js"
-        ],
-        "persistent": true
+    {
+      "matches": [
+        "https://*.service-now.com/*",
+        "https://*.servicenowservices.com/*"
+      ],
+      "exclude_matches": [
+        "*://*/*?XML*",
+        "*://*/*&XML*",
+        "*://*/*?WSDL*",
+        "*://*/*&WSDL*"
+      ],
+      "js": [
+        "js/Tinycon.js",
+        "content_script_parent.js"
+      ],
+      "all_frames": false
+    }
+  ],
+  "commands": {
+    "_execute_page_action": {
+      "suggested_key": {
+        "default": "Ctrl+1",
+        "mac": "Command+1"
+      },
+      "description": "Activate Extension"
     },
-    "content_scripts": [
-        {
-            "matches": [
-                "https://*.service-now.com/*",
-                "https://*.servicenowservices.com/*"
-                
-            ],
-            "exclude_matches": [
-                "https://*.service-now.com/*XML=*",
-                "https://*.service-now.com/*WSDL=*"
-            ],
-            "js": [
-                "js/purify.min.js",
-                "js/jquery.min.js",
-                "content_script_all_frames.js"
-            ],
-            "all_frames": true
-        },
-        {
-            "matches": [
-                "https://*.service-now.com/*",
-                "https://*.servicenowservices.com/*"
-                
-            ],
-            "exclude_matches": [
-                "https://*.service-now.com/*XML=*",
-                "https://*.service-now.com/*WSDL=*"
-            ],
-            "js": [
-                "js/Tinycon.js",
-                "content_script_parent.js"
-            ],
-            "all_frames": false
-        }
-        
-    ],
-    "commands": {
-        "_execute_page_action": {
-            "suggested_key": {
-                "default": "Ctrl+1",
-                "mac": "Command+1"
-            },
-            "description": "Activate Extension"
-        },
-        "pop": {
-            "suggested_key": {
-                "default": "Ctrl+2",
-                "mac": "Command+2"
-            },
-            "description": "Pop-In / Pop-Out"
-        },
-        "show-technical-names": {
-            "suggested_key": {
-                "default": "Ctrl+3",
-                "mac": "Command+3"
-            },
-            "description": "Show Technical Names"
-        },
-        "slashcommand-shortcut": {
-            "suggested_key": {
-                "default": "Ctrl+4",
-                "mac": "Command+4"
-            },
-            "description": "Run /shortcut slashcommand"
-        },
-        "slashcommand": {
-            "description": "Open slashcommand popup"
-        }
+    "pop": {
+      "suggested_key": {
+        "default": "Ctrl+2",
+        "mac": "Command+2"
+      },
+      "description": "Pop-In / Pop-Out"
     },
-    "page_action": {
-        "default_title": "SN Utils",
-        "default_popup": "popup.html",
-        "default_icon": {
-            "16": "images/icon16.png",
-            "32": "images/icon32.png",
-            "48": "images/icon48.png",
-            "128": "images/icon128.png"
-        },
-        "show_matches": ["https://*.service-now.com/*", "https://*.servicenowservices.com/*"],
-        "hide_matches": ["https://signon.service-now.com/*"]
+    "show-technical-names": {
+      "suggested_key": {
+        "default": "Ctrl+3",
+        "mac": "Command+3"
+      },
+      "description": "Show Technical Names"
     },
-    "web_accessible_resources": [
+    "slashcommand-shortcut": {
+      "suggested_key": {
+        "default": "Ctrl+4",
+        "mac": "Command+4"
+      },
+      "description": "Run /shortcut slashcommand"
+    },
+    "slashcommand": {
+      "description": "Open slashcommand popup"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
         "js/purify.min.js",
         "inject.js",
         "inject_next.js",
         "inject_parent.js",
         "css/inject.css",
         "js/monaco/*"
-    ],
-    "incognito": "split",
-    "manifest_version": 2,
-    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src https://*.service-now.com https://*.servicenowservices.com 'self' data:; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com https://*.servicenowservices.com ws://127.0.0.1:1978/"
-    
+      ],
+      "matches": [
+        "https://*.service-now.com/*"
+      ]
+    }
+  ],
+  "incognito": "split",
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src https://*.service-now.com https://*.servicenowservices.com 'self' data:; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com https://*.servicenowservices.com ws://127.0.0.1:1978/"
+  },
+  "action": {
+    "default_title": "SN Utils",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "32": "images/icon32.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    },
+    "show_matches": [
+      "https://*.service-now.com/*",
+      "https://*.servicenowservices.com/*"
+    ]
+  },
+  "host_permissions": [
+    "https://*.service-now.com/*",
+    "https://*.servicenowservices.com/*"
+  ]
 }

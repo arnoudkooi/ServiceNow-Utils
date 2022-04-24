@@ -16,7 +16,11 @@ input {
     accent-color: #5274FF;
 }
 
-
+div.info{
+    border:1pt solid #ff8234;
+    width:50%;
+    padding:10px;
+}
 
 #snuVersion{
     font-size: 12pt;

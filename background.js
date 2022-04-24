@@ -35,21 +35,18 @@ chrome.runtime.onInstalled.addListener(function (details) {
     }
     
 
-    if (typeof chrome.declarativeContent === 'undefined')
-        return;
-
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
-        chrome.declarativeContent.onPageChanged.addRules([{
-            conditions: [
-                new chrome.declarativeContent.PageStateMatcher({
-                    pageUrl: {
-                        urlContains: urlContains
-                    },
-                })
-            ],
-            actions: [new chrome.declarativeContent.ShowPageAction()]
-        }]);
-    });
+    if (typeof chrome.declarativeContent !== 'undefined'){
+        chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
+            chrome.declarativeContent.onPageChanged.addRules([
+            {
+                conditions: [ new chrome.declarativeContent.PageStateMatcher({
+                    pageUrl: {urlContains: urlContains},
+                })],
+                actions: [new chrome.declarativeContent.ShowPageAction()]
+            }
+            ]);
+        });
+    }
 
     for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
         chrome.contextMenus.create(Object.assign(menuItems[itemIdx], defaultMenuConf));

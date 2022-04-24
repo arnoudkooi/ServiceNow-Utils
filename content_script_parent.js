@@ -36,6 +36,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         toggleSearch();
     } 
     else if (request.method == "snuUpdateSettingsEvent") { //pass settings to page
+        if (typeof cloneInto != 'undefined') request = cloneInto(request, document.defaultView); //required for ff
         var event = new CustomEvent(
             request.method, request
         );
@@ -80,16 +81,22 @@ function getSelection() {
         return '';
 
     var result = '' + self.document.getSelection().toString();
-    for (var i = 0; !result && i < self.frames.length; i++) {
+    var iframes = document.querySelectorAll("iframe");
+    if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+        iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+
+    iframes.forEach(frame => {
 
         try {
-            result = self.frames[i].document.getSelection().toString();
+            result = frame.contentWindow.getSelection().toString();
         } catch (error) {
             console.log(error);
         }
-    }
+    });
     return '' + result;
 }
+
+
 
 //get the href of the contentframe gsft_main
 function getFrameHref() {
@@ -111,26 +118,18 @@ function getFrameHref() {
     return frameHref;
 }
 
-
 //initialize g_list variable 
 function setGList(doc) {
-    var scriptContent = "try{ var g_list = GlideList2.get(document.querySelector('#sys_target').value); } catch(err){console.log(err);}";
-    
-    if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
-        var script = doc.createElement('script');
-        script.appendChild(doc.createTextNode(scriptContent));
-        doc.body.appendChild(script);
-    }
-    else{
-        var event = new CustomEvent('snuEvent', {
-            detail : { "type" : "code", 
-                       "content" : scriptContent
-                     }
-        });
-        doc.dispatchEvent(event);
-    }
+    var detail = { 
+        "detail" : {
+            "type" : "code", 
+            "content" : "try{ var g_list = GlideList2.get(document.querySelector('#sys_target').value); } catch(err){console.log(err);}"
+        }
+    };
+    if (typeof cloneInto != 'undefined') detail = cloneInto(detail, document.defaultView); //required for ff
+    var event = new CustomEvent('snuEvent', detail);
+    doc.dispatchEvent(event);
 }
-
 
 
 //try to return the window variables, defined in the comma separated varstring string
@@ -165,29 +164,20 @@ function getVars(varstring) {
         scriptContent += "try{ if (typeof window." + currVariable + " !== 'undefined') document.body.setAttribute('tmp_" + currVariable.replace(/\./g, "") + "', window." + currVariable + "); } catch(err){console.log(err);}\n"
     }
 
-    if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
-        var script = doc.createElement('script');
-        script.id = 'tmpScript';
-        script.appendChild(doc.createTextNode(scriptContent));
-        doc.body.appendChild(script);
-    }
-    else{
-        var event = new CustomEvent('snuEvent', {
-            detail : { "type" : "code", 
-                       "content" : scriptContent
-                     }
-        });
-        doc.dispatchEvent(event);
-    }
+    var detail = { 
+        "detail" : {
+            "type" : "code", 
+            "content" : scriptContent 
+        }
+    };
+    if (typeof cloneInto != 'undefined') detail = cloneInto(detail, document.defaultView); //required for ff
+    var event = new CustomEvent('snuEvent', detail);
+    doc.dispatchEvent(event);
 
     for (var i = 0; i < variables.length; i++) {
         var currVariable = variables[i];
         ret[currVariable.replace(/\./g, "")] = doc.body.getAttribute("tmp_" + currVariable.replace(/\./g, ""));
         doc.body.removeAttribute("tmp_" + currVariable.replace(/\./g, ""));
-    }
-
-    if(navigator.userAgent.toLowerCase().includes('firefox')){ //todo: find alternative for Eventdispatching in FF #202
-        doc.body.querySelector("#tmpScript").remove();
     }
     return ret;
 }

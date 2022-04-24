@@ -137,6 +137,45 @@ class SnuNextManager {
         return namesAdded;
     }
 
+    
+    linkPickers() {
+        querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container').style.width = '80px'
+        var snuStyle = document.createElement('style');
+        snuStyle.innerHTML = `
+        div.snupicker:hover {
+            background-color: #53526A;
+        }`;
+        var snuSpacer = document.createElement('div');
+        snuSpacer.id = 'snuSpacer'
+        snuSpacer.appendChild(snuStyle);
+        snuSpacer.appendChild(querySelectorShadowDom.querySelectorDeep('#concourse-pickers-tooltip div'))
+        snuSpacer.style.whiteSpace = 'nowrap';
+        snuSpacer.style.overflow = 'hidden';
+        snuSpacer.style.textOverflow = 'ellipsis';
+        snuSpacer.style.color = 'white';
+        snuSpacer.style.margin = '0 5px'
+
+        snuInsertAfter(snuSpacer,
+            querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
+
+        snuSpacer.querySelector('div').querySelectorAll('div').forEach((div, idx) => {
+            div.className = 'snupicker';
+            div.addEventListener('click', evt => {
+                let eventPath = evt.path || (evt.composedPath && evt.composedPath());
+                this.showPicker(['application', 'update-set'][idx]);
+            });
+        });
+
+    }
+
+    showPicker(pickertype){
+        try {
+        querySelectorShadowDom.querySelectorDeep('now-icon.contextual-zone-icon').click()
+        setTimeout( () => { querySelectorShadowDom.querySelectorDeep('sn-drilldown-list.'+ pickertype+' span.label').click() }, 800);
+        setTimeout( () => { querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body input#filter').select() }, 800); // doent work :(
+        } catch (ex) {};
+    }
+
 
     createLabelLink(elm){
         let linkBtn = '', linkAttrs;

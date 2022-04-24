@@ -155,6 +155,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Pop in/out classic UI"
     },
+    "ppt": {
+        "url": "*",
+        "hint": "Polaris Picker Test :)"
+    },
     "s2": {
         "url": "*",
         "hint": "Toggle Select2 for Application and Updateset picker"
@@ -427,7 +431,11 @@ function snuGetDirectLinks(targeturl, shortcut) {
             "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
             "&sysparm_fields=sys_id," + fields;
 
-        var table = url.match(/.*\/(.*)\?/)[1]
+        try {   
+            var table = url.match(/.*\/(.*)\?/)[1]
+        } catch (ex) {
+            return false;
+        }
         snuLoadXMLDoc(g_ck, url, null, function (jsn) {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
@@ -694,6 +702,12 @@ function snuAddSlashCommandListener() {
             else if (shortcut == "imp"){
                 e.preventDefault();
                 snuGetUsersForImpersonate(query);
+                return;
+            }
+            else if (shortcut == "ppt"){
+                e.preventDefault();
+                snuNextManager.linkPickers();
+                snuHideSlashCommand();
                 return;
             }
             else if (shortcut == "token") {
@@ -2206,7 +2220,7 @@ function setShortCuts() {
     htmlFilter.innerHTML = cleanHTML
     if (!window.top.document.querySelectorAll('#snufilter').length) { //prevent reinject 
         window.top.document.body.appendChild(htmlFilter);
-        window.top.document.getElementById('cmdhidedot').addEventListener('click', snuHideSlashCommand);
+        window.top.document.getElementById('cmdhidedot').addEventListener('click', evt => { snuHideSlashCommand(false, evt) } );
         window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
     }
     snuAddSlashCommandListener();
@@ -2216,7 +2230,7 @@ function setShortCuts() {
             if (snusettings.slashoption == 'off') return;
             let eventPath = event.path || (event.composedPath && event.composedPath());
             if (eventPath[0]?.className?.includes('CodeMirror-code')) return; //allow commenting wit ctrl-/
-            var isActive = (location.host.includes("service-now.com") && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
+            var isActive = ((location.host.includes("service-now.com") || typeof g_ck != 'undefined') && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
                 var path = event.path || (event.composedPath && event.composedPath());
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
@@ -2655,7 +2669,8 @@ function snuShowAlert(msg, type, timeout) {
 function snuHideAlert() {
     jQuery('.service-now-util-alert').removeClass('visible');
 }
-function snuHideSlashCommand(navFocus = false) {
+function snuHideSlashCommand(navFocus = false, evt) {
+    if (evt) evt.preventDefault();
     window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
@@ -2668,7 +2683,7 @@ function snuHideSlashCommand(navFocus = false) {
                     }
                 } catch (e) { }
             }
-            if (window.top?.querySelectorShadowDom != 'undefined'){
+            if (typeof window.top?.querySelectorShadowDom != 'undefined'){
                 window.top.querySelectorShadowDom.querySelectorDeep('div#all.sn-polaris-tab').click();
                 setTimeout(() => {
                     var fltr = window.top.querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.all input#filter`);
@@ -2677,7 +2692,7 @@ function snuHideSlashCommand(navFocus = false) {
             }
         }
     }
-    return true;
+    return false;
 }
 
 function snuShowSlashCommand(initialCommand, autoRun) {
@@ -3972,8 +3987,8 @@ function snuPersonaliseList(autoclose) {
 
 document.addEventListener('snuEvent', function (e)
 {
-    if (e.detail.type == "code"){
-        var script = document.createElement('script');
+    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined')){ //basic check for servicenow instance
+        var script = document.createElement('script'); 
         script.textContent = e.detail.content;
         (document.head || document.documentElement).appendChild(script);
     }
