@@ -17,12 +17,16 @@ class SnuNextManager {
             try{
                 if (eventPath[0].tagName == "svg") return;
                 if (eventPath[0]?.className.includes('sn-polaris-tab')){ //save a click, select input
-                    setTimeout(() => {
-                        var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
-                        if (fltr) fltr.select();
-                    }, 400);
+                    tryFocus(0);
                 }
             } catch (ex) {};
+
+            function tryFocus(num) { //wait till element exists
+                var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
+                if (fltr) fltr.select();
+                else if (num < 20) setTimeout(() => { tryFocus(++num) }, 200);
+            }
+
         });
     }
 
@@ -137,47 +141,6 @@ class SnuNextManager {
         return namesAdded;
     }
 
-    
-    linkPickers() {
-        querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container').style.width = '80px'
-        var snuStyle = document.createElement('style');
-        snuStyle.innerHTML = `
-        div.snupicker:hover {
-            background-color: #53526A;
-        }`;
-        var snuSpacer = document.createElement('div');
-        snuSpacer.id = 'snuSpacer'
-        snuSpacer.title = '[SN Utils]'
-        snuSpacer.appendChild(snuStyle);
-        snuSpacer.appendChild(querySelectorShadowDom.querySelectorDeep('#concourse-pickers-tooltip div'))
-        snuSpacer.style.whiteSpace = 'nowrap';
-        snuSpacer.style.overflow = 'hidden';
-        snuSpacer.style.textOverflow = 'ellipsis';
-        snuSpacer.style.color = 'white';
-        snuSpacer.style.margin = '0 5px'
-
-        snuInsertAfter(snuSpacer,
-            querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
-
-        snuSpacer.querySelector('div').querySelectorAll('div').forEach((div, idx) => {
-            div.className = 'snupicker';
-            div.addEventListener('click', evt => {
-                let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-                this.showPicker(['application', 'update-set'][idx]);
-            });
-        });
-
-    }
-
-    showPicker(pickertype){
-        try {
-        querySelectorShadowDom.querySelectorDeep('now-icon.contextual-zone-icon').click()
-        setTimeout( () => { querySelectorShadowDom.querySelectorDeep('sn-drilldown-list.'+ pickertype+' span.label').click() }, 800);
-        setTimeout( () => { querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body input#filter').select() }, 800); // doent work :(
-        } catch (ex) {};
-    }
-
-
     createLabelLink(elm){
         let linkBtn = '', linkAttrs;
         if (fieldType == 'reference' || fieldType == 'glide_list') {
@@ -272,6 +235,102 @@ class SnuNextManager {
     ) {
         return __Closest(base);
     }
+
+    linkPickers(cnt) {
+        var tooltip = querySelectorShadowDom.querySelectorDeep('#concourse-pickers-tooltip div');
+        var searchContainer = querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container')
+        var searchInput = querySelectorShadowDom.querySelectorDeep('input.sn-global-typeahead-input');
+
+        if (!(!!tooltip * !!searchContainer * !!searchInput)){ //if not all exist, try again afte3 500ms
+            if (cnt < 20)
+                setTimeout(() => { this.linkPickers(++cnt)}, 500);
+            return;
+        }
+        searchContainer.style.width = '80px'
+        var snuStyle = document.createElement('style');
+        snuStyle.innerHTML = `
+        div.snupicker {
+            max-width:200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        div.snupicker:hover {
+            background-color: #53526A;
+        }
+        `;
+
+        searchInput.addEventListener('focus', (event) => {
+            querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container').style.width = '';
+            querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'none';
+        }, true);
+        searchInput.addEventListener('blur', (event) => {
+            setTimeout(() => {
+                querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container').style.width = '80px';
+                querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'inline';
+            }, 100);
+        }, true);
+        var snuSpacer = document.createElement('div');
+        snuSpacer.id = 'snuSpacer'
+        snuSpacer.title = '[SN Utils] Hold CTRL for Slashcommand switcher'
+        snuSpacer.appendChild(snuStyle);
+        snuSpacer.appendChild(tooltip) //move the tooltip to the headerbar
+        snuSpacer.style.whiteSpace = 'nowrap';
+        snuSpacer.style.overflow = 'hidden';
+        snuSpacer.style.textOverflow = 'ellipsis';
+        snuSpacer.style.color = 'white';
+        snuSpacer.style.margin = '0 0 0 7px'
+    
+        snuInsertAfter(snuSpacer,
+            querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
+    
+        snuSpacer.querySelector('div').querySelectorAll('div').forEach((div, idx) => {
+            div.className = 'snupicker';
+            div.addEventListener('click', evt => {
+                evt.preventDefault();
+                evt.stopPropagation();
+                this.showPicker(['application', 'update-set'][idx], evt);
+            });
+        });
+    
+    }
+    
+    showPicker(pickertype,evt){
+        if (evt.ctrlKey || evt.metaKey){
+            if (pickertype == 'application')
+                snuShowSlashCommand('/sa ',true);
+            // else if (pickertype == 'update-set')
+            //     snuShowSlashCommand('/su ',true);
+            return;
+        }
+        try {
+            
+            var back = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body span.go-back-button');
+            if (back) back.click();
+            else querySelectorShadowDom.querySelectorDeep('now-icon.contextual-zone-icon').click();
+            setTimeout( () => { 
+                querySelectorShadowDom.querySelectorDeep('sn-drilldown-list.'+ pickertype+' span.label').click();
+                tryOpenList(0);
+            }, 800);
+        } catch (ex) {};
+        
+        function tryOpenList(num) { //try till element exists, max 20x
+            var fltr = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body input#filter');
+            if (fltr) {
+                fltr.classList.add('has-focus');
+                fltr.focus();
+            }
+            else if (num < 20){ 
+                setTimeout(() => {
+                    tryOpenList(++num);
+                },200)
+            }
+        }
+    }
+    
+
+
+
 }
 const snuNextManager = new SnuNextManager();
 

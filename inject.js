@@ -706,7 +706,7 @@ function snuAddSlashCommandListener() {
             }
             else if (shortcut == "ppt"){
                 e.preventDefault();
-                snuNextManager.linkPickers();
+                snuNextManager.linkPickers(0);
                 snuHideSlashCommand();
                 return;
             }
@@ -1221,6 +1221,7 @@ function snuSettingsAdded() {
     }
     if (snusettings.s2ify) {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
+        if (typeof snuNextManager != 'undefined') snuNextManager.linkPickers(0);
     }
     if (snusettings.allowsavefromotherscope){
         snuAllowSaveFromOtherScope();
