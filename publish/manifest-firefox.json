@@ -22,11 +22,8 @@
     },
     "background": {
         "scripts": [
-            "js/purify.min.js",
-            "js/jquery.min.js",
             "background.js"
-        ],
-        "persistent": true
+        ]
     },
     "content_scripts": [
         {
@@ -48,7 +45,6 @@
             ],
             "js": [
                 "js/purify.min.js",
-                "js/jquery.min.js",
                 "content_script_all_frames.js"
             ],
             "all_frames": true

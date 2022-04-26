@@ -147,6 +147,7 @@ class SnuNextManager {
         }`;
         var snuSpacer = document.createElement('div');
         snuSpacer.id = 'snuSpacer'
+        snuSpacer.title = '[SN Utils]'
         snuSpacer.appendChild(snuStyle);
         snuSpacer.appendChild(querySelectorShadowDom.querySelectorDeep('#concourse-pickers-tooltip div'))
         snuSpacer.style.whiteSpace = 'nowrap';

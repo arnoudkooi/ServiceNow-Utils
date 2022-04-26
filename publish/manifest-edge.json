@@ -3,7 +3,7 @@
   "short_name": "SN Utils for Edge",
   "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
   "author": "Arnoud Kooi / arnoudkooi.com",
-  "version": "0.0.0.0",
+    "version": "0.0.0.0",
   "manifest_version": 3,
   "permissions": [
     "activeTab",
@@ -35,7 +35,6 @@
       ],
       "js": [
         "js/purify.min.js",
-        "js/jquery.min.js",
         "content_script_all_frames.js"
       ],
       "all_frames": true

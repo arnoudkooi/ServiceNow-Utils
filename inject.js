@@ -501,12 +501,12 @@ snuEasyCompareTime();
 function snuAddFilterListener() { 
     if (document.getElementById('filter') == null) return;
     document.getElementById('filter').addEventListener('keyup', function (e) {
-        if (e.currentTarget.value.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') { //is a sys_id
-            snuSearchSysIdTables(e.currentTarget.value);
+        var filterValue = e.currentTarget.value.replace(/['" ]+/g, '');
+        if (filterValue.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') { //is a sys_id
+            snuSearchSysIdTables(filterValue);
         } 
         //adjusted for polaris compatability, 
         //moved logic to global keydown evnt to dectect '/' in filter
-
     });
 }
 
@@ -669,8 +669,8 @@ function snuAddSlashCommandListener() {
                 e.preventDefault();
                 return;
             }
-            if (shortcut.match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid") {//is a sys_id
-                var sysid = (shortcut.length == 32) ? shortcut : query;
+            if (shortcut.replace(/['" ]+/g, '').match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid") {//is a sys_id
+                var sysid = (shortcut.replace(/['" ]+/g, '').length == 32) ? shortcut.replace(/['" ]+/g, '') : query;
                 if (sysid.length != 32) return;
                 snuSearchSysIdTables(sysid);
                 //snuHideSlashCommand();
@@ -1069,7 +1069,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
         html += "<li class='cmdexpand' data-shortcut='" + shortcut + "' ><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
     }
 
-    if (!html && shortcut.replace(/ /g, '').length == 32) {
+    if (!html && shortcut.replace(/['" ]+/g, '').length == 32) {
         html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/sys_id</span> " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
@@ -3987,7 +3987,7 @@ function snuPersonaliseList(autoclose) {
 
 document.addEventListener('snuEvent', function (e)
 {
-    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined')){ //basic check for servicenow instance
+    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined') || location.pathname.endsWith('.do')){ //basic check for servicenow instance
         var script = document.createElement('script'); 
         script.textContent = e.detail.content;
         (document.head || document.documentElement).appendChild(script);
