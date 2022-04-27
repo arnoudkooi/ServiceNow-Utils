@@ -2248,7 +2248,7 @@ function setShortCuts() {
         if (typeof g_form != 'undefined') {
             mySysId = g_form.getUniqueValue();
             var action;
-            if ((event.ctrlKey || event.metaKey) && event.key == "s") { //cmd-s
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() == "s") { //cmd-s
 
                 event.preventDefault();
                 var doInsertStay = false;
