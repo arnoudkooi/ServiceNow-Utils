@@ -3016,26 +3016,29 @@ function snuPostLinkRequestToScriptSync(field) {
 
 function snuAddFieldSyncButtons() {
 
-    var fieldTypes = ["script", "xml", "html", "template", "json", "css"];
+    var fieldTypes = ["script", "xml", "html", "template", "json", "css", "condition_string"];
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
         if (g_form.isNewRecord()) return;
-        var isSysTable = g_form.getTableName().startsWith('sys_')
+        var tableName = g_form.getTableName();
+        var isSysTable = tableName.startsWith('sys_');
         jQuery(".label-text").each(function (index, value) {
             try {
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
                 var fieldType = g_form.getGlideUIElement(elm).type || jQuery(this).closest('[type]').attr('type') || jQuery(this).text().toLowerCase();
                 var txt = this.innerText.toLowerCase();
+                // Old instances still use String type for the Business Rule.Condition field.
+                var isBusinessRuleCondition = tableName == 'sys_script' && elm == 'condition';
 
-                if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType))  {
+                if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType) || isBusinessRuleCondition) {
                     jQuery(this).after(getBtns(elm,fieldType));
                     return true;
                 }
                 if (isSysTable && fieldType.includes('string')){ //probably a JSON file
                     var len = 0;
                     try{
-                        var el = document.getElementById(g_form.getTableName() + '.' + elm);
+                        var el = document.getElementById(tableName + '.' + elm);
                         len = Number(el.dataset.length);
                     } catch(e){}
                     if (len >= 4000){
