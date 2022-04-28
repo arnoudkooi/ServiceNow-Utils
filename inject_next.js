@@ -238,12 +238,12 @@ class SnuNextManager {
 
     linkPickers(cnt) {
         var tooltip = querySelectorShadowDom.querySelectorDeep('#concourse-pickers-tooltip div');
-        var searchContainer = querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container')
+        var searchContainer = querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, search-combobox search-combobox--header')
         var searchInput = querySelectorShadowDom.querySelectorDeep('input.sn-global-typeahead-input');
 
         if (!(!!tooltip * !!searchContainer * !!searchInput)){ //if not all exist, try again afte3 500ms
-            if (cnt < 20)
-                setTimeout(() => { this.linkPickers(++cnt)}, 500);
+            if (cnt < 30)
+                setTimeout(() => { this.linkPickers(++cnt)}, 600);
             return;
         }
         searchContainer.style.width = '80px'
@@ -254,6 +254,7 @@ class SnuNextManager {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            cursor: pointer;
         }
         div.snupicker:hover {
             background-color: #53526A;
@@ -261,12 +262,12 @@ class SnuNextManager {
         `;
 
         searchInput.addEventListener('focus', (event) => {
-            querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container').style.width = '';
+            querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, search-combobox search-combobox--header').style.width = '';
             querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'none';
         }, true);
         searchInput.addEventListener('blur', (event) => {
             setTimeout(() => {
-                querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container').style.width = '80px';
+                querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, search-combobox search-combobox--header').style.width = '80px';
                 querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'inline';
             }, 100);
         }, true);
@@ -283,13 +284,17 @@ class SnuNextManager {
     
         snuInsertAfter(snuSpacer,
             querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
+
+        var pickersArr = ['application', 'update-set'];
+        var pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
+        if (pickerDivs.length == 3)  pickersArr = ['domain', 'application', 'update-set']; //domain separated instance
     
-        snuSpacer.querySelector('div').querySelectorAll('div').forEach((div, idx) => {
+        pickerDivs.forEach((div, idx) => {
             div.className = 'snupicker';
             div.addEventListener('click', evt => {
                 evt.preventDefault();
                 evt.stopPropagation();
-                this.showPicker(['application', 'update-set'][idx], evt);
+                this.showPicker(pickersArr[idx], evt);
             });
         });
     
@@ -308,11 +313,22 @@ class SnuNextManager {
             var back = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body span.go-back-button');
             if (back) back.click();
             else querySelectorShadowDom.querySelectorDeep('now-icon.contextual-zone-icon').click();
-            setTimeout( () => { 
-                querySelectorShadowDom.querySelectorDeep('sn-drilldown-list.'+ pickertype+' span.label').click();
-                tryOpenList(0);
-            }, 800);
+            clickPicker(0, pickertype)
+
         } catch (ex) {};
+
+        function clickPicker(num, pickertype){
+            var lbl = querySelectorShadowDom.querySelectorDeep('sn-drilldown-list.'+ pickertype+' span.label')
+            if (lbl) {
+                lbl.click();
+                tryOpenList(0);
+            }
+            else if (num < 20){
+                setTimeout(() => { 
+                    clickPicker(++num, pickertype);
+                }, 200);
+            }
+        }
         
         function tryOpenList(num) { //try till element exists, max 20x
             var fltr = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body input#filter');

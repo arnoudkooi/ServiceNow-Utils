@@ -89,7 +89,7 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/rome/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/sandiego/All/$0",
         "hint": "Search developer portal <search>"
     },
     "diff1": {
@@ -101,7 +101,7 @@ var snuslashcommands = {
         "hint": "Send XML of record to right side of diff viewer"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=rome",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=sandiego",
         "hint": "Search Docs <search>"
     },
     "env": {
@@ -2271,6 +2271,16 @@ function setShortCuts() {
                 action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
                 gsftSubmit(null, g_form.getFormElement(), action);
                 return false;
+            }
+            else if ((event.ctrlKey || event.metaKey) && event.key == '['){
+                if (snusettings.nouielements) return //way to disable this shortcut
+                var prev = document.querySelector('button[onclick*=sysverb_record_prev]'); //previous record
+                if (prev) prev.click();
+            }
+            else if ((event.ctrlKey || event.metaKey) && event.key == ']'){
+                if (snusettings.nouielements) return //way to disable this shortcut
+                var next = document.querySelector('button[onclick*=sysverb_record_next]'); //next record
+                if (next) next.click();
             }
         }
     }, false);
