@@ -42,7 +42,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
                 conditions: [ new chrome.declarativeContent.PageStateMatcher({
                     pageUrl: {urlContains: urlContains},
                 })],
-                actions: [new chrome.declarativeContent.ShowPageAction()]
+                actions: [new chrome.declarativeContent.ShowAction()]
             }
             ]);
         });

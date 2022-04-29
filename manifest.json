@@ -3,7 +3,7 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "6.0.1.5",
+    "version": "6.0.1.6",
     "manifest_version": 3,
     "permissions": [
       "activeTab",
@@ -56,7 +56,7 @@
       }
     ],
     "commands": {
-      "_execute_page_action": {
+      "_execute_action": {
         "suggested_key": {
           "default": "Ctrl+1",
           "mac": "Command+1"
