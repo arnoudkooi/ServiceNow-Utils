@@ -88,7 +88,7 @@ function getSelection() {
     iframes.forEach(frame => {
 
         try {
-            result = frame.contentWindow.getSelection().toString();
+            result += frame.contentWindow.getSelection().toString();
         } catch (error) {
             console.log(error);
         }
