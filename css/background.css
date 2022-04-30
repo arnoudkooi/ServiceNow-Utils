@@ -1,0 +1,58 @@
+body {
+    font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
+    font-size: 11pt;
+    height: 100%;
+    margin-top: 0;
+}
+
+#container {
+    min-height:70vh; 
+    border:1pt solid #cccccc;
+}
+
+
+.container {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    width: 100vw;
+    min-height: 100vh;
+}
+
+.container__left {
+    padding: 10px;
+    min-height: 100vh;
+    width: 65%
+}
+
+.resizer {
+    background-color: #cbd5e0;
+    cursor: ew-resize;
+    height: 100vh;
+    width: 2px;
+}
+
+.container__right {
+    padding: 10px;
+    height: 100vh;
+    width: 35%
+}
+
+.result {
+    word-wrap: break-word;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #333;
+    background-image: linear-gradient(to right, #ccc, #333, #ccc);
+}
+
+pre {
+    white-space: pre-wrap;
+}
+
+label{
+    font-size:9pt;
+}

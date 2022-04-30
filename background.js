@@ -497,19 +497,6 @@ function sendToggleSearchFocus() {
         });
 }
 
-function sendToggleAtfHelper() {
-    chrome.tabs.query({
-        currentWindow: true,
-        active: true
-    },
-        function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                method: "runFunctionChild",
-                myVars: "toggleATFMode()"
-            });
-        });
-}
-
 function codeSearch(message, cookieStoreId) {
     var url = chrome.runtime.getURL("codesearch.html");
     var args = '?query=' + message.command["query"] +

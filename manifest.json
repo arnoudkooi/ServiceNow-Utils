@@ -95,7 +95,7 @@
           "inject.js",
           "inject_next.js",
           "inject_parent.js",
-          "css/inject.css",
+          "css/*",
           "js/monaco/*"
         ],
         "matches": [

@@ -8,8 +8,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
     else if (request.method == "runFunction") {
         runFunction(request.myVars);
-    } else if (request.method == "runFunctionChild") {
-        runFunction(request.myVars, 'child');
+    } else if (request.method == "setBackgroundScript") {
+        runFunction(request.myVars, "background");
     } else if (request.snippet) {
         insertTextAtCursor(request.snippet);
     }
@@ -71,18 +71,17 @@ document.addEventListener("snutils-event", function(data) {
 
 
 
-function runFunction(f, context) {
+function runFunction(f, myType = "code") {
     if (typeof document === 'undefined' || document == null) return;
 
     let inParent = document.querySelector('iframe#gsft_main') != null && document.querySelector('iframe#gsft_main').contentDocument != null;
-    //if (context == 'child' && inParent) { // see issue #171 if this works ok remove all runFunctionChild stuff
     if (inParent) {
         // don't run function meant for content frame if we're not in it
         return;
     }
     var detail = { 
         "detail" : {
-            "type" : "code", 
+            "type" : myType, 
             "content" : f 
         }
     };

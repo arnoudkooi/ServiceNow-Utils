@@ -2960,13 +2960,7 @@ function snuPostToScriptSync(field, fieldType) {
 
     }
     else { //bgscript
-        
-        try {
-            document.getElementById('runscript').style.display = "inline";
-            document.getElementById('container').style.display = "none";
-            document.querySelector('form').target = '_blank';
-
-        } catch(e){};
+    
 
         let date = new Date();
         let my_id = (date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2(date.getDate()) + '-' + pad2(date.getHours()) + pad2(date.getMinutes()) + pad2(date.getSeconds()));
@@ -4001,9 +3995,10 @@ function snuPersonaliseList(autoclose) {
 
 document.addEventListener('snuEvent', function (e)
 {
-    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined') || location.pathname.endsWith('.do')){ //basic check for servicenow instance
+    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined' || location.pathname.endsWith('.do'))){ //basic check for servicenow instance
         var script = document.createElement('script'); 
         script.textContent = e.detail.content;
         (document.head || document.documentElement).appendChild(script);
     }
+
 });
