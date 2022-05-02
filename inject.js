@@ -3072,7 +3072,6 @@ function snuAddFieldSyncButtons() {
         });
     } else if (location.href.includes("sp_config/?id=widget_editor") ||
         location.href.includes("sp_config?id=widget_editor")) {
-
         var $body = angular.element(document.body); // 1
         var $rootScope = $body.scope().$root;
         $rootScope.$watch("loadingIndicator", function (newValue, oldValue) {
@@ -3091,6 +3090,7 @@ function snuAddFieldSyncButtons() {
 function snuAddBGScriptButton() {
     if (!location.href.includes("/sys.scripts.do")) return; //only in bg script
     g_ck = document.getElementsByName('sysparm_ck')[0]?.value;
+    window.top.window.g_ck = g_ck;
     if (g_ck) {
         document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();'>[Mirror in sn-scriptsync]</a>");
     }
