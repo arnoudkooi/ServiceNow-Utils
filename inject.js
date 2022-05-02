@@ -389,7 +389,7 @@ function snuGetTables(shortcut) {
         qry = '^nameLIKE' + shortcut.replace(/\*/g, '');
     }
 
-    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE$^nameNOT LIKE00' + qry + '^EORDERBYname' + shortcut;
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE$^nameNOT LIKE00' + qry + '^ORDERBYname';
     snuLoadXMLDoc(g_ck, myurl, null, function (jsn) {
 
         if (jsn.hasOwnProperty('result')) {
@@ -1653,7 +1653,7 @@ function snuEnhanceNotFound(advanced) {
         html += 'Mode: starts with: ' + query[0] + ' | <a title="splits by underscore and does a contains for each word" href="javascript:snuEnhanceNotFound(1)">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
 
     html += '<br /><ul>';
-    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^EORDERBYlabel^nameSTARTSWITH' + query[0];
+    var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^ORDERBYlabel^nameSTARTSWITH' + query[0];
 
 
     if (advanced) {
