@@ -48,6 +48,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             else if (message.command.fieldType.includes('css')) lang = 'scss';
             else if (message.command.fieldType.includes('xml')) lang = 'xml';
             else if (message.command.fieldType.includes('html')) lang = 'html';
+            else if (message.command.name.endsWith('psm1')) lang = 'powershell';
 
             editor = monaco.editor.create(document.getElementById('container'), {
                 automaticLayout: true,
@@ -121,7 +122,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 }
             })
             editor.addAction({
-                id: "5_plain",
+                id: "7_powershell",
+                label: "Set to Powershell",
+                contextMenuGroupId: "3_lang",
+                run: (editor) => {
+                    monaco.editor.setModelLanguage(editor.getModel(), "powershell");
+                }
+            })
+            editor.addAction({
+                id: "7_plain",
                 label: "Set to Plain text",
                 contextMenuGroupId: "3_lang",
                 run: (editor) => {
