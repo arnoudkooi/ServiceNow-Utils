@@ -2260,7 +2260,7 @@ function setShortCuts() {
                     }
                 }
                 action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
-                gsftSubmit(null, g_form.getFormElement(), action);
+                gsftSubmit(gel(action));
                 return false;
             }
             else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 85) { //cmd-shift-u 
