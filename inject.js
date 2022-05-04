@@ -2269,7 +2269,7 @@ function setShortCuts() {
             else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
                 event.preventDefault();
                 action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
-                gsftSubmit(null, g_form.getFormElement(), action);
+                gsftSubmit(gel(action));
                 return false;
             }
             else if ((event.ctrlKey || event.metaKey) && event.key == '['){
