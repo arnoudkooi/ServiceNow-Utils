@@ -196,7 +196,7 @@ var menuItems = [{
     "contexts": ["selection"]
 },
 {
-    "id": "openscript",
+    "id": "openscriptinclude",
     "parentId": "goto",
     "title": "Script Include: %s",
     "contexts": ["selection"]
@@ -379,8 +379,8 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
         openSearch(clickData, tab);
     else if (clickData.menuItemId == "codesearch")
         contextCodeSearch(clickData, tab);
-    else if (clickData.menuItemId == "openscript")
-        openScriptInclude();
+    else if (clickData.menuItemId == "openscriptinclude")
+        openScriptInclude(clickData, tab);
     else if (clickData.menuItemId == "opentablelist")
         openTableList(clickData, tab);
     else if (clickData.menuItemId == "propertie")
@@ -401,7 +401,7 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
         createScriptSyncTab();
     else if (clickData.menuItemId == "copyselectedcellvalues")
         slashCommand('copycells');
-    else if (clickData.menuItemId.startsWith('codesnippet'))
+    else if (clickData.menuItemId.includes('snippet'))
         insertSnippet(clickData, tab);
     else if (clickData.menuItemId.startsWith('sc')){
         getFromSyncStorageGlobal("snusettings", function (snusettings) {

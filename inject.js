@@ -1615,7 +1615,7 @@ function snuCaptureFormClick() {
                     qryDisp += _qry[_elm].elmDisp + ' ' + _qry[_elm].operator + ' <b>' + snuEncodeHtml(_qry[_elm].valDisp) + '</b> > ';
                 }
 
-                var listurl = '/' + tbl + '_list.do?sysparm_query=' + qry;
+                var listurl = `/${tbl}_list.do?sysparm_query=${qry}&sysparm_filter_pinned=true`;
                 g_form.clearMessages();
                 if (qry) {
                     var qryDisp2 = qryDisp.substring(0, qryDisp.length - 3);
