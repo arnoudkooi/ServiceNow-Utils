@@ -385,7 +385,7 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
         openTableList(clickData, tab);
     else if (clickData.menuItemId == "propertie")
         openPropertie(clickData, tab);
-    else if (clickData.menuItemId == "unhideFields")
+    else if (clickData.menuItemId == "unhidefields")
         unhideFields(clickData, tab);
     else if (clickData.menuItemId == "canceltransaction")
         openUrl(clickData, tab, '/cancel_my_transactions.do');
