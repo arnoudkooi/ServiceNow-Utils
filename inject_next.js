@@ -284,17 +284,24 @@ class SnuNextManager {
     
         snuInsertAfter(snuSpacer,
             querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
-
-        var pickersArr = ['application', 'update-set'];
+      
         var pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
-        if (pickerDivs.length == 3)  pickersArr = ['domain', 'application', 'update-set']; //domain separated instance
-    
         pickerDivs.forEach((div, idx) => {
             div.className = 'snupicker';
-            div.addEventListener('click', evt => {
-                evt.preventDefault();
-                evt.stopPropagation();
-                this.showPicker(pickersArr[idx], evt);
+        }); 
+        
+        //domain picker can be loaded later, determine the clicked div at runtime
+        snuSpacer.addEventListener('click', evt => {
+            let eventPath = evt.path || (evt.composedPath && evt.composedPath());
+            var pickersArr = ['application', 'update-set'];
+            if (pickerDivs.length == 3)  pickersArr = ['domain', 'application', 'update-set']; //domain separated instance
+
+            pickerDivs.forEach((div, idx) => {
+                if (div == eventPath[0]){
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    this.showPicker(pickersArr[idx], evt);
+                }
             });
         });
     

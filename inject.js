@@ -75,6 +75,10 @@ var snuslashcommands = {
         "url": "/now/workspace/agent/",
         "hint": "Agent Workspace"
     },
+    "cheat": {
+        "url": "https://www.arnoudkooi.com/cheatsheet/",
+        "hint": "Download the latest SN Utils cheatsheet"
+    },
     "comm": {
         "url": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
         "hint": "Search Community <search>"
@@ -2259,7 +2263,7 @@ function setShortCuts() {
                         return false;
                     }
                 }
-                action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
+                action = (doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
                 gsftSubmit(gel(action));
                 return false;
             }
