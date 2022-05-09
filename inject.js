@@ -2263,8 +2263,13 @@ function setShortCuts() {
                         return false;
                     }
                 }
-                action = (doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
-                gsftSubmit(gel(action));
+                action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
+                var button = gel(action);
+                if (button) {
+                    gsftSubmit(button);
+                } else {
+                    gsftSubmit(null, g_form.getFormElement(), action);
+                }
                 return false;
             }
             else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.keyCode == 85) { //cmd-shift-u 
@@ -2273,7 +2278,12 @@ function setShortCuts() {
             else if ((event.ctrlKey || event.metaKey) && event.keyCode == 85) { //cmd-u 
                 event.preventDefault();
                 action = (g_form.newRecord) ? "sysverb_insert" : "sysverb_update";
-                gsftSubmit(gel(action));
+                var button = gel(action);
+                if (button) {
+                    gsftSubmit(button);
+                } else {
+                    gsftSubmit(null, g_form.getFormElement(), action);
+                }
                 return false;
             }
             else if ((event.ctrlKey || event.metaKey) && event.key == '['){
