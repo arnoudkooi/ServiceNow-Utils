@@ -19,7 +19,7 @@
     "128": "images/icon128.png"
   },
   "background": {
-    "service_worker": "service_worker.js"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
