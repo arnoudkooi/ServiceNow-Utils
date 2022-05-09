@@ -2263,7 +2263,7 @@ function setShortCuts() {
                         return false;
                     }
                 }
-                action = (doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
+                action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
                 if (gel(action)) gsftSubmit(gel(action));
                 else gsftSubmit(null, g_form.getFormElement(), action);
 
