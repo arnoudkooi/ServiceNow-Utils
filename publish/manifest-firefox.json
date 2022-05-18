@@ -7,7 +7,7 @@
     "permissions": [
         "activeTab",
         "https://*.service-now.com/*",
-        "https://*.servicenowservices.com",
+        "https://*.servicenowservices.com/*",
         "contextualIdentities",
         "tabs",
         "storage",

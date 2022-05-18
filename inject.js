@@ -104,6 +104,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Send XML of record to right side of diff viewer"
     },
+    "diffenv": {
+        "url": "*",
+        "hint": "Compare current record XML with XML of <instance>"
+    },
     "docs": {
         "url": "https://docs.servicenow.com/search?q=$0&labelkey=sandiego",
         "hint": "Search Docs <search>"
@@ -783,6 +787,15 @@ function snuAddSlashCommandListener() {
                 snuDiffXml(shortcut)
                 return;
             }
+            else if (shortcut == 'diffenv'){
+                if (query.length > 3){
+                    snuDiffXml('diff1');
+                    setTimeout(() =>{
+                        snuDiffXml('diff2', query);
+                    }, 1000)
+                }
+                return;
+            }
             else if (shortcut === 'xmlsrc') {
                 if (typeof g_form == 'undefined') {
                     //snuShowAlert("No form found","warning",2000)
@@ -1112,7 +1125,7 @@ function setSnuFilter(ev) {
     }
 }
 
-function snuDiffXml(shortcut){
+function snuDiffXml(shortcut, instance = ''){
     if (typeof g_form == 'undefined' &&  typeof gsft_main?.g_form == 'undefined' ) {
         //snuShowAlert("No form found","warning",2000)
         snuHideSlashCommand();
@@ -1122,8 +1135,21 @@ function snuDiffXml(shortcut){
         g_form = gsft_main.g_form;
     }
 
+    instance = instance.trim();
+    let origin = window.location.origin;
+    let host = window.location.host;
 
-    let thisUrl =  `${window.location.origin}/${g_form.getTableName()}.do?XML=&sys_id=${g_form.getUniqueValue()}`;
+    // this allows logic to work with on-premise instances as well
+    let newinstance = instance;
+    if (!instance.includes('.')) {
+        newinstance += '.service-now.com';
+    }
+    if (instance.length > 3){
+        origin = origin.replace(window.location.host, newinstance);
+        host = host.replace(window.location.host, newinstance);
+    }
+
+    let thisUrl =  `${origin}/${g_form.getTableName()}.do?XML=&sys_id=${g_form.getUniqueValue()}`;
     let delay = 0;
 
     if (shortcut == 'diff1'){
@@ -1145,7 +1171,7 @@ function snuDiffXml(shortcut){
             tableName : g_form.getTableName(),
             displayValue : g_form.getDisplayValue(),
             sysId : g_form.getUniqueValue(),
-            host: location.host
+            host: host
         };
         let event = new CustomEvent(
             "snutils-event", {
@@ -2263,6 +2289,7 @@ function setShortCuts() {
                         return false;
                     }
                 }
+                try { document.activeElement.blur(); } catch (e) {} // #235 dont think this throws error, but to be sure...
                 action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
                 if (gel(action)) gsftSubmit(gel(action));
                 else gsftSubmit(null, g_form.getFormElement(), action);
