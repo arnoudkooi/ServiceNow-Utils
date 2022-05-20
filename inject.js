@@ -1396,6 +1396,9 @@ function snuDoubleClickToShowFieldOrReload() {
                 location.reload();
             } else if (event.target.classList.contains('breadcrumb_container')){
                 //placeholder maybe move breadcrumb doubleclick here
+            } else if (event?.target?.classList?.contains('btn-ref')){
+                let field = event?.target.id.split(".").splice(2).join(".");
+                window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}`);
             }
             else if (['div','li','body'].includes(event.target.localName) ) {
                 snuAddTechnicalNames();
@@ -2837,7 +2840,7 @@ function snuFillFields(query) {
                 snuSetInfoText(`- Applying data to mandatory field`, true);
                 console.log(doc.g_form.getControl(fld).tagName != "SELECT");
 
-                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string") && doc.g_form.getControl(fld).tagName != "SELECT") ? "RANDOM TESTDATA " : "") + res[fld].value;
+                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string") && doc.g_form.getControl(fld).tagName != "SELECT") ? "RANDOM TEST DATA " : "") + res[fld].value;
                 doc.g_form.setValue(fld, val, res[fld].display_value);
                 setTimeout(snuHideSlashCommand,3000);
             })
