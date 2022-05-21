@@ -36,7 +36,7 @@ function snuActionSendScriptsToScriptSync(){
     let allSteps = sidePanelReact?.props?.allSteps; //the sys_id of the sys_hub_step_instance record only found here
     
     if (!allSteps) { 
-        alert('No script steps found'); 
+        alert('No action steps found'); 
         return 
     };
     if (!allSteps.filter(f => f.DB_TYPE == 'SCRIPT').length){
@@ -45,6 +45,9 @@ function snuActionSendScriptsToScriptSync(){
     }
     if (actSteps.length != allSteps.length) { // mismatch in length of objects
         alert('Cannot sync scripts'); 
+        return 
+    }; 
+    if (!confirm('This is a beta function, please use wise, at own risk or cancel!')) { // mismatch in length of objects
         return 
     }; 
     var pushed = 0;
