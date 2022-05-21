@@ -22,10 +22,19 @@ function snuAddActionScriptSyncButton(){
 
 
 function snuActionSendScriptsToScriptSync(){
+
+    let actionReact = snuFindReact(document.querySelector("#action-editor"));
+    if (!actionReact?.props?.propertiesState?.data.security?.can_write !== false){
+        alert('Can not edit read only action'); 
+        return 
+    }
+
+
     let sidePanelReact = snuFindReact(document.querySelector(".actionOutline.pn-content"));
     let actionName = document.querySelector('#header-title-input')?.value;
     let actSteps = sidePanelReact?.props?.editorState?.actSteps;
     let allSteps = sidePanelReact?.props?.allSteps; //the sys_id of the sys_hub_step_instance record only found here
+    
     if (!allSteps) { 
         alert('No script steps found'); 
         return 
