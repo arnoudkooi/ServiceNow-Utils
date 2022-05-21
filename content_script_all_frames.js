@@ -24,6 +24,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     if (location.pathname.startsWith("/now/") || location.pathname.startsWith("/x/"))
         addScript('inject_next.js', false);
+    if (location.pathname.startsWith("/$flow-designer.do"))
+        addScript('js/inject_flow.js', false);
     else if (location.pathname == "/sys.scripts.do") {
         setTimeout(function(){
             addScript('js/monaco/vs/loader.js', false);

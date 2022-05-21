@@ -2979,7 +2979,16 @@ function snuPostToScriptSync(field, fieldType) {
     data.action = 'saveFieldAsFile';
     data.instance = instance;
 
-    if (field) {
+
+    if (fieldType == 'flowaction') {
+        data.field = field.actionName;
+        data.table = 'flow_action_scripts'
+        data.sys_id = field.sysId;
+        data.content = field.script;
+        data.fieldType = 'script';
+        data.name = field.scriptName;
+    }
+    else if (field) {
         g_form.clearMessages();
         data.field = field;
         data.table = g_form.getTableName();
@@ -3010,10 +3019,13 @@ function snuPostToScriptSync(field, fieldType) {
         //     g_form.addErrorMessage(client.responseText);
     };
     client.onerror = function (e) {
-        var msg = "Error, please check if VS Code with SN SriptSync is running";
+        var msg = "Error, Check if VS Code with sn-sriptsync is running";
         try {
             g_form.addErrorMessage(msg);
-        } catch (e) { alert(msg); }
+        } catch (e) { 
+            snuSetInfoText(msg, false);
+            document.querySelector('#snualertdiv')?.remove();
+        }
 
     };
     client.send(JSON.stringify(data));

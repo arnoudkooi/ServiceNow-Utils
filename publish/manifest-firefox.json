@@ -127,7 +127,7 @@
         "inject_next.js",
         "inject_parent.js",
         "css/*",
-        "js/monaco/*"
+        "js/*"
     ],
     "manifest_version": 2,
     "applications": {

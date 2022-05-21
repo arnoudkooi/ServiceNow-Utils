@@ -96,7 +96,7 @@
           "inject_next.js",
           "inject_parent.js",
           "css/*",
-          "js/monaco/*"
+          "js/*"
         ],
         "matches": [
           "<all_urls>"

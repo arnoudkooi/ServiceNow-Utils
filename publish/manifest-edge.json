@@ -98,7 +98,7 @@
         "inject_next.js",
         "inject_parent.js",
         "css/*",
-        "js/monaco/*"
+        "js/*"
       ],
       "matches": [
         "https://*.service-now.com/*"

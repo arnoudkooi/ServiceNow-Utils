@@ -101,8 +101,10 @@ $(document).ready(function () {
                 } else if (wsObj.action == 'linkAppToVSCode') {
                     // no need to log more..
                 } else if ('instance' in wsObj) {
-
-                    if (wsObj.fieldName.includes(".var__"))
+                    if (wsObj.tableName == 'flow_action_scripts'){
+                        updateActionScript(wsObj);                        
+                    }
+                    else if (wsObj.fieldName.includes(".var__"))
                         updateVar(wsObj);
                     else 
                         updateRecord(wsObj, true);
@@ -582,28 +584,58 @@ function changeFavicon(src) {
     }
 }
 
+function updateActionScript(wsObj){
+
+    var field = 'script';
+    var val = wsObj.content || "";
+    val = JSON.stringify(val).slice(1, -1);
+    
+    var scrpt = `
+    //set state of action to draft
+    var grAction = new GlideRecord('sys_hub_action_type_definition');
+    grAction.addEncodedQuery("RLQUERYsys_hub_step_instance.action,>=1^sys_id=${wsObj.sys_id}^ENDRLQUERY");
+    grAction.query();
+    while (grAction.next()) {
+        grAction.setValue('state','draft');
+        grAction.update();
+    }
+    //update the variable
+    var grVar = new GlideRecord('sys_variable_value');
+    grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${field}");
+    grVar.setLimit(1);
+    grVar.query();
+    while (grVar.next()) {
+        grVar.setValue('value', "${val}");
+        grVar.update();
+    }
+    `;
+    snuStartBackgroundScript(scrpt, wsObj.instance);
+    
+    }
+    
+
 function updateVar(wsObj){
+   
+    var field = wsObj.fieldName.split(".")[2];
+    var val = wsObj.content || "";
+    val = JSON.stringify(val).slice(1, -1);
 
-var field = wsObj.fieldName.split(".")[2];
-var val = wsObj.content || "";
-val = JSON.stringify(val).slice(1, -1);
-
-var scrpt = `
-var grVar = new GlideRecord('sys_variable_value');
-grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${field}");
-grVar.setLimit(1);
-grVar.query();
-while (grVar.next()) {
-    grVar.setValue('value', "${val}");
-    grVar.update();
-}
-//keep the updates in sync...
-var rec = new GlideRecord('${wsObj.tableName}');
-rec.get('${wsObj.sys_id}');
-var um = new GlideUpdateManager2();
-um.saveRecord(rec);
-`;
-snuStartBackgroundScript(scrpt, wsObj.instance);
+    var scrpt = `
+    var grVar = new GlideRecord('sys_variable_value');
+    grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${field}");
+    grVar.setLimit(1);
+    grVar.query();
+    while (grVar.next()) {
+        grVar.setValue('value', "${val}");
+        grVar.update();
+    }
+    //keep the updates in sync...
+    var rec = new GlideRecord('${wsObj.tableName}');
+    rec.get('${wsObj.sys_id}');
+    var um = new GlideUpdateManager2();
+    um.saveRecord(rec);
+    `;
+    snuStartBackgroundScript(scrpt, wsObj.instance);
 
 }
 
