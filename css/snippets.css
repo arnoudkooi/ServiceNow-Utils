@@ -1,0 +1,29 @@
+body {
+    display: grid;
+    grid-template-columns: minmax(150px, 25%) 1fr;
+    padding: 0;
+    margin: 0;
+    background: black;
+    color: whitesmoke;;
+    font-family: system-ui, serif;
+
+  }
+  
+  .sidebar {
+    height: 100vh;
+    padding: 1rem;
+    font-size: 14pt;
+    text-align: center;
+  }
+  
+  .content {
+    padding: 0rem;
+  }
+  
+
+ul{
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    text-align: left;
+}

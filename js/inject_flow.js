@@ -53,7 +53,8 @@ function snuActionSendScriptsToScriptSync(){
     var pushed = 0;
     for (let step = 0; step < allSteps.length; step++) {
         if (allSteps[step].DB_TYPE == "SCRIPT"){
-            if (allSteps[step].cid !== actSteps[step].cid) continue; //extra check for same step
+            if (allSteps[step]?.cid !== actSteps[step]?.cid) continue; //extra check for same step id
+            if (allSteps[step]?.readonly) continue; 
             let data = {
                 "sysId" : actSteps[step].step_id,
                 "script" : allSteps[step].data.script,
@@ -76,7 +77,7 @@ function snuActionSendScriptsToScriptSync(){
         snudiv.style.fontWeight = 'bold';
         snudiv.style.backgroundColor = '#f0ad4e';
         snudiv.style.borderRadius = '3px';
-        snudiv.innerText = '[SN Utils] sn-scriptsync active. Edit and save script in VS Code, reload page to see results'
+        snudiv.innerText = `[SN Utils] sn-scriptsync active. Edit and save ${pushed} script${(pushed > 1) ? 's' : '' } in VS Code, reload page to see results`;
         snubtn.parentElement.parentElement.prepend(snudiv);
     }
 }
