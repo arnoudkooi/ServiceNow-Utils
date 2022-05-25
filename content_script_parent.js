@@ -1,4 +1,4 @@
-(function () {
+setTimeout(() => { //be sure content_script_all_frames.js is loaded first
 
     if (document.getElementById("filter") != null || location.pathname.startsWith("/now/nav/ui/")) {
 
@@ -19,7 +19,7 @@
         });
     });
 
-})();
+},200);
 
 
 //attach event listener from popup
