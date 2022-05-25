@@ -20,7 +20,7 @@ if (snusettings.applybgseditor && scrpt) {
 	
 	var monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
 	if (navigator.userAgent.toLowerCase().includes('firefox')) { //fix to allow autocomplete issue FF #134, didnt work :(
-		monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
+		monacoUrl = 'https://snutils.com/js/monaco/0.33/vs';
 	}
 
 	require.config({

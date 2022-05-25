@@ -8,6 +8,7 @@
         "activeTab",
         "https://*.service-now.com/*",
         "https://*.servicenowservices.com/*",
+        "https://snutils.com/*",
         "contextualIdentities",
         "tabs",
         "storage",
@@ -135,5 +136,5 @@
             "id": "email@arnoudkooi.com"
         }
     },
-    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src https://*.service-now.com https://*.servicenowservices.com 'self' data:; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com https://*.servicenowservices.com ws://127.0.0.1:1978/"
+    "content_security_policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src https://*.service-now.com https://*.servicenowservices.com https://snutils.com 'self' data:; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com https://*.servicenowservices.com https://snutils.com ws://127.0.0.1:1978/"
 }

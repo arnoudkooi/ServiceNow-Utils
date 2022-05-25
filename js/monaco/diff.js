@@ -5,9 +5,9 @@ let theme;
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     {
         var monacoUrl = chrome.runtime.getURL('/') + 'js/monaco/vs';
-        // if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134
-        //     monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
-        // }
+        if (navigator.userAgent.toLowerCase().includes('firefox')){ //fix to allow autocomplete issue FF #134
+            monacoUrl = 'https://snutils.com/js/monaco/0.33/vs';
+        }
 
         require.config({
             paths: {
