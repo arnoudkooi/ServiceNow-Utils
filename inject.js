@@ -1448,6 +1448,38 @@ function snuAddErrorLogScriptLinks(){
     }
 }
 
+//toggle Select2 for Application and updatesetpicker
+function snuS2Ify(){
+
+    if (typeof Select2 == 'undefined') return;
+    var setOff = jQuery('#application_picker_select').hasClass('select2-offscreen'); 
+
+    jQuery('#application_picker_select').select2('destroy'); 
+    jQuery('#update_set_picker_select').select2('destroy'); 
+    jQuery('#domain_picker_select_header').select2('destroy'); 
+
+    if (setOff) return;
+    
+    jQuery('#application_picker_select').select2({ 'dropdownAutoWidth': true })
+    jQuery('#application_picker_select').on('change', function (e) {
+        setTimeout(function () {
+            jQuery('#update_set_picker_select').trigger('change.select2');
+        }, 5000);
+    }); 
+
+    jQuery('#update_set_picker_select').select2({ 'dropdownAutoWidth': true });
+    jQuery('#update_set_picker_select').on('change', function (e) {
+        jQuery('#update_set_picker_select').trigger('change.select2');
+    });
+    
+    jQuery('#domain_picker_select_header').select2({ 'dropdownAutoWidth': true });
+    jQuery('#domain_picker_select_header').on('change', function (e) {
+        jQuery('#domain_picker_select_header').trigger('change.select2');
+    });
+}
+
+
+
 function snuAddFormDesignScopeChange(){
     if (location.pathname == "/$ng_fd.do" ){
         setTimeout( f => {
