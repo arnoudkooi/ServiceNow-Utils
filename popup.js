@@ -844,7 +844,7 @@ function setDataTableUpdateSets(nme) {
             }
         ],
         "drawCallback": function () {
-            var row0 = $("#updatesets tbody tr a.iscurrent").closest('tr').clone();
+            var row0 = $("#updatesets tbody tr a.iscurrent").closest('tr');
             $('#updatesets tbody tr:first').before(row0.css('background-color', '#86ED78'));
         },
         "language": {
