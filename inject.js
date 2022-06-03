@@ -260,7 +260,7 @@ var snuslashcommands = {
         "hint": "Open UI Builder"
     },
     "uis": {
-        "url": "sys_ui_script_list.do?sysparm_query=script_nameLIKE$0^ORDERBYDESCsys_updated_on",
+        "url": "sys_ui_script_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter UI Scripts <name>",
         "fields": "name"
     },
@@ -845,7 +845,7 @@ function snuAddSlashCommandListener() {
                     if (typeof qry != 'undefined') {
                         if (targeturl.includes("{}")) {
                             targeturl = targeturl.replace('{}', qry.getTableName());
-                            window.open(targeturl, '_blank');
+                            if (!targeturl.startsWith("$random")) window.open(targeturl, '_blank');
                         }
                         else if (targeturl.startsWith("&")) {
                             var myurl = doc.location.href
