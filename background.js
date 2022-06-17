@@ -10,7 +10,7 @@ var nme;
 var jsnNodes;
 var urlFull;
 var updateSetTables = [];
-var lastCommand = (new Date()).getTime();
+var lastCommand;
 var cmd = {};
 
 var urlContains = ".service-now.com";
@@ -150,9 +150,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 
 chrome.commands.onCommand.addListener(function (command) {
-
-    if ((new Date()).getTime() - lastCommand < 500) {
-        //dont trigger twice
+    if (typeof lastCommand !== 'undefined' && (new Date()).getTime() - lastCommand < 500) {
+        //dont trigger twice #245
     }
     else if (command == "show-technical-names")
         addTechnicalNames();
