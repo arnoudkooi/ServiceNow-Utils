@@ -1396,9 +1396,15 @@ function snuDoubleClickToShowFieldOrReload() {
                 location.reload();
             } else if (event.target.classList.contains('breadcrumb_container')){
                 //placeholder maybe move breadcrumb doubleclick here
-            } else if (event?.target?.classList?.contains('btn-ref')){
+            } else if (event?.target?.classList?.contains('btn-ref')){ //open refernece record
                 let field = event?.target.id.split(".").splice(2).join(".");
-                window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}`);
+                if (field)
+                    window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}`);
+                else { //maybe a document ID
+                    var data = event?.target?.parentElement.dataset;
+                    if (data?.sysi && data?.table)
+                        window.open(`${data?.table}?sys_id=${data?.sysid}`);
+                }
             }
             else if (['div','li','body'].includes(event.target.localName) ) {
                 snuAddTechnicalNames();
