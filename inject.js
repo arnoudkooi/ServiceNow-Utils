@@ -371,6 +371,7 @@ if (typeof jQuery != "undefined") {
         snuMakeReadOnlyContentCopyable();
     });
 }
+flowDesignerDoubleClick();
 
 function snuEncodeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/\//g, '&#x2F;');
@@ -1344,7 +1345,7 @@ function snuRemoveFromList(){
 
 function snuDoubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined'  || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
-        document.addEventListener('dblclick', function (event) {
+        document.addEventListener('dblclick', event => {
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') || 
                 event?.target?.parentElement?.classList.contains('sc_editor_label')) {
                 var elm;
@@ -1402,7 +1403,7 @@ function snuDoubleClickToShowFieldOrReload() {
                     window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}`);
                 else { //maybe a document ID
                     var data = event?.target?.parentElement.dataset;
-                    if (data?.sysi && data?.table)
+                    if (data?.sysid && data?.table)
                         window.open(`${data?.table}?sys_id=${data?.sysid}`);
                 }
             }
@@ -1412,6 +1413,39 @@ function snuDoubleClickToShowFieldOrReload() {
         }, true);
     }
 }
+
+//current only implementation is doubleclick label to edit condition field, or open condition in list with CTRL/CMD
+function flowDesignerDoubleClick() {
+    if (location.pathname != "/$flow-designer.do") return;
+    document.addEventListener('dblclick', event => {
+        if (angular && event.path.length > 2 &&
+            (event.path[2].classList?.contains('form-group') || event.path[2].classList?.contains('content-container'))) {
+            let elm = event.path[2].querySelector('.compounds');
+            if (elm) {
+                let angElm = angular.element(elm).scope().$parent;
+                let oldValue = angElm.filterConfig.encodedQuery;
+                console.log(angElm);
+                if (event.ctrlKey || event.metaKey) {
+                    window.open(`${angElm.table}_list.do?sysparm_query=${oldValue}&sysparm_filter_pinned=true`);
+                } else {
+                    let newValue = prompt('[SN Utils]\nCondition table: ' + angElm.table + '\nValue:', oldValue);
+                    if (newValue !== null && newValue != oldValue) {
+                        angElm.$emit("snfilter:initialize_query", newValue);
+                    }
+                }
+            }
+            else {
+                snuSetInfoText('Flow Designer label doubeleclick only implemented for Condition fields',false);
+                setTimeout(snuHideSlashCommand,4000);
+            }
+        }
+        else if (event?.target?.classList?.contains('form-label')){
+            snuSetInfoText('Flow Designer label doubeleclick only implemented for Condition fields',false);
+            setTimeout(snuHideSlashCommand,4000);
+        }
+    })
+}
+
 
 function mouseEnterToConvertToHyperlink() {
     if (typeof g_form != 'undefined') {
