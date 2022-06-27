@@ -2066,7 +2066,7 @@ function snuAddTechnicalNames() {
     //add names to variables in form formatter
     if (typeof g_form != 'undefined') {
         g_form.nameMap.each(vari => {
-            var elm = document.querySelector("div[id$='"+ vari.realName +"']");
+            var elm = document.querySelector(`div[id$='${vari.realName}'], label[id$='${vari.realName}_label']`);
                 if (elm && !elm.classList.contains('snutn')){
                     try{
                     var newElm = document.createElement('span');
@@ -2075,7 +2075,10 @@ function snuAddTechnicalNames() {
                     // The variable definition table in case of the order form and the variable storage table in other cases
                     var linkTableName = tableName == 'ni' ? 'item_option_new' : 'sc_item_option';
                     newElm.innerHTML = "<span class='snuwrap'> | <a target='_blank' href='/" + linkTableName + ".do?sys_id=" + sysid + "'>" + vari.prettyName + "</a></span>"; newElm.style = "font-family:monospace;";
-                    elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
+                    if (elm.tagName == 'DIV')
+                        elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
+                    else //checkbox
+                        elm.appendChild(newElm);
                     elm.classList.add('snutn');
                     } catch {}
                 }
