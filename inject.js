@@ -313,6 +313,7 @@ var snuslashcommands = {
 var snuslashswitches = {
     "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
     "n": { "description": "New Record", "value": "$0.do", "type": "link" },
+    "l": { "description": "View list", "value": "$0_list.do", "type": "link" },
     "r": { "description": "Open Random Record", "value": "$random.$0", "type": "link" },
     "ra": { "description": "REST API Explorer", "value": "$restapi.do?tableName=$0", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
