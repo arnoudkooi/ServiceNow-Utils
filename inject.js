@@ -318,7 +318,7 @@ var snuslashswitches = {
     "ra": { "description": "REST API Explorer", "value": "$restapi.do?tableName=$0", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
     "erd": { "description": "View Schema Map", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
-
+    
     "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
     "f": { "description": "Filter Only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
     "ga": { "description": "Group Count Ascending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNT", "type": "querypart" },
@@ -334,6 +334,7 @@ var snuslashswitches = {
     "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on", "type": "encodedquerypart" },
     "pf": { "description": "Use Polaris = False", "value": "&sysparm_use_polaris=false", "type": "querypart" },
     "p": { "description": "Filter Pinned", "value": "&sysparm_filter_pinned=true", "type": "querypart" },
+    "pi": { "description": "Pop In - Open in full UI", "value": "/nav_to.do?uri=", "type": "prepend" },
 }
 
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD", //"IN", //removed, to common ie: INC00010001
@@ -635,6 +636,9 @@ function snuAddSlashCommandListener() {
                             linkSwitch = true;
                             unusedSwitches = {};
                             switchText = '<br /> Options:<br />'; //reset switchtext
+                        }
+                        else if (snuslashswitches[prop].type == "prepend") {
+                            targeturl = snuslashswitches[prop].value + targeturl;
                         }
                         else if (snuslashswitches[prop].value.startsWith("^")) {
                             targeturl += snuslashswitches[prop].value;
