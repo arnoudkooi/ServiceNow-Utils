@@ -620,8 +620,7 @@ function snuAddSlashCommandListener() {
                 targeturl = targeturl.replace(/\$sysid/g, sysId);
             }
             else { //workspace
-                var myurl = window.location.search;
-                var parts = myurl.pathname.split("/");
+                var parts = window.location.pathname.split("/");
                 var idx = parts.indexOf("sub") // show subrecord if available
                 if (idx != -1) parts = parts.slice(idx);
                 idx = parts.indexOf("record")
@@ -2562,9 +2561,15 @@ function getBlob(encoded) {
 }
 
 function snuSaveImage(imgData, fileInfo, tableName, sysId) {
+    function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
+    var date = new Date();
+    fileName = 'screenshot_' + date.getFullYear().toString() +
+                                  pad2(date.getMonth() + 1) + pad2( date.getDate()) + '_'  +
+                                  pad2( date.getHours() ) + pad2( date.getMinutes() ) + 
+                                  pad2( date.getSeconds() ) + '.png';
 
     var URL = "/api/now/attachment/file?table_name=" +
-        tableName + "&table_sys_id=" + sysId + "&file_name=" + fileInfo.name;
+        tableName + "&table_sys_id=" + sysId + "&file_name=" + fileName;
 
     var request = new XMLHttpRequest();
     request.open("POST", URL, true);
@@ -2580,7 +2585,7 @@ function snuSaveImage(imgData, fileInfo, tableName, sysId) {
                 g_form.clearMessages();
                 g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" +
                     `<div class="input-group">
-                <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="` + r.result.file_name.replace('.png', '') + `" style='width:200px;'class="form-control" placeholder="Image name">
+                <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="` + r.result.file_name.replace('.png', '') + `" style='width:260px;'class="form-control" placeholder="Image name">
                 <span class="input-group-btn" style="display: inline; ">
                 <button class="btn btn-primary" onClick='renamePasted("` + r.result.sys_id + `")' style="width: 80px;" type="button">.png Save..</button>
                 </span>
