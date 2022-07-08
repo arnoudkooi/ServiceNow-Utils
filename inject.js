@@ -607,9 +607,31 @@ function snuAddSlashCommandListener() {
             targeturl = (snuslashcommands[shortcut].url || "");
         }
 
-        if (typeof g_form !== 'undefined') {
+        if (typeof g_form !== 'undefined') { //get sysid and tablename from classic form
             targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
             targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
+        }
+        else { ///get sysid and tablename from portal or workspace
+            let searchParams = new URLSearchParams(window.location.search)
+            let tableName = searchParams.get('table') || searchParams.get('id');
+            let sysId = searchParams.get('sys_id');
+            if (tableName && sysId){ //portal
+                targeturl = targeturl.replace(/\$table/g, tableName);
+                targeturl = targeturl.replace(/\$sysid/g, sysId);
+            }
+            else { //workspace
+                var myurl = window.location.search;
+                var parts = myurl.pathname.split("/");
+                var idx = parts.indexOf("sub") // show subrecord if available
+                if (idx != -1) parts = parts.slice(idx);
+                idx = parts.indexOf("record")
+                if (idx > -1 && parts.length >= idx + 2) {
+                    tableName = parts[idx + 1];
+                    sysId = parts[idx + 2];
+                }
+                targeturl = targeturl.replace(/\$table/g, tableName);
+                targeturl = targeturl.replace(/\$sysid/g, sysId);
+            }
         }
 
         var switchText = '<br /> Options:<br />';

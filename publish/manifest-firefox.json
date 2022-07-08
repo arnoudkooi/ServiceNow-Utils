@@ -117,10 +117,6 @@
         },
         "show_matches": ["https://*.service-now.com/*", "https://*.servicenowservices.com/*"]
     },
-    "options_ui": {
-        "page": "options.html",
-        "browser_style": true
-    },
     "web_accessible_resources": [
         "js/purify.min.js",
         "inject.js",

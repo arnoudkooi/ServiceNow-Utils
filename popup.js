@@ -432,9 +432,6 @@ function setBrowserVariables(obj) {
                 });
                 break;
             case "#tabsettings":
-                if (typeof InstallTrigger !== 'undefined') {
-                    jQuery(".hide-in-chrome").css('display', 'inline');
-                }
                 getSettings(function(){});
                 getInstanceSettings();
                 break;
@@ -1311,7 +1308,7 @@ function getExploreData() {
         method: "getVars",
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
-        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref);
+        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref) || getParameterByName('id', response.frameHref);
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id", response.frameHref);
 
         if (!tableName) { //try to find table and sys_id in workspace
