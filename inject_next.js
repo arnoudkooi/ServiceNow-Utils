@@ -281,14 +281,22 @@ class SnuNextManager {
         snuSpacer.style.textOverflow = 'ellipsis';
         snuSpacer.style.color = 'white';
         snuSpacer.style.margin = '0 0 0 7px'
+
     
         snuInsertAfter(snuSpacer,
             querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
-      
-        var pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
-        pickerDivs.forEach((div, idx) => {
-            div.className = 'snupicker';
-        }); 
+            
+        var pickerDivs;
+        snuSpacer.addEventListener('mouseover', () => {
+            pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
+            pickerDivs.forEach((div, idx) => {
+                div.className = 'snupicker';
+            }); 
+        })
+
+        var wrpr = querySelectorShadowDom.querySelectorDeep('sn-search-input-wrapper');
+        if (wrpr) wrpr.windowSize = 'collapsed'; //show icon instead of small input
+
         
         //domain picker can be loaded later, determine the clicked div at runtime
         snuSpacer.addEventListener('click', evt => {
