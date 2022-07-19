@@ -188,19 +188,25 @@ var snuslashcommands = {
         "url": "sp_widget_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Service Portal Widgets <search>",
         "fields": "name",
-        "overwriteurl": "/sp_config?id=widget_editor&sys_id=$sysid"
+        "overwriteurl": "/sp_config?id=widget_editor&sys_id=$sysid",
+        "inlineonly" : true
     },
     "sa": {
         "url": "*",
         "hint": "Switch Application (10 most recent)"
     },
-    // "su": {
-    //     "url": "sys_update_set_list.do?sysparm_query=sys_created_by=javascript:gs.getUserName()^state=in progress^application=javascript:gs.getCurrentApplicationId()^nameLIKE$0^ORDERBYDESCsys_updated_on",
-    //     "hint": "[BETA] Switch Updateset (created by me) <name>",
-    //     "fields": "name,sys_updated_on",
-    //     "overwriteurl": "javascript:snuSetUpdateSet('$sysid')",
-    //     "inline_only" : true
-    // },
+    "sd": {
+        "url": "domain_list.do?sysparm_query=nameLIKE$0^ORDERBYname",
+        "hint": "[BETA] Switch Domain <name>",
+        "fields": "name",
+        "overwriteurl": "#snu:switchto,domain,value,$sysid",
+    },
+    "su": {
+        "url": "sys_update_set_list.do?sysparm_query=state=in progress^application=javascript:gs.getCurrentApplicationId()^nameLIKE$0^ORDERBYDESCsys_updated_on",
+        "hint": "[BETA] Switch Updateset <name>",
+        "fields": "name,sys_updated_on",
+        "overwriteurl": "#snu:switchto,updateset,sysId,$sysid",
+    },
     "rnd": {
         "url": "*",
         "hint": "Fill empty mandatory fields"
@@ -451,6 +457,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
                 var results = jsn.result;
+                if (table == 'domain') directlinks = `0 <a id="snulnk0" href="#snu:switchto,domain,value,global">global</a><br />`;
                 if (results.length == 0) directlinks = `No results found`;
                 var idx = 0;
                 var dispIdx = 0;
@@ -489,9 +496,28 @@ function snuGetDirectLinks(targeturl, shortcut) {
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
             window.top.document.getElementById('snudirectlinks');
-            window.top.document.querySelectorAll("#snudirectlinks a").forEach(function (elm) { elm.addEventListener("click", snuHideSlashCommand) });
+            window.top.document.querySelectorAll("#snudirectlinks a").forEach(elm => { 
+
+                if (elm.hash.startsWith('#snu:')){
+                    var args = elm.hash.substring(5).split(',');
+                    elm.addEventListener("click", (evt) =>{
+                        evt.preventDefault();
+                        snuExcuteHashCommand(args);
+                    })
+                }
+                else 
+                    elm.addEventListener("click", snuHideSlashCommand) 
+            
+            });
 
         })
+    }
+}
+
+
+function snuExcuteHashCommand(args){
+    if (args.length == 4 && args[0] == 'switchto'){
+        snuSwitchTo(args[1],args[2],args[3]);
     }
 }
 
@@ -538,7 +564,7 @@ function snuAddSlashCommandListener() {
         if (isFinite(e.key)) {
             if (window.top.document.getElementById('snulnk' + e.key)) {
                 e.preventDefault();
-                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent("click"));
+                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new Event('click',{cancelable:true}));
                 return;
             }
         }
@@ -584,7 +610,7 @@ function snuAddSlashCommandListener() {
 
 
         var targeturl = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].url || "" : "";
-        var inlineOnly = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].inline_only : false;
+        var inlineOnly = snuslashcommands.hasOwnProperty(shortcut) ? snuslashcommands[shortcut].overwriteurl : false;
 
         if (typeof g_form == 'undefined') {
             try { //get if in iframe
@@ -1245,6 +1271,8 @@ function snuAddSlashCommand(cmd) {
 }
 
 function snuSettingsAdded() {
+    if (snusettings?.added) return;
+    snusettings.added = true; //only run once when installed both normal and OnPrem version
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
     if (typeof snusettings.applybgseditor == 'undefined') snusettings.applybgseditor = true;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
@@ -1560,7 +1588,7 @@ function snuAddFormDesignScopeChange(){
                         snuSetInfoText(`<br />Switch to scope of this view: <a id='snuswitcscope' href='#'  >${scope}</a>`);
                         document.querySelector('#snuswitcscope').addEventListener('click', e => {
                             e.preventDefault();
-                            snuSetScope(scopeId);
+                            snuSwitchTo("application","app_id",scopeId);
                         });
 
                     })
@@ -3899,7 +3927,7 @@ function snuGetLastScopes(query) {
             document.querySelectorAll('a.snuscopeswitch').forEach(item => {
                 item.addEventListener('click', event => {
                     event.preventDefault();
-                    snuSetScope(event.target.hash.substring(1));
+                    snuSwitchTo("application","app_id",event.target.hash.substring(1));
                 })
             })
         })
@@ -3907,9 +3935,10 @@ function snuGetLastScopes(query) {
 
 }
 
-function snuSetScope(scopeId) {
-    var payload = { "app_id": scopeId };
-    fetch("/api/now/ui/concoursepicker/application", {
+function snuSwitchTo(switchType, key,  val) {
+    let payload = {}
+    payload[key] = val; //
+    fetch(`/api/now/ui/concoursepicker/${switchType}`, {
         method: 'PUT',
         headers: {
           'Accept' : 'application/json, text/plain, */*',
@@ -3922,13 +3951,18 @@ function snuSetScope(scopeId) {
       .then(response => response.json())
       .then(data => {
           if (data?.error)
-            snuSetInfoText('Error switching app:' + data.error.detail, false);
-          else 
-            location.reload();
+            snuSetInfoText('Error switching:' + data.error.detail, false);
+          else {
+            snuSetInfoText('Reloading page...', false);
+            setTimeout(() => {
+                window.top.location.reload();
+            }, 1000);
+          }
+            
 
       })
       .catch((error) => {
-          snuSetInfoText('Error switching app:', error, false);
+          snuSetInfoText('Error switching:', error, false);
       });
 }
 
@@ -4068,20 +4102,6 @@ function snuImpersonater(doc){
         } catch (e){}
     }
     return impersonatingUser;
-}
-
-
-function snuSetUpdateSet(sysid) { 
-    var updateSetSelect = window.top.document.getElementById("update_set_picker_select");
-    if (updateSetSelect) { //set the select if in UI16
-        window.top.jQuery("#update_set_picker_select").val("string:" + sysid).trigger('change');
-    }
-    else { //via the API
-        var myurl = '/api/now/ui/concoursepicker/updateset';
-        snuLoadXMLDoc(g_ck, myurl, `{"sysId": "${sysid}"}`, function (jsn) {
-
-        });
-    }
 }
 
 

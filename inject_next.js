@@ -238,9 +238,9 @@ class SnuNextManager {
 
     linkPickers(cnt) {
         var tooltip = querySelectorShadowDom.querySelectorDeep('#concourse-pickers-tooltip div');
-        var searchContainer = querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, search-combobox search-combobox--header')
-        var searchInput = querySelectorShadowDom.querySelectorDeep('input.sn-global-typeahead-input');
-
+        var searchContainer = querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, div.search-combobox--header')
+        var searchInput = querySelectorShadowDom.querySelectorDeep('input.sn-global-typeahead-input, input.input-container__input');
+        
         if (!(!!tooltip * !!searchContainer * !!searchInput)){ //if not all exist, try again afte3 500ms
             if (cnt < 30)
                 setTimeout(() => { this.linkPickers(++cnt)}, 600);
@@ -291,6 +291,7 @@ class SnuNextManager {
             pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
             pickerDivs.forEach((div, idx) => {
                 div.className = 'snupicker';
+                div.dataset.index = ++idx;
             }); 
         })
 
@@ -301,46 +302,44 @@ class SnuNextManager {
         //domain picker can be loaded later, determine the clicked div at runtime
         snuSpacer.addEventListener('click', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-            var pickersArr = ['application', 'update-set'];
-            if (pickerDivs.length == 3)  pickersArr = ['domain', 'application', 'update-set']; //domain separated instance
+            var idx = Number(eventPath[0]?.dataset?.index) || 1; //determine number of clicked element
+            
+            evt.preventDefault();
+            evt.stopPropagation();
+            this.showPicker(idx, evt, eventPath[0]);
 
-            pickerDivs.forEach((div, idx) => {
-                if (div == eventPath[0]){
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                    this.showPicker(pickersArr[idx], evt);
-                }
-            });
         });
     
     }
     
-    showPicker(pickertype,evt){
-        if (evt.ctrlKey || evt.metaKey){
-            if (pickertype == 'application')
-                snuShowSlashCommand('/sa ',true);
-            // else if (pickertype == 'update-set')
-            //     snuShowSlashCommand('/su ',true);
-            return;
-        }
+    showPicker(pickerindex,evt,elm){
         try {
-            
+            if (evt.ctrlKey || evt.metaKey){
+                var txt = elm.innerText.toLowerCase();
+                if (txt.startsWith('domain')) snuShowSlashCommand('/sd ',true);
+                else if (txt.startsWith('application')) snuShowSlashCommand('/sa ',true);
+                else if (txt.startsWith('update')) snuShowSlashCommand('/su ',true);
+                return;
+            }
+        
             var back = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body span.go-back-button');
             if (back) back.click();
             else querySelectorShadowDom.querySelectorDeep('now-icon.contextual-zone-icon').click();
-            clickPicker(0, pickertype)
+            clickPicker(0, pickerindex)
 
         } catch (ex) {};
 
-        function clickPicker(num, pickertype){
-            var lbl = querySelectorShadowDom.querySelectorDeep('sn-drilldown-list.'+ pickertype+' span.label')
+        function clickPicker(num, pickerindex){
+            let lbls = querySelectorShadowDom.querySelectorAllDeep('sn-drilldown-list span.label');
+            let lbl; //make clicked label independent of available pickers but based on index #260
+            if (lbls.length >= pickerindex ) lbl = querySelectorShadowDom.querySelectorAllDeep('sn-drilldown-list span.label')[pickerindex -1];
             if (lbl) {
                 lbl.click();
                 tryOpenList(0);
             }
             else if (num < 20){
                 setTimeout(() => { 
-                    clickPicker(++num, pickertype);
+                    clickPicker(++num, pickerindex);
                 }, 200);
             }
         }
