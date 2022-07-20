@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
         getBrowserVariables(tabid,cookieStoreId);
 
     });
-    document.querySelector('#firefoxoptions').href = chrome.runtime.getURL("options.html");
 
     if (typeof InstallTrigger !== 'undefined') $('input[type="color"]').attr('type','text') //bug in FireFox to use html5 color tag in popup
 
