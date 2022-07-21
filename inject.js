@@ -10,6 +10,7 @@ var snuNav = {
     'loading': 'mustload',
     'loadedLastTime': 0
 };
+var snuSettingsParsed = false;
 
 var snuslashcommands = {
     "acl": {
@@ -189,7 +190,7 @@ var snuslashcommands = {
         "hint": "Service Portal Widgets <search>",
         "fields": "name",
         "overwriteurl": "/sp_config?id=widget_editor&sys_id=$sysid",
-        "inlineonly" : true
+        "inlineonly": true
     },
     "sa": {
         "url": "*",
@@ -324,7 +325,7 @@ var snuslashswitches = {
     "ra": { "description": "REST API Explorer", "value": "$restapi.do?tableName=$0", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
     "erd": { "description": "View Schema Map", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
-    
+
     "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
     "f": { "description": "Filter Only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
     "ga": { "description": "Group Count Ascending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNT", "type": "querypart" },
@@ -344,14 +345,13 @@ var snuslashswitches = {
 }
 
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD", //"IN", //removed, to common ie: INC00010001
-     "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
+    "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
 
-document.addEventListener('snuUpdateSettingsEvent', function (e)
-{
-    if (e.type == "snuUpdateSettingsEvent"){
-        if (e?.detail?.action == "updateSlashCommand"){
+document.addEventListener('snuUpdateSettingsEvent', function (e) {
+    if (e.type == "snuUpdateSettingsEvent") {
+        if (e?.detail?.action == "updateSlashCommand") {
             snuslashcommands[e.detail.cmdname] = e.detail.cmd;
-            snuShowSlashCommand('/' + e.detail.cmdname + ' ',0);
+            snuShowSlashCommand('/' + e.detail.cmdname + ' ', 0);
         }
     }
 });
@@ -368,7 +368,7 @@ if (typeof jQuery != "undefined") {
 
         // We have to call the function twice since we don't know what type of related list loading is selected by a user (with the form or after forms loads).
         doubleClickToSetQueryListV2();
-        if (typeof CustomEvent.observe == 'function'){
+        if (typeof CustomEvent.observe == 'function') {
             CustomEvent.observe('related_lists.ready', function () {
                 doubleClickToSetQueryListV2();
             });
@@ -448,7 +448,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
             "&sysparm_fields=sys_id," + fields;
 
-        try {   
+        try {
             var table = url.match(/.*\/(.*)\?/)[1]
         } catch (ex) {
             return false;
@@ -474,7 +474,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                         link = overwriteurl.replace(/\$sysid/g, val.sys_id)
                         for (var i = 0; i < fieldArr.length; i++) {
                             link = link.replaceAll('$' + fieldArr[i], val[fieldArr[i]]);
-                        }                     
+                        }
                         target = (!overwriteurl.startsWith("http") && !overwriteurl.startsWith("/")) ? "gsft_main" : "_blank";
                     }
                     var idattr
@@ -496,18 +496,18 @@ function snuGetDirectLinks(targeturl, shortcut) {
             }
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
             window.top.document.getElementById('snudirectlinks');
-            window.top.document.querySelectorAll("#snudirectlinks a").forEach(elm => { 
+            window.top.document.querySelectorAll("#snudirectlinks a").forEach(elm => {
 
-                if (elm.hash.startsWith('#snu:')){
+                if (elm.hash.startsWith('#snu:')) {
                     var args = elm.hash.substring(5).split(',');
-                    elm.addEventListener("click", (evt) =>{
+                    elm.addEventListener("click", (evt) => {
                         evt.preventDefault();
                         snuExcuteHashCommand(args);
                     })
                 }
-                else 
-                    elm.addEventListener("click", snuHideSlashCommand) 
-            
+                else
+                    elm.addEventListener("click", snuHideSlashCommand)
+
             });
 
         })
@@ -515,9 +515,9 @@ function snuGetDirectLinks(targeturl, shortcut) {
 }
 
 
-function snuExcuteHashCommand(args){
-    if (args.length == 4 && args[0] == 'switchto'){
-        snuSwitchTo(args[1],args[2],args[3]);
+function snuExcuteHashCommand(args) {
+    if (args.length == 4 && args[0] == 'switchto') {
+        snuSwitchTo(args[1], args[2], args[3]);
     }
 }
 
@@ -535,13 +535,13 @@ function snuEasyCompareTime() { //for our ITOM friends to easy select compare ti
 }
 snuEasyCompareTime();
 
-function snuAddFilterListener() { 
+function snuAddFilterListener() {
     if (document.getElementById('filter') == null) return;
     document.getElementById('filter').addEventListener('keyup', function (e) {
         var filterValue = e.currentTarget.value.replace(/['" ]+/g, '');
         if (filterValue.match(/^[0-9a-f]{32}$/) != null && e.key == 'Enter') { //is a sys_id
             snuSearchSysIdTables(filterValue);
-        } 
+        }
         //adjusted for polaris compatability, 
         //moved logic to global keydown evnt to dectect '/' in filter
     });
@@ -564,7 +564,7 @@ function snuAddSlashCommandListener() {
         if (isFinite(e.key)) {
             if (window.top.document.getElementById('snulnk' + e.key)) {
                 e.preventDefault();
-                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new Event('click',{cancelable:true}));
+                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new Event('click', { cancelable: true }));
                 return;
             }
         }
@@ -599,13 +599,13 @@ function snuAddSlashCommandListener() {
         var shortcut = snufilter.slice(0, idx).toLowerCase();
         if (snuPropertyNames.length > 1 && snuIndex >= 0 && ["ArrowDown", "ArrowUp", "Enter", "Tab", " "].includes(e.key)) {
             shortcut = snuPropertyNames[snuIndex];
-           // idx = snufilter.indexOf(' '); //why is this line here?
+            // idx = snufilter.indexOf(' '); //why is this line here?
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if (((e.key == 'ArrowRight' && noSpace) || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 || 
-            tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) { 
-                snuGetTables(tmpshortcut);
+        if (((e.key == 'ArrowRight' && noSpace) || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 ||
+            tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) {
+            snuGetTables(tmpshortcut);
         };
 
 
@@ -614,9 +614,9 @@ function snuAddSlashCommandListener() {
 
         if (typeof g_form == 'undefined') {
             try { //get if in iframe
-                g_form =  
-                (document.querySelector("#gsft_main") || document.querySelector("[component-id]")
-                .shadowRoot.querySelector("#gsft_main")).contentWindow.g_form;
+                g_form =
+                    (document.querySelector("#gsft_main") || document.querySelector("[component-id]")
+                        .shadowRoot.querySelector("#gsft_main")).contentWindow.g_form;
             } catch (e) { }
         }
 
@@ -641,7 +641,7 @@ function snuAddSlashCommandListener() {
             let searchParams = new URLSearchParams(window.location.search)
             let tableName = searchParams.get('table') || searchParams.get('id');
             let sysId = searchParams.get('sys_id');
-            if (tableName && sysId){ //portal
+            if (tableName && sysId) { //portal
                 targeturl = targeturl.replace(/\$table/g, tableName);
                 targeturl = targeturl.replace(/\$sysid/g, sysId);
             }
@@ -761,12 +761,12 @@ function snuAddSlashCommandListener() {
                 snuFillFields(query);
                 return;
             }
-            else if (shortcut == "imp"){
+            else if (shortcut == "imp") {
                 e.preventDefault();
                 snuGetUsersForImpersonate(query);
                 return;
             }
-            else if (shortcut == "ppt"){
+            else if (shortcut == "ppt") {
                 e.preventDefault();
                 snuNextManager.linkPickers(0);
                 snuHideSlashCommand();
@@ -837,14 +837,14 @@ function snuAddSlashCommandListener() {
                 }
                 return;
             }
-            else if (['diff1','diff2'].includes(shortcut)){
+            else if (['diff1', 'diff2'].includes(shortcut)) {
                 snuDiffXml(shortcut)
                 return;
             }
-            else if (shortcut == 'diffenv'){
-                if (query.length > 3){
+            else if (shortcut == 'diffenv') {
+                if (query.length > 3) {
                     snuDiffXml('diff1');
-                    setTimeout(() =>{
+                    setTimeout(() => {
                         snuDiffXml('diff2', query);
                     }, 1000)
                 }
@@ -880,7 +880,7 @@ function snuAddSlashCommandListener() {
                 var iframes = window.top.document.querySelectorAll("iframe");
                 if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
                     iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
-                
+
                 iframes.forEach((iframe) => {
                     if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
                         iframe.contentWindow.snuAddTechnicalNames();
@@ -892,7 +892,7 @@ function snuAddSlashCommandListener() {
                 return;
             }
             else if (shortcut.startsWith("-")) {
-                var gsft =  (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
+                var gsft = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
                 var doc = gsft ? gsft.contentWindow : window;
                 if (typeof doc.GlideList2 != 'undefined') {
                     var qry = doc.GlideList2.get(doc.document.querySelector('#sys_target')?.value);
@@ -953,18 +953,18 @@ function snuAddSlashCommandListener() {
             else if (shortcut == "unimp") {
                 e.preventDefault();
                 var impersonating = snuImpersonater();
-                if (impersonating){
+                if (impersonating) {
                     snuImpersonate(impersonating);
                     return;
-                } else{
-                    snuSetInfoText("You are not impersonating anyone",false);
+                } else {
+                    snuSetInfoText("You are not impersonating anyone", false);
                 }
             }
             else if (shortcut == "lang") {
                 {
 
                     if (query.length != 2) {
-                        snuSetInfoText("Please provide a 2 character language code like 'en'",false);
+                        snuSetInfoText("Please provide a 2 character language code like 'en'", false);
                         return;
                     }
                     var payload = { "current": query };
@@ -1075,10 +1075,10 @@ function snuAddSlashCommandListener() {
     });
 
     window.top.document.getElementById('snufilter').addEventListener('paste', function (e) {
-        setTimeout(function(){
+        setTimeout(function () {
             obj = { 'key': 'ArrowRight' };
             window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', obj));
-        },30 );
+        }, 30);
 
     });
 }
@@ -1103,11 +1103,11 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
         if (startswith)
             return propertyName.indexOf(shortcut) === 0;
         return propertyName.indexOf(shortcut) > -1;
-    }).sort(function(a, b) { 
+    }).sort(function (a, b) {
         return (snuslashcommands[a].order || 100) - (snuslashcommands[b].order || 100);
     });
 
-    if (snufilter.trim().split(' ').length > 1 ){
+    if (snufilter.trim().split(' ').length > 1) {
         snuPropertyNames = [shortcut];
     }
 
@@ -1130,7 +1130,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
         html += `<li id='cmd${snuPropertyNames[i]}' data-index='${i}' class='cmdfilter ${cssclass} nth${(snuslashcommands[snuPropertyNames[i]]?.order || 100)}' >
                  <span class='cmdkey'>/${snuPropertyNames[i]}</span>
                  <span class='cmdlabel'>${lbl}</span></li>`;
-        
+
         if (fltr.value.includes(" ")) {
             break;
         }
@@ -1157,11 +1157,11 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
     window.top.document.getElementById('snuslashcount').innerHTML = DOMPurify.sanitize(snuPropertyNames.length + "/" + Object.keys(snuslashcommands).length);
-    try{
+    try {
         window.top.document.querySelector('li.nth100').style['margin-top'] = '7px'; //add a visual clue between favorites
-    } catch(e){};
+    } catch (e) { };
 
-    window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter )});
+    window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
 }
 
@@ -1179,13 +1179,13 @@ function setSnuFilter(ev) {
     }
 }
 
-function snuDiffXml(shortcut, instance = ''){
-    if (typeof g_form == 'undefined' &&  typeof gsft_main?.g_form == 'undefined' ) {
+function snuDiffXml(shortcut, instance = '') {
+    if (typeof g_form == 'undefined' && typeof gsft_main?.g_form == 'undefined') {
         //snuShowAlert("No form found","warning",2000)
         snuHideSlashCommand();
         return;
     }
-    else if (typeof g_form == 'undefined' ) {
+    else if (typeof g_form == 'undefined') {
         g_form = gsft_main.g_form;
     }
 
@@ -1198,15 +1198,15 @@ function snuDiffXml(shortcut, instance = ''){
     if (!instance.includes('.')) {
         newinstance += '.service-now.com';
     }
-    if (instance.length > 3){
+    if (instance.length > 3) {
         origin = origin.replace(window.location.host, newinstance);
         host = host.replace(window.location.host, newinstance);
     }
 
-    let thisUrl =  `${origin}/${g_form.getTableName()}.do?XML=&sys_id=${g_form.getUniqueValue()}`;
+    let thisUrl = `${origin}/${g_form.getTableName()}.do?XML=&sys_id=${g_form.getUniqueValue()}`;
     let delay = 0;
 
-    if (shortcut == 'diff1'){
+    if (shortcut == 'diff1') {
         delay = 400;
         let event = new CustomEvent(
             "snutils-event",
@@ -1221,19 +1221,19 @@ function snuDiffXml(shortcut, instance = ''){
 
     setTimeout(function () {
         let data = {
-            url : thisUrl,
-            tableName : g_form.getTableName(),
-            displayValue : g_form.getDisplayValue(),
-            sysId : g_form.getUniqueValue(),
+            url: thisUrl,
+            tableName: g_form.getTableName(),
+            displayValue: g_form.getDisplayValue(),
+            sysId: g_form.getUniqueValue(),
             host: host
         };
         let event = new CustomEvent(
             "snutils-event", {
-                detail: {
-                    event: "fetch" + shortcut,
-                    command: data
-                }
+            detail: {
+                event: "fetch" + shortcut,
+                command: data
             }
+        }
         );
         window.top.document.dispatchEvent(event);
     }, delay);
@@ -1250,7 +1250,7 @@ function snuExpandHints(shortcut) {
     shortcut = shortcut || this.dataset.shortcut;
     snuMaxHints = 1000;
     var e = new KeyboardEvent('keypress', { 'key': 'KeyDown' });
-    snuShowSlashCommandHints(shortcut, false,'','', e);
+    snuShowSlashCommandHints(shortcut, false, '', '', e);
     var elm = window.top.document.getElementById('snufilter');
     elm.focus();
     elm.selectionStart = elm.selectionEnd = elm.value.length;
@@ -1271,8 +1271,8 @@ function snuAddSlashCommand(cmd) {
 }
 
 function snuSettingsAdded() {
-    if (snusettings?.added) return;
-    snusettings.added = true; //only run once when installed both normal and OnPrem version
+    if (snuSettingsParsed) return;
+    snuSettingsParsed = true; //only run once when installed both normal and OnPrem version
     if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
     if (typeof snusettings.applybgseditor == 'undefined') snusettings.applybgseditor = true;
     if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
@@ -1309,7 +1309,7 @@ function snuSettingsAdded() {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
         if (typeof snuNextManager != 'undefined') snuNextManager.linkPickers(0);
     }
-    if (snusettings.allowsavefromotherscope){
+    if (snusettings.allowsavefromotherscope) {
         snuAllowSaveFromOtherScope();
     }
     if (snusettings.nouielements == false) {
@@ -1358,7 +1358,7 @@ function snuCreateHyperLinkForGlideLists() {
     try {
         document.querySelectorAll('div[type=glide_list]').forEach(function (elm) {
             var field = elm.id.split('.')[2];
-            var fieldId = elm.id.replace('label.','');
+            var fieldId = elm.id.replace('label.', '');
             var isReadOnly = (g_form.getElement(field).getAttribute("class") || "").includes("readonly") || g_form.getElement(field).getAttribute("writeaccess") == "false";
             var table = g_form.getGlideUIElement(field).reference;
             var hasReferenceTable = table && table !== 'null';
@@ -1369,39 +1369,39 @@ function snuCreateHyperLinkForGlideLists() {
             var links = [];
             var sysIDRegex = /[0-9a-f]{32}/i;
             for (var i = 0; i < labels.length; i++) {
-                if (values[i] != ""){
+                if (values[i] != "") {
                     var rmvBtn = (!isReadOnly) ? `<span style='white-space: nowrap' id='${field}-${values[i]}' data-field="${field}" data-remove="false" data-value="${values[i]}" data-fieldid="${fieldId}"><a title='[SN Utils] Remove' class="remove icon icon-cross" href="#" style="font-size:6pt; color:red; padding-right:3px; vertical-align: middle;" aria-hidden="true"></a>` : "<span>";
-                if (hasReferenceTable && sysIDRegex.test(values[i])) 
-                    links.push(`${rmvBtn}<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a></span>`);
-                else
-                    links.push(`${rmvBtn}${labels[i]}</span>`);
+                    if (hasReferenceTable && sysIDRegex.test(values[i]))
+                        links.push(`${rmvBtn}<a href="/${table}.do?sys_id=${values[i]}" target="_blank" />${labels[i]}</a></span>`);
+                    else
+                        links.push(`${rmvBtn}${labels[i]}</span>`);
                 }
-        }
+            }
             var html = links.join(', ');
             elm.nextSibling.querySelector('p').innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
             var newElm = elm.nextSibling.querySelector('p')
             newElm.innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
-            Array.from(newElm.querySelectorAll('.remove')).forEach(function(elm) {
+            Array.from(newElm.querySelectorAll('.remove')).forEach(function (elm) {
                 elm.addEventListener('click', snuRemoveFromList);
             });
         })
     } catch (e) { };
 }
 
-function snuRemoveFromList(){
+function snuRemoveFromList() {
     var elm = this.parentElement;
     var val = elm.getAttribute("data-value");
     var fld = elm.getAttribute("data-field");
     var oldArr = g_form.getValue(fld).split(',');
     var newArr = oldArr.filter(item => item !== val);
     g_form.setValue(fld, newArr.join(','));
-    setTimeout(snuCreateHyperLinkForGlideLists,1000);
+    setTimeout(snuCreateHyperLinkForGlideLists, 1000);
 }
 
 function snuDoubleClickToShowFieldOrReload() {
-    if (typeof g_form != 'undefined'  || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
+    if (typeof g_form != 'undefined' || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
         document.addEventListener('dblclick', event => {
-            if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') || 
+            if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') ||
                 event?.target?.parentElement?.classList.contains('sc_editor_label')) {
                 var elm;
 
@@ -1450,9 +1450,9 @@ function snuDoubleClickToShowFieldOrReload() {
                 }
             } else if (event.target.classList.contains('container-fluid')) {
                 location.reload();
-            } else if (event.target.classList.contains('breadcrumb_container')){
+            } else if (event.target.classList.contains('breadcrumb_container')) {
                 //placeholder maybe move breadcrumb doubleclick here
-            } else if (event?.target?.classList?.contains('btn-ref')){ //open refernece record
+            } else if (event?.target?.classList?.contains('btn-ref')) { //open refernece record
                 let field = event?.target.id.split(".").splice(2).join(".");
                 if (field)
                     window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}`);
@@ -1462,7 +1462,7 @@ function snuDoubleClickToShowFieldOrReload() {
                         window.open(`${data?.table}?sys_id=${data?.sysid}`);
                 }
             }
-            else if (['div','li','body'].includes(event.target.localName) ) {
+            else if (['div', 'li', 'body'].includes(event.target.localName)) {
                 snuAddTechnicalNames();
             }
         }, true);
@@ -1490,13 +1490,13 @@ function flowDesignerDoubleClick() {
                 }
             }
             else {
-                snuSetInfoText('Flow Designer label doubeleclick only implemented for Condition fields',false);
-                setTimeout(snuHideSlashCommand,4000);
+                snuSetInfoText('Flow Designer label doubeleclick only implemented for Condition fields', false);
+                setTimeout(snuHideSlashCommand, 4000);
             }
         }
-        else if (event?.target?.classList?.contains('form-label')){
-            snuSetInfoText('Flow Designer label doubeleclick only implemented for Condition fields',false);
-            setTimeout(snuHideSlashCommand,4000);
+        else if (event?.target?.classList?.contains('form-label')) {
+            snuSetInfoText('Flow Designer label doubeleclick only implemented for Condition fields', false);
+            setTimeout(snuHideSlashCommand, 4000);
         }
     })
 }
@@ -1505,68 +1505,68 @@ function flowDesignerDoubleClick() {
 function mouseEnterToConvertToHyperlink() {
     if (typeof g_form != 'undefined') {
         document.querySelectorAll('div[type="glide_list"]').forEach(
-            div => div.parentElement.addEventListener('mouseenter', 
+            div => div.parentElement.addEventListener('mouseenter',
                 snuCreateHyperLinkForGlideLists
             ));
     }
 }
 
-function snuAddGroupSortIcon(){
-    if (location.pathname.includes("_list.do") && location.search.includes("GROUPBY")){
+function snuAddGroupSortIcon() {
+    if (location.pathname.includes("_list.do") && location.search.includes("GROUPBY")) {
         var qry = GlideList2.get(document.querySelector('#sys_target')?.value);
-        var gb = qry.getGroupBy().replace("GROUPBY","");
+        var gb = qry.getGroupBy().replace("GROUPBY", "");
         var elm = document.querySelector(`th[name="${gb}"] a`);
         var descstyle = location.search.includes("sysparm_group_sort=COUNTDESC") ? 'font-weight:bold; color:blue !important' : '';
         var ascstyle = location.search.includes("sysparm_group_sort=COUNT") && !descstyle ? 'font-weight:bold; color:blue !important' : '';
-        elm.innerHTML = DOMPurify.sanitize(elm.innerHTML + 
-        ` <span data-slashcommand='/-gd' style="${descstyle}" class="icon icon-sort-descending snuexeccmd"></span>
+        elm.innerHTML = DOMPurify.sanitize(elm.innerHTML +
+            ` <span data-slashcommand='/-gd' style="${descstyle}" class="icon icon-sort-descending snuexeccmd"></span>
           <span data-slashcommand='/-ga' style="${ascstyle}" class="icon icon-sort-ascending snuexeccmd"></span>`);
 
-        jQuery(`th[name="${gb}"] a span.snuexeccmd`).on('click',function(elm){
+        jQuery(`th[name="${gb}"] a span.snuexeccmd`).on('click', function (elm) {
             elm.preventDefault();
-            snuShowSlashCommand(elm.currentTarget.dataset.slashcommand,1);
+            snuShowSlashCommand(elm.currentTarget.dataset.slashcommand, 1);
         })
 
     }
 }
 
-function snuAddErrorLogScriptLinks(){
-    if (location.pathname.includes("syslog_list.do")){
-        jQuery("td.vt:contains('Caused by error')").each(function(tableCellIndex, tableCell) {
+function snuAddErrorLogScriptLinks() {
+    if (location.pathname.includes("syslog_list.do")) {
+        jQuery("td.vt:contains('Caused by error')").each(function (tableCellIndex, tableCell) {
             var regex = /Caused by error in (([a-z_]+).([A-Za-z0-9]+).[a-z]+) at line ([0-9]+)/;
             var found = tableCell.innerText.match(regex);
-            if(found !== null) {
+            if (found !== null) {
                 var newHtml = tableCell.innerHTML.replace(found[1], `<a title="Link via SN Utils" href='/${found[2]}.do?sys_id=${found[3]}'>${found[1]}</a>`);
-                tableCell.innerHTML = DOMPurify.sanitize(newHtml,{ ADD_ATTR: ['target'] }) ;
+                tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ['target'] });
             }
         });
     }
 }
 
 //toggle Select2 for Application and updatesetpicker
-function snuS2Ify(){
+function snuS2Ify() {
 
     if (typeof Select2 == 'undefined') return;
-    var setOff = jQuery('#application_picker_select').hasClass('select2-offscreen'); 
+    var setOff = jQuery('#application_picker_select').hasClass('select2-offscreen');
 
-    jQuery('#application_picker_select').select2('destroy'); 
-    jQuery('#update_set_picker_select').select2('destroy'); 
-    jQuery('#domain_picker_select_header').select2('destroy'); 
+    jQuery('#application_picker_select').select2('destroy');
+    jQuery('#update_set_picker_select').select2('destroy');
+    jQuery('#domain_picker_select_header').select2('destroy');
 
     if (setOff) return;
-    
+
     jQuery('#application_picker_select').select2({ 'dropdownAutoWidth': true })
     jQuery('#application_picker_select').on('change', function (e) {
         setTimeout(function () {
             jQuery('#update_set_picker_select').trigger('change.select2');
         }, 5000);
-    }); 
+    });
 
     jQuery('#update_set_picker_select').select2({ 'dropdownAutoWidth': true });
     jQuery('#update_set_picker_select').on('change', function (e) {
         jQuery('#update_set_picker_select').trigger('change.select2');
     });
-    
+
     jQuery('#domain_picker_select_header').select2({ 'dropdownAutoWidth': true });
     jQuery('#domain_picker_select_header').on('change', function (e) {
         jQuery('#domain_picker_select_header').trigger('change.select2');
@@ -1575,12 +1575,12 @@ function snuS2Ify(){
 
 
 
-function snuAddFormDesignScopeChange(){
-    if (location.pathname == "/$ng_fd.do" ){
-        setTimeout( f => {
-            if (document.querySelectorAll('dd-section-item').length){ //recursive until page loaded.
+function snuAddFormDesignScopeChange() {
+    if (location.pathname == "/$ng_fd.do") {
+        setTimeout(f => {
+            if (document.querySelectorAll('dd-section-item').length) { //recursive until page loaded.
                 var section = document.querySelector('dd-section-item[drop-disabled=true]');
-                if (section){
+                if (section) {
                     var scope = section.getAttribute('form-scope');
                     var urlScope = '/api/now/table/sys_scope?sysparm_fields=sys_id&sysparm_display_value=true&sysparm_query=scope=' + scope;
                     snuLoadXMLDoc(g_ck, urlScope, null, res => {
@@ -1588,16 +1588,16 @@ function snuAddFormDesignScopeChange(){
                         snuSetInfoText(`<br />Switch to scope of this view: <a id='snuswitcscope' href='#'  >${scope}</a>`);
                         document.querySelector('#snuswitcscope').addEventListener('click', e => {
                             e.preventDefault();
-                            snuSwitchTo("application","app_id",scopeId);
+                            snuSwitchTo("application", "app_id", scopeId);
                         });
 
                     })
                 }
             }
-            else{
+            else {
                 snuAddFormDesignScopeChange(); //try if its loaded after timeout
             }
-        },1000);
+        }, 1000);
     }
 }
 
@@ -1639,18 +1639,18 @@ var _qry = {};
 
 function snuClickToOpenWidget() {
     if (location.pathname == "/$pa_dashboard.do" && typeof DashboardMessageHandler != 'undefined') {
-        document.querySelectorAll('.grid-widget-header-title').forEach((function(el){ 
-            el.setAttribute("title","[SN Utils] CTRL or CMD-Click to open source");
+        document.querySelectorAll('.grid-widget-header-title').forEach((function (el) {
+            el.setAttribute("title", "[SN Utils] CTRL or CMD-Click to open source");
         }));
         document.addEventListener("click", function (event) {
             if ((event.ctrlKey || event.metaKey) && event.target.tagName != 'A') {
                 event.preventDefault();
-                try{
-                var lnk = event.target.closest('.grid-stack-item').querySelector('decoration').getAttribute("editlink");
-                window.open(lnk) ;
+                try {
+                    var lnk = event.target.closest('.grid-stack-item').querySelector('decoration').getAttribute("editlink");
+                    window.open(lnk);
                 }
-                catch(e){
-                    snuSetInfoText('CTRL-Click only works in same scope',false);
+                catch (e) {
+                    snuSetInfoText('CTRL-Click only works in same scope', false);
                 }
                 return true;
             }
@@ -1658,12 +1658,12 @@ function snuClickToOpenWidget() {
     }
 }
 
-function snuAllowSaveFromOtherScope(){
+function snuAllowSaveFromOtherScope() {
     if (typeof g_form != 'undefined') { //set sysparm_transaction_scope to current scope value, this way a record can be saved even when scope was changed
-        if (document.querySelector('#sysparm_transaction_scope') && document.querySelector('input[id$="sys_scope"]')){
-            document.querySelector('#sysparm_transaction_scope').value = 
+        if (document.querySelector('#sysparm_transaction_scope') && document.querySelector('input[id$="sys_scope"]')) {
+            document.querySelector('#sysparm_transaction_scope').value =
                 document.querySelector('input[id$="sys_scope"]').value
-         }
+        }
     }
 }
 
@@ -1783,11 +1783,11 @@ function snuCaptureFormClick() {
                 }
             }
 
-            if (event.target.className.includes('scriptSync icon-save')){
+            if (event.target.className.includes('scriptSync icon-save')) {
                 snuPostToScriptSync(event.target.dataset.field, event.target.dataset.fieldtype);
                 event.target.style.color = '#81B5A1';
             }
-            if (event.target.className.includes('scriptSync icon-code')){
+            if (event.target.className.includes('scriptSync icon-code')) {
                 snuPostToMonaco(event.target.dataset.field, event.target.dataset.fieldtype);
                 event.target.style.color = '#81B5A1';
             }
@@ -1949,15 +1949,15 @@ function snuOpenTable(fieldName) {
 }
 
 function snuViewTranslations(fieldName) {
-    var url = '/sys_translated_text_list.do?sysparm_query=tablenameINjavascript:new global.PAUtils().getTableAncestors("'+ g_form.getTableName() +'")^fieldname=' + fieldName + 
-    '^documentkey=' + g_form.getUniqueValue() ;
+    var url = '/sys_translated_text_list.do?sysparm_query=tablenameINjavascript:new global.PAUtils().getTableAncestors("' + g_form.getTableName() + '")^fieldname=' + fieldName +
+        '^documentkey=' + g_form.getUniqueValue();
     window.open(url, 'translation');
 }
 
 function snuViewTranslationsMeta(fieldName) {
     var orig = document.querySelector('*[id^="sys_original"][id$="' + fieldName + '"]').value;
-    var url = '/sys_translated_list.do?sysparm_query=nameINjavascript:new global.PAUtils().getTableAncestors("'+ g_form.getTableName() +'")^element=' + fieldName + 
-    '^value=' + orig + '^idISEMPTY^ORid=' + g_form.getUniqueValue()
+    var url = '/sys_translated_list.do?sysparm_query=nameINjavascript:new global.PAUtils().getTableAncestors("' + g_form.getTableName() + '")^element=' + fieldName +
+        '^value=' + orig + '^idISEMPTY^ORid=' + g_form.getUniqueValue()
     window.open(url, 'translation');
 }
 
@@ -1996,7 +1996,7 @@ function snuShowScratchpad() {
     g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {}, 2, 2) + "</pre>");
 }
 
-function toggleLabel() {
+function snuToggleLabel() {
     jQuery('span.label-orig, span.label-tech, span.label-snu').toggle();
 }
 
@@ -2026,19 +2026,20 @@ function snuAddTechnicalNames() {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
             jQuery("h1.navbar-title:not(:contains('|'))").first().append('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
-                ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="For easier copying of field names" onclick="toggleLabel()">[toggle label]</a> </span></span>');
-                document.querySelectorAll("#related_lists_wrapper h1.navbar-title").forEach(lr => { 
-                    if (!lr.querySelectorAll(".snuwrap").length){
-                        lr.style.display = 'inline';
-                        var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
-                        if (tbl.startsWith("REL:")){
-                            tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:','')}' >[scripted relation]</a>`;
-                        }
-                        lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
+                ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="Show the originating table innfo of fields" onclick="snuExtendedFieldInfo()">[table fields]</a>'+
+                '<a title="For easier copying of field names" onclick="snuToggleLabel()">[toggle label]</a> </span></span>');
+            document.querySelectorAll("#related_lists_wrapper h1.navbar-title").forEach(lr => {
+                if (!lr.querySelectorAll(".snuwrap").length) {
+                    lr.style.display = 'inline';
+                    var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
+                    if (tbl.startsWith("REL:")) {
+                        tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:', '')}' >[scripted relation]</a>`;
                     }
-                })          
-                jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
-                jQuery(elem.parentElement).attr('data-for',jQuery(elem.parentElement).attr('for')); //copy for value
+                    lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
+                }
+            })
+            jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
+                jQuery(elem.parentElement).attr('data-for', jQuery(elem.parentElement).attr('for')); //copy for value
                 jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
                 var elm;
@@ -2076,7 +2077,7 @@ function snuAddTechnicalNames() {
                     };
                     elm = '⚑ ' + elm;
                 }
-                else if (['translated_text','translated_html'].includes(fieldType)) {
+                else if (['translated_text', 'translated_html'].includes(fieldType)) {
                     linkAttrs = {
                         onclick: 'snuViewTranslations(\'' + elm + '\');',
                         title: `View translations of ${fieldType} field`
@@ -2087,7 +2088,7 @@ function snuAddTechnicalNames() {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
                         linkAttrs.title + '" target="_blank">' + elm + '</a>';
                 }
-                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span></span>');
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
@@ -2112,7 +2113,7 @@ function snuAddTechnicalNames() {
     //add to names list and relatedlist
     jQuery('th.list_hdr, th.table-column-header').each(function (index) {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
-        if (!jQuery(this).hasClass("snutn")){
+        if (!jQuery(this).hasClass("snutn")) {
             jQuery(this).addClass("snutn")
             jQuery(this).find('a.list_hdrcell, a.sort-columns').parent().after('<div class="snuwrap" style="font-family:monospace;font-size:small;margin-left: 25px;margin-top: -3px; font-weight:normal">' + tname + '</div> ');
         }
@@ -2122,8 +2123,8 @@ function snuAddTechnicalNames() {
     if (typeof g_form != 'undefined') {
         g_form.nameMap.each(vari => {
             var elm = document.querySelector(`div[id$='${vari.realName}'], label[id$='${vari.realName}_label']`);
-                if (elm && !elm.classList.contains('snutn')){
-                    try{
+            if (elm && !elm.classList.contains('snutn')) {
+                try {
                     var newElm = document.createElement('span');
                     var sysid = vari.realName.substr(vari.realName.length - 32);
                     var tableName = g_form.getTableName();
@@ -2135,8 +2136,8 @@ function snuAddTechnicalNames() {
                     else //checkbox
                         elm.appendChild(newElm);
                     elm.classList.add('snutn');
-                    } catch {}
-                }
+                } catch { }
+            }
         })
     }
 
@@ -2151,13 +2152,114 @@ function snuAddTechnicalNames() {
 
 
     //toggle the Technical names function
-    if (hasRun){
+    if (hasRun) {
         var display = (document.querySelector('.snuwrap')?.style?.display == 'none') ? '' : 'none';
         document.querySelectorAll('.snuwrap').forEach(cls => {
             cls.style.display = display;
         });
     }
 
+
+}
+
+function snuExtendedFieldInfo() {
+    var tableFields = {};
+    var tableName = g_form.getTableName();
+    //get all fields and group them by the table they are on.
+    snuLoadXMLDoc(g_ck, `/api/now/table/sys_dictionary?sysparm_query=nameINjavascript:new PAUtils().getTableAncestors('${tableName}')^element!=NULL^ORDERBYname,element^ORDERBYname&sysparm_exclude_reference_link=false&sysparm_suppress_pagination_header=true&sysparm_fields=element%2Cname&sysparm_no_count=true`, null, jsn => {
+        jsn.result.forEach(elm => {
+            (tableFields[elm.name]) ? tableFields[elm.name].push(elm.element) : tableFields[elm.name] = [elm.element];
+        })
+        var tables = Object.keys(tableFields);
+        if (tables.length == 1) { } // do nothing
+        else if (tables.length == 2 && tables[0] == tableName) tables.reverse(); //make sure parent table is first in array;
+        
+        if (tables.length <= 2) objToHtml(tables, tableFields);
+        else { //more tables in hierarchy we need to determine order via a server call
+            snuLoadXMLDoc(g_ck, `/api/now/table/sys_db_object?sysparm_query=nameIN${tables.join(',')}&sysparm_display_value=true&sysparm_fields=name%2Csuper_class.name`, null, tbls => {
+                var loop = true;
+                var loops = 0;
+                var tablesOrdered = [];
+                var superSearch = '';
+                while (loop && loops < 20) {
+                    tbls.result.forEach(res => {
+                        if (res["super_class.name"] == superSearch) {
+                            tablesOrdered.push(res.name);
+                            superSearch = res.name;
+                            if (superSearch == tableName) loop = false;
+                        }
+                    })
+                    loops++;
+                }
+                objToHtml(tablesOrdered, tableFields);
+            });
+
+        }
+    });
+
+    function objToHtml(tables, tableFields){
+
+        var tblCnt = tables.length;
+        if (tblCnt > 1){
+
+            for (let idx = tblCnt -1; idx >= 1; idx--) { //unduplicate the fields arrays
+                tableFields[tables[idx]] = tableFields[tables[idx]].filter( ( el ) => !tableFields[tables[idx-1]].includes( el ) );
+            }
+
+            for (let idx = 0; idx < tblCnt; idx++) {
+                let fields = tableFields[tables[idx]];
+                for (let jdx = 0; jdx < fields.length; jdx++) {
+                    let elm = document.querySelector(`sup[data-element=${fields[jdx]}]`);
+                    if (elm){
+                        elm.innerText = idx;
+                        elm.title = 'Field from table: ' + tables[idx];
+                       
+                        try {
+                            let pe = g_form.getGlideUIElement(fields[jdx]);
+                            let pc = g_form.getControl(fields[jdx]);
+                            fields[jdx] = ((g_form.isVisible(pe, pc)) ? '✓ ' : '◌ ') + fields[jdx]; 
+                        }
+                        catch(e){
+                            fields[jdx] = '✓ ' + fields[jdx]; 
+                        }
+                    }
+                    else {
+                        fields[jdx] = '✖ ' + fields[jdx]; 
+                    }
+                }
+            };
+        }
+
+       
+
+        var tbl = document.createElement('table');
+        var th = tbl.createTHead();
+        var tb = tbl.createTBody();
+        var thr = th.insertRow();
+        var tr = tb.insertRow();
+
+        tbl.style.margin = '2px';
+        thr.style.fontWeight = 'bold';
+        tr.style.verticalAlign = 'top';
+        thr.style.padding = '2px';
+        tr.style.padding = '2px';
+
+        tables.forEach(tbl => {
+            var hc = thr.insertCell();
+            var hct = document.createTextNode(tbl);
+            hc.appendChild(hct);
+
+            var tc = tr.insertCell();
+            var ct = document.createElement('pre');
+            ct.style.margin = '2px';
+
+            tc.appendChild(ct);
+            ct.innerText = tableFields[tbl].join("\n");
+        })
+
+        g_form.addInfoMessage("[BETA] Fields per table: (On form: ✓ Yes | ✖ No | ◌ Hidden)<br/>" + tbl.outerHTML);
+
+    }
 
 }
 
@@ -2286,7 +2388,7 @@ function searchLargeSelects() {
                 input.placeholder = "Filter choices...";
                 input.className = "form-control";
                 input.style.marginBottom = "2px";
-                snuInsertAfter(input,document.querySelector('label[for=slush_left], label[for=select_0]'))
+                snuInsertAfter(input, document.querySelector('label[for=slush_left], label[for=select_0]'))
                 jQuery('select#slush_left, select#select_0').filterByText(input, true).addClass('searchified');
             }
 
@@ -2308,12 +2410,12 @@ function searchLargeSelects() {
                         el.appendChild(opt);
                     }
                 }
-                
+
                 snuInsertAfter(input, document.querySelectorAll('.glide-list')[1]);
                 jQuery('select#slush_right').addClass('searchified');
             }
         } catch (e) { } //nice try
-     });
+    });
 
 
 
@@ -2384,7 +2486,7 @@ function setShortCuts() {
     htmlFilter.innerHTML = cleanHTML
     if (!window.top.document.querySelectorAll('#snufilter').length) { //prevent reinject 
         window.top.document.body.appendChild(htmlFilter);
-        window.top.document.getElementById('cmdhidedot').addEventListener('click', evt => { snuHideSlashCommand(false, evt) } );
+        window.top.document.getElementById('cmdhidedot').addEventListener('click', evt => { snuHideSlashCommand(false, evt) });
         window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
     }
     snuAddSlashCommandListener();
@@ -2398,11 +2500,11 @@ function setShortCuts() {
             if (isActive) {
                 var path = event.path || (event.composedPath && event.composedPath());
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
-                    (event.ctrlKey || event.metaKey)  ||
-                     path[0].id == 'filter' && path[0].value == ''
-                    ) { //not when form element active, except filter
+                    (event.ctrlKey || event.metaKey) ||
+                    path[0].id == 'filter' && path[0].value == ''
+                ) { //not when form element active, except filter
                     event.preventDefault();
-                    snuShowSlashCommand('',false);
+                    snuShowSlashCommand('', false);
                 }
             }
         }
@@ -2422,7 +2524,7 @@ function setShortCuts() {
                         return false;
                     }
                 }
-                try { document.activeElement.blur(); } catch (e) {} // #235 dont think this throws error, but to be sure...
+                try { document.activeElement.blur(); } catch (e) { } // #235 dont think this throws error, but to be sure...
                 action = (g_form.newRecord || doInsertStay) ? "sysverb_insert_and_stay" : "sysverb_update_and_stay";
                 if (gel(action)) gsftSubmit(gel(action));
                 else gsftSubmit(null, g_form.getFormElement(), action);
@@ -2432,12 +2534,12 @@ function setShortCuts() {
             else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key == 'u') { //cmd-shift-u 
                 unhideFields();
             }
-            else if ((event.ctrlKey || event.metaKey) && event.key == '['){
+            else if ((event.ctrlKey || event.metaKey) && event.key == '[') {
                 if (snusettings.nouielements) return //way to disable this shortcut
                 var prev = document.querySelector('button[onclick*=sysverb_record_prev]'); //previous record
                 if (prev) prev.click();
             }
-            else if ((event.ctrlKey || event.metaKey) && event.key == ']'){
+            else if ((event.ctrlKey || event.metaKey) && event.key == ']') {
                 if (snusettings.nouielements) return //way to disable this shortcut
                 var next = document.querySelector('button[onclick*=sysverb_record_next]'); //next record
                 if (next) next.click();
@@ -2592,9 +2694,9 @@ function snuSaveImage(imgData, fileInfo, tableName, sysId) {
     function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
     var date = new Date();
     fileName = 'screenshot_' + date.getFullYear().toString() +
-                                  pad2(date.getMonth() + 1) + pad2( date.getDate()) + '_'  +
-                                  pad2( date.getHours() ) + pad2( date.getMinutes() ) + 
-                                  pad2( date.getSeconds() ) + '.png';
+        pad2(date.getMonth() + 1) + pad2(date.getDate()) + '_' +
+        pad2(date.getHours()) + pad2(date.getMinutes()) +
+        pad2(date.getSeconds()) + '.png';
 
     var URL = "/api/now/attachment/file?table_name=" +
         tableName + "&table_sys_id=" + sysId + "&file_name=" + fileName;
@@ -2778,7 +2880,7 @@ function snuLoadXMLDoc(token, url, post, callback) {
 //         'Content-Type' : 'application/json',
 //         'X-UserToken' : token || ''
 //     });
-      
+
 //       const response = await fetch(pathToResource,  { headers: snuHeaders });
 //       console.log(response);
 //       return response;
@@ -2792,26 +2894,26 @@ function snuLoadXMLDoc(token, url, post, callback) {
  */
 function snuStartBackgroundScript(script, callback) {
     try {
-        fetch('sys.scripts.do' , {
+        fetch('sys.scripts.do', {
             method: 'POST', //POST does not work somehow
             headers: {
                 'Cache-Control': 'no-cache',
-                "Content-Type" : "application/x-www-form-urlencoded"
+                "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({
                 script: script,
                 runscript: "Run script",
                 sysparm_ck: g_ck,
                 sys_scope: "e24e9692d7702100738dc0da9e6103dd",
-                quota_managed_transaction: "on" 
+                quota_managed_transaction: "on"
             }).toString()
         }).then(response => response.text())
-        .then(data => {
-            console.log(data);
-            callback(data);
-        }).catch(error => {
-            snuSetInfoText('Background Script failed (' + error + ')<br />', true);
-        });
+            .then(data => {
+                console.log(data);
+                callback(data);
+            }).catch(error => {
+                snuSetInfoText('Background Script failed (' + error + ')<br />', true);
+            });
     } catch (error) {
         snuSetInfoText('Background Script failed (' + error + ')<br />', true);
     }
@@ -2851,7 +2953,7 @@ function snuHideSlashCommand(navFocus = false, evt) {
     window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
-        if (navFocus === true){
+        if (navFocus === true) {
             if (window.top.document.getElementById('filter') != null) {
                 try {
                     if (event.currentTarget.value.length <= 1) {
@@ -2860,7 +2962,7 @@ function snuHideSlashCommand(navFocus = false, evt) {
                     }
                 } catch (e) { }
             }
-            if (typeof window.top?.querySelectorShadowDom != 'undefined'){
+            if (typeof window.top?.querySelectorShadowDom != 'undefined') {
                 window.top.querySelectorShadowDom.querySelectorDeep('div#all.sn-polaris-tab').click();
                 setTimeout(() => {
                     var fltr = window.top.querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.all input#filter`);
@@ -2880,21 +2982,21 @@ function snuShowSlashCommand(initialCommand, autoRun) {
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
         snuShowSlashCommandHints((initialCommand || "").substring(1), false, "", "", false);
-        if (initialCommand && autoRun ) {
+        if (initialCommand && autoRun) {
             window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Enter' }));
             setTimeout(function () {
                 window.top.document.getElementById('snufilter').selectionStart =
-                window.top.document.getElementById('snufilter').selectionEnd = 10000;
+                    window.top.document.getElementById('snufilter').selectionEnd = 10000;
             }, 10);
         }
         else {
             if (autoRun === 0)
                 window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowRight' }));
-            setTimeout(function () { 
+            setTimeout(function () {
                 window.top.document.getElementById('snufilter').selectionStart =
-                window.top.document.getElementById('snufilter').selectionEnd = 10000;
+                    window.top.document.getElementById('snufilter').selectionEnd = 10000;
             }
-            , 10);
+                , 10);
         }
     }
 }
@@ -2909,23 +3011,22 @@ function snuGetSelectionText() {
     return text;
 }
 
-function snuSetInfoText(msg, addText){
+function snuSetInfoText(msg, addText) {
     window.top.document.querySelector('div.snutils').style.display = '';
-    var txt =  addText ? window.top.document.getElementById('snudirectlinks').innerHTML : "";
+    var txt = addText ? window.top.document.getElementById('snudirectlinks').innerHTML : "";
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(txt + msg);
 }
 
 function snuFillFields(query) {
 
-    if (location.search.includes("sc_cat_item") && location.search.includes("id=")){
-        snuSetRandomPortal(query,0);
+    if (location.search.includes("sc_cat_item") && location.search.includes("id=")) {
+        snuSetRandomPortal(query, 0);
         return;
     }
 
     if (typeof window.g_form != 'undefined' && location.pathname != '/nav_to.do' && !location.pathname.startsWith('/now/nav/ui/classic/params/target/')) {
-        if (!(window.NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)))
-        {
-            snuSetInfoText("Only available for admin, or when impersonating",false);
+        if (!(window.NOW.user.roles.split(',').includes('admin') || snuImpersonater(document))) {
+            snuSetInfoText("Only available for admin, or when impersonating", false);
             return;
         }
         var manFields = window.g_form.getMissingFields();
@@ -2933,11 +3034,11 @@ function snuFillFields(query) {
         // if(['-xss'].includes(query) ){ //todo determine fieldtypes too fill
         //     manFields = elNames.split(',');
         // }
-        
-        
+
+
         if (window.g_form.getTableName() != 'ni')
             setRandom(window.g_form.getTableName(), manFields, window);
-        else 
+        else
             snuSetInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog, try in Portal.<br />`, false);
     }
     else {
@@ -2946,15 +3047,14 @@ function snuFillFields(query) {
             iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
         Array.from(iframes).forEach(function (frm) {
             if (typeof frm.contentWindow.g_form != 'undefined') {
-                if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow)) ) 
-                {
-                    snuSetInfoText("Only available for admin, or when impersonating",false);
+                if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow))) {
+                    snuSetInfoText("Only available for admin, or when impersonating", false);
                     return;
                 }
                 var manFields = frm.contentWindow.g_form.getMissingFields();
                 if (g_form.getTableName() != 'ni')
                     setRandom(g_form.getTableName(), manFields, frm.contentWindow);
-                else 
+                else
                     snuSetInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog.<br />`, false);
 
             }
@@ -2962,7 +3062,7 @@ function snuFillFields(query) {
     }
     function setRandom(tbl, flds, doc) {
 
-        if (!flds.length){
+        if (!flds.length) {
             snuSetInfoText(`<b>Log</b><br />- No empty mandatory fields found.<br />`, false);
             return;
         }
@@ -2978,7 +3078,7 @@ function snuFillFields(query) {
 
                 var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string") && doc.g_form.getControl(fld).tagName != "SELECT") ? "RANDOM TEST DATA " : "") + res[fld].value;
                 doc.g_form.setValue(fld, val, res[fld].display_value);
-                setTimeout(snuHideSlashCommand,3000);
+                setTimeout(snuHideSlashCommand, 3000);
             })
         })
     }
@@ -3008,14 +3108,14 @@ function snuCopySelectedCellValues(copySysIDs) {
         var str = '';
         var wdw = (frm) ? frm.contentWindow : window;
         selCells.forEach(function (cElem) {
-            if (copySysIDs ){
-                if (cElem.querySelector('a')){
+            if (copySysIDs) {
+                if (cElem.querySelector('a')) {
                     //str += cElem.querySelector('a[sys_id]').getAttribute('sys_id') + ',';
                     var match = RegExp('[?&]' + "sys_id" + '=([^&]*)').exec(cElem.querySelector('a').getAttribute('href'));
                     str += match && decodeURIComponent(match[1].replace(/\+/g, '')) + ',';
                 }
             }
-            else 
+            else
                 str += cElem.innerText + '\n';
         });
         if (str.endsWith(',')) str = str.substring(0, str.length - 1);
@@ -3135,7 +3235,7 @@ function snuPostToScriptSync(field, fieldType) {
 
     }
     else { //bgscript
-    
+
 
         let date = new Date();
         let my_id = (date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2(date.getDate()) + '-' + pad2(date.getHours()) + pad2(date.getMinutes()) + pad2(date.getSeconds()));
@@ -3158,7 +3258,7 @@ function snuPostToScriptSync(field, fieldType) {
         var msg = "Error, Check if VS Code with sn-sriptsync is running";
         try {
             g_form.addErrorMessage(msg);
-        } catch (e) { 
+        } catch (e) {
             snuSetInfoText(msg, false);
             document.querySelector('#snualertdiv')?.remove();
         }
@@ -3214,17 +3314,17 @@ function snuAddFieldSyncButtons() {
                 var isBusinessRuleCondition = tableName == 'sys_script' && elm == 'condition';
 
                 if (txt == 'script' || txt == 'css' || fieldTypes.includes(fieldType) || isBusinessRuleCondition) {
-                    jQuery(this).after(getBtns(elm,fieldType));
+                    jQuery(this).after(getBtns(elm, fieldType));
                     return true;
                 }
-                if (isSysTable && fieldType.includes('string')){ //probably a JSON file
+                if (isSysTable && fieldType.includes('string')) { //probably a JSON file
                     var len = 0;
-                    try{
+                    try {
                         var el = document.getElementById(tableName + '.' + elm);
                         len = Number(el.dataset.length);
-                    } catch(e){}
-                    if (len >= 4000){
-                        jQuery(this).after(getBtns(elm,fieldType));
+                    } catch (e) { }
+                    if (len >= 4000) {
+                        jQuery(this).after(getBtns(elm, fieldType));
                         return true;
                     }
                 }
@@ -3232,16 +3332,16 @@ function snuAddFieldSyncButtons() {
                 for (var i = 0; i < fieldTypes.length; i++) {
                     if (fieldType.includes(fieldTypes[i]) || elm.startsWith(fieldTypes[i])) {
                         fieldType = fieldTypes[i];
-                        jQuery(this).after(getBtns(elm,fieldType));
+                        jQuery(this).after(getBtns(elm, fieldType));
                         break;
                     }
                 }
 
-                function getBtns(elm,fieldType){
+                function getBtns(elm, fieldType) {
                     var btns = '';
-                    if (snusettings.vsscriptsync == true) 
+                    if (snusettings.vsscriptsync == true)
                         btns += `<span style="color: #293E40; cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
-                    if (snusettings.codeeditor == true) 
+                    if (snusettings.codeeditor == true)
                         btns += `<span style="color: #293E40; cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
                     return btns;
                 }
@@ -3509,7 +3609,7 @@ function sncWait(ms) { //dirty. but just need to wait a sec...
 
 function snuSearchSysIdTables(sysId) {
     try {
-        snuSetInfoText("Searching for sys_id. This could take some seconds...<br />",false);
+        snuSetInfoText("Searching for sys_id. This could take some seconds...<br />", false);
         var script = `      
             function findSysID(sysId) {
                 var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
@@ -3569,7 +3669,7 @@ function snuSearchSysIdTables(sysId) {
             if (rspns.length == 0)
                 snuSetInfoText('Could not search for sys_id. (are you an Admin?)<br />', true);
             else if (answer != null && answer[1]) {
-                snuSetInfoText('Opening in new tab: ' + answer[1].split('^')[1] + "<br />",true);
+                snuSetInfoText('Opening in new tab: ' + answer[1].split('^')[1] + "<br />", true);
                 var table = answer[1].split('^')[0];
                 var url = table + '.do?sys_id=' + sysId;
                 window.open(url, '_blank');
@@ -3788,54 +3888,53 @@ function snuGetUsersForImpersonate(query) {
 
     var impersonating = snuImpersonater();
 
-    
-    var client=new XMLHttpRequest();
+
+    var client = new XMLHttpRequest();
     if (query)
-        client.open("get","api/now/table/sys_user?sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20&" +
-        `sysparm_fields=sys_id,user_name,name&sysparm_query=active=true^user_nameLIKE${query}^ORnameLIKE${query}`);
-    else 
+        client.open("get", "api/now/table/sys_user?sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20&" +
+            `sysparm_fields=sys_id,user_name,name&sysparm_query=active=true^user_nameLIKE${query}^ORnameLIKE${query}`);
+    else
         try {
-        client.open("get","/api/now/ui/impersonate/recent");
+            client.open("get", "/api/now/ui/impersonate/recent");
         }
         catch (e) {
-            snuSetInfoText("No access to Impersonations (admin only)",false);
+            snuSetInfoText("No access to Impersonations (admin only)", false);
         }
-    client.setRequestHeader('Accept','application/json');
-    client.setRequestHeader('Content-Type','application/json');
+    client.setRequestHeader('Accept', 'application/json');
+    client.setRequestHeader('Content-Type', 'application/json');
     client.setRequestHeader("X-UserToken", g_ck);
-    client.onreadystatechange = function() { 
-        if(this.readyState == this.DONE) {
+    client.onreadystatechange = function () {
+        if (this.readyState == this.DONE) {
             var idx = 0;
             var dispIdx = (impersonating) ? 1 : 0;
             var res = JSON.parse(this.response);
             var impDirectLinks = '';
-            
+
             if (impersonating)
-                impDirectLinks +=  `Currently Impersonating<br />1 <a id="snulnk1" class="snuimp" href="#${impersonating}">Stop Impersonating</a> <span class="semihidden">${impersonating}</span><br />\n`;
+                impDirectLinks += `Currently Impersonating<br />1 <a id="snulnk1" class="snuimp" href="#${impersonating}">Stop Impersonating</a> <span class="semihidden">${impersonating}</span><br />\n`;
 
             if (query)
                 impDirectLinks += 'Found users (remove filter for recent impersonations)<br />';
             else
                 impDirectLinks += 'Recent impersonated (add filter to search users)<br />';
-            
+
             if (!res.result.length)
                 impDirectLinks += '- No results found<br />';
-            
-            res.result.forEach(imp => 
-                { 
-                    var idattr
-                    if (idx < 10 && (dispIdx !== '>')) {
-                        idx++;
-                        dispIdx++;
-                        dispIdx = dispIdx % 10;
-                        idattr = 'id="snulnk' + dispIdx + '"';
-                    }
-                    else {
-                        dispIdx = '>';
-                        idattr = '';
-                    }
-                    impDirectLinks += dispIdx + ` <a  ${idattr} class="snuimp" href="#${imp.user_name}">${imp.user_display_value || imp.name }</a> <span class="semihidden">${imp.user_name}</span><br />\n`;
+
+            res.result.forEach(imp => {
+                var idattr
+                if (idx < 10 && (dispIdx !== '>')) {
+                    idx++;
+                    dispIdx++;
+                    dispIdx = dispIdx % 10;
+                    idattr = 'id="snulnk' + dispIdx + '"';
                 }
+                else {
+                    dispIdx = '>';
+                    idattr = '';
+                }
+                impDirectLinks += dispIdx + ` <a  ${idattr} class="snuimp" href="#${imp.user_name}">${imp.user_display_value || imp.name}</a> <span class="semihidden">${imp.user_name}</span><br />\n`;
+            }
             );
 
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(impDirectLinks);
@@ -3847,22 +3946,22 @@ function snuGetUsersForImpersonate(query) {
                 })
             })
         }
-    }; 
+    };
     client.send();
 }
 
-function snuImpersonate(userName){
-    var client=new XMLHttpRequest();
-    client.open("post","/api/now/ui/impersonate/" + userName);  
-    client.setRequestHeader('Accept','application/json');
-    client.setRequestHeader('Content-Type','application/json');
+function snuImpersonate(userName) {
+    var client = new XMLHttpRequest();
+    client.open("post", "/api/now/ui/impersonate/" + userName);
+    client.setRequestHeader('Accept', 'application/json');
+    client.setRequestHeader('Content-Type', 'application/json');
     client.setRequestHeader("X-UserToken", g_ck);
-    client.onreadystatechange = function() { 
-        if(this.readyState == this.DONE) {
+    client.onreadystatechange = function () {
+        if (this.readyState == this.DONE) {
             location.reload();
             snuHideSlashCommand();
         }
-    }; 
+    };
     client.send("");
 }
 
@@ -3882,13 +3981,13 @@ function snuGetLastScopes(query) {
             return;
         }
         var urlScope = "/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=sys_idIN" + scopes.join(',');
-        if (query){
-            urlScope =`/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=nameLIKE${query}^ORscopeLIKE${query}`;
+        if (query) {
+            urlScope = `/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=nameLIKE${query}^ORscopeLIKE${query}`;
         }
         snuLoadXMLDoc(g_ck, urlScope, null, res => {
 
             //this is a fix to suppor searching for scopes, instead of displaying last 10
-            if (query){
+            if (query) {
                 res.result.forEach(scp => {
                     scopes.push(scp.sys_id)
                     scopesObj[scp.sys_id] = '';
@@ -3899,7 +3998,7 @@ function snuGetLastScopes(query) {
             var idx = 0;
             var dispIdx = 0;
             snuSetInfoText(`- Fetching scope details.<br />`, false);
-            
+
             res.result.forEach(scp => returnScopes[scp.sys_id] = scp);
 
             //var lastScopes = []
@@ -3927,7 +4026,7 @@ function snuGetLastScopes(query) {
             document.querySelectorAll('a.snuscopeswitch').forEach(item => {
                 item.addEventListener('click', event => {
                     event.preventDefault();
-                    snuSwitchTo("application","app_id",event.target.hash.substring(1));
+                    snuSwitchTo("application", "app_id", event.target.hash.substring(1));
                 })
             })
         })
@@ -3935,35 +4034,35 @@ function snuGetLastScopes(query) {
 
 }
 
-function snuSwitchTo(switchType, key,  val) {
+function snuSwitchTo(switchType, key, val) {
     let payload = {}
     payload[key] = val; //
     fetch(`/api/now/ui/concoursepicker/${switchType}`, {
         method: 'PUT',
         headers: {
-          'Accept' : 'application/json, text/plain, */*',
-          'Content-Type' : 'application/json;charset=UTF-8',
-          'X-WantSessionNotificationMessages': false,
-          'X-UserToken' : g_ck
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'X-WantSessionNotificationMessages': false,
+            'X-UserToken': g_ck
         },
         body: JSON.stringify(payload),
-      })
-      .then(response => response.json())
-      .then(data => {
-          if (data?.error)
-            snuSetInfoText('Error switching:' + data.error.detail, false);
-          else {
-            snuSetInfoText('Reloading page...', false);
-            setTimeout(() => {
-                window.top.location.reload();
-            }, 1000);
-          }
-            
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data?.error)
+                snuSetInfoText('Error switching:' + data.error.detail, false);
+            else {
+                snuSetInfoText('Reloading page...', false);
+                setTimeout(() => {
+                    window.top.location.reload();
+                }, 1000);
+            }
 
-      })
-      .catch((error) => {
-          snuSetInfoText('Error switching:', error, false);
-      });
+
+        })
+        .catch((error) => {
+            snuSetInfoText('Error switching:', error, false);
+        });
 }
 
 function snuGetRandomRecord(table, query, fullRecord, callback) {
@@ -3978,7 +4077,7 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
         var rows = request.getResponseHeader("X-Total-Count");
         var rnd = Math.floor(Math.random() * rows);
 
-        if (fullRecord){
+        if (fullRecord) {
             if (Number(rows))
                 snuSetInfoText(`- Found ${rows} matching rows<br />- Fetching data from match ${rnd}<br />`, true);
             else {
@@ -4006,22 +4105,22 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
 }
 
 
-function snuSetRandomPortal(allFields,iteration) {
-    if (!iteration && !g_user_is_admin ) {
-        if (!snuImpersonater()){
-            snuSetInfoText("Only available for admin or when impersonating<br />",false);
+function snuSetRandomPortal(allFields, iteration) {
+    if (!iteration && !g_user_is_admin) {
+        if (!snuImpersonater()) {
+            snuSetInfoText("Only available for admin or when impersonating<br />", false);
             return;
         }
     }
     var cnt = 0;
     if (!iteration)
-        snuSetInfoText("Setting random values<br />",iteration)
-    else 
-        snuSetInfoText(`Rerunning set random values Iteration:${iteration}<br />`,iteration)
+        snuSetInfoText("Setting random values<br />", iteration)
+    else
+        snuSetInfoText(`Rerunning set random values Iteration:${iteration}<br />`, iteration)
     var gf = angular.element(document.querySelectorAll('label.field-label, span.type-boolean')[0]).scope().getGlideForm();
     gf.getEditableFields().forEach(fldName => {
         var fld = gf.getField(fldName);
-        if ((fld.mandatory || allFields)  && fld.visible && !fld.value) {
+        if ((fld.mandatory || allFields) && fld.visible && !fld.value) {
             if (fld.type.includes("date")) {
                 snuSetInfoText(`- Setting random future date to field ${fldName}<br />`, true);
                 var today = new Date();
@@ -4030,30 +4129,30 @@ function snuSetRandomPortal(allFields,iteration) {
                 gf.setValue(fldName, today)
                 cnt++;
             }
-            else if (["reference","glide_list"].includes(fld.type)) {
+            else if (["reference", "glide_list"].includes(fld.type)) {
                 snuGetRandomRecord(fld.ed.reference, fld.ed.qualifier, false, res => {
                     if (res)
                         snuSetInfoText(`- Setting random value to ${fld.type} field ${fldName}<br />`, true);
-                    else 
+                    else
                         snuSetInfoText(`- PROBLEM no value found for ${fld.type} field ${fldName}<br />`, true);
                     gf.setValue(fldName, res);
                     cnt++;
                 })
-                
+
             }
             else if (["choice"].includes(fld.type)) {
                 snuSetInfoText(`- Setting random text choice field ${fldName}<br />`, true);
                 gf.setValue(fldName, fld.choices[Math.floor(Math.random() * fld.choices.length)].value);
                 cnt++;
             }
-            else if (["string","html", "textarea"].includes(fld.type)) {
+            else if (["string", "html", "textarea"].includes(fld.type)) {
                 snuSetInfoText(`- Setting filler value to ${fld.type} field ${fldName}<br />`, true);
                 var rndString = "Lorem Ipsum SN Utils Dolar /rnd Slashcommand";
-                if(allFields == "-xss") {
-                    rndString = `alert(“SNUTILS-XSS-TEST”)“>SNUTILS XSS TEST</a><img src=“a.jpg” onerror=“javascript:alert(“SNUTILS-XSS-TEST”)“/>`+
-                    `<img src=x onError=alert(“SNUTILS-XSS-TEST”)`;
+                if (allFields == "-xss") {
+                    rndString = `alert(“SNUTILS-XSS-TEST”)“>SNUTILS XSS TEST</a><img src=“a.jpg” onerror=“javascript:alert(“SNUTILS-XSS-TEST”)“/>` +
+                        `<img src=x onError=alert(“SNUTILS-XSS-TEST”)`;
                 }
-                gf.setValue(fldName,rndString);
+                gf.setValue(fldName, rndString);
                 cnt++;
             }
             else if (["email"].includes(fld.type)) {
@@ -4061,51 +4160,51 @@ function snuSetRandomPortal(allFields,iteration) {
                 gf.setValue(fldName, "snutils@rocks.dummy");
                 cnt++;
             }
-            else{
+            else {
                 snuSetInfoText(`- Field ${fldName} of type ${fld.type} not supported to randomfill<br />`, true);
             }
         }
     })
 
-    if (cnt && iteration < 20){
-        setTimeout(function(){ snuSetRandomPortal(allFields,++iteration) }, 800);
+    if (cnt && iteration < 20) {
+        setTimeout(function () { snuSetRandomPortal(allFields, ++iteration) }, 800);
     }
     else {
-            setTimeout(function(){
-                if (!window.top.document.getElementById('snudirectlinks').innerHTML.includes("- PROBLEM"))
+        setTimeout(function () {
+            if (!window.top.document.getElementById('snudirectlinks').innerHTML.includes("- PROBLEM"))
                 snuHideSlashCommand();
-            }, 2500);
+        }, 2500);
     }
 
 }
 
 //try to get userid of original user when impersonating
-function snuImpersonater(doc){
+function snuImpersonater(doc) {
     doc = doc || document;
     var impersonatingUser = '';
     try {
         var scrptArr = Array.from(doc.querySelectorAll('script[type="text/javascript"]')).filter(
-                scrp => scrp.innerText.includes("user.impersonation")
-            );
-        if (scrptArr.length){    
+            scrp => scrp.innerText.includes("user.impersonation")
+        );
+        if (scrptArr.length) {
             impersonatingUser = scrptArr[0].innerHTML.match(/(\'user.impersonation\', \')([^&]*)\'\)/)[2];
         }
     }
-    catch (e){ }
+    catch (e) { }
 
-    if (!impersonatingUser){
+    if (!impersonatingUser) {
         try {
-            var client=new XMLHttpRequest();
-            client.open("get","notfoundthispage.do", false);
+            var client = new XMLHttpRequest();
+            client.open("get", "notfoundthispage.do", false);
             client.send();
             impersonatingUser = client.response.match(/(\'user.impersonation\', \')([^&]*)\'\)/)[2];
-        } catch (e){}
+        } catch (e) { }
     }
     return impersonatingUser;
 }
 
 
-function snuAddPersonaliseListHandler(){
+function snuAddPersonaliseListHandler() {
     if (typeof GlideList2 == 'undefined' || typeof g_form != 'undefined') return; //only lists for now
     let tableName = document.querySelector('#sys_target')?.value;
     if (!tableName) return;
@@ -4120,7 +4219,7 @@ function snuAddPersonaliseListHandler(){
     icon.className = 'snuPersonaliseList icon-endpoint btn btn-icon table-btn-lg';
     icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open`;
     icon.role = 'button';
-    icon.addEventListener('click', evt =>{
+    icon.addEventListener('click', evt => {
         let autoclose = !(evt.metaKey || evt.ctrlKey);
         snuPersonaliseList(autoclose);
     });
@@ -4143,7 +4242,7 @@ function snuPersonaliseList(autoclose) {
                 loops++;
                 loop(); //not loaded, try again after xx ms
                 return;
-            } 
+            }
 
             let add = snusettings.listfields.split(',');
             let addCount = 0;
@@ -4155,18 +4254,17 @@ function snuPersonaliseList(autoclose) {
                     addCount++;
                 }
             })
-            if (autoclose && addCount) setTimeout(actionOK,500);
-            
+            if (autoclose && addCount) setTimeout(actionOK, 500);
+
 
         }, 300);
     }
 
 }
 
-document.addEventListener('snuEvent', function (e)
-{
-    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined' || location.pathname.endsWith('.do'))){ //basic check for servicenow instance
-        var script = document.createElement('script'); 
+document.addEventListener('snuEvent', function (e) {
+    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined' || location.pathname.endsWith('.do'))) { //basic check for servicenow instance
+        var script = document.createElement('script');
         script.textContent = e.detail.content;
         (document.head || document.documentElement).appendChild(script);
     }
