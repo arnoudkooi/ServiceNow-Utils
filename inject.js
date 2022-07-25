@@ -2396,7 +2396,7 @@ function searchLargeSelects() {
                 //document.querySelector('.slushbucket-top.slushbody').style.display = 'inline';
                 var input = document.createElement("input");
                 input.type = "text";
-                input.placeholder = "Add dotwalk field (conform with enter)";
+                input.placeholder = "Add dotwalk field (confirm with enter)";
                 input.className = "form-control";
                 input.style.marginTop = "2px";
                 input.style.marginLeft = "2px";
