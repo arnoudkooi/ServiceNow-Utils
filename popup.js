@@ -134,7 +134,7 @@ function prepareJsonTable() {
 
 //Query ServiceNow for nodes
 function getNodes() {
-    var myurl = url + '/api/now/table/sys_cluster_state?sysparm_query=ORDERBYsystem_id&sysparm_fields=system_id,node_id,status&sysparm_display_value=false';
+    var myurl = url + '/api/now/table/sys_cluster_state?sysparm_query=ORDERBYsystem_id&sysparm_fields=system_id,node_id,status,node_type&sysparm_display_value=true&sysparm_exclude_reference_link=true';
     snuFetch(g_ck, myurl, null, function (jsn) {
         setNodes(jsn.result);
     });
@@ -902,6 +902,7 @@ function setDataTableNodes(nme, node) {
             },
             { "mDataProp": "system_id" },
             { "mDataProp": "status" },
+            { "mDataProp": "node_type" },
             {
                 mRender: function (data, type, row) {
                     var iscurrent = (row.node_id == node);

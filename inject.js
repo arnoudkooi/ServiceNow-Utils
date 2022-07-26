@@ -56,6 +56,10 @@ var snuslashcommands = {
         "url": "sys.scripts.do",
         "hint": "Background Script"
     },
+    "cls": {
+        "url": "*",
+        "hint": "Clear Local Storage" 
+    },
     "nav": {
         "url": "*",
         "hint": "[Beta] Navigator <search> or <application,item>"
@@ -757,6 +761,10 @@ function snuAddSlashCommandListener() {
                 snuGetLastScopes(query);
                 return;
             }
+            else if (shortcut == "cls") {
+                snuClearLocalStorage();
+                return;
+            }
             else if (shortcut == "rnd") {
                 snuFillFields(query);
                 return;
@@ -1328,6 +1336,7 @@ function snuSettingsAdded() {
         snuAddErrorLogScriptLinks();
         snuAddFormDesignScopeChange();
         snuAddPersonaliseListHandler();
+        snuAddLinkToCachDo();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1363,6 +1372,7 @@ function snuCreateHyperLinkForGlideLists() {
             var table = g_form.getGlideUIElement(field).reference;
             var hasReferenceTable = table && table !== 'null';
             if (!hasReferenceTable) return; // if there's no Reference Table, there's no use adding links, values are to be used as-is 
+            elm.nextSibling.querySelector('p').style.display = 'inline'; //polaris fix
             var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
             var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
             if (labels.length != values.length) return; //not a reliable match
@@ -1833,6 +1843,30 @@ function snuEnhanceNotFound(advanced) {
         html += '</ul></div>';
         jQuery('.notfound_message').append(html);
     });
+}
+
+function snuAddLinkToCachDo() {
+    if (location.pathname != "/cache.do") return;
+
+    var elemDiv = document.createElement('div');
+    elemDiv.innerHTML = `<hr ><b>[SN Utils] Troubleshooting?</b><br /> Try running the <a id='cmdcls' href='#cls'>/cls</a> slashcommand to clear local storage`;
+    document.body.appendChild(elemDiv);
+    document.querySelector('#cmdcls').addEventListener('click', evt => { 
+        evt.preventDefault();
+        snuShowSlashCommand('cls',1);
+    });
+
+}
+
+function snuClearLocalStorage() {
+
+    let msg =  `Clearing <br />- localStorage (${localStorage.length}) <br />- sessionStorage (${sessionStorage.length}) <br />`;
+    snuSetInfoText(msg, false);
+
+    localStorage.clear();
+    sessionStorage.clear();
+    snuSetInfoText('Local storage cleared..', true);
+
 }
 
 function generateATFValues(event) {
@@ -2396,7 +2430,7 @@ function searchLargeSelects() {
                 //document.querySelector('.slushbucket-top.slushbody').style.display = 'inline';
                 var input = document.createElement("input");
                 input.type = "text";
-                input.placeholder = "Add dotwalk field (conform with enter)";
+                input.placeholder = "Add dotwalk field (confirm with enter)";
                 input.className = "form-control";
                 input.style.marginTop = "2px";
                 input.style.marginLeft = "2px";
