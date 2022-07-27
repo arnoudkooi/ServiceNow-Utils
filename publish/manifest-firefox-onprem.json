@@ -29,19 +29,38 @@
     },
     "content_scripts": [
         {
-            "matches": [
-                "*://*/*"
-            ],
-            "js": [
-                "js/purify.min.js",
-                "js/jquery.min.js",
-                "js/Tinycon.js",
-                "content_script_parent.js",
-                "content_script_all_frames.js"
-            ],
-            "all_frames": true
+          "matches": [
+            "<all_urls>"
+          ],
+          "exclude_matches": [
+            "*://*/*?XML*",
+            "*://*/*&XML*",
+            "*://*/*?WSDL*",
+            "*://*/*&WSDL*"
+          ],
+          "js": [
+            "js/purify.min.js",
+            "content_script_all_frames.js"
+          ],
+          "all_frames": true
+        },
+        {
+          "matches": [
+            "<all_urls>"
+          ],
+          "exclude_matches": [
+            "*://*/*?XML*",
+            "*://*/*&XML*",
+            "*://*/*?WSDL*",
+            "*://*/*&WSDL*"
+          ],
+          "js": [
+            "js/Tinycon.js",
+            "content_script_parent.js"
+          ],
+          "all_frames": false
         }
-    ],
+      ],
     "commands": {
         "_execute_page_action": {
             "suggested_key": {
