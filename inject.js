@@ -222,7 +222,7 @@ var snuslashcommands = {
     },
     "shortcut": {
         "url": "//sa",
-        "hint": "Special slashcommand, accesible via extension keyboard shortcut"
+        "hint": "Special slashcommand, accessible via extension keyboard shortcut"
     },
     "start": {
         "url": "/nav_to.do",

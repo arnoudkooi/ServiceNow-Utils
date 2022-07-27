@@ -7,7 +7,7 @@ If you choose to use my SN Utils, then you agree to the collection and use of in
 
 
 ## Disclosure for requested permissions
-Manifest Permmissions:
+Manifest Permissions:
 - Cookies: Needed and only used for switching Nodes  
 - Storage: Used to store SN Utils settings and cache data like table list to reduce rest calls  
 - activeTab: Interact with ServiceNow browser tabs  
