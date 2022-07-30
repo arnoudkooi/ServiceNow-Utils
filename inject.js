@@ -568,7 +568,7 @@ function snuAddSlashCommandListener() {
         if (isFinite(e.key)) {
             if (window.top.document.getElementById('snulnk' + e.key)) {
                 e.preventDefault();
-                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new Event('click', { cancelable: true }));
+                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent('click', { cancelable: true }));
                 return;
             }
         }

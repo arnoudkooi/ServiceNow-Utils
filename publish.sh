@@ -39,4 +39,4 @@ sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-edge.json
 
-#node publish/publish.mjs
+node publish/publish.mjs
