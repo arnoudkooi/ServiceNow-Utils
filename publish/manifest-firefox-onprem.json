@@ -33,6 +33,7 @@
             "<all_urls>"
           ],
           "exclude_matches": [
+            "*://*.azure.com/*",
             "*://*/*?XML*",
             "*://*/*&XML*",
             "*://*/*?WSDL*",
@@ -49,6 +50,7 @@
             "<all_urls>"
           ],
           "exclude_matches": [
+            "*://*.azure.com/*",
             "*://*/*?XML*",
             "*://*/*&XML*",
             "*://*/*?WSDL*",
