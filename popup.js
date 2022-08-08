@@ -374,7 +374,7 @@ function setBrowserVariables(obj) {
             case "#tabupdates":
                 if (!updatesloaded) {
                     $('#waitingupdates').show();
-                    getUpdates(userName);
+                    getUpdates();
 
                     updatesloaded = true;
                 }
@@ -476,8 +476,8 @@ function setUpdateSet(data) {
 }
 
 //Query ServiceNow for updaes by current user, pass JSON back to popup
-function getUpdates(username) {
-    var myurl = url + '/api/now/table/sys_update_xml?sysparm_display_value=true&sysparm_fields=sys_id%2Ctype%2Cname%2Ctarget_name%2Cupdate_set.name%2Csys_updated_on%2Csys_updated_by&sysparm_query=sys_updated_byLIKE' + username + '%5EORDERBYDESCsys_updated_on&sysparm_limit=20';
+function getUpdates() {
+    var myurl = url + '/api/now/table/sys_update_xml?sysparm_display_value=true&sysparm_fields=sys_id%2Ctype%2Cname%2Ctarget_name%2Cupdate_set.name%2Csys_updated_on%2Csys_updated_by&sysparm_query=sys_updated_byLIKEjavascript:gs.getUserName()%5EORDERBYDESCsys_updated_on&sysparm_limit=20';
     snuFetch(g_ck, myurl, null, function (jsn) {
         setDataTableUpdates(jsn);
     });
@@ -762,9 +762,9 @@ function getUserDetails(userName) {
     $('#tbxname').val(userName);
     $('#waitinguser').show();
 
-    var myurl = url + "/api/now/table/sys_user?sysparm_display_value=all&sysparm_query=user_name%3D" + userName;
+    var myurl = url + "/api/now/table/sys_user?sysparm_display_value=all&sysparm_query=user_name%3Djavascript:gs.getUserName()";
     snuFetch(g_ck, myurl, null, function (fetchResult) {
-        var listhyperlink = " <a target='_blank' href='" + url + "/sys_user_list.do?sysparm_query=user_nameLIKE" + userName + "%5EORnameLIKE" + userName + "'> <i class='fa fa-list' aria-hidden='true'></i></a>";
+        var listhyperlink = " <a target='_blank' href='" + url + "/sys_user_list.do?sysparm_query=user_nameLIKEjavascript:gs.getUserName()%5EORnameLIKEjavascript:gs.getUserName()'> <i class='fa fa-list' aria-hidden='true'></i></a>";
         var html;
         if (fetchResult.result.length > 0) {
             var usr = fetchResult.result[0];

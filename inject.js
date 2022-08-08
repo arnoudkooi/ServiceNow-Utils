@@ -1865,6 +1865,10 @@ function snuClearLocalStorage() {
 
     localStorage.clear();
     sessionStorage.clear();
+
+    const dbs = await window.indexedDB.databases();
+    dbs.forEach(db => { window.indexedDB.deleteDatabase(db.name) });
+
     snuSetInfoText('Local storage cleared..', true);
 
 }
