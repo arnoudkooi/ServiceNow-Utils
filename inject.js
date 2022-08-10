@@ -4180,8 +4180,8 @@ function snuSetRandomPortal(allFields, iteration) {
                 })
 
             }
-            else if (["choice"].includes(fld.type)) {
-                snuSetInfoText(`- Setting random text choice field ${fldName}<br />`, true);
+            else if (["choice", "multiple_choice"].includes(fld.type)) {
+                snuSetInfoText(`- Setting random text ${fld.type} field ${fldName}<br />`, true);
                 gf.setValue(fldName, fld.choices[Math.floor(Math.random() * fld.choices.length)].value);
                 cnt++;
             }
@@ -4207,13 +4207,13 @@ function snuSetRandomPortal(allFields, iteration) {
     })
 
     if (cnt && iteration < 20) {
-        setTimeout(function () { snuSetRandomPortal(allFields, ++iteration) }, 800);
+        setTimeout(() => { snuSetRandomPortal(allFields, ++iteration) }, 800);
     }
     else {
-        setTimeout(function () {
+        setTimeout(() => {
             if (!window.top.document.getElementById('snudirectlinks').innerHTML.includes("- PROBLEM"))
                 snuHideSlashCommand();
-        }, 2500);
+        }, 5000);
     }
 
 }
