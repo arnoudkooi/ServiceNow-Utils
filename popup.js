@@ -456,7 +456,7 @@ function setBrowserVariables(obj) {
 
     });
 
-    document.querySelector('#btnopengrquery').addEventListener('click', evt => openGrInBgScript(evt.metaKey || evt.ctrlKey) );
+    document.querySelector('#btnopengrquery').addEventListener('click', evt => openGrInBgScript(!(evt.metaKey || evt.ctrlKey)));
 
 
 }
