@@ -23,7 +23,7 @@ var snuslashcommands = {
         "hint": "Search Developer References <search>"
     },
     "app": {
-        "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^scopeLIKE$0^ORDERBYDESCsys_updated_on",
+        "url": "sys_scope_list.do?sysparm_query=sys_scope_list.do?sysparm_query=nameLIKE$0^ORscopeLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Applications <name>",
         "fields": "name"
     },
@@ -55,6 +55,10 @@ var snuslashcommands = {
     "bg": {
         "url": "sys.scripts.do",
         "hint": "Background Script"
+    },
+    "bgc": {
+        "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord(%27$table%27);%0Acurrent.get(%27$sysid%27);%0A%0Ags.print(current.getDisplayValue());',
+        "hint": "Background Script with var current"
     },
     "cls": {
         "url": "*",
@@ -315,8 +319,7 @@ var snuslashcommands = {
     "versions": {
         "url": "/sys_update_version_list.do?sysparm_query=name=$table_$sysid^ORDERBYDESCsys_recorded_at",
         "hint": "Versions of current record",
-        "fields": "sys_recorded_at,sys_created_by",
-        "overwriteurl": "/merge_form_current_version.do?sysparm_version_id=$sysid"
+        "fields": "sys_recorded_at,sys_created_by"
     }
 
 }

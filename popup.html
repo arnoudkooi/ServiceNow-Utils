@@ -191,6 +191,9 @@
                             value="sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORDERBYDESCsys_updated_on&sysparm_filter_pinned=true">
                             Listview
                             query: Updated on Today / Order by Updated desc.</option>
+                        <option
+                            value="sysparm_filter_pinned=true">
+                            Listview query: none (filter only)</option>
                     </select>
                     <!--<a href='/snutils.html' target='_blank' >Open this table list in new tab.</a>-->
                 </div>
@@ -285,6 +288,12 @@
                         </div>
                     </div> <textarea class="form-control form-control-sm grtemplate" autocomplete="off"
                         autocapitalize="off" spellcheck="false" id="txtgrquery"></textarea>
+
+                        <div class="btns btnspadding">
+                            <div class="dt-buttons"> 
+                                <button id="btnopengrquery" class="dt-button" type="button"><span>Open in backgroundscript</span></button>
+                            </div>
+                        </div>
 
 
                     <!-- <div class="btns">

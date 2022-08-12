@@ -12,7 +12,9 @@ document.querySelector('form').setAttribute('onsubmit', '');
 
 let leftSide, resizer, rightSide, result, timerInterval;
 
-
+const params = new Proxy(new URLSearchParams(window.location.search), {
+	get: (searchParams, prop) => searchParams.get(prop),
+});
 
 if (snusettings.applybgseditor && scrpt) {
 
@@ -45,6 +47,7 @@ if (snusettings.applybgseditor && scrpt) {
 		monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
 
 		var theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
+		scrpt.value = scrpt.value || params.content;
 
 		editor = monaco.editor.create(document.getElementById('container'), {
 			value: scrpt.value,
@@ -76,6 +79,7 @@ if (snusettings.applybgseditor && scrpt) {
 }
 
 document.addEventListener('snuEvent', function (e) {
+	debugger;
 	if (e.detail.type == "background") { //basic check for servicenow instance
 		document.getElementById('runscript').value = e.detail.content.content;
 		if (typeof editor != 'undefined') editor.getModel().setValue(e.detail.content.content);

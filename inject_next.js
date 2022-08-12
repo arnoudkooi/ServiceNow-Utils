@@ -17,7 +17,7 @@ class SnuNextManager {
             try{
                 if (eventPath[0].tagName == "svg") return;
                 if (eventPath[0]?.className.includes('sn-polaris-tab')){ //save a click, select input
-                    tryFocus(0);
+                    setTimeout(() => { tryFocus(0) }, 200);
                 }
             } catch (ex) {};
 
@@ -287,12 +287,19 @@ class SnuNextManager {
             querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
             
         var pickerDivs;
-        snuSpacer.addEventListener('mouseover', () => {
+
+        function addClassToPickerDivs(){
             pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
             pickerDivs.forEach((div, idx) => {
                 div.className = 'snupicker';
                 div.dataset.index = ++idx;
             }); 
+        }
+
+        addClassToPickerDivs();
+
+        snuSpacer.addEventListener('mouseover', () => {
+            addClassToPickerDivs();
         })
 
         var wrpr = querySelectorShadowDom.querySelectorDeep('sn-search-input-wrapper');

@@ -170,6 +170,10 @@ table.dataTable tbody td {
     clear: both;
 }
 
+.btnspadding{
+    padding: 8px 0 5px 0;
+}
+
 .dt-button {
     padding: 0.2em 0.5em !important;
     font-size: 8pt !important;

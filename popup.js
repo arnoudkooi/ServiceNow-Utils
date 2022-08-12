@@ -456,6 +456,8 @@ function setBrowserVariables(obj) {
 
     });
 
+    document.querySelector('#btnopengrquery').addEventListener('click', evt => openGrInBgScript(evt.metaKey || evt.ctrlKey) );
+
 
 }
 
@@ -762,9 +764,9 @@ function getUserDetails(userName) {
     $('#tbxname').val(userName);
     $('#waitinguser').show();
 
-    var myurl = url + "/api/now/table/sys_user?sysparm_display_value=all&sysparm_query=user_name%3Djavascript:gs.getUserName()";
+    var myurl = url + "/api/now/table/sys_user?sysparm_display_value=all&sysparm_query=user_name%3D" + userName;
     snuFetch(g_ck, myurl, null, function (fetchResult) {
-        var listhyperlink = " <a target='_blank' href='" + url + "/sys_user_list.do?sysparm_query=user_nameLIKEjavascript:gs.getUserName()%5EORnameLIKEjavascript:gs.getUserName()'> <i class='fa fa-list' aria-hidden='true'></i></a>";
+        var listhyperlink = " <a target='_blank' href='" + url + "/sys_user_list.do?sysparm_query=user_nameLIKE" + userName + "%5EORnameLIKE" + userName + "'> <i class='fa fa-list' aria-hidden='true'></i></a>";
         var html;
         if (fetchResult.result.length > 0) {
             var usr = fetchResult.result[0];
@@ -1584,4 +1586,14 @@ function snuFetch(token, url, post, callback) {
         callback(data);
     });
 
+}
+
+
+function openGrInBgScript(active) {
+    let content = encodeURIComponent(document.getElementById('txtgrquery').value);
+    var createObj = {
+        'url': url + "/sys.scripts.do?content=" + content,
+        'active': active
+    }
+    chrome.tabs.create(createObj);
 }
