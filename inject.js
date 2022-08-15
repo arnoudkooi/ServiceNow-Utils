@@ -1295,6 +1295,10 @@ function snuSettingsAdded() {
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
     if (typeof snusettings.listfields == 'undefined') snusettings.listfields = 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
+    if (typeof snusettings.slashsswitches == 'undefined') snusettings.slashsswitches = '{}';
+
+    let addedslashsswitches = JSON.parse(snusettings.slashsswitches);
+    snuslashswitches = {...snuslashswitches, ...addedslashsswitches};
 
 
     setShortCuts();
@@ -1869,10 +1873,25 @@ function snuClearLocalStorage() {
     localStorage.clear();
     sessionStorage.clear();
 
-    (async () => {
-        const dbs = await window.indexedDB.databases();
-        dbs.forEach(db => { window.indexedDB.deleteDatabase(db.name) });
-    })();
+
+    indexedDB.databases().then(dbs => {
+        var promises = dbs.map(db => {
+            return new Promise((resolve, reject) => {
+                var req = indexedDB.deleteDatabase(db.Name);
+                req.onsuccess = resolve;
+                req.onerror = reject;
+                req.onblocked = reject;
+            });
+        });
+        Promise.all(promises).then(console.log).catch(console.error);
+    })
+
+ 
+    //clear serviceworkers
+    caches.keys().then(function(names) {
+        for (let name of names)
+            caches.delete(name);
+    });
 
     snuSetInfoText('Local storage cleared..', true);
 

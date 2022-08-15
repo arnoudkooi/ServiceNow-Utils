@@ -12,7 +12,7 @@ document.querySelector('form').setAttribute('onsubmit', '');
 
 let leftSide, resizer, rightSide, result, timerInterval;
 
-const params = new Proxy(new URLSearchParams(window.location.search), {
+const urlparams = new Proxy(new URLSearchParams(window.location.search), {
 	get: (searchParams, prop) => searchParams.get(prop),
 });
 
@@ -47,7 +47,7 @@ if (snusettings.applybgseditor && scrpt) {
 		monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
 
 		var theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
-		scrpt.value = scrpt.value || params.content;
+		scrpt.value = scrpt.value || urlparams.content;
 
 		editor = monaco.editor.create(document.getElementById('container'), {
 			value: scrpt.value,

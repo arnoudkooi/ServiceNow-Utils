@@ -342,7 +342,7 @@ function setBrowserVariables(obj) {
         chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
-    $('#slashcommands').on('dblclick',function(){
+    $('#slashcommands, #slashsswitches').on('dblclick',function(){
         $(this).prop('readonly','');
     })
 
