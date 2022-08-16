@@ -3,6 +3,7 @@ html {
 	padding: 0;
 	margin: 0;
 	height: calc(100vh - 2em);
+	font-family: system-ui, sans-serif;
 }
 
 #container {

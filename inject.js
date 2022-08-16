@@ -1191,9 +1191,10 @@ function setSnuFilter(ev) {
 }
 
 function snuDiffXml(shortcut, instance = '') {
-    if (typeof g_form == 'undefined' && typeof gsft_main?.g_form == 'undefined') {
+    if (typeof g_form == 'undefined' && typeof window?.gsft_main?.g_form == 'undefined') {
         //snuShowAlert("No form found","warning",2000)
-        snuHideSlashCommand();
+        snuSetInfoText('Diff only works in classic forms',false);
+        //snuHideSlashCommand();
         return;
     }
     else if (typeof g_form == 'undefined') {
