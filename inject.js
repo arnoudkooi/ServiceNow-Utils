@@ -23,7 +23,7 @@ var snuslashcommands = {
         "hint": "Search Developer References <search>"
     },
     "app": {
-        "url": "sys_scope_list.do?sysparm_query=sys_scope_list.do?sysparm_query=nameLIKE$0^ORscopeLIKE$0^ORDERBYDESCsys_updated_on",
+        "url": "sys_scope_list.do?sysparm_query=nameLIKE$0^ORscopeLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Applications <name>",
         "fields": "name"
     },
