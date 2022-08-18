@@ -2091,7 +2091,7 @@ function snuAddTechnicalNames() {
             jQuery("h1.navbar-title:not(:contains('|'))").first().append('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
                 ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="Show the originating table innfo of fields" onclick="snuExtendedFieldInfo()">[table fields]</a>'+
                 '<a title="For easier copying of field names" onclick="snuToggleLabel()">[toggle label]</a> </span></span>');
-            document.querySelectorAll("#related_lists_wrapper h1.navbar-title").forEach(lr => {
+            document.querySelectorAll("#related_lists_wrapper h1.navbar-title, h1.navbar-title.embedded").forEach(lr => {
                 if (!lr.querySelectorAll(".snuwrap").length) {
                     lr.style.display = 'inline';
                     var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
@@ -2174,7 +2174,7 @@ function snuAddTechnicalNames() {
     }
 
     //add to names list and relatedlist
-    jQuery('th.list_hdr, th.table-column-header').each(function (index) {
+    jQuery('th.list_hdr, th.table-column-header, th.list_hdrembedded').each(function (index) {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
         if (!jQuery(this).hasClass("snutn")) {
             jQuery(this).addClass("snutn")
