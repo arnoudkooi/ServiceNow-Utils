@@ -1296,10 +1296,12 @@ function snuSettingsAdded() {
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
     if (typeof snusettings.listfields == 'undefined') snusettings.listfields = 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
-    if (typeof snusettings.slashsswitches == 'undefined') snusettings.slashsswitches = '{}';
+    if (typeof snusettings.slashsswitches == 'undefined' || snusettings.slashsswitches == '') snusettings.slashsswitches = '{}';
 
-    let addedslashsswitches = JSON.parse(snusettings.slashsswitches);
-    snuslashswitches = {...snuslashswitches, ...addedslashsswitches};
+    try { //ignore if not valid json
+        let addedslashsswitches = JSON.parse(snusettings.slashsswitches);
+        snuslashswitches = {...snuslashswitches, ...addedslashsswitches};
+    } catch (ex) { } 
 
 
     setShortCuts();
