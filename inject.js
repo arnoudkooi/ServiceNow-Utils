@@ -57,7 +57,7 @@ var snuslashcommands = {
         "hint": "Background Script"
     },
     "bgc": {
-        "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord(%27$table%27);%0Acurrent.get(%27$sysid%27);%0A%0Ags.print(current.getDisplayValue());',
+        "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord(%27$table%27);%0Acurrent.get(%27$sysid%27);%0A%0Ags.info(current.getDisplayValue());',
         "hint": "Background Script with var current"
     },
     "cls": {
@@ -452,7 +452,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
         snuSetInfoText(`Fetching data...`, false);
         snuslashcommands[shortcut].fields
         var url = "api/now/table/" + targeturl.replace("_list.do", "") +
-            "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
+            "&sysparm_display_value=false&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
             "&sysparm_fields=sys_id," + fields;
 
         try {
@@ -478,7 +478,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                     var link = table + ".do?sys_id=" + val.sys_id;
                     var target = "gsft_main"
                     if (overwriteurl) {
-                        link = overwriteurl.replace(/\$sysid/g, val.sys_id)
+                        link = overwriteurl.replace(/\$sysid/g, val.sys_id);
                         for (var i = 0; i < fieldArr.length; i++) {
                             link = link.replaceAll('$' + fieldArr[i], val[fieldArr[i]]);
                         }
@@ -2096,7 +2096,13 @@ function snuAddTechnicalNames() {
             document.querySelectorAll("#related_lists_wrapper h1.navbar-title, h1.navbar-title.embedded").forEach(lr => {
                 if (!lr.querySelectorAll(".snuwrap").length) {
                     lr.style.display = 'inline';
-                    var tbl = lr.querySelector('a').dataset.list_id.split('.')[1];
+                    var dataListId = lr.querySelector('a')?.dataset?.list_id;
+                    if (!dataListId){ // diffrent dom structure for embedded lists #286
+                        try {
+                            dataListId = lr.closest('div.embedded[tab_list_name_raw]').getAttribute('tab_list_name_raw');
+                        } catch (e) { dataListId = '-.-' };
+                    }
+                    var tbl = dataListId.split('.')[1];
                     if (tbl.startsWith("REL:")) {
                         tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:', '')}' >[scripted relation]</a>`;
                     }
@@ -2401,7 +2407,7 @@ function snuTableCollectionLink() {
     if (typeof jQuery == 'undefined') return;
     var tbl = g_form.getValue('name');
     jQuery('.related_links_container').append("<li style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='sys_dictionary.do?sysparm_query=name=" +
-        tbl + "^internal_type=collection^' title='Link added by SN Utils (This is NOT a UI Action!)' >Collection Dictionary Entry</a></li>");
+        tbl + "^internal_type=collection^' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
 }
 
 function searchLargeSelects() {
