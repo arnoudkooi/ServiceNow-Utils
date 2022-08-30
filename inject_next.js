@@ -331,7 +331,7 @@ class SnuNextManager {
         
             var back = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body span.go-back-button');
             if (back) back.click();
-            else querySelectorShadowDom.querySelectorDeep('now-icon.contextual-zone-icon').click();
+            else querySelectorShadowDom.querySelectorDeep('span.contextual-zone-button.concourse-pickers').click();
             clickPicker(0, pickerindex)
 
         } catch (ex) {};
