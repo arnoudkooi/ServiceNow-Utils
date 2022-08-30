@@ -452,7 +452,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
         snuSetInfoText(`Fetching data...`, false);
         snuslashcommands[shortcut].fields
         var url = "api/now/table/" + targeturl.replace("_list.do", "") +
-            "&sysparm_display_value=false&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
+            "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
             "&sysparm_fields=sys_id," + fields;
 
         try {
@@ -640,31 +640,7 @@ function snuAddSlashCommandListener() {
             targeturl = (snuslashcommands[shortcut].url || "");
         }
 
-        if (typeof g_form !== 'undefined') { //get sysid and tablename from classic form
-            targeturl = targeturl.replace(/\$table/g, g_form.getTableName());
-            targeturl = targeturl.replace(/\$sysid/g, g_form.getUniqueValue());
-        }
-        else { ///get sysid and tablename from portal or workspace
-            let searchParams = new URLSearchParams(window.location.search)
-            let tableName = searchParams.get('table') || searchParams.get('id');
-            let sysId = searchParams.get('sys_id');
-            if (tableName && sysId) { //portal
-                targeturl = targeturl.replace(/\$table/g, tableName);
-                targeturl = targeturl.replace(/\$sysid/g, sysId);
-            }
-            else { //workspace
-                var parts = window.location.pathname.split("/");
-                var idx = parts.indexOf("sub") // show subrecord if available
-                if (idx != -1) parts = parts.slice(idx);
-                idx = parts.indexOf("record")
-                if (idx > -1 && parts.length >= idx + 2) {
-                    tableName = parts[idx + 1];
-                    sysId = parts[idx + 2];
-                }
-                targeturl = targeturl.replace(/\$table/g, tableName);
-                targeturl = targeturl.replace(/\$sysid/g, sysId);
-            }
-        }
+        targeturl = snuResolveVariables(targeturl);
 
         var switchText = '<br /> Options:<br />';
         if (['nav', 'fav', 'hist'].includes(shortcut)) {
@@ -687,6 +663,7 @@ function snuAddSlashCommandListener() {
                             var tableName = targeturl.split("_list.do")[0] || "{}";
                             targeturl = snuslashswitches[prop].value.replace(/\$0/, tableName);
                             targeturl = targeturl.replace(/\$sysid/, mySysId);
+                            targeturl = snuResolveVariables(targeturl);
                             linkSwitch = true;
                             unusedSwitches = {};
                             switchText = '<br /> Options:<br />'; //reset switchtext
@@ -1255,6 +1232,36 @@ function snuDiffXml(shortcut, instance = '') {
 
     snuHideSlashCommand();
     return;
+}
+
+
+function snuResolveVariables(variableString){
+    if (typeof g_form !== 'undefined') { //get sysid and tablename from classic form
+        variableString = variableString.replace(/\$table/g, g_form.getTableName());
+        variableString = variableString.replace(/\$sysid/g, g_form.getUniqueValue());
+    }
+    else { ///get sysid and tablename from portal or workspace
+        let searchParams = new URLSearchParams(window.location.search)
+        let tableName = searchParams.get('table') || searchParams.get('id');
+        let sysId = searchParams.get('sys_id');
+        if (tableName && sysId) { //portal
+            variableString = variableString.replace(/\$table/g, tableName);
+            variableString = variableString.replace(/\$sysid/g, sysId);
+        }
+        else { //workspace
+            var parts = window.location.pathname.split("/");
+            var idx = parts.indexOf("sub") // show subrecord if available
+            if (idx != -1) parts = parts.slice(idx);
+            idx = parts.indexOf("record")
+            if (idx > -1 && parts.length >= idx + 2) {
+                tableName = parts[idx + 1];
+                sysId = parts[idx + 2];
+            }
+            variableString = variableString.replace(/\$table/g, tableName);
+            variableString = variableString.replace(/\$sysid/g, sysId);
+        }
+    }
+    return variableString;
 }
 
 function snuExpandHints(shortcut) {
@@ -3369,7 +3376,7 @@ function snuPostLinkRequestToScriptSync(field) {
 
 function snuAddFieldSyncButtons() {
 
-    var fieldTypes = ["script", "xml", "html", "template", "json", "css", "condition_string"];
+    var fieldTypes = ["script", "xml", "html", "template", "json", "css", "condition_string", "graphql_schema", "expression", "json_translations", "script_client"];
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {

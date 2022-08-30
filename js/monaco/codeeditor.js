@@ -161,6 +161,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 }
             })
             editor.addAction({
+                id: "6_graphql",
+                label: "Set to GraphQL",
+                contextMenuGroupId: "3_lang",
+                run: (editor) => {
+                    monaco.editor.setModelLanguage(editor.getModel(), "graphql");
+                }
+            })
+            editor.addAction({
                 id: "7_powershell",
                 label: "Set to Powershell",
                 contextMenuGroupId: "3_lang",
@@ -169,7 +177,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 }
             })
             editor.addAction({
-                id: "7_plain",
+                id: "8_plain",
                 label: "Set to Plain text",
                 contextMenuGroupId: "3_lang",
                 run: (editor) => {
