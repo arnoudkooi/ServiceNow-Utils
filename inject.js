@@ -274,6 +274,12 @@ var snuslashcommands = {
         "url": "/now/build/ui/experiences",
         "hint": "Open UI Builder"
     },
+    "uibe": {
+        "url": "/sys_ux_page_registry_list.do?sysparm_query=root_macroponentISNOTEMPTY^sys_id!=3bfb334573021010e12d1e3014f6a7a9^sys_id!=8f30c79577af00108a370870a810613a^sys_id!=a36cd3837721201079ccdc3f581061b8^sys_id!=ec71a07477a2301079ccdc3f581061e9^titleLIKE$0^ORpathLIKE$0^ORDERBYDESCsys_updated_on",
+        "hint": "UIB Experience <search>",
+        "fields": "title,path,admin_panel.sys_id",
+        "overwriteurl": "/now/build/ui/apps/$admin_panel.sys_id"
+    },
     "uis": {
         "url": "sys_ui_script_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter UI Scripts <name>",
@@ -1239,6 +1245,24 @@ function snuResolveVariables(variableString){
     if (typeof g_form !== 'undefined') { //get sysid and tablename from classic form
         variableString = variableString.replace(/\$table/g, g_form.getTableName());
         variableString = variableString.replace(/\$sysid/g, g_form.getUniqueValue());
+    }
+    if (location.pathname == "/$flow-designer.do"){ //flowdesigner
+        let tableName;
+        let sysId;
+        if (location.hash.startsWith("#/flow-designer/")){
+            tableName = "sys_hub_flow";
+            sysId = location.hash.replace("#/flow-designer/","").substring(0,32);
+        }
+        else if (location.hash.startsWith("#/sub-flow-designer/")){
+            tableName = "sys_hub_flow";
+            sysId = location.hash.replace("#/sub-flow-designer/","").substring(0,32);
+        }
+        else if (location.hash.startsWith("#/action-designer/")){
+            tableName = "sys_hub_action_type_definition";
+            sysId = location.hash.replace("#/action-designer/","").substring(0,32);
+        }
+        variableString = variableString.replace(/\$table/g, tableName);
+        variableString = variableString.replace(/\$sysid/g, sysId);
     }
     else { ///get sysid and tablename from portal or workspace
         let searchParams = new URLSearchParams(window.location.search)

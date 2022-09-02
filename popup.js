@@ -1303,6 +1303,48 @@ function getSlashcommands() {
 
 }
 
+
+function getTableSysId(){ //extracted from inject.js snuResolveVariables, todo:merge methods
+    var ts = {
+        tableName : '',
+        sysId : ''
+    }
+    const loc = new URL(urlFull);
+    console.log(loc);
+    if (loc.pathname == "/$flow-designer.do"){ //flowdesigner
+        if (loc.hash.startsWith("#/flow-designer/")){
+            ts.tableName = "sys_hub_flow";
+            ts.sysId = loc.hash.replace("#/flow-designer/","").substring(0,32);
+        }
+        else if (loc.hash.startsWith("#/sub-flow-designer/")){
+            ts.tableName = "sys_hub_flow";
+            ts.sysId = loc.hash.replace("#/sub-flow-designer/","").substring(0,32);
+        }
+        else if (loc.hash.startsWith("#/action-designer/")){
+            ts.tableName = "sys_hub_action_type_definition";
+            ts.sysId = loc.hash.replace("#/action-designer/","").substring(0,32);
+        }
+    }
+    else { ///get sysid and tablename from portal or workspace
+        let searchParams = new URLSearchParams(loc.search)
+        ts.tableName = searchParams.get('table') || searchParams.get('id');
+        ts.sysId = searchParams.get('sys_id');
+        if (!(ts.tableName && ts.sysId)) { //workspace
+            var parts = loc.pathname.split("/");
+            var idx = parts.indexOf("sub") // show subrecord if available
+            if (idx != -1) parts = parts.slice(idx);
+            idx = parts.indexOf("record")
+            if (idx > -1 && parts.length >= idx + 2) {
+                ts.tableName = parts[idx + 1];
+                ts.sysId = parts[idx + 2];
+            }
+        }
+    }
+    console.log(ts);
+
+    return ts;
+}
+
 //Query ServiceNow for tables, pass JSON back to popup
 function getExploreData() {
 
@@ -1310,8 +1352,8 @@ function getExploreData() {
         method: "getVars",
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
-        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref) || getParameterByName('id', response.frameHref);
-        var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id", response.frameHref);
+        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref) || getParameterByName('id', response.frameHref) || getTableSysId().tableName ;
+        var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id", response.frameHref) || getTableSysId().sysId;
 
         if (!tableName) { //try to find table and sys_id in workspace
             var myurl = new URL(response.frameHref)
