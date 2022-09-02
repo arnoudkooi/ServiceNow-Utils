@@ -224,6 +224,6 @@ function startStopWatch() {
 	var startTime = Date.now();
 	timerInterval = setInterval(function() {
 		var elapsedTime = Date.now() - startTime;
-		result.innerHTML = (elapsedTime / 1000).toFixed(3) + ' - Background script running... <hr />';
+		result.innerHTML = (elapsedTime / 1000).toFixed(3) + ' - Background script running... <a href="/cancel_my_transaction.do">Cancel my transaction</a><hr />';
 	}, 100);
 }
