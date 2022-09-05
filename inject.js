@@ -3257,16 +3257,17 @@ function snuPostRequestToScriptSync(requestType) {
 
     }
 
-    var client = new XMLHttpRequest();
-    client.open("post", "http://127.0.0.1:1977");
-    client.onreadystatechange = function (m) {
-        if (client.readyState == 4 && client.status != 200)
-            snuSetInfoText(client.responseText.replace(/<\/?[^>]+(>|$)/g + "<br />", true));
-    };
-    client.onerror = function (e) {
-        snuSetInfoText("Error, please check if VS Code with SN SriptSync is running<br />", true);
-    };
-    client.send(JSON.stringify(data));
+    snuScriptSyncPostData(data);
+    // var client = new XMLHttpRequest();
+    // client.open("post", "http://127.0.0.1:1977");
+    // client.onreadystatechange = function (m) {
+    //     if (client.readyState == 4 && client.status != 200)
+    //         snuSetInfoText(client.responseText.replace(/<\/?[^>]+(>|$)/g + "<br />", true));
+    // };
+    // client.onerror = function (e) {
+    //     snuSetInfoText("Error, please check if VS Code with SN SriptSync is running<br />", true);
+    // };
+    // client.send(JSON.stringify(data));
 }
 
 function snuPostToMonaco(field, fieldType) {
@@ -3350,23 +3351,25 @@ function snuPostToScriptSync(field, fieldType) {
         data.name = 'script'; //(new Date()).toISOString().slice(0,10).replace(/-/g,"");
     }
 
-    var client = new XMLHttpRequest();
-    client.open("post", "http://127.0.0.1:1977");
-    client.onreadystatechange = function (m) {
-        // if (client.readyState == 4 && client.status != 200)
-        //     g_form.addErrorMessage(client.responseText);
-    };
-    client.onerror = function (e) {
-        var msg = "Error, Check if VS Code with sn-sriptsync is running";
-        try {
-            g_form.addErrorMessage(msg);
-        } catch (e) {
-            snuSetInfoText(msg, false);
-            document.querySelector('#snualertdiv')?.remove();
-        }
+    snuScriptSyncPostData(data);
 
-    };
-    client.send(JSON.stringify(data));
+    // var client = new XMLHttpRequest();
+    // client.open("post", "http://127.0.0.1:1977");
+    // client.onreadystatechange = function (m) {
+    //     // if (client.readyState == 4 && client.status != 200)
+    //     //     g_form.addErrorMessage(client.responseText);
+    // };
+    // client.onerror = function (e) {
+    //     var msg = "Error, Check if VS Code with sn-sriptsync is running";
+    //     try {
+    //         g_form.addErrorMessage(msg);
+    //     } catch (e) {
+    //         snuSetInfoText(msg, false);
+    //         document.querySelector('#snualertdiv')?.remove();
+    //     }
+
+    // };
+    // client.send(JSON.stringify(data));
 
 }
 
@@ -3386,16 +3389,17 @@ function snuPostLinkRequestToScriptSync(field) {
     data.appName = ngScope.ProjectConfig.APP_NAME;
     data.appScope = ngScope.ProjectConfig.APP_SCOPE;
 
-    var client = new XMLHttpRequest();
-    client.open("post", "http://127.0.0.1:1977");
-    client.onreadystatechange = function (m) {
-        // if (client.readyState == 4 && client.status != 200)
-        //     g_form.addErrorMessage(client.responseText);
-    };
-    client.onerror = function (e) {
-        alert("Error, please check if VS Code with SN SriptSync is running");
-    };
-    client.send(JSON.stringify(data));
+    snuScriptSyncPostData(data);
+    // var client = new XMLHttpRequest();
+    // client.open("post", "http://127.0.0.1:1977");
+    // client.onreadystatechange = function (m) {
+    //     // if (client.readyState == 4 && client.status != 200)
+    //     //     g_form.addErrorMessage(client.responseText);
+    // };
+    // client.onerror = function (e) {
+    //     alert("Error, please check if VS Code with SN SriptSync is running");
+    // };
+    // client.send(JSON.stringify(data));
 }
 
 function snuAddFieldSyncButtons() {
@@ -3699,6 +3703,19 @@ function snuScriptSync() {
     );
     window.top.document.dispatchEvent(event);
     sncWait();
+}
+
+function snuScriptSyncPostData(data) {
+    var event = new CustomEvent(
+        "snutils-event",
+        {
+            detail: {
+                event: "scriptsyncpostdata",
+                command: data
+            }
+        }
+    );
+    window.top.document.dispatchEvent(event);
 }
 
 function sncWait(ms) { //dirty. but just need to wait a sec...

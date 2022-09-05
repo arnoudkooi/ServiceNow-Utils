@@ -540,11 +540,10 @@ function openFile(link) {
 
 
 function createScriptSyncTab(cookieStoreId) {
-
     getFromSyncStorageGlobal("synctab", function (tid) {
         if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
-            chrome.tabs.get(tid, function () {
-                if (chrome.runtime.lastError) {
+            chrome.tabs.get(tid, tb => {
+                if (!tb) {
                     var url = chrome.runtime.getURL("scriptsync.html");
                     var createObj = {
                         'url': url,
