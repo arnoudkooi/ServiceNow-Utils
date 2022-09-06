@@ -840,7 +840,7 @@ function snuAddSlashCommandListener() {
                     snuDiffXml('diff1');
                     setTimeout(() => {
                         snuDiffXml('diff2', query);
-                    }, 1000)
+                    }, 1400)
                 }
                 return;
             }
@@ -1202,7 +1202,7 @@ function snuDiffXml(shortcut, instance = '') {
     let delay = 0;
 
     if (shortcut == 'diff1') {
-        delay = 400;
+        delay = 900;
         let event = new CustomEvent(
             "snutils-event",
             {
@@ -3273,7 +3273,7 @@ function snuPostRequestToScriptSync(requestType) {
 function snuPostToMonaco(field, fieldType) {
     if (event && typeof event.preventDefault !== 'undefined') event?.preventDefault();
     snuScriptEditor();
-    sncWait(400);
+    sncWait(900);
     var data = {};
     var instance = {};
     instance.name = window.location.host.split('.')[0];
