@@ -1854,7 +1854,8 @@ function snuEnhanceNotFound(advanced) {
     jQuery('#snutils-suggestions').remove();
 
 
-    var not_the_droids = jQuery('#not_the_droids').val();
+    var not_the_droids = DOMPurify.sanitize(jQuery('#not_the_droids').val());
+    if (not_the_droids != jQuery('#not_the_droids').val()) return;
     var query = not_the_droids.split('_list.do');
     var addedQuery = '_list.do' + ((query.length > 1) ? query[1] : '');
     var html = '<div id="snutils-suggestions" style="margin-top:20px"><h4>SN Utils \'did you mean\' table suggestions</h4>';
@@ -2118,28 +2119,31 @@ function snuAddTechnicalNames() {
     if (typeof jQuery == 'undefined') return; //not in studio
 
     snuAddTechnicalNamesPortal();
+
+    document.querySelectorAll("#related_lists_wrapper h1.navbar-title, h1.navbar-title.embedded, .list_nav_top .navbar-title").forEach(lr => {
+        if (!lr.querySelectorAll(".snuwrap").length) {
+            lr.style.display = 'inline';
+            var dataListId = lr.querySelector('a')?.dataset?.list_id;
+            if (!dataListId){ // diffrent dom structure for embedded lists #286
+                try {
+                    dataListId = lr.closest('div.embedded[tab_list_name_raw]').getAttribute('tab_list_name_raw');
+                } catch (e) { dataListId = '-.-' };
+            }
+            var tbl = (typeof g_form != 'undefined') ? dataListId.split('.')[1] : dataListId; // ? form : list 
+            if (tbl.startsWith("REL:")) {
+                tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:', '')}' >[scripted relation]</a>`;
+            }
+            lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
+        }
+    })
+
     if (typeof g_form != 'undefined') {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
             jQuery("h1.navbar-title:not(:contains('|'))").first().append('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
                 ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="Show the originating table innfo of fields" onclick="snuExtendedFieldInfo()">[table fields]</a>'+
                 '<a title="For easier copying of field names" onclick="snuToggleLabel()">[toggle label]</a> </span></span>');
-            document.querySelectorAll("#related_lists_wrapper h1.navbar-title, h1.navbar-title.embedded").forEach(lr => {
-                if (!lr.querySelectorAll(".snuwrap").length) {
-                    lr.style.display = 'inline';
-                    var dataListId = lr.querySelector('a')?.dataset?.list_id;
-                    if (!dataListId){ // diffrent dom structure for embedded lists #286
-                        try {
-                            dataListId = lr.closest('div.embedded[tab_list_name_raw]').getAttribute('tab_list_name_raw');
-                        } catch (e) { dataListId = '-.-' };
-                    }
-                    var tbl = dataListId.split('.')[1];
-                    if (tbl.startsWith("REL:")) {
-                        tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:', '')}' >[scripted relation]</a>`;
-                    }
-                    lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
-                }
-            })
+
             jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
                 jQuery(elem.parentElement).attr('data-for', jQuery(elem.parentElement).attr('for')); //copy for value
                 jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
@@ -2483,18 +2487,18 @@ function searchLargeSelects() {
 
     jQuery('select:not(.list_action_option, .searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
         try {
-            if (jQuery(el).find('option').length >= minItems && el.id != 'slush_right') {
+            if (jQuery(el).find('option').length >= minItems && (el.id == 'slush_left' || el.id == 'field_list_select_0')) {
                 //document.querySelector('.slushbucket-top').style.display = 'inline';
                 var input = document.createElement("input");
                 input.type = "text";
                 input.placeholder = "Filter choices...";
                 input.className = "form-control";
                 input.style.marginBottom = "2px";
-                snuInsertAfter(input, document.querySelector('label[for=slush_left], label[for=select_0]'))
-                jQuery('select#slush_left, select#select_0').filterByText(input, true).addClass('searchified');
+                snuInsertAfter(input, document.querySelector('label[for=slush_left], label[for=select_0], label[for=field_list_select_0]'))
+                jQuery('select#slush_left, select#select_0, select#field_list_select_0').filterByText(input, true).addClass('searchified');
             }
 
-            if (el.id == 'slush_right') {
+            if (el.id == 'slush_right' || el.id == 'field_list_select_1') {
                 //document.querySelector('.slushbucket-top.slushbody').style.display = 'inline';
                 var input = document.createElement("input");
                 input.type = "text";
@@ -2513,8 +2517,10 @@ function searchLargeSelects() {
                     }
                 }
 
-                snuInsertAfter(input, document.querySelectorAll('.glide-list')[1]);
-                jQuery('select#slush_right').addClass('searchified');
+                var elmCount = document.querySelectorAll('.glide-list').length;
+                var elmAfter =  document.querySelectorAll('.glide-list')[elmCount -1];
+                snuInsertAfter(input, elmAfter );
+                jQuery('select#slush_right, select#field_list_select_1').addClass('searchified');
             }
         } catch (e) { } //nice try
     });
@@ -3256,18 +3262,7 @@ function snuPostRequestToScriptSync(requestType) {
                 data.widget.data_table.choices = []; //skip useless data
 
     }
-
     snuScriptSyncPostData(data);
-    // var client = new XMLHttpRequest();
-    // client.open("post", "http://127.0.0.1:1977");
-    // client.onreadystatechange = function (m) {
-    //     if (client.readyState == 4 && client.status != 200)
-    //         snuSetInfoText(client.responseText.replace(/<\/?[^>]+(>|$)/g + "<br />", true));
-    // };
-    // client.onerror = function (e) {
-    //     snuSetInfoText("Error, please check if VS Code with SN SriptSync is running<br />", true);
-    // };
-    // client.send(JSON.stringify(data));
 }
 
 function snuPostToMonaco(field, fieldType) {
@@ -3353,24 +3348,6 @@ function snuPostToScriptSync(field, fieldType) {
 
     snuScriptSyncPostData(data);
 
-    // var client = new XMLHttpRequest();
-    // client.open("post", "http://127.0.0.1:1977");
-    // client.onreadystatechange = function (m) {
-    //     // if (client.readyState == 4 && client.status != 200)
-    //     //     g_form.addErrorMessage(client.responseText);
-    // };
-    // client.onerror = function (e) {
-    //     var msg = "Error, Check if VS Code with sn-sriptsync is running";
-    //     try {
-    //         g_form.addErrorMessage(msg);
-    //     } catch (e) {
-    //         snuSetInfoText(msg, false);
-    //         document.querySelector('#snualertdiv')?.remove();
-    //     }
-
-    // };
-    // client.send(JSON.stringify(data));
-
 }
 
 function snuPostLinkRequestToScriptSync(field) {
@@ -3390,16 +3367,6 @@ function snuPostLinkRequestToScriptSync(field) {
     data.appScope = ngScope.ProjectConfig.APP_SCOPE;
 
     snuScriptSyncPostData(data);
-    // var client = new XMLHttpRequest();
-    // client.open("post", "http://127.0.0.1:1977");
-    // client.onreadystatechange = function (m) {
-    //     // if (client.readyState == 4 && client.status != 200)
-    //     //     g_form.addErrorMessage(client.responseText);
-    // };
-    // client.onerror = function (e) {
-    //     alert("Error, please check if VS Code with SN SriptSync is running");
-    // };
-    // client.send(JSON.stringify(data));
 }
 
 function snuAddFieldSyncButtons() {
@@ -4387,5 +4354,4 @@ document.addEventListener('snuEvent', function (e) {
         script.textContent = e.detail.content;
         (document.head || document.documentElement).appendChild(script);
     }
-
 });

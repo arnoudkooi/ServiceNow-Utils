@@ -87,7 +87,7 @@ function openMonaceDiff(fieldName, context) {
             }
         );
         window.top.document.dispatchEvent(event);
-    }, 400);
+    }, 1500);
 
 
 }

@@ -9,7 +9,7 @@ var thistabid
 chrome.tabs.getCurrent( tab => { thistabid = tab.id });
 
 //this replaces the  webserver port 1977 communication to proxy ecverything through websocket/helpertab
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
     if (message.event == "scriptsyncpostdata") {
         ws.send(JSON.stringify(message.command));
     }
