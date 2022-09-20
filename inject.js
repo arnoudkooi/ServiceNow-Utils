@@ -1848,13 +1848,12 @@ function snuCaptureFormClick() {
 }
 
 function snuEnhanceNotFound(advanced) {
-
     if (typeof jQuery == 'undefined') return;
     if (!jQuery('#not_the_droids').length) return;
     jQuery('#snutils-suggestions').remove();
 
 
-    var not_the_droids = DOMPurify.sanitize(jQuery('#not_the_droids').val());
+    var not_the_droids = jQuery('#not_the_droids').val().replace(/[^a-z0-9\._-]/gi, '');
     if (not_the_droids != jQuery('#not_the_droids').val()) return;
     var query = not_the_droids.split('_list.do');
     var addedQuery = '_list.do' + ((query.length > 1) ? query[1] : '');
@@ -1883,7 +1882,7 @@ function snuEnhanceNotFound(advanced) {
             html += '<li style="font-size:11pt"><a href="' + results[i].name + addedQuery + '">' + results[i].label + ' [' + results[i].name + ']</a></li>';
         }
         html += '</ul></div>';
-        jQuery('.notfound_message').append(html);
+        jQuery('.notfound_message').append(DOMPurify.sanitize(html));
     });
 }
 
@@ -3122,7 +3121,7 @@ function snuGetSelectionText() {
 function snuSetInfoText(msg, addText) {
     window.top.document.querySelector('div.snutils').style.display = '';
     var txt = addText ? window.top.document.getElementById('snudirectlinks').innerHTML : "";
-    window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(txt + msg);
+    window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(txt + msg, { ADD_ATTR: ['target'] });
 }
 
 function snuFillFields(query) {
@@ -3755,9 +3754,9 @@ function snuSearchSysIdTables(sysId) {
             if (rspns.length == 0)
                 snuSetInfoText('Could not search for sys_id. (are you an Admin?)<br />', true);
             else if (answer != null && answer[1]) {
-                snuSetInfoText('Opening in new tab: ' + answer[1].split('^')[1] + "<br />", true);
                 var table = answer[1].split('^')[0];
                 var url = table + '.do?sys_id=' + sysId;
+                snuSetInfoText(`Opening in new tab: <a target='_blank' href='${url}'>${table}<br />`, true);
                 window.open(url, '_blank');
             } else {
                 snuSetInfoText('sys_id was not found...<br />', true);
