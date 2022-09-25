@@ -120,6 +120,23 @@ function devidePage() {
 				result.innerHTML = response.replace('<HTML><BODY>','').replace('</BODY></HTML>','');
 				resizer.style.height = document.body.scrollHeight + 'px';
 				document.querySelector('input[name=runscript]').disabled = false;
+
+				//add downloadlink
+				let text = document.querySelector('.result pre').innerText;
+				if (text.length > 10) { 
+					let oldLink = document.querySelector('.result a');
+					let lnk = document.createElement('a');
+					let linkText = document.createTextNode("download result");
+					lnk.appendChild(linkText);
+					lnk.href = "#";
+					lnk.style.display = "block";
+					lnk.title = 'Added via SN Utils'
+					lnk.addEventListener('click', evt => {
+						downloadResult();
+					});
+					oldLink.append(lnk);
+				}
+
 			})
 		e.preventDefault();
 	});
@@ -165,6 +182,32 @@ function devidePage() {
 	resizer.addEventListener('mousedown', mouseDownHandler);
 
 }
+
+
+function downloadResult() {
+
+    function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
+	var instance = window.location.hostname.split('.')[0];
+    var date = new Date();
+    fileName = 'bgscript_' + instance + '_' + date.getFullYear().toString() +
+        pad2(date.getMonth() + 1) + pad2(date.getDate()) + '_' +
+        pad2(date.getHours()) + pad2(date.getMinutes()) +
+        pad2(date.getSeconds()) + '.txt';
+
+	var link = document.querySelector('.result a').href;
+    var text = document.querySelector('.result pre').innerText;
+
+	text = 'Backgroundscript result exported via SN Utils\n' + link + '\n\n' + text;
+
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', fileName);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
+
 
 
 // The current position of mouse

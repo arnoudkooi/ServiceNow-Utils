@@ -10,7 +10,7 @@ class SnuNextManager {
             if (!eventPath[0]?.className?.includes('snuelm'))
                 if (!this._snuShowUpdateFieldNext(eventPath))
                     this.addTechnicalNames();
-
+            
         });
         document.addEventListener('mouseup', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
@@ -28,6 +28,16 @@ class SnuNextManager {
             }
 
         });
+
+        //specfic for UI builder, enable save button on mouseenter, as it sometimes doesnt get enabled after a propertie change
+        setTimeout(() => {
+            querySelectorShadowDom = window.querySelectorShadowDom;
+            querySelectorShadowDom.querySelectorDeep('.sn-ui-builder-comps-page-header--save').addEventListener('mouseenter', evt =>{
+                querySelectorShadowDom.querySelectorDeep('.sn-ui-builder-comps-page-header--save').disabled = false;
+            })
+        }, 2500);
+
+
     }
 
     addTechnicalNames() {
@@ -40,7 +50,7 @@ class SnuNextManager {
                 let view = querySelectorShadowDom.querySelectorDeep('now-record-form-section-column-layout',frm)?.view || frm.view; 
                 div.className = 'snutn snufrm snunodblclk';
                 div.style = 'margin-left: 4px; font-size:9pt; text-decration:none';
-                div.innerHTML = `<a title='SN Utils - Open view in platform' href='/${frm.table}.do?sys_id=${frm.nowRecordFormBlob.sysId}&sysparm_view=${view}' target='_blank'>${frm.table} - ${view}</a>
+                div.innerHTML = `<a title='SN Utils - Open view in platform' href='/${frm?.table}.do?sys_id=${frm?.nowRecordFormBlob?.sysId}&sysparm_view=${view}' target='_blank'>${frm?.table} - ${view}</a>
                 <a id='snureload' title='SN Utils - Reload this form' href='#' >⟳</a>
                 <a id='snuconsole' title='SN Utils - Show object data in console' href='#' >↷</a>`;
                 frm.insertBefore(div, frm.firstChild );
@@ -91,7 +101,7 @@ class SnuNextManager {
                 }
             })
 
-            if (frm.nowRecordFormBlob.fieldElements.forEach(elm => {
+            if (frm?.nowRecordFormBlob?.fieldElements.forEach(elm => {
                 if (elm.choices) {
                     elm.choices.forEach(choice => {
                         if (!choice.snuOrigValue) { //firsttime
@@ -250,7 +260,7 @@ class SnuNextManager {
         var snuStyle = document.createElement('style');
         snuStyle.innerHTML = `
         div.snupicker {
-            max-width:200px;
+            max-width:350px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
