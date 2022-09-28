@@ -973,7 +973,7 @@ function snuAddSlashCommandListener() {
                     xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
                     xhttp.setRequestHeader("Cache-Control", "no-cache");
                     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                    xhttp.setRequestHeader("X-UserToken", g_ck);
+                    if (typeof g_ck != 'undefined') xhttp.setRequestHeader("X-UserToken", g_ck);
                     xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
                     xhttp.send(JSON.stringify(payload));
 
@@ -2813,7 +2813,7 @@ function snuSaveImage(imgData, fileInfo, tableName, sysId) {
     request.setRequestHeader('Cache-Control', 'no-cache');
     request.setRequestHeader('Accept', 'application/json');
     request.setRequestHeader('Content-Type', fileInfo.type);
-    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
+    if (typeof g_ck != 'undefined') request.setRequestHeader('X-UserToken', g_ck);
 
     request.onload = function (resp) {
         if (this.status >= 200 && this.status < 400) {
@@ -2856,8 +2856,7 @@ function renamePasted(sysID, check) {
     client.open("put", "/api/now/table/sys_attachment/" + sysID);
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    if (typeof g_ck != 'undefined')
-        client.setRequestHeader('X-UserToken', g_ck);
+    if (typeof g_ck != 'undefined') client.setRequestHeader('X-UserToken', g_ck);
 
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
@@ -3987,7 +3986,7 @@ function snuGetUsersForImpersonate(query) {
         }
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader("X-UserToken", g_ck);
+    if (typeof g_ck != 'undefined') client.setRequestHeader("X-UserToken", g_ck);
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
             var idx = 0;
@@ -4040,7 +4039,7 @@ function snuImpersonate(userName) {
     client.open("post", "/api/now/ui/impersonate/" + userName);
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader("X-UserToken", g_ck);
+    if (typeof g_ck != 'undefined') client.setRequestHeader("X-UserToken", g_ck);
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
             location.reload();
@@ -4122,15 +4121,16 @@ function snuGetLastScopes(query) {
 function snuSwitchTo(switchType, key, val) {
     let payload = {}
     payload[key] = val; //
+    let headers = {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'X-WantSessionNotificationMessages': false            
+    };
+    if (typeof g_ck != 'undefined') headers['X-UserToken'] = g_ck
     fetch(`/api/now/ui/concoursepicker/${switchType}`, {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json, text/plain, */*',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'X-WantSessionNotificationMessages': false,
-            'X-UserToken': g_ck
-        },
-        body: JSON.stringify(payload),
+        "method": 'PUT',
+        "headers": headers,
+        "body": JSON.stringify(payload)
     })
         .then(response => response.json())
         .then(data => {
@@ -4157,7 +4157,7 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
     request.setRequestHeader('Cache-Control', 'no-cache');
     request.setRequestHeader('Accept', 'application/json');
     request.setRequestHeader('Content-Type', 'application/json');
-    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
+    if (typeof g_ck != 'undefined') request.setRequestHeader('X-UserToken', g_ck);
     request.onload = function () {
         var rows = request.getResponseHeader("X-Total-Count");
         var rnd = Math.floor(Math.random() * rows);
