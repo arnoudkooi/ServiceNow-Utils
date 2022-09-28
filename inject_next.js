@@ -32,9 +32,12 @@ class SnuNextManager {
         //specfic for UI builder, enable save button on mouseenter, as it sometimes doesnt get enabled after a propertie change
         setTimeout(() => {
             querySelectorShadowDom = window.querySelectorShadowDom;
-            querySelectorShadowDom.querySelectorDeep('.sn-ui-builder-comps-page-header--save').addEventListener('mouseenter', evt =>{
-                querySelectorShadowDom.querySelectorDeep('.sn-ui-builder-comps-page-header--save').disabled = false;
-            })
+            let elm = querySelectorShadowDom.querySelectorDeep('.sn-ui-builder-comps-page-header--save');
+            if (elm) {
+                elm.addEventListener('mouseenter', evt => {
+                    elm.disabled = false;
+                })
+            }
         }, 2500);
 
 

@@ -360,6 +360,9 @@ var snuslashswitches = {
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD", //"IN", //removed, to common ie: INC00010001
     "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
 
+if (typeof g_ck == 'undefined') g_ck = null;  //prevent not defined errors when not provided in older instances
+
+
 document.addEventListener('snuUpdateSettingsEvent', function (e) {
     if (e.type == "snuUpdateSettingsEvent") {
         if (e?.detail?.action == "updateSlashCommand") {
@@ -973,7 +976,7 @@ function snuAddSlashCommandListener() {
                     xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
                     xhttp.setRequestHeader("Cache-Control", "no-cache");
                     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                    if (typeof g_ck != 'undefined') xhttp.setRequestHeader("X-UserToken", g_ck);
+                    if (g_ck) xhttp.setRequestHeader("X-UserToken", g_ck);
                     xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
                     xhttp.send(JSON.stringify(payload));
 
@@ -2603,7 +2606,7 @@ function setShortCuts() {
             if (snusettings.slashoption == 'off') return;
             let eventPath = event.path || (event.composedPath && event.composedPath());
             if (eventPath[0]?.className?.includes('CodeMirror-code')) return; //allow commenting wit ctrl-/
-            var isActive = ((location.host.includes("service-now.com") || typeof g_ck != 'undefined') && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
+            var isActive = ((location.host.includes("service-now.com") || g_ck) && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
             if (isActive) {
                 var path = event.path || (event.composedPath && event.composedPath());
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
@@ -2813,7 +2816,7 @@ function snuSaveImage(imgData, fileInfo, tableName, sysId) {
     request.setRequestHeader('Cache-Control', 'no-cache');
     request.setRequestHeader('Accept', 'application/json');
     request.setRequestHeader('Content-Type', fileInfo.type);
-    if (typeof g_ck != 'undefined') request.setRequestHeader('X-UserToken', g_ck);
+    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
 
     request.onload = function (resp) {
         if (this.status >= 200 && this.status < 400) {
@@ -2856,7 +2859,7 @@ function renamePasted(sysID, check) {
     client.open("put", "/api/now/table/sys_attachment/" + sysID);
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    if (typeof g_ck != 'undefined') client.setRequestHeader('X-UserToken', g_ck);
+    if (g_ck) client.setRequestHeader('X-UserToken', g_ck);
 
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
@@ -3986,7 +3989,7 @@ function snuGetUsersForImpersonate(query) {
         }
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    if (typeof g_ck != 'undefined') client.setRequestHeader("X-UserToken", g_ck);
+    if (g_ck) client.setRequestHeader("X-UserToken", g_ck);
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
             var idx = 0;
@@ -4039,7 +4042,7 @@ function snuImpersonate(userName) {
     client.open("post", "/api/now/ui/impersonate/" + userName);
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
-    if (typeof g_ck != 'undefined') client.setRequestHeader("X-UserToken", g_ck);
+    if (g_ck) client.setRequestHeader("X-UserToken", g_ck);
     client.onreadystatechange = function () {
         if (this.readyState == this.DONE) {
             location.reload();
@@ -4126,7 +4129,7 @@ function snuSwitchTo(switchType, key, val) {
         'Content-Type': 'application/json;charset=UTF-8',
         'X-WantSessionNotificationMessages': false            
     };
-    if (typeof g_ck != 'undefined') headers['X-UserToken'] = g_ck
+    if (g_ck) headers['X-UserToken'] = g_ck
     fetch(`/api/now/ui/concoursepicker/${switchType}`, {
         "method": 'PUT',
         "headers": headers,
@@ -4140,7 +4143,7 @@ function snuSwitchTo(switchType, key, val) {
                 snuSetInfoText('Reloading page...', false);
                 setTimeout(() => {
                     window.top.location.reload();
-                }, 1000);
+                }, 1600);
             }
 
 
@@ -4157,7 +4160,7 @@ function snuGetRandomRecord(table, query, fullRecord, callback) {
     request.setRequestHeader('Cache-Control', 'no-cache');
     request.setRequestHeader('Accept', 'application/json');
     request.setRequestHeader('Content-Type', 'application/json');
-    if (typeof g_ck != 'undefined') request.setRequestHeader('X-UserToken', g_ck);
+    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
     request.onload = function () {
         var rows = request.getResponseHeader("X-Total-Count");
         var rnd = Math.floor(Math.random() * rows);
@@ -4348,7 +4351,7 @@ function snuPersonaliseList(autoclose) {
 }
 
 document.addEventListener('snuEvent', function (e) {
-    if (e.detail.type == "code" && (location.host.includes('service-now') || typeof g_ck != 'undefined' || location.pathname.endsWith('.do'))) { //basic check for servicenow instance
+    if (e.detail.type == "code" && (location.host.includes('service-now') || g_ck || location.pathname.endsWith('.do'))) { //basic check for servicenow instance
         var script = document.createElement('script');
         script.textContent = e.detail.content;
         (document.head || document.documentElement).appendChild(script);
