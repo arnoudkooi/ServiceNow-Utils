@@ -360,7 +360,7 @@ var snuslashswitches = {
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD", //"IN", //removed, to common ie: INC00010001
     "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
 
-if (typeof g_ck == 'undefined') g_ck = null;  //prevent not defined errors when not provided in older instances
+if (typeof g_ck == 'undefined' || g_ck === 'null') g_ck = null;  //prevent not defined errors when not provided in older instances
 
 
 document.addEventListener('snuUpdateSettingsEvent', function (e) {
