@@ -831,6 +831,7 @@ function snuAddSlashCommandListener() {
                 }
                 else {
                     window.open(thisUrl, '_blank');
+                    snuHideSlashCommand();
                 }
                 return;
             }
