@@ -2490,7 +2490,7 @@ function searchLargeSelects() {
 
     jQuery('select:not(.list_action_option, .searchified, .select2, .select2-offscreen, #application_picker_select, #update_set_picker_select)').each(function (i, el) {
         try {
-            if (jQuery(el).find('option').length >= minItems && (el.id == 'slush_left' || el.id == 'field_list_select_0')) {
+            if (jQuery(el).find('option').length >= minItems && (el.id == 'slush_left' || el.id.includes('select_0'))) {
                 //document.querySelector('.slushbucket-top').style.display = 'inline';
                 var input = document.createElement("input");
                 input.type = "text";
