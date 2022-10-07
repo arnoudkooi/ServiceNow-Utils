@@ -2614,6 +2614,8 @@ function setShortCuts() {
                     (event.ctrlKey || event.metaKey) ||
                     path[0].id == 'filter' && path[0].value == ''
                 ) { //not when form element active, except filter
+
+                    if (path.length > 8 && path[2]?.className.includes('CodeMirror')) return //not in codemirror
                     event.preventDefault();
                     snuShowSlashCommand('', false);
                 }
@@ -3559,7 +3561,7 @@ function snuSortStudioLists() {
 
 function snuAddStudioSearch() {
     if (!location.href.includes("$studio.do")) return; //only in studio
-    if (typeof g_ck == 'undefined') {
+    if (!g_ck) {
         if (typeof InitialState != 'undefined') {
             g_ck = InitialState.userToken;
         }
@@ -3572,7 +3574,7 @@ function snuAddStudioSearch() {
 function snuAddStudioScriptSync() {
 
     if (!location.href.includes("$studio.do")) return; //only in studio
-    if (typeof g_ck == 'undefined') {
+    if (!g_ck) {
         if (typeof InitialState != 'undefined') {
             g_ck = InitialState.userToken;
         }
