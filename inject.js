@@ -89,7 +89,7 @@ var snuslashcommands = {
         "hint": "Download the latest SN Utils cheatsheet"
     },
     "comm": {
-        "url": "https://community.servicenow.com/community?id=community_search&q=$0&spa=1",
+        "url": "https://www.servicenow.com/community/forums/searchpage/tab/message?advanced=false&allow_punctuation=false&q=$0",
         "hint": "Search Community <search>"
     },
     "cs": {
@@ -102,7 +102,7 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/sandiego/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/tokyo/All/$0",
         "hint": "Search developer portal <search>"
     },
     "diff1": {
@@ -118,7 +118,7 @@ var snuslashcommands = {
         "hint": "Compare current record XML with XML of <instance>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=sandiego",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=tokyo",
         "hint": "Search Docs <search>"
     },
     "env": {
@@ -712,7 +712,7 @@ function snuAddSlashCommandListener() {
                 targeturl = targeturl.replace(re, queryArr[i] || "");
             }
         }
-        if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly)) snuGetDirectLinks(targeturl, shortcut);
+        if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly && !(e.ctrlKey || e.metaKey))) snuGetDirectLinks(targeturl, shortcut);
 
         else if (e.key == 'Enter') {
             shortcut = shortcut.replace(/\*/g, '');

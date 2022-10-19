@@ -348,8 +348,8 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
 }
 
 function executeCodeSearch(url, gck, searchTerm, searchGroup) {
-  if (searchTerm.length < 4) {
-    jQuery('#searchmsg').html('Searchterm must be 4 characters or more');
+  if (searchTerm.length < 3) {
+    jQuery('#searchmsg').html('Searchterm must be 3 characters or more');
     return;
   }
 
