@@ -2117,7 +2117,6 @@ function snuAddTechnicalNames() {
 
     var hasRun = document.querySelectorAll('.snuwrap').length > 0; //helper var to allow toggle technical names
 
-    snuAddTechnicalNamesWorkspace();
     if (typeof snuNextManager != 'undefined') snuNextManager.addTechnicalNames();
     if (typeof jQuery == 'undefined') return; //not in studio
 
@@ -3893,81 +3892,6 @@ function snuGetNavHints(shortcut, srch) {
         }
     }
     return '<br />' + hit + ' Matches:<br />' + html;
-}
-
-function snuAddTechnicalNamesWorkspace() {
-    //in workspace, iterate through the components, and dive into their shadowroots.
-    document.querySelectorAll("sn-workspace-content").forEach(function (elm1) {
-        elm1.shadowRoot.querySelectorAll("now-record-form-connected").forEach(function (elm2) {
-            elm2.shadowRoot.querySelectorAll("sn-form-internal-workspace-form-layout").forEach(function (elm3) {
-
-                //add link after the UI action
-                elm3.shadowRoot.querySelector("sn-form-internal-header-layout").
-                    shadowRoot.querySelector("now-record-common-uiactionbar").
-                    shadowRoot.querySelectorAll("now-button").forEach(function (uiact) {
-                        var lnk = document.createElement("A");
-                        lnk.textContent = '?';
-                        lnk.href = '/sys_ui_action.do?sys_id=' + uiact.appendToPayload.item.sysId;
-                        lnk.target = 'uia';
-                        lnk.title = 'SN Utils - Open the UI Action definition';
-                        snuInsertAfter(lnk, uiact);
-                        console.dir(uiact);
-                    });
-
-                elm3.shadowRoot.querySelectorAll("now-record-form-blob").forEach(function (elm4) {
-                    elm4.shadowRoot.querySelectorAll("sn-form-internal-tabs").forEach(function (elm5) {
-                        elm5.shadowRoot.querySelectorAll("sn-form-internal-tab-contents").forEach(function (elm6) {
-                            elm6.shadowRoot.querySelectorAll("now-record-form-section-column-layout").forEach(function (elm7) {
-                                elm7.shadowRoot.querySelectorAll("*").forEach(function (elm8) {
-                                    if (elm8.nodeName.includes('-')) {
-                                        var lbl = elm8.shadowRoot.querySelector('.sn-control-label');
-                                        if (lbl && !lbl.innerHTML.includes('|')) {
-                                            var btn = document.createElement("A");
-                                            btn.textContent = elm8.name;
-                                            btn.href = 'javascript:void(0);';
-                                            btn.title = 'SN Utils - Doubleclick to edit';
-                                            btn.addEventListener('dblclick', function () { snuWsGetValue(elm4, elm8.name) }, false);
-                                            lbl.textContent = lbl.textContent + ' | ';
-                                            lbl.appendChild(btn);
-                                        }
-                                        console.dir(elm8)
-                                        elm8.shadowRoot.querySelectorAll("*").forEach(function (elm9) {
-                                            if (elm9.nodeName.includes('-')) {
-                                                var lbl = elm9.shadowRoot.querySelector('.sn-control-label');
-                                                if (lbl && !lbl.innerHTML.includes('|')) {
-                                                    var btn = document.createElement("A");
-                                                    btn.textContent = elm8.name;
-                                                    btn.href = 'javascript:void(0);';
-                                                    btn.title = 'SN Utils - Doubleclick to edit';
-                                                    btn.addEventListener('dblclick', function () { snuWsGetValue(elm4, elm8.name) }, false);
-                                                    lbl.textContent = lbl.textContent + ' | ';
-                                                    lbl.appendChild(btn);
-                                                }
-                                            }
-                                        })
-                                    }
-                                })
-                            })
-                        })
-                    })
-                })
-            })
-        })
-    })
-
-    function snuWsGetValue(frm, field) {
-        var newval = prompt("SNU", frm.fields[field].value);
-
-        if (newval != null) {
-            frm.dispatch("GFORM#SET_VALUE",
-                {
-                    fieldName: field,
-                    value: newval
-                });
-        }
-    }
-
-
 }
 
 function snuInsertAfter(newNode, referenceNode) {

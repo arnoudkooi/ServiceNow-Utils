@@ -103,6 +103,7 @@ function devidePage() {
 
 		document.querySelector('input[name=runscript]').disabled = true;
 		startStopWatch();
+		top.document.title ="🔴 BG script running.."
 		
 		const form = e.target;
 		var postData = new URLSearchParams(new FormData(form));
@@ -117,6 +118,7 @@ function devidePage() {
 			}).then(response => response.text())
 			.then((response) => {
 				clearInterval(timerInterval);
+				top.document.title ="🟢 BG script finished.."
 				result.innerHTML = response.replace('<HTML><BODY>','').replace('</BODY></HTML>','');
 				resizer.style.height = document.body.scrollHeight + 'px';
 				document.querySelector('input[name=runscript]').disabled = false;

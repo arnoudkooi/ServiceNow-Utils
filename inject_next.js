@@ -10,16 +10,16 @@ class SnuNextManager {
             if (!eventPath[0]?.className?.includes('snuelm'))
                 if (!this._snuShowUpdateFieldNext(eventPath))
                     this.addTechnicalNames();
-            
+
         });
         document.addEventListener('mouseup', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
-            try{
+            try {
                 if (eventPath[0].tagName == "svg") return;
-                if (eventPath[0]?.className.includes('sn-polaris-tab')){ //save a click, select input
+                if (eventPath[0]?.className.includes('sn-polaris-tab')) { //save a click, select input
                     setTimeout(() => { tryFocus(0) }, 200);
                 }
-            } catch (ex) {};
+            } catch (ex) { };
 
             function tryFocus(num) { //wait till element exists
                 var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
@@ -44,24 +44,26 @@ class SnuNextManager {
     }
 
     addTechnicalNames() {
+        this.snuAddFilterToTrees(); //add filter to now-content-tree components
+
         let namesAdded = 0;
         let frms = querySelectorShadowDom.querySelectorAllDeep('sn-form-data-connected, sn-form-data-connected');
         frms.forEach(frm => {
-            if (!querySelectorShadowDom.querySelectorAllDeep('.snufrm',frm).length){ //only add once
-                let uiab = querySelectorShadowDom.querySelectorAllDeep('.uiaction-bar-wrapper',frm);
+            if (!querySelectorShadowDom.querySelectorAllDeep('.snufrm', frm).length) { //only add once
+                let uiab = querySelectorShadowDom.querySelectorAllDeep('.uiaction-bar-wrapper', frm);
                 let div = document.createElement("div");
-                let view = querySelectorShadowDom.querySelectorDeep('now-record-form-section-column-layout',frm)?.view || frm.view; 
+                let view = querySelectorShadowDom.querySelectorDeep('now-record-form-section-column-layout', frm)?.view || frm.view;
                 div.className = 'snutn snufrm snunodblclk';
                 div.style = 'margin-left: 4px; font-size:9pt; text-decration:none';
                 div.innerHTML = `<a title='SN Utils - Open view in platform' href='/${frm?.table}.do?sys_id=${frm?.nowRecordFormBlob?.sysId}&sysparm_view=${view}' target='_blank'>${frm?.table} - ${view}</a>
                 <a id='snureload' title='SN Utils - Reload this form' href='#' >⟳</a>
                 <a id='snuconsole' title='SN Utils - Show object data in console' href='#' >↷</a>`;
-                frm.insertBefore(div, frm.firstChild );
-                frm.querySelector('#snureload').addEventListener('click' , e =>{
+                frm.insertBefore(div, frm.firstChild);
+                frm.querySelector('#snureload').addEventListener('click', e => {
                     e.preventDefault();
                     frm.nowRecordFormBlob.gForm.reload();
                 })
-                frm.querySelector('#snuconsole').addEventListener('click' , e =>{
+                frm.querySelector('#snuconsole').addEventListener('click', e => {
                     e.preventDefault();
                     console.log('SN Utils: sn-form-data-connected');
                     console.dir(frm);
@@ -88,7 +90,7 @@ class SnuNextManager {
                           <a class='snuelm' target='dictionary' href="/sys_dictionary.do?sysparm_query=nameINjavascript:new PAUtils().getTableAncestors('${elm.referringTable}')^element=${elm.dictionary.name}">Dictionary</a> 
                         </div>
                         <div>
-                          Fieldtype: ${elm.dictionary?.type } 
+                          Fieldtype: ${elm.dictionary?.type} 
                         </div>
                       </div>
                     </details>`
@@ -121,10 +123,10 @@ class SnuNextManager {
                 }
             }));
 
-             
+
         })
 
-        namesAdded += this.addTechnicalNamesLists();  
+        namesAdded += this.addTechnicalNamesLists();
 
         //toogle visibility
         querySelectorShadowDom.querySelectorAllDeep('.snutn').forEach(cls => {
@@ -136,9 +138,10 @@ class SnuNextManager {
 
     addTechnicalNamesLists() {
         let namesAdded = 0;
-        let lists = querySelectorShadowDom.querySelectorAllDeep("now-record-list-connected, now-record-list-connected-related");
+        let lists = querySelectorShadowDom.querySelectorAllDeep("now-record-list-connected, now-record-list-connected-related, now-record-list-connected-snapshot");
         lists.forEach(list => {
             if (!querySelectorShadowDom.querySelectorAllDeep('.snulist', list).length) {
+                //add column names below label
                 querySelectorShadowDom.querySelectorAllDeep('th:not(.snuth)', list).forEach(th => {
                     let name = th.id.substring(0, th.id.lastIndexOf("_"));
                     let div = document.createElement("div");
@@ -146,15 +149,70 @@ class SnuNextManager {
                     div.style = 'margin-left: 18px; font-weight: lighter; font-size: 9pt; margin-top: -10pt;'
                     div.innerText = name;
                     th.append(div);
-                    th.classList.add('snuth','snunodblclk');
+                    th.classList.add('snuth', 'snunodblclk');
                     namesAdded++;
                 })
+
+
+                //add tablename and clickable encodeqquery above list
+                let lst = querySelectorShadowDom.querySelectorDeep('div.sn-list-grid-container:not(.snutable)', list);
+                if (lst) {
+                    
+                    let div = document.createElement("div");
+                    div.classList.add('snutn','uiaction-bar');
+                    div.title = '[SN Utils] Utility functions added via SN Utils';
+                    div.style = 'margin-left: 10px; padding:5px; width: max-content; gap: 5px; align-items: center;';
+                    
+                    
+                    let diveq = document.createElement("div");
+                    diveq.style = 'margin-right: 5px; display:inline';
+                    let btneq = document.createElement("now-button");
+                    btneq.icon = 'filter-outline';
+                    btneq.variant = 'secondary';
+                    btneq.size= 'sm';
+                    btneq.title = '[SN Utils]] Click to view/edit encodedquery';
+                    btneq.addEventListener('click', () => {
+                        let newValue = prompt(`[SN Utils]\nEncodedquery\nTable: ${list.table}\nFixedquery: ${list.fixedQuery}\nComplete encodedquery`, (list.fixedQuery + (list.fixedQuery) ? '^' : '' +  list.query).replace('^^','^'));
+                        if (newValue !== null)
+                            list.query = newValue.replace(list.fixedQuery, "");
+                        return true;
+                    })
+                    diveq.appendChild(btneq);
+                    div.appendChild(diveq);
+
+                    let divol = document.createElement("div");
+                    divol.style = 'margin-right: 5px; display:inline';
+                    let btnol = document.createElement("now-button");
+                    btnol.icon = 'score-list-outline';
+                    btnol.variant = 'secondary';
+                    btnol.size= 'sm';
+                    btnol.title = '[SN Utils]] Click to open in classic list';
+                    btnol.style = 'padding-right: 5px; margin-left: 5px;';
+                    btnol.addEventListener('click', () => {
+                       window.open((`/${list.table}_list.do?sysparm_query=${list.fixedQuery + (list.fixedQuery) ? '^' : '' + list.query}&sysparm_view=${list.view}`).replace('^^','^'));
+                    })
+                    divol.appendChild(btnol);
+                    div.appendChild(divol);
+                    
+                    let spn = document.createElement("span");
+                    spn.innerText = list.table;
+                    spn.title = '[SN Utils] Source table of list';
+                    spn.style = 'margin-left: 5px;';
+                    spn.classList.add('snunodblclk');
+                    div.appendChild(spn);
+                    
+                    let parentElm = lst.parentNode;
+                    parentElm.insertBefore(div, lst);
+                    lst.classList.add('snutable', 'snunodblclk');
+
+                }
+
             }
         })
         return namesAdded;
     }
 
-    createLabelLink(elm){
+    createLabelLink(elm) {
         let linkBtn = '', linkAttrs;
         if (fieldType == 'reference' || fieldType == 'glide_list') {
             var reftable = g_form.getGlideUIElement(elm).reference;
@@ -182,7 +240,7 @@ class SnuNextManager {
             };
             elm = '⚑ ' + elm;
         }
-        else if (['translated_text','translated_html'].includes(fieldType)) {
+        else if (['translated_text', 'translated_html'].includes(fieldType)) {
             linkAttrs = {
                 onclick: 'snuViewTranslations(\'' + elm + '\');',
                 title: `View translations of ${fieldType} field`
@@ -199,7 +257,7 @@ class SnuNextManager {
 
     }
 
-    labelClick(componentId,fieldName) {
+    labelClick(componentId, fieldName) {
         alert(`[SN Utils] You clicked label: ${fieldName} \nthis still needs to be implemented`)
         console.log(componentId);
         console.log(fieldName);
@@ -238,13 +296,13 @@ class SnuNextManager {
         selector, // selector like in .closest()
         base = this, // extra functionality to skip a parent
         __Closest = (el, found = el && el.closest(selector)) =>
-        !el || el === document || el === window ?
-        null // standard .closest() returns null for non-found selectors also
-        :
-        found ?
-        found // found a selector INside this element
-        :
-        __Closest(el.getRootNode().host) // recursion!! break out to parent DOM
+            !el || el === document || el === window ?
+                null // standard .closest() returns null for non-found selectors also
+                :
+                found ?
+                    found // found a selector INside this element
+                    :
+                    __Closest(el.getRootNode().host) // recursion!! break out to parent DOM
     ) {
         return __Closest(base);
     }
@@ -253,10 +311,10 @@ class SnuNextManager {
         var tooltip = querySelectorShadowDom.querySelectorDeep('#concourse-pickers-tooltip div');
         var searchContainer = querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, div.search-combobox--header')
         var searchInput = querySelectorShadowDom.querySelectorDeep('input.sn-global-typeahead-input, input.input-container__input');
-        
-        if (!(!!tooltip * !!searchContainer * !!searchInput)){ //if not all exist, try again afte3 500ms
+
+        if (!(!!tooltip * !!searchContainer * !!searchInput)) { //if not all exist, try again afte3 500ms
             if (cnt < 30)
-                setTimeout(() => { this.linkPickers(++cnt)}, 600);
+                setTimeout(() => { this.linkPickers(++cnt) }, 600);
             return;
         }
         searchContainer.style.width = '80px'
@@ -295,18 +353,18 @@ class SnuNextManager {
         snuSpacer.style.color = 'white';
         snuSpacer.style.margin = '0 0 0 7px'
 
-    
+
         snuInsertAfter(snuSpacer,
             querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
-            
+
         var pickerDivs;
 
-        function addClassToPickerDivs(){
+        function addClassToPickerDivs() {
             pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
             pickerDivs.forEach((div, idx) => {
                 div.className = 'snupicker';
                 div.dataset.index = ++idx;
-            }); 
+            });
         }
 
         addClassToPickerDivs();
@@ -318,68 +376,115 @@ class SnuNextManager {
         var wrpr = querySelectorShadowDom.querySelectorDeep('sn-search-input-wrapper');
         if (wrpr) wrpr.windowSize = 'collapsed'; //show icon instead of small input
 
-        
+
         //domain picker can be loaded later, determine the clicked div at runtime
         snuSpacer.addEventListener('click', evt => {
             let eventPath = evt.path || (evt.composedPath && evt.composedPath());
             var idx = Number(eventPath[0]?.dataset?.index) || 1; //determine number of clicked element
-            
+
             evt.preventDefault();
             evt.stopPropagation();
             this.showPicker(idx, evt, eventPath[0]);
 
         });
-    
+
     }
-    
-    showPicker(pickerindex,evt,elm){
+
+    showPicker(pickerindex, evt, elm) {
         try {
-            if (evt.ctrlKey || evt.metaKey){
+            if (evt.ctrlKey || evt.metaKey) {
                 var txt = elm.innerText.toLowerCase();
-                if (txt.startsWith('domain')) snuShowSlashCommand('/sd ',true);
-                else if (txt.startsWith('application')) snuShowSlashCommand('/sa ',true);
-                else if (txt.startsWith('update')) snuShowSlashCommand('/su ',true);
+                if (txt.startsWith('domain')) snuShowSlashCommand('/sd ', true);
+                else if (txt.startsWith('application')) snuShowSlashCommand('/sa ', true);
+                else if (txt.startsWith('update')) snuShowSlashCommand('/su ', true);
                 return;
             }
-        
+
             var back = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body span.go-back-button');
             if (back) back.click();
             else querySelectorShadowDom.querySelectorDeep('span.contextual-zone-button.concourse-pickers').click();
             clickPicker(0, pickerindex)
 
-        } catch (ex) {};
+        } catch (ex) { };
 
-        function clickPicker(num, pickerindex){
+        function clickPicker(num, pickerindex) {
             let lbls = querySelectorShadowDom.querySelectorAllDeep('sn-drilldown-list span.label');
             let lbl; //make clicked label independent of available pickers but based on index #260
-            if (lbls.length >= pickerindex ) lbl = querySelectorShadowDom.querySelectorAllDeep('sn-drilldown-list span.label')[pickerindex -1];
+            if (lbls.length >= pickerindex) lbl = querySelectorShadowDom.querySelectorAllDeep('sn-drilldown-list span.label')[pickerindex - 1];
             if (lbl) {
                 lbl.click();
                 tryOpenList(0);
             }
-            else if (num < 20){
-                setTimeout(() => { 
+            else if (num < 20) {
+                setTimeout(() => {
                     clickPicker(++num, pickerindex);
                 }, 200);
             }
         }
-        
+
         function tryOpenList(num) { //try till element exists, max 20x
             var fltr = querySelectorShadowDom.querySelectorDeep('div.concourse-pickers-body input#filter');
             if (fltr) {
                 fltr.classList.add('has-focus');
                 fltr.focus();
             }
-            else if (num < 20){ 
+            else if (num < 20) {
                 setTimeout(() => {
                     tryOpenList(++num);
-                },200)
+                }, 200)
             }
         }
     }
-    
 
+    snuFilterTree(tree, search) {
+        if (!tree.hasOwnProperty('original_items_' + tree.componentName))
+            tree['original_items_' + tree.componentName] = structuredClone(tree.items);
 
+        let newItems = tree['original_items_' + tree.componentName];
+
+        function copy(o) {
+            return Object.assign({}, o)
+        }
+
+        search.split(" ").forEach(wrd => {
+            newItems = newItems.map(copy).filter(function f(o) {
+                if (o.displayValue.toLowerCase().includes(wrd)) return true
+
+                if (o.children) {
+                    return (o.children = o.children.map(copy).filter(f)).length
+                }
+            })
+        });
+
+        tree.items = newItems;
+        tree.searchTerm = search;
+    }
+
+    snuAddFilterToTrees() {
+        let trees = querySelectorShadowDom.querySelectorAllDeep('now-content-tree:not(.snuified)')
+        trees.forEach(tree => {
+            if (tree?.items[0]?.displayValue) {
+
+                let inp = document.createElement("input");
+                inp.type = "search";
+                inp.placeholder = "[SN Utils] filter";
+                inp.spellcheck = false;
+                inp.classList.add('snutn', 'search-combobox');
+                inp.style.border = 'var(--now-form-control--border-width,1px) solid RGB(var(--now-color_divider--tertiary,var(--now-color--neutral-3,209,214,214)))';
+                inp.style.borderRadius = '3px';
+                inp.style.outline = 'none';
+                inp.style.padding = '3px';
+                inp.style.width = '100%';
+                inp.style.backgroundColor = 'hsla(0, 0%, 0%, 0)';
+                inp.style.color = 'RGB(var(--now-form-field--color,var(--now-color_text--primary,var(--now-color--neutral-18,22,27,28))))';
+                inp.addEventListener('keyup', () => this.snuFilterTree(tree, inp.value));
+                let parentElm = tree.parentNode;
+                parentElm.insertBefore(inp, tree);
+                tree.classList.add("snuified");
+            }
+        })
+
+    }
 
 }
 const snuNextManager = new SnuNextManager();
@@ -400,7 +505,7 @@ var querySelectorShadowDom = function (e) {
                 h = /(?:[^\\]|(?:^|[^\\])(?:\\\\)+)$/,
                 i = /^\s+$/,
                 c = [/\s+|\/\*|["'>~+[(]/g, /\s+|\/\*|["'[\]()]/g, /\s+|\/\*|["'[\]()]/g, null, /\*\//g];
-            for (e = e.trim();;) {
+            for (e = e.trim(); ;) {
                 if (r = "", (l = c[s[s.length - 1]]).lastIndex = a, !(n = l.exec(e))) {
                     r = e.substr(a), t();
                     break
@@ -421,10 +526,10 @@ var querySelectorShadowDom = function (e) {
         return document.head.createShadowRoot || document.head.attachShadow ? !u && t ? t : h(e, ",").reduce(function (e, t) {
             if (!u && e) return e;
             var g, d, p, n = h(t.replace(/^\s+/g, "").replace(/\s*([>+~]+)\s*/g, "$1"), " ").filter(function (e) {
-                    return !!e
-                }).map(function (e) {
-                    return h(e, ">")
-                }),
+                return !!e
+            }).map(function (e) {
+                return h(e, ">")
+            }),
                 r = n.length - 1,
                 l = i(n[r][n[r].length - 1], s, a),
                 o = (g = n, d = r, p = s, function (e) {
@@ -432,7 +537,7 @@ var querySelectorShadowDom = function (e) {
                         var o = !0;
                         if (1 === g[n].length) o = r.matches(g[n]);
                         else
-                            for (var u = [].concat(g[n]).reverse(), s = r, a = u, h = Array.isArray(a), i = 0, a = h ? a : a[Symbol.iterator]();;) {
+                            for (var u = [].concat(g[n]).reverse(), s = r, a = u, h = Array.isArray(a), i = 0, a = h ? a : a[Symbol.iterator](); ;) {
                                 var c;
                                 if (h) {
                                     if (i >= a.length) break;
