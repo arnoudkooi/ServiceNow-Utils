@@ -128,9 +128,9 @@ class SnuNextManager {
 
         namesAdded += this.addTechnicalNamesLists();
 
-        //toogle visibility
+        //toggle visibility
         querySelectorShadowDom.querySelectorAllDeep('.snutn').forEach(cls => {
-            cls.style.display = (namesAdded || cls.style.display) ? '' : 'none';
+            cls.style.display = (namesAdded || cls.style.display) ? '' : 'none';                
         });
 
         return (frms.length == 0);
@@ -159,7 +159,7 @@ class SnuNextManager {
                 if (lst) {
                     
                     let div = document.createElement("div");
-                    div.classList.add('snutn','uiaction-bar');
+                    div.classList.add('snutn','snuactiondiv');
                     div.title = '[SN Utils] Utility functions added via SN Utils';
                     div.style = 'margin-left: 10px; padding:5px; width: max-content; gap: 5px; align-items: center;';
                     
@@ -333,12 +333,12 @@ class SnuNextManager {
         `;
 
         searchInput.addEventListener('focus', (event) => {
-            querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, search-combobox search-combobox--header').style.width = '';
+            querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, .search-combobox--header').style.width = '';
             querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'none';
         }, true);
         searchInput.addEventListener('blur', (event) => {
             setTimeout(() => {
-                querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, search-combobox search-combobox--header').style.width = '80px';
+                querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, .search-combobox--header').style.width = '80px';
                 querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'inline';
             }, 100);
         }, true);

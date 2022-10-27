@@ -236,6 +236,11 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Instance search <sys_id>"
     },
+    "tables": {
+        "url": "sys_db_object_list.do?sysparm_query=sys_update_nameISNOTEMPTY^labelLIKE$0^ORnameLIKE$0^ORDERBYname",
+        "hint": "Tables sys_db_object <search>",
+        "fields": "label,name"
+    },
     "tsk": {
         "url": "task.do?sysparm_refkey=name&sys_id=$0",
         "hint": "Open task <number>"
@@ -701,7 +706,7 @@ function snuAddSlashCommandListener() {
         query = query.trim();
 
         if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
-            targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + query + (e.key.length == 1 ? e.key : ""));
+            targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + encodeURIComponent(query) + (e.key.length == 1 ? e.key : ""));
             switchText = '<br />Encodedquery detected<br /><br />'
         }
         targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
@@ -1858,14 +1863,14 @@ function snuEnhanceNotFound(advanced) {
 
 
     var not_the_droids = jQuery('#not_the_droids').val().replace(/[^a-z0-9\._-]/gi, '');
-    if (not_the_droids != jQuery('#not_the_droids').val()) return;
+   // if (not_the_droids != jQuery('#not_the_droids').val()) return;
     var query = not_the_droids.split('_list.do');
-    var addedQuery = '_list.do' + ((query.length > 1) ? query[1] : '');
+    var addedQuery = '_list.do?' + ((query.length > 1) ? query[1] : '');
     var html = '<div id="snutils-suggestions" style="margin-top:20px"><h4>SN Utils \'did you mean\' table suggestions</h4>';
     if (advanced)
-        html += 'Mode: <a href="javascript:snuEnhanceNotFound(0)">starts with: ' + query[0] + '</a> | contains: ' + query[0].replace(/_/g, ' & ') + '<br />';
+        html += 'Mode: <a data-advanced="false" class="snutablesearch" href="#">starts with: ' + query[0] + '</a> | contains: ' + query[0].replace(/_/g, ' & ') + '<br />';
     else
-        html += 'Mode: starts with: ' + query[0] + ' | <a title="splits by underscore and does a contains for each word" href="javascript:snuEnhanceNotFound(1)">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
+        html += 'Mode: starts with: ' + query[0] + ' | <a data-advanced="true" class="snutablesearch" title="splits by underscore and does a contains for each word" href="#">contains: ' + query[0].replace(/_/g, ' & ') + '</a><br />';
 
     html += '<br /><ul>';
     var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^ORDERBYlabel^nameSTARTSWITH' + query[0];
@@ -1887,6 +1892,12 @@ function snuEnhanceNotFound(advanced) {
         }
         html += '</ul></div>';
         jQuery('.notfound_message').append(DOMPurify.sanitize(html));
+        document.querySelectorAll("a.snutablesearch").forEach(a =>{
+            a.addEventListener('click', evt =>{
+                evt.preventDefault();
+                snuEnhanceNotFound(a?.dataset?.advanced == 'true');
+            });
+        });
     });
 }
 
