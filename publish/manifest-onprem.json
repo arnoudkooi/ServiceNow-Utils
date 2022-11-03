@@ -13,10 +13,11 @@
       "cookies"
     ],
     "icons": {
-      "16": "images/icon16.png",
-      "32": "images/icon32.png",
-      "48": "images/icon48.png",
-      "128": "images/icon128.png"
+      "16": "images/op16.png",
+      "24": "images/op24.png",
+      "32": "images/op32.png",
+      "48": "images/op48.png",
+      "128": "images/op128.png"
     },
     "background": {
       "service_worker": "background.js"
@@ -108,10 +109,11 @@
       "default_title": "SN Utils",
       "default_popup": "popup.html",
       "default_icon": {
-        "16": "images/icon16.png",
-        "32": "images/icon32.png",
-        "48": "images/icon48.png",
-        "128": "images/icon128.png"
+        "16": "images/op16.png",
+        "24": "images/op24.png",
+        "32": "images/op32.png",
+        "48": "images/op48.png",
+        "128": "images/op128.png"
       }
     },
     "host_permissions": [
