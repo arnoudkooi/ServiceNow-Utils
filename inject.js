@@ -3237,8 +3237,18 @@ function snuCopySelectedCellValues(copySysIDs) {
                     str += match && decodeURIComponent(match[1].replace(/\+/g, '')) + ',';
                 }
             }
-            else
-                str += cElem.innerText + '\n';
+            else {
+                var oTitle = cElem.getAttribute("data-original-title");
+                if (oTitle !== null){
+                    if (oTitle.length == 1000)
+                        str +=  '"' + cElem.innerText.replace(/"/g, '""') + ' [TRUNCATED]"\n';
+                    else
+                        str += '"' + oTitle.replace(/"/g, '""') + '"\n';
+                }
+                else
+                    str += cElem.innerText + '\n';
+            }
+                
         });
         if (str.endsWith(',')) str = str.substring(0, str.length - 1);
 

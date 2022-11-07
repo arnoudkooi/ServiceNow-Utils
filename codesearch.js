@@ -413,31 +413,33 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
 }
 
 function loadXMLDoc(token, url, post) {
-  var hdrs = {
+  let hdrs = {
     'Cache-Control': 'no-cache',
+    'Content-Type': 'application/json',
     'Accept': 'application/json, text/plain, */*'
   };
 
-  if (token)
-    //only for instances with high security plugin enabled
-    hdrs['X-UserToken'] = token;
+  if (token) hdrs['X-UserToken'] = token;
 
-  var method = 'GET';
-  if (post) method = 'PUT';
+  let requestInfo = {
+      method : 'get',
+      headers : hdrs
+  }
+
+  if (post){
+      requestInfo.method = 'PUT';
+      requestInfo.body = post;
+  }
 
   return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: url,
-      method: method,
-      data: post,
-      headers: hdrs
+    fetch(url, requestInfo)
+    .then(response => response.json())
+    .then(data => { 
+      resolve(data);
     })
-      .done(function (rspns) {
-        resolve(rspns);
-      })
-      .fail(function (jqXHR, textStatus) {
-        reject(textStatus);
-      });
+    .catch(error => {
+      reject(error);
+    });
   });
 }
 
@@ -477,3 +479,40 @@ function setGroupDescription(group) {
 function htmlEntities(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+
+
+/*
+
+snippet to do search for multiple words, problem with this is search includes a genereic term like GlideRecord 
+
+let searchTerm = 'fred googlep'
+let s = [...new Set(searchTerm.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
+  (unique, item) => ( unique.filter(e => item.includes(item)).length > 1 ? unique : [...unique, item]),[],);
+
+let res = {
+    result : [],
+    sysIds : [],
+    uniqueSysIds : []
+};
+
+
+
+let sysIds = []
+for ( i = 0; i < s.length; i++){
+
+    res.result[i] = await loadXMLDoc(getUrlVars('g_ck'),"https://empakooi.service-now.com/api/sn_codesearch/code_search/search?term=" + s[i] 
+    +"&limit=100&search_all_scopes=true&search_group=sn_devstudio.Studio+Search+Group&table=sys_script_include");
+
+    res.sysIds[i] = res.result[i].result.hits.map(a => a.sysId)
+    
+    if (i == 0 )
+        res.uniqueSysIds = res.sysIds[i];
+    else 
+        res.uniqueSysIds = res.uniqueSysIds.filter(element => res.sysIds[i].includes(element));
+    
+
+}
+res.uniqueSysIds
+
+*/
