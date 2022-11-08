@@ -378,7 +378,7 @@ document.addEventListener('snuUpdateSettingsEvent', function (e) {
 });
 
 if (typeof jQuery != "undefined") {
-    jQuery(function () {
+    (function() {
         if (typeof angular != "undefined") {
             setTimeout(function () {
                 getListV3Fields();
@@ -398,7 +398,7 @@ if (typeof jQuery != "undefined") {
         snuCaptureFormClick();
         snuClickToOpenWidget();
         snuMakeReadOnlyContentCopyable();
-    });
+    })();
 }
 flowDesignerDoubleClick();
 
