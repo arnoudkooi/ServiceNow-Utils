@@ -2463,38 +2463,6 @@ function searchLargeSelects() {
     var mdl = document.querySelector('#list_mechanic .modal-dialog');
     if (mdl) mdl.style = 'width:80% !important; padding:20px'; //give it more width...
 
-    if (typeof jQuery.fn.filterByText == 'undefined') {
-        jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
-            return this.each(function () {
-                var select = this;
-                var options = [];
-                jQuery(select).find('option').each(function () {
-                    options.push({
-                        value: jQuery(this).val(),
-                        text: jQuery(this).text()
-                    });
-                });
-                jQuery(select).data('options', options);
-                jQuery(textbox).bind('change keyup', function () {
-                    var options = jQuery(select).empty().data('options');
-                    var search = jQuery.trim(jQuery(this).val());
-                    var regex = new RegExp(search, "gi");
-
-                    jQuery.each(options, function (i) {
-                        var option = options[i];
-                        if (option.text.match(regex) !== null) {
-                            jQuery(select).append(
-                                jQuery('<option>').text(option.text).val(option.value)
-                            );
-                        }
-                    });
-                    if (selectSingleMatch === true && jQuery(select).children().length === 1) {
-                        jQuery(select).children().get(0).selected = true;
-                    }
-                });
-            });
-        };
-    }
 
     var minItems = 15;
 
@@ -2507,8 +2475,14 @@ function searchLargeSelects() {
                 input.placeholder = "Filter choices...";
                 input.className = "form-control";
                 input.style.marginBottom = "2px";
+                input.addEventListener('keyup',evt =>{
+                    let options = document.querySelectorAll('select#slush_left option, select#select_0 option, select#field_list_select_0 option');
+                    options.forEach(option => {
+                        option.style.display = (option.innerText.includes(evt.target.value)) ? '' : 'none';
+                    });
+                })
                 snuInsertAfter(input, document.querySelector('label[for=slush_left], label[for=select_0], label[for=field_list_select_0]'))
-                jQuery('select#slush_left, select#select_0, select#field_list_select_0').filterByText(input, true).addClass('searchified');
+                document.querySelector('select#slush_left, select#select_0, select#field_list_select_0').classList.add('searchified');
             }
 
             if (el.id == 'slush_right' || el.id == 'field_list_select_1') {

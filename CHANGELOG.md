@@ -1,10 +1,11 @@
 # CHANGELOG.md
 
-## 6.2.1.2 (2022-11-09)
+## 6.2.1.3 (2022-11-10)
 
 Fixes / changes:
   - Improve copycells for cells with long text content (Issue #318)
   - Fix scriptsync icons click event inside forms in studio (Issue #319)
+  - Fix slushbucket when filtered to not loose eventhandlers (issue #322)
 
 
 ## 6.2.1.0 (2022-11-03)
