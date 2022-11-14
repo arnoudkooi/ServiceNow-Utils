@@ -3,8 +3,11 @@ var mySysId = '';
 var snuMaxHints = 10;
 var snuPropertyNames = [];
 var snuIndex = 0;
+var snuSlashLogIndex = -1;
 var snuSelection = '';
 var snuReceivedCommand = '';
+var snuSlashNavigatorData = null;
+var snuSlashLogData = null;
 var snuLastOpened = (new Date()).getTime();
 var snuNav = {
     'loading': 'mustload',
@@ -64,21 +67,13 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Clear Local Storage" 
     },
-    "nav": {
-        "url": "*",
-        "hint": "[Beta] Navigator <search> or <application,item>"
-    },
-    "fav": {
-        "url": "*",
-        "hint": "[Beta] Favorites <search>"
-    },
     "tab": {
         "url": "/$0",
         "hint": "New tab <page or portal ie. foo.do or csm>"
     },
-    "hist": {
+    "m": {
         "url": "*",
-        "hint": "[Beta] History <search>"
+        "hint": "All menu search (Next Experience only) <search>"
     },
     "aw": {
         "url": "/now/workspace/agent/",
@@ -574,27 +569,46 @@ function snuAddSlashCommandListener() {
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
-        if (e.key == 'ArrowDown') { e.preventDefault(); snuMaxHints = 1000; snuIndex++; };
         if (e.key == 'ArrowUp') {
             e.preventDefault();
-            if (snuIndex == 0)
-                snuMaxHints = 10;
-            else
-                snuIndex--;
+            if (snuIndex == 0) { 
+                snuSlashLogData = snuSlashLogData || snuSlashLog();
+                if (snuSlashLogData.length){
+                    snuSlashLogIndex = (snuSlashLogData.length > (snuSlashLogIndex+1)) ? snuSlashLogIndex+1 : 0;
+                    this.value = snuSlashLogData[snuSlashLogIndex];
+                }
+            }
+            else {
+                (snuIndex == 0) ? snuMaxHints = 10 : snuIndex--; 
+            }
         }
+        if (e.key == 'ArrowDown') { 
+            e.preventDefault(); 
+            if (snuSlashLogIndex <= 0 && snuPropertyNames.length > 1){
+                snuMaxHints = 1000; 
+                snuIndex++; 
+            }
+            else {
+                snuSlashLogData = snuSlashLogData || snuSlashLog();
+                if (snuSlashLogData.length){
+                    snuSlashLogIndex = (snuSlashLogIndex > 0) ? snuSlashLogIndex-1 : snuSlashLogData.length-1;
+                    this.value = snuSlashLogData[snuSlashLogIndex];
+                }
+            }
+        };
         if (isFinite(e.key)) {
             if (window.top.document.getElementById('snulnk' + e.key)) {
                 e.preventDefault();
-                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent('click', { cancelable: true }));
+                window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent('click', { cancelable: true, metaKey : e.metaKey, shiftKey : e.shiftKey, ctrlKey : e.ctrlKey}));
                 return;
             }
         }
         if (e.key == 'Meta' || e.key == 'Control' || e.key == 'ArrowLeft') return;
         if (e.currentTarget.selectionStart < e.currentTarget.value.length && e.key == 'ArrowRight') return;
-        if (e.key == 'Escape') snuHideSlashCommand();
-        if (e.currentTarget.value.length <= 1 && e.key == 'Backspace') snuHideSlashCommand(true);
+        if (e.key == 'Escape') snuHideSlashCommand(false, e);
+        if (e.currentTarget.value.length <= 1 && e.key == 'Backspace') snuHideSlashCommand(true,e);
         var sameWindow = !(e.metaKey || e.ctrlKey) && (window.top.document.getElementById('gsft_main') != null ||
-            window.top.location.pathname.startsWith('/now/nav/ui/classic/params/target/'));
+            document.querySelector("[component-id]") != null);
         if (!e.currentTarget.value.startsWith("/")) {
             e.currentTarget.value = "/" + e.currentTarget.value
         }
@@ -605,7 +619,7 @@ function snuAddSlashCommandListener() {
         var thisOrigin = window.location.origin;
         var idx = snufilter.indexOf(' ')
         var noSpace = (snufilter.indexOf(' ') == -1);
-        var selectFirst = (e.key == " " || e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
+        var selectFirst = (e.key == "Tab" || e.key == "Enter") && !snufilter.includes(" ");
         var thisKey = (e.key.trim().length == 1) ? e.key : ""; //we may need to add this as we are capturing keydown
         var thisKeyWithSpace = (e.key.trim().length == 1 || e.key == " ") ? e.key : ""; //now 
         if (e.key == '\\') {
@@ -624,7 +638,7 @@ function snuAddSlashCommandListener() {
         }
         var query = snufilter.slice(idx + 1);
         var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
-        if (((e.key == 'ArrowRight' && noSpace) || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 ||
+        if (((e.key == 'ArrowRight' && (noSpace || snuPropertyNames.length == 0 )) || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 ||
             tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) {
             snuGetTables(tmpshortcut);
         };
@@ -657,10 +671,9 @@ function snuAddSlashCommandListener() {
         targeturl = snuResolveVariables(targeturl);
 
         var switchText = '<br /> Options:<br />';
-        if (['nav', 'fav', 'hist'].includes(shortcut)) {
-
-            snuGetNav(shortcut);
-            switchText = snuGetNavHints(shortcut, query + thisKeyWithSpace);
+        if (shortcut == 'm') {
+            snuDoSlashNavigatorSearch(query + thisKeyWithSpace);
+            return true;
         }
         if (targeturl.includes('sysparm_query=') || originalShortcut.startsWith("-")) {
             if (originalShortcut.startsWith("-")) query = shortcut;
@@ -717,9 +730,12 @@ function snuAddSlashCommandListener() {
                 targeturl = targeturl.replace(re, queryArr[i] || "");
             }
         }
-        if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly && !(e.ctrlKey || e.metaKey))) snuGetDirectLinks(targeturl, shortcut);
-
+        if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly && !(e.ctrlKey || e.metaKey))) {
+            snuSlashLog(true);
+            snuGetDirectLinks(targeturl, shortcut);
+        }
         else if (e.key == 'Enter') {
+            snuSlashLog(true);
             shortcut = shortcut.replace(/\*/g, '');
             snufilter = snufilter.replace(/\*/g, '');
             idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
@@ -1040,15 +1056,36 @@ function snuAddSlashCommandListener() {
                 targeturl = targeturl.substring(8)
                 snuGetRandomRecord(targeturl, "", false, res => {
                     targeturl = targeturl + ".do?sys_id=" + res;
-                    if (inIFrame)
-                        (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = targeturl;
+                    if (inIFrame){
+                        var nxtHdr = window.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
+                        if (nxtHdr){ //next experience
+                            nxtHdr.dispatch("NAV_ITEM_SELECTED", {
+                                "params": {
+                                    "target": targeturl
+                                },
+                                "route": "classic"
+                            });
+        
+                        }
+                        else document.querySelector("#gsft_main").src = targeturl;
+                    }
                     else
                         window.open(targeturl, '_blank');
                     snuHideSlashCommand();
                 })
             }
             else if (inIFrame) {
-                (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = targeturl;
+                var nxtHdr = window.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
+                if (nxtHdr){ //next experience
+                    nxtHdr.dispatch("NAV_ITEM_SELECTED", {
+                        "params": {
+                            "target": targeturl
+                        },
+                        "route": "classic"
+                    });
+
+                }
+                else document.querySelector("#gsft_main").src = targeturl;
             }
             else {
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
@@ -1071,7 +1108,7 @@ function snuAddSlashCommandListener() {
         }
         else {
             if (e.key == " ") idx = shortcut.length;
-            else if (e.key == "Backspace") idx = -1;
+            else if (e.key == "Backspace") { idx = -1; snuIndex = 0; snuSlashLogIndex = -1};
             snuShowSlashCommandHints(originalShortcut, selectFirst, snufilter + thisKey, switchText, e);
         }
 
@@ -1101,20 +1138,20 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
         startswith = false;
     }
 
-    snuPropertyNames = Object.keys(snuslashcommands).filter(function (propertyName) {
+    var fltr = window.top.document.getElementById('snufilter');
+
+    snuPropertyNames = Object.keys(snuslashcommands).filter(propertyName => {
         shortcut = shortcut.trim();
         if (startswith)
-            return propertyName.indexOf(shortcut) === 0;
-        return propertyName.indexOf(shortcut) > -1;
+            return propertyName == shortcut || (propertyName.startsWith(shortcut) && !fltr.value.includes(" ") && e.code != "Space")
+        return propertyName.includes(shortcut);
     }).sort(function (a, b) {
         return (snuslashcommands[a].order || 100) - (snuslashcommands[b].order || 100);
     });
 
-    if (snufilter.trim().split(' ').length > 1) {
-        snuPropertyNames = [shortcut];
-    }
-
-    var fltr = window.top.document.getElementById('snufilter');
+    // if (snufilter.trim().split(' ').length > 1) {
+    //     snuPropertyNames = [shortcut];
+    // }
 
     if (snuPropertyNames.length > 0 && selectFirst && !snuPropertyNames.includes(shortcut)) { //select first hit when tap or space pressed
         if (e) e.preventDefault();
@@ -1152,8 +1189,8 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
             "<span class='cmdlabel'>Direct navigation</span></li>"
     }
     if (!html && shortcut.length > 5) {
-        html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
-            "<span class='cmdlabel'>Table search &lt;encodedquery&gt; (hit ► to search tables)</span></li>"
+        // html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
+        //     "<span class='cmdlabel'>Table search &lt;encodedquery&gt; (hit ► to search tables)</span></li>"
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
     window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
@@ -1166,6 +1203,9 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
+
+    if (snuPropertyNames.length == 0)
+        snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter);
 }
 
 function setSnuFilter(ev) {
@@ -1332,6 +1372,8 @@ function snuSettingsAdded() {
     if (typeof snusettings.codeeditor == 'undefined') snusettings.codeeditor = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
     if (typeof snusettings.allowsavefromotherscope == 'undefined') snusettings.allowsavefromotherscope = false;
+    if (typeof snusettings.slashnavigatorsearch == 'undefined') snusettings.slashnavigatorsearch = true;
+    if (typeof snusettings.slashhistory == 'undefined') snusettings.slashhistory = 50;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
     if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
@@ -2376,7 +2418,7 @@ function snuExtendedFieldInfo() {
             ct.innerText = tableFields[tbl].join("\n");
         })
 
-        g_form.addInfoMessage("[BETA] Fields per table: (On form: ✓ Yes | ✖ No | ◌ Hidden)<br/>" + tbl.outerHTML);
+        g_form.addInfoMessage("Fields per table: (On form: ✓ Yes | ✖ No | ◌ Hidden)<br/>" + tbl.outerHTML);
 
     }
 
@@ -2512,8 +2554,6 @@ function searchLargeSelects() {
         } catch (e) { } //nice try
     });
 
-
-
 }
 
 function setShortCuts() {
@@ -2532,7 +2572,8 @@ function setShortCuts() {
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey { border-color: #8BB3A2}
         ul#snuhelper li.active span.cmdlabel { color: black}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
-        div#snudirectlinks a {color:#22885c;}
+        div#snudirectlinks a {color:#22885c; text-decoration: none; }
+        div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#1f1cd2;}
         </style>`;
     }
@@ -2564,7 +2605,8 @@ function setShortCuts() {
         ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey  { border-color: yellow}
         ul#snuhelper li.active span.cmdlabel { color: yellow}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
-        div#snudirectlinks a {color:#1cad6e;}
+        div#snudirectlinks a {color:#1cad6e; text-decoration: none; }
+        div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#0cffdd;}
         </style>`;
     }
@@ -3045,7 +3087,15 @@ function snuHideAlert() {
     jQuery('.service-now-util-alert').removeClass('visible');
 }
 function snuHideSlashCommand(navFocus = false, evt) {
-    if (evt) evt.preventDefault();
+
+    var storeSlashLog = true;
+    if (evt) {
+        evt.preventDefault();
+        if (['Backspace','Escape'].includes(evt?.key)) storeSlashLog = false;
+    }
+
+    if (storeSlashLog) snuSlashLog(true);
+
     window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
@@ -3059,7 +3109,8 @@ function snuHideSlashCommand(navFocus = false, evt) {
                 } catch (e) { }
             }
             if (typeof window.top?.querySelectorShadowDom != 'undefined') {
-                window.top.querySelectorShadowDom.querySelectorDeep('div#all.sn-polaris-tab').click();
+                let tab = window.top.querySelectorShadowDom.querySelectorDeep('div#all.sn-polaris-tab');
+                if (tab) tab.click();
                 setTimeout(() => {
                     var fltr = window.top.querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.all input#filter`);
                     if (fltr) fltr.select();
@@ -3072,6 +3123,10 @@ function snuHideSlashCommand(navFocus = false, evt) {
 
 function snuShowSlashCommand(initialCommand, autoRun) {
     snuReceivedCommand = initialCommand;
+    snuSlashNavigatorData = null; //force refreshing menu data
+    snuSlashLogData = null; 
+    snuSlashLogIndex = -1;
+    snuIndex = 0;
     window.top.document.snuSelection = snuGetSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
@@ -3866,28 +3921,6 @@ function snuGetNav(shortcut) {
     xhttp.send();
 }
 
-function snuGetNavHints(shortcut, srch) {
-    var navObjName = ({ "nav": "applications", "hist": "history", "fav": "favorites" })[shortcut];
-    if (!snuNav.hasOwnProperty(navObjName)) return '';
-    var nav = snuNav[navObjName];
-    var html = "";
-    var lastApp = "";
-    var srchArr = srch.toLowerCase().split(","); srchArr.push(srchArr[0]);
-    var hits = 80; var hit = 0// maximum results
-    for (var ix = 0; ix < nav.length && hit < hits; ix++) {
-        var srchApp = srchArr[0].trim(); var srchItem = srchArr[1].trim()
-        if ((srchArr.length == 3 && (nav[ix].app.toLowerCase().includes(srchApp) && nav[ix].item.toLowerCase().includes(srchItem))) ||
-            (srchArr.length == 2 && (nav[ix].app.toLowerCase().includes(srchApp) || nav[ix].item.toLowerCase().includes(srchItem)))) {
-            if (lastApp != nav[ix].app) {
-                html += "<div>" + nav[ix].app.replace(new RegExp(srchApp || "!", "gi"), (match) => `<u>${match}</u>`) + "</div>";
-            }
-            html += "- <a target='_blank' href='" + nav[ix].uri + "'>" + nav[ix].item.replace(new RegExp(srchItem || "!", "gi"), (match) => `<u>${match}</u>`) + "</a><br />"
-            lastApp = nav[ix].app;
-            hit++;
-        }
-    }
-    return '<br />' + hit + ' Matches:<br />' + html;
-}
 
 function snuInsertAfter(newNode, referenceNode) {
     referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
@@ -4279,3 +4312,178 @@ document.addEventListener('snuEvent', function (e) {
         (document.head || document.documentElement).appendChild(script);
     }
 });
+
+
+//menu handling inside
+
+
+function snuGetSlashNavigatorData(){ //get JSON from loacal storage and prepare
+    var prtl = Object.entries(localStorage)
+    .filter(ent => ent[0].includes((window?.NOW?.user?.userID || window?.NOW?.user_id || '') + '.headerMenuItems'));
+    if (prtl.length){
+        try { 
+            const lang = prtl[0][0].slice(-2);
+            let preflat = JSON.parse(prtl[0][1]).value;
+
+            try {
+            preflat[0].order = 3; //try swap and reorder to have history and favorites before all
+            preflat[2].order = 1;
+            preflat = preflat.sort((a, b) => a.order - b.order);
+            } catch (r) {}
+
+            let menu = snuFlatten({ "subItems" : preflat});
+            let idx = 0;
+            menu.forEach(elm => {
+                if (elm?.subItems) { //shape the JSON by adding parent and fulltext prop
+                    let subIds = elm.subItems.map(si => si.id);
+                    let subItems = menu.filter(e => subIds.includes(e.id));
+                    subItems.forEach(si => {
+                        si.parent = elm.id
+                        // if (idx == 0)
+                        //     si.fulltext = elm.label 
+                        // else 
+                            si.fulltext = (elm.fulltext ?  elm.fulltext + ' > ' : '') + si.label + (si.description ? ' ' + si.description + ' - ' : '') ;
+                        if (si?.route) {
+                            const timeAgoString = si.createdTimestamp ? snuTimeAgo(si.createdTimestamp, lang) : '';
+                            si.displaygroup = elm.fulltext;
+                            si.fulltext = elm.fulltext + ' > ' + si.label + (si.description ? ' - ' + si.description : ' ') + timeAgoString;
+                            si.target = si?.route?.params?.target || si?.route.external?.url || si?.route?.external?.target || si?.route?.context?.path || '';
+                            //si.window = 
+                            si.fulltext = si.fulltext + ' ' +  si.target.match(/[^.]*/)[0];
+                            if (si.description) si.label = si.label + ' 🛈 ' + si.description + ' '; 
+                            si.labelnotime = si.label;
+                            if (timeAgoString) si.label = si.label + ' ◷ ' + timeAgoString; 
+                        }
+                        idx++;
+                    });
+                }
+            })
+            
+            menu = menu.filter(m => !m.subItems && m.label);
+
+            const tmpMenu = new Set(); //deduplicate based on group, label and target
+            menu = menu.filter(mnu => {
+                if (tmpMenu.has(mnu.displaygroup + mnu.labelnotime + mnu.target)) {
+                    return false;
+                }
+                tmpMenu.add(mnu.displaygroup + mnu.labelnotime + mnu.target);
+                return true;
+            });
+            return menu; 
+
+        } catch(e) { return null;};
+    }
+    return null
+
+    function snuFlatten(head, returnArray = [], key = 'subItems') {
+        if (head) {
+            returnArray.push(head);
+            head[key]?.forEach((item) => snuFlatten(item, returnArray, key));
+        }
+        return returnArray;
+    }
+    
+}
+
+function snuTimeAgo (timestamp, locale = 'en') {
+    let value;
+    const diff = (new Date().getTime() - timestamp) / 1000;
+    const minutes = Math.floor(diff / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(months / 12);
+    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  
+    if (years > 0) value = rtf.format(0 - years, "year");
+    else if (months > 0) value = rtf.format(0 - months, "month");
+    else if (days > 0) value = rtf.format(0 - days, "day");
+    else if (hours > 0) value = rtf.format(0 - hours, "hour");
+    else value = rtf.format(0 - minutes, "minute");
+
+    return value;
+  }
+
+function snuDoSlashNavigatorSearch(search) {
+    const MAXROWS = 25;
+    if (!snusettings.slashnavigatorsearch) return;
+    if (search.trim().length < 2) return;
+    snuSlashNavigatorData = snuSlashNavigatorData || snuGetSlashNavigatorData(); //store in memory after first call
+    let words = [...new Set(search.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
+        (unique, item) => ( unique.filter(e => item.includes(item)).length > 5 ? unique : [...unique, item]),[],); //todo check undouble
+
+    let directlinks = '<div style="font-weight:bold; margin-bottom:5px;">🔍 Navigator search [Beta]</div>';
+    let idx = 0;
+    let dispIdx = 0;
+    let lastgroup = '';
+    let filtered = snuSlashNavigatorData.filter(itm => containsWords(itm.fulltext));
+    filtered.forEach(res => {
+        let link = res?.route?.params?.target || res?.route?.external?.url || res?.route?.external?.target || '';
+        //var target = "gsft_main";
+        let target = "_blank";
+        let idattr
+        if (idx < 10 && (dispIdx !== '>')) {
+            dispIdx++;
+            dispIdx = dispIdx % 10;
+            idattr = 'id="snulnk' + dispIdx + '"';
+        }
+        else {
+            dispIdx = '>';
+            idattr = '';
+        }
+        
+        if (idx <= MAXROWS ){
+            let displaygroup = (res.displaygroup == lastgroup) ? `` : `<div style="margin-top:7px;">${res.displaygroup}</div>`;
+            let label = res.label;
+
+            for (let word of words){
+                displaygroup = displaygroup.replace( new RegExp(word, 'gi'), str => { return '<u>'+str+'</u>' });
+                label = label.replace( new RegExp(word, 'gi'), str => { return '<u>'+str+'</u>' });
+            }
+
+            directlinks +=  `<div>${displaygroup}${dispIdx} <a ${idattr} data-idx="${idx}" target="${target}" title="${label}" href="${link}">${label}</a></div>`;
+            lastgroup = res.displaygroup;
+            console.log(res)
+        }
+        idx++;
+
+    })
+
+    function containsWords(text){   
+        for (let word of words){
+            if (!(text?.toLowerCase().includes(word))) return false;
+        }
+        return true;
+    }
+
+    window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
+    window.top.document.getElementById('snudirectlinks');
+    window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize('');
+    window.top.document.querySelectorAll("#snudirectlinks a").forEach(elm => {
+        elm.addEventListener("click", (evt) =>{
+            var nxtHdr = window?.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
+            if (nxtHdr && !(evt.shiftKey || evt.ctrlKey || evt.metaKey)){
+                evt.preventDefault();
+                nxtHdr.dispatch("NAV_ITEM_SELECTED", filtered[Number(elm.dataset.idx)].route);
+            }
+            snuSlashLog(true);
+            snuHideSlashCommand();
+        })
+    });
+
+}
+
+function snuSlashLog(addValue = false) {
+    var slashLog = JSON.parse(localStorage.getItem('snuslashlog')) || [];
+    if (addValue) {
+        var value = window.top.document.querySelector('#snufilter')?.value;
+        if (value.length < 2 || value == '/undefined') return slashLog;
+        slashLog.unshift(value);
+        slashLog = [...new Set(slashLog)];
+        slashLog = slashLog.splice(0, snusettings.slashhistory);
+        localStorage.setItem('snuslashlog', JSON.stringify(slashLog));
+    }
+    return slashLog;
+}
+
+

@@ -386,6 +386,13 @@
                                         Allow saving metadata after scope has changed.
                                     </label>
                                 </div>
+                                <div class="form-check" title="">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="slashnavigatorsearch" 
+                                        name="slashnavigatorsearch" checked="checked">
+                                    <label class="form-check-label" for="slashnavigatorsearch">
+                                        Include navigator search in slashcommands (Next Experience only).
+                                    </label>
+                                </div>                             
                             </form>
                         </div>
 
@@ -415,12 +422,26 @@
                                     </select>
                                 </div>
                                 <div class="form-check">
+                                    <label class="form-check-label" for="slashhistory">
+                                        Locally store slashcommands per instance:
+                                    </label>
+                                    <select class="snu-setting form-control form-control-sm" name="slashhistory"
+                                        id="slashhistory">
+                                        <option value="0">0 - disabled</option>
+                                        <option>20</option>
+                                        <option selected="selected">50</option>
+                                        <option>100</option>
+                                        <option>200</option>
+                                    </select>
+                                </div>   
+                                <div class="form-check">
                                     <label class="form-check-label" for="listfields">
                                         One click personalise list fields:
                                     </label>
                                     <input class="snu-setting form-control form-control-sm" name="listfields"
                                         id="listfields" value="sys_updated_on,sys_updated_by,sys_scope,sys_created_on" />
                                 </div>
+
                             </form>
                         </div>
                     </div>
@@ -554,17 +575,18 @@
 
                 <div class="tab-pane active" id="tababout">
                     <h4>SN Utils <span id='snuVersion'></span></h4>
-                    <!-- Developed by
-                    <a class="popuplinks" href="http://arnoudkooi.com" target="_blank">arnoudkooi.com</a> -->
+                    Developed by
+                    <h3><a class="popuplinks" href="http://arnoudkooi.com" target="_blank">arnoudkooi.com</a></h3>
                     <br />
                     If you &#10084;&#65039; SN Utils, consider becoming a <a href="https://www.patreon.com/snutils" target="_blank"> Patreon!</a>
                     <br />
-                    <br /> LinkedIn post:
+                    
+                    <!-- <br /> LinkedIn post:
                     <br />
 
                     <a class="popuplinks" target="_blank" href="https://www.linkedin.com/feed/update/urn:li:activity:6792572753460379648/">
                         <img src="/images/5y.png" alt="updates" class="ytthumbnail" title="LinkdeIn post" />
-                    </a>
+                    </a> -->
 
                     <br /> Check my
                     <a class="popuplinks" href="https://www.youtube.com/channel/UCtr-9_HAEAPmcDRQSyKNzxg/videos"
