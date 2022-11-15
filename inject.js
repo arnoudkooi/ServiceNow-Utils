@@ -3088,6 +3088,10 @@ function snuHideAlert() {
 }
 function snuHideSlashCommand(navFocus = false, evt) {
 
+    snuSlashNavigatorData = null;
+    snuSlashLogData = null;
+    snuMaxHints = 10;
+
     var storeSlashLog = true;
     if (evt) {
         evt.preventDefault();
@@ -4339,20 +4343,21 @@ function snuGetSlashNavigatorData(){ //get JSON from loacal storage and prepare
                     let subItems = menu.filter(e => subIds.includes(e.id));
                     subItems.forEach(si => {
                         si.parent = elm.id
-                        // if (idx == 0)
-                        //     si.fulltext = elm.label 
-                        // else 
-                            si.fulltext = (elm.fulltext ?  elm.fulltext + ' > ' : '') + si.label + (si.description ? ' ' + si.description + ' - ' : '') ;
-                        if (si?.route) {
+                        si.fulltext = (elm.fulltext ?  elm.fulltext + ' > ' : '') + (si?.label || '') + (si?.description ? ' ' + si.description + ' - ' : '') ;
+                        if (si?.route || si?.actionType) {
                             const timeAgoString = si.createdTimestamp ? snuTimeAgo(si.createdTimestamp, lang) : '';
                             si.displaygroup = elm.fulltext;
-                            si.fulltext = elm.fulltext + ' > ' + si.label + (si.description ? ' - ' + si.description : ' ') + timeAgoString;
-                            si.target = si?.route?.params?.target || si?.route.external?.url || si?.route?.external?.target || si?.route?.context?.path || '';
-                            //si.window = 
-                            si.fulltext = si.fulltext + ' ' +  si.target.match(/[^.]*/)[0];
+                            si.fulltext = elm.fulltext + ' > ' + (si?.label || '') + (si?.description ? ' - ' + si.description : ' ') + timeAgoString;
+                            if (si?.route)
+                                si.target = si?.route?.params?.target || si?.route.external?.url || si?.route?.external?.target || si?.route?.context?.path || '';
+                            else if (si?.actionType == "SCRIPT")
+                                si.target = si?.command || '';    
+                            if (si?.target)           
+                                si.fulltext = si.fulltext + ' ' +  si?.target?.match(/[^.]*/)[0];
+                            if ((si?.fulltext || '').includes("undefined")) debugger;
                             if (si.description) si.label = si.label + ' 🛈 ' + si.description + ' '; 
                             si.labelnotime = si.label;
-                            if (timeAgoString) si.label = si.label + ' ◷ ' + timeAgoString; 
+                            if (timeAgoString && !si?.actionType) si.label = si.label + ' ◷ ' + timeAgoString; 
                         }
                         idx++;
                     });
@@ -4433,7 +4438,7 @@ function snuDoSlashNavigatorSearch(search) {
         }
         
         if (idx <= MAXROWS ){
-            let displaygroup = (res.displaygroup == lastgroup) ? `` : `<div style="margin-top:7px;">${res.displaygroup}</div>`;
+            let displaygroup = (res.displaygroup == lastgroup) ? `` : res.displaygroup;
             let label = res.label;
 
             for (let word of words){
@@ -4441,9 +4446,10 @@ function snuDoSlashNavigatorSearch(search) {
                 label = label.replace( new RegExp(word, 'gi'), str => { return '<u>'+str+'</u>' });
             }
 
+            if (displaygroup) displaygroup = `<div style="margin-top:7px;">${displaygroup}</div>`;
+
             directlinks +=  `<div>${displaygroup}${dispIdx} <a ${idattr} data-idx="${idx}" target="${target}" title="${label}" href="${link}">${label}</a></div>`;
             lastgroup = res.displaygroup;
-            console.log(res)
         }
         idx++;
 
@@ -4460,15 +4466,21 @@ function snuDoSlashNavigatorSearch(search) {
     window.top.document.getElementById('snudirectlinks');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize('');
     window.top.document.querySelectorAll("#snudirectlinks a").forEach(elm => {
-        elm.addEventListener("click", (evt) =>{
-            var nxtHdr = window?.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
-            if (nxtHdr && !(evt.shiftKey || evt.ctrlKey || evt.metaKey)){
-                evt.preventDefault();
-                nxtHdr.dispatch("NAV_ITEM_SELECTED", filtered[Number(elm.dataset.idx)].route);
-            }
-            snuSlashLog(true);
-            snuHideSlashCommand();
-        })
+        if (filtered[Number(elm.dataset.idx)]?.route) {
+            elm.addEventListener("click", (evt) =>{
+                var nxtHdr = window?.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
+                if (nxtHdr && !(evt.shiftKey || evt.ctrlKey || evt.metaKey)){
+                    evt.preventDefault();
+                        nxtHdr.dispatch("NAV_ITEM_SELECTED", filtered[Number(elm.dataset.idx)].route);
+                }
+                snuSlashLog(true);
+                snuHideSlashCommand();
+            })
+        }
+        else {
+            elm.href = filtered[Number(elm.dataset.idx)]?.command;
+            elm.target = '';
+        }
     });
 
 }

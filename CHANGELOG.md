@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## 6.3.0.3 (2022-11-15)
+
+Fixes / changes:
+  - Prevent adding underscore to the new search highlighting in HTML Tags
+  - Support for actiontype script in new navigator
+  - Prevent showing undefined in new navigator
+  - Set objects to null when slashcommand popup opens /closes to force refresh
+
+
 ## 6.3.0.0 (2022-11-14)
 
 Features:
