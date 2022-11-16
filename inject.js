@@ -1085,7 +1085,11 @@ function snuAddSlashCommandListener() {
                     });
 
                 }
-                else document.querySelector("#gsft_main").src = targeturl;
+                else {
+                    var gsft = document.querySelector("#gsft_main");
+                    if (gsft) document.querySelector("#gsft_main").src = targeturl;
+                    else window.open(targeturl, '_blank');
+                }
             }
             else {
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
@@ -1204,7 +1208,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
 
-    if (snuPropertyNames.length == 0)
+    if (snuPropertyNames.length == 0 && switchText.length <=25)
         snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter);
 }
 

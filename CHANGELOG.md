@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 6.3.0.5 (2022-11-16)
+
+Fixes / changes:
+  - Restore showing switches to current table i.e. slashcommand:  /-t
+  - Restore always opening commands in a new tab when gsft_main is not present.
+
 ## 6.3.0.3 (2022-11-15)
 
 Fixes / changes:
