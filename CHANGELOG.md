@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 6.3.0.6 (2022-11-)
+
+Fixes / changes:
+  - Allow explicit navigator search with /m command, even when setting is off (Issue 326)
+
 ## 6.3.0.5 (2022-11-16)
 
 Fixes / changes:

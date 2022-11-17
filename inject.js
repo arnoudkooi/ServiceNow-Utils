@@ -671,10 +671,7 @@ function snuAddSlashCommandListener() {
         targeturl = snuResolveVariables(targeturl);
 
         var switchText = '<br /> Options:<br />';
-        if (shortcut == 'm') {
-            snuDoSlashNavigatorSearch(query + thisKeyWithSpace);
-            return true;
-        }
+
         if (targeturl.includes('sysparm_query=') || originalShortcut.startsWith("-")) {
             if (originalShortcut.startsWith("-")) query = shortcut;
             var extraParams = "";
@@ -1115,6 +1112,9 @@ function snuAddSlashCommandListener() {
             else if (e.key == "Backspace") { idx = -1; snuIndex = 0; snuSlashLogIndex = -1};
             snuShowSlashCommandHints(originalShortcut, selectFirst, snufilter + thisKey, switchText, e);
         }
+        if (shortcut == 'm') { 
+            snuDoSlashNavigatorSearch(query + thisKeyWithSpace);
+        }
 
     });
 
@@ -1208,7 +1208,7 @@ function snuShowSlashCommandHints(shortcut, selectFirst, snufilter, switchText, 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
 
-    if (snuPropertyNames.length == 0 && switchText.length <=25)
+    if (snusettings.slashnavigatorsearch && snuPropertyNames.length == 0 && switchText.length <=25)
         snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter);
 }
 
@@ -4415,7 +4415,7 @@ function snuTimeAgo (timestamp, locale = 'en') {
 
 function snuDoSlashNavigatorSearch(search) {
     const MAXROWS = 25;
-    if (!snusettings.slashnavigatorsearch) return;
+    
     if (search.trim().length < 2) return;
     snuSlashNavigatorData = snuSlashNavigatorData || snuGetSlashNavigatorData(); //store in memory after first call
     let words = [...new Set(search.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
