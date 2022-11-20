@@ -22,7 +22,7 @@ class SnuNextManager {
             } catch (ex) { };
 
             function tryFocus(num) { //wait till element exists
-                var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav.${eventPath[0].id} input#filter`);
+                var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav input#filter`);
                 if (fltr) fltr.select();
                 else if (num < 20) setTimeout(() => { tryFocus(++num) }, 200);
             }
@@ -330,6 +330,11 @@ class SnuNextManager {
         div.snupicker:hover {
             background-color: #53526A;
         }
+
+        div.snudefault, div.snudefault:hover {
+            background-color: red;
+            color: yellow;
+        }
         `;
 
         searchInput.addEventListener('focus', (event) => {
@@ -364,6 +369,13 @@ class SnuNextManager {
             pickerDivs.forEach((div, idx) => {
                 div.className = 'snupicker';
                 div.dataset.index = ++idx;
+
+                if (!window?.snusettings.nouielements && div.innerText.includes('Default [')){
+                    div.className = 'snupicker snudefault';
+                    div.title = '[SN Utils] You may be working in the default Updateset!'
+                }
+
+
             });
         }
 

@@ -1017,10 +1017,17 @@ function getTables(dataset) {
 
     var myurl = url + '/api/now/table/sys_db_object?sysparm_fields=' + fields + '&sysparm_query=' + query;
     snuFetch(g_ck, myurl, null, function (jsn) {
-        var res = JSON.stringify(jsn.result).
-            replace(/super_class.name/g, 'super_classname').
-            replace(/sys_scope.scope/g, 'sys_scopescope'); //hack to get rid of . in object key names
-        setTables(JSON.parse(res));
+        if (jsn?.error){
+            document.querySelector('#divtblinfo').innerText = jsn?.status + ' - ' + jsn.error?.detail;
+            document.querySelector('#divtblinfo').classList = 'alert alert-danger';
+            $('#waitingtables').hide();
+        }
+        else {
+            var res = JSON.stringify(jsn?.result).
+                replace(/super_class.name/g, 'super_classname').
+                replace(/sys_scope.scope/g, 'sys_scopescope'); //hack to get rid of . in object key names
+            setTables(JSON.parse(res));
+        }
     });
 }
 

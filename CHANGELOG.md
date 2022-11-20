@@ -1,6 +1,14 @@
 # CHANGELOG.md
 
-## 6.3.0.6 (2022-11-)
+## 6.3.1.2 (2022-11-21)
+
+Fixes / changes:
+  - Delete localstorage when full, to prevent errors.
+  - Fixes to prevent console errors for next experience and new navigator feature.
+  - Add error handling in tables tab of popup.
+  - Add a red markation in SN Utils Next UI Updateset picker when in default updateset (Request: SN Devs / wiz0floyd)
+
+## 6.3.0.6 (2022-11-17)
 
 Fixes / changes:
   - Allow explicit navigator search with /m command, even when setting is off (Issue 326)

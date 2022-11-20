@@ -4418,6 +4418,7 @@ function snuDoSlashNavigatorSearch(search) {
     
     if (search.trim().length < 2) return;
     snuSlashNavigatorData = snuSlashNavigatorData || snuGetSlashNavigatorData(); //store in memory after first call
+    if (!snuSlashNavigatorData) return;
     let words = [...new Set(search.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
         (unique, item) => ( unique.filter(e => item.includes(item)).length > 5 ? unique : [...unique, item]),[],); //todo check undouble
 
@@ -4497,7 +4498,13 @@ function snuSlashLog(addValue = false) {
         slashLog.unshift(value);
         slashLog = [...new Set(slashLog)];
         slashLog = slashLog.splice(0, snusettings.slashhistory);
-        localStorage.setItem('snuslashlog', JSON.stringify(slashLog));
+        try {
+            localStorage.setItem('snuslashlog', JSON.stringify(slashLog));
+        } catch (ex){
+            debugger;
+            localStorage.clear(); 
+            localStorage.setItem('snuslashlog', JSON.stringify(slashLog));
+        }
     }
     return slashLog;
 }
