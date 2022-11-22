@@ -173,7 +173,7 @@ var snuslashcommands = {
     },
     "s2": {
         "url": "*",
-        "hint": "Toggle Select2 for Application and Updateset picker"
+        "hint": "Toggle Select2 for Application and update set picker"
     },
     "search": {
         "url": "text_search_exact_match.do?sysparm_search=$0",
@@ -201,13 +201,13 @@ var snuslashcommands = {
     },
     "sd": {
         "url": "domain_list.do?sysparm_query=nameLIKE$0^ORDERBYname",
-        "hint": "[BETA] Switch Domain <name>",
+        "hint": "Switch Domain <name>",
         "fields": "name",
         "overwriteurl": "#snu:switchto,domain,value,$sysid",
     },
     "su": {
         "url": "sys_update_set_list.do?sysparm_query=state=in progress^application=javascript:gs.getCurrentApplicationId()^nameLIKE$0^ORDERBYDESCsys_updated_on",
-        "hint": "[BETA] Switch Updateset <name>",
+        "hint": "Switch Update set <name>",
         "fields": "name,sys_updated_on",
         "overwriteurl": "#snu:switchto,updateset,sysId,$sysid",
     },
@@ -1375,6 +1375,7 @@ function snuSettingsAdded() {
     if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;
     if (typeof snusettings.codeeditor == 'undefined') snusettings.codeeditor = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
+    if (typeof snusettings.highlightdefaultupdateset == 'undefined') snusettings.highlightdefaultupdateset = true;
     if (typeof snusettings.allowsavefromotherscope == 'undefined') snusettings.allowsavefromotherscope = false;
     if (typeof snusettings.slashnavigatorsearch == 'undefined') snusettings.slashnavigatorsearch = true;
     if (typeof snusettings.slashhistory == 'undefined') snusettings.slashhistory = 50;

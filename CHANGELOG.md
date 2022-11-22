@@ -1,12 +1,20 @@
 # CHANGELOG.md
 
+## 6.3.1.5 (2022-11-22)
+
+Fixes / changes:
+  - Only select Unfied Nav filter input when one input with id #filter is present (Issue #328)
+  - Add option to not mark default update set
+  - Fixing a few typos (Updateset => Update set)
+
+
 ## 6.3.1.2 (2022-11-21)
 
 Fixes / changes:
   - Delete localstorage when full, to prevent errors.
   - Fixes to prevent console errors for next experience and new navigator feature.
   - Add error handling in tables tab of popup.
-  - Add a red markation in SN Utils Next UI Updateset picker when in default updateset (Request: SN Devs / wiz0floyd)
+  - Add a red markation in SN Utils Next UI Update set picker when in default update set (Request: SN Devs / wiz0floyd)
 
 ## 6.3.0.6 (2022-11-17)
 

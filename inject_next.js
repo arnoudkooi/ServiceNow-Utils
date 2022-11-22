@@ -22,9 +22,9 @@ class SnuNextManager {
             } catch (ex) { };
 
             function tryFocus(num) { //wait till element exists
-                var fltr = querySelectorShadowDom.querySelectorDeep(`.sn-polaris-nav input#filter`);
-                if (fltr) fltr.select();
-                else if (num < 20) setTimeout(() => { tryFocus(++num) }, 200);
+                var fltr = querySelectorShadowDom.querySelectorAllDeep(`.sn-polaris-nav input#filter`);
+                if (fltr.length == 1) fltr.select(); //only when 1 match #328
+                else if (fltr.length == 0 && num < 20) setTimeout(() => { tryFocus(++num) }, 200);
             }
 
         });
@@ -370,9 +370,9 @@ class SnuNextManager {
                 div.className = 'snupicker';
                 div.dataset.index = ++idx;
 
-                if (!window?.snusettings.nouielements && div.innerText.includes('Default [')){
+                if (window?.snusettings?.highlightdefaultupdateset && div.innerText.includes('Default [')){
                     div.className = 'snupicker snudefault';
-                    div.title = '[SN Utils] You may be working in the default Updateset!'
+                    div.title = '[SN Utils] You may be working in the default Update set! (Disable this warning in settings)'
                 }
 
 
