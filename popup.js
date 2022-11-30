@@ -859,7 +859,7 @@ function setDataTableUpdateSets(nme) {
     });
 
     $('#tbxupdatesets').keyup(function () {
-        dtUpdateSets.search($(this).val()).draw();
+        dtUpdateSets.search($(this).val(),true).draw();
     }).focus().trigger('keyup');
 
     $('a.updatesetlist').click(function () {
@@ -922,7 +922,7 @@ function setDataTableNodes(nme, node) {
     });
 
     $('#tbxnodes').keyup(function () {
-        dtNodes.search($(this).val()).draw();
+        dtNodes.search($(this).val(),true).draw();
     }).focus().trigger('keyup');
 
     $('a.setnode').click(function () {
@@ -983,7 +983,7 @@ function setDataTableUpdates(nme) {
     });
 
     $('#tbxupdates').keyup(function () {
-        dtUpdates.search($(this).val()).draw();
+        dtUpdates.search($(this).val(),true).draw();
     }).focus().trigger('keyup');
 
 
@@ -1126,7 +1126,7 @@ function setDataTableTables(nme) {
 
 
     $('#tbxtables').keyup(function () {
-        dtTables.search($(this).val()).draw();
+        dtTables.search($(this).val(),true).draw();
     }).focus().trigger('keyup');
 
 
@@ -1237,7 +1237,7 @@ function getSlashcommands() {
         });
 
         $('#tbxslashcommands').keyup(function () {
-            dtSlashcommands.search($(this).val()).draw();
+            dtSlashcommands.search($(this).val(),true).draw();
         }).focus().trigger('keyup');
 
         $('a.deletecmd').on('click', function (e) {
@@ -1496,13 +1496,13 @@ function setDataExplore(nme) {
 
     $('#tbxdataexplore').keyup(function () {
         var srch = ($('#cbxhideempty').prop('checked') ? "hasdata " : "") + $('#tbxdataexplore').val();
-        dtDataExplore.search(srch).draw();
+        dtDataExplore.search(srch,true).draw();
     }).focus().trigger('keyup');
 
     
     $('#cbxhideempty').change(function (e) {
         var srch = ($('#cbxhideempty').prop('checked') ? "hasdata " : "") + $('#tbxdataexplore').val();
-        dtDataExplore.search(srch).draw();
+        dtDataExplore.search(srch,true).draw();
     });
 
     $('a.referencelink').click(function () {

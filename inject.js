@@ -1510,6 +1510,8 @@ function snuDoubleClickToShowFieldOrReload() {
         document.addEventListener('dblclick', event => {
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') ||
                 event?.target?.parentElement?.classList.contains('sc_editor_label')) {
+               event.preventDefault();
+                
                 var elm;
 
                 var formGroup = event.target.closest('div.form-group');
@@ -2205,8 +2207,8 @@ function snuAddTechnicalNames() {
                 '<a title="For easier copying of field names" onclick="snuToggleLabel()">[toggle label]</a> </span></span>');
 
             jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
-                jQuery(elem.parentElement).attr('data-for', jQuery(elem.parentElement).attr('for')); //copy for value
-                jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
+                // jQuery(elem.parentElement).attr('data-for', jQuery(elem.parentElement).attr('for')); //copy for value
+                // jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
                 var elm;
                 try {

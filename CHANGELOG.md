@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 6.3.1.7 (2022-11-30)
+
+Fixes / changes:
+  - Change searchmode in datatables in popup to allow regex, ie | for or. (Discussion #331)
+  - Change so that g_form.setLabelOf keeps working when /tn is active (it does remove the technical name now)
+
 ## 6.3.1.5 (2022-11-22)
 
 Fixes / changes:
