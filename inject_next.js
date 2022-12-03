@@ -23,7 +23,7 @@ class SnuNextManager {
 
             function tryFocus(num) { //wait till element exists
                 var fltr = querySelectorShadowDom.querySelectorAllDeep(`.sn-polaris-nav input#filter`);
-                if (fltr.length == 1) fltr.select(); //only when 1 match #328
+                if (fltr.length == 1) fltr[0].select(); //only when 1 match #328
                 else if (fltr.length == 0 && num < 20) setTimeout(() => { tryFocus(++num) }, 200);
             }
 

@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 6.3.2.0 (2022-12-03)
+
+Fixes / changes:
+  - Reinitialize contextmenus from background.js at each startup to prevent loosing menus in FireFox
+  - Reinitialize contextmenus after slashcommand save, to immidiate see slashcommands containing #contextmenu
+  - Ability to add switch overwrites per table, specific for -s for the syslog table (Discussion #329)
+  - Bugfix for focus on filter input when opening navigator menu in Next UI
+  
 ## 6.3.1.7 (2022-11-30)
 
 Fixes / changes:

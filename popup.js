@@ -1304,10 +1304,10 @@ function getSlashcommands() {
             setSettings();
             getSlashcommands();
 
+            chrome.runtime.sendMessage({ "event" : "initializecontextmenus"});
+
         });
-
     });
-
 }
 
 

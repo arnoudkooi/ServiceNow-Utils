@@ -355,7 +355,12 @@ var snuslashswitches = {
     "pf": { "description": "Use Polaris = False", "value": "&sysparm_use_polaris=false", "type": "querypart" },
     "p": { "description": "Filter Pinned", "value": "&sysparm_filter_pinned=true", "type": "querypart" },
     "pi": { "description": "Pop In - Open in full UI", "value": "/nav_to.do?uri=", "type": "prepend" },
-}
+};
+
+var snuslashswitchesvalueoverwrites = { 
+    "s.syslog": "^source=javascript:var sc = new GlideRecord('sys_scope'); sc.get(gs.getCurrentApplicationId()); sc.scope;" 
+};
+
 
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD", //"IN", //removed, to common ie: INC00010001
     "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
@@ -670,7 +675,7 @@ function snuAddSlashCommandListener() {
 
         targeturl = snuResolveVariables(targeturl);
 
-        var switchText = '<br /> Options:<br />';
+        var switchText = '<br /> Switches:<br />';
 
         if (targeturl.includes('sysparm_query=') || originalShortcut.startsWith("-")) {
             if (originalShortcut.startsWith("-")) query = shortcut;
@@ -682,24 +687,36 @@ function snuAddSlashCommandListener() {
                 Object.entries(switches).forEach(([key, val]) => {
                     var prop = val.replace(/\s|\-/g, '');
                     if (snuslashswitches.hasOwnProperty(prop) && !linkSwitch) {
+                        var switchValue = snuslashswitches[prop].value;
+                        var tableName = targeturl.split("_list.do")[0] || '';
+                        if (!tableName){
+                            var gsft = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
+                            var doc = gsft ? gsft.contentWindow : window;
+                            if (typeof doc.GlideList2 != 'undefined') tableName = doc.document.querySelector('#sys_target').value;
+                            if (typeof doc.g_form != 'undefined') tableName =  g_form.getTableName();
+                        }
+                        if (!tableName) tableName = '{}';
+                        
+                        if (snuslashswitchesvalueoverwrites.hasOwnProperty(`${prop}.${tableName}`)){
+                            switchValue = snuslashswitchesvalueoverwrites[`${prop}.${tableName}`];
+                        }
                         query = query.replace(val, "");
                         if (snuslashswitches[prop].type == "link") {
-                            var tableName = targeturl.split("_list.do")[0] || "{}";
-                            targeturl = snuslashswitches[prop].value.replace(/\$0/, tableName);
+                            targeturl = switchValue.replace(/\$0/, tableName);
                             targeturl = targeturl.replace(/\$sysid/, mySysId);
                             targeturl = snuResolveVariables(targeturl);
                             linkSwitch = true;
                             unusedSwitches = {};
-                            switchText = '<br /> Options:<br />'; //reset switchtext
+                            switchText = '<br /> Switches:<br />'; //reset switchtext
                         }
                         else if (snuslashswitches[prop].type == "prepend") {
-                            targeturl = snuslashswitches[prop].value + targeturl;
+                            targeturl = switchValue + targeturl;
                         }
-                        else if (snuslashswitches[prop].value.startsWith("^")) {
-                            targeturl += snuslashswitches[prop].value;
+                        else if (switchValue.startsWith("^")) {
+                            targeturl += switchValue;
                         }
                         else {
-                            extraParams += snuslashswitches[prop].value;
+                            extraParams += switchValue;
                         }
                         switchText += "<div class='cmdlabel'>-" + prop + ": " + snuslashswitches[prop].description + '</div>';
                         delete unusedSwitches[prop];

@@ -26,6 +26,8 @@ var defaultMenuConf = {
 
 if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatability
 
+chrome.contextMenus.removeAll(initializeContextMenus);
+
 //Attatch eventlistener, setting extension only active on matching urls
 chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
@@ -33,7 +35,6 @@ chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install" || (details.reason == "update" && version == ("5.6.3.3"))) {
         //openFile("welcome.html");
     }
-    
 
     if (typeof chrome.declarativeContent !== 'undefined'){
         chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
@@ -47,6 +48,10 @@ chrome.runtime.onInstalled.addListener(function (details) {
             ]);
         });
     }
+
+});
+
+function initializeContextMenus(){
 
     for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
         chrome.contextMenus.create(Object.assign(menuItems[itemIdx], defaultMenuConf));
@@ -82,18 +87,10 @@ chrome.runtime.onInstalled.addListener(function (details) {
             catch (e) { }
         }
     });
+}
 
-
-});
-
-// chrome.runtime.onUpdateAvailable.addListener(function () {
-//     chrome.runtime.reload();
-//     //clear storage on update (just to keep it clean)
-//     chrome.storage.local.clear();
-// });
-
-//work in progress, as of 2022-03 prepare to be manifest v3 compliant
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+
     if (message.event == "scriptsync") {
         var cookieStoreId = '';
         if (sender.tab.hasOwnProperty('cookieStoreId')) {
@@ -103,6 +100,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
     if (message.event == "pop") {
         pop();
+    }
+    if (message.event == "initializecontextmenus") {
+        chrome.contextMenus.removeAll(initializeContextMenus);
     }
     else if (message.event == "codesearch") {
         codeSearch(message, cookieStoreId);
