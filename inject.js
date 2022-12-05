@@ -1678,7 +1678,6 @@ function snuAddErrorLogScriptLinks() {
 			var regex = /(([a-z_]+):([a-z0-9]+))/gm;
 			var found = tableCell.innerText.match(regex);
 			if (found !== null) {
-				console.log(found);
 				found.forEach(function (find) {
 					var str = find.split(":");
 					var t = str[0];
