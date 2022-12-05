@@ -1659,13 +1659,38 @@ function snuAddGroupSortIcon() {
 function snuAddErrorLogScriptLinks() {
     if (location.pathname.includes("syslog_list.do")) {
         jQuery("td.vt:contains('Caused by error')").each(function (tableCellIndex, tableCell) {
-            var regex = /Caused by error in (([a-z_]+).([A-Za-z0-9]+).[a-z]+) at line ([0-9]+)/;
-            var found = tableCell.innerText.match(regex);
-            if (found !== null) {
-                var newHtml = tableCell.innerHTML.replace(found[1], `<a title="Link via SN Utils" href='/${found[2]}.do?sys_id=${found[3]}'>${found[1]}</a>`);
-                tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ['target'] });
-            }
-        });
+			var regex = /Caused by error in (([a-z_]+).([A-Za-z0-9]+).[a-z]+) at line ([0-9]+)/;
+			var found = tableCell.innerText.match(regex);
+			if (found !== null) {
+				var newHtml = tableCell.innerHTML.replace(
+					found[1],
+					`<a title="Link via SN Utils" href='/${found[2]}.do?sys_id=${found[3]}'>${found[1]}</a>`
+				);
+				tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
+			}
+		});
+
+		// links for NiceError stack traces
+		jQuery("td.vt:contains('-------- STACK TRACE ---------')").each(function (
+			tableCellIndex,
+			tableCell
+		) {
+			var regex = /(([a-z_]+):([a-z0-9]+))/gm;
+			var found = tableCell.innerText.match(regex);
+			if (found !== null) {
+				console.log(found);
+				found.forEach(function (find) {
+					var str = find.split(":");
+					var t = str[0];
+					var id = str[1];
+					var newHtml = tableCell.innerHTML.replaceAll(
+						find,
+						`<a title="Link via SN Utils" href='/${t}.do?sys_id=${id}'>${find}</a>`
+					);
+					tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
+				});
+			}
+		});
     }
 }
 
