@@ -91,17 +91,18 @@ function initializeContextMenus(){
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
+    var cookieStoreId = '';
+    if (sender.tab.hasOwnProperty('cookieStoreId')) {
+        cookieStoreId = sender.tab.cookieStoreId;
+    }
+
     if (message.event == "scriptsync") {
-        var cookieStoreId = '';
-        if (sender.tab.hasOwnProperty('cookieStoreId')) {
-            cookieStoreId = sender.tab.cookieStoreId;
-        }
         createScriptSyncTab(cookieStoreId);
     }
-    if (message.event == "pop") {
+    else if (message.event == "pop") {
         pop();
     }
-    if (message.event == "initializecontextmenus") {
+    else if (message.event == "initializecontextmenus") {
         chrome.contextMenus.removeAll(initializeContextMenus);
     }
     else if (message.event == "codesearch") {
@@ -140,9 +141,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         var createObj = {
             'url': message.command,
         }
-        if (sender.tab.hasOwnProperty('cookieStoreId')) {
-            createObj.cookieStoreId = sender.tab.cookieStoreId;
-        }
+        if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
         chrome.tabs.create(createObj);
     }
     return true;

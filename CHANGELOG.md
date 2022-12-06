@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 6.3.2.3 (2022-12-6)
+
+Fixes / changes:
+  - Make refrences in NiceError errors clickable (Discussion #325, PR #332 by VanWeapon, work in progress)
+  - FirefFox containers support for codesearch
+
+
 ## 6.3.2.0 (2022-12-03)
 
 Fixes / changes:
