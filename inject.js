@@ -1658,37 +1658,49 @@ function snuAddGroupSortIcon() {
 
 function snuAddErrorLogScriptLinks() {
     if (location.pathname.includes("syslog_list.do")) {
-        jQuery("td.vt:contains('Caused by error')").each(function (tableCellIndex, tableCell) {
-            var regex = /Caused by error in (([a-z_]+).([A-Za-z0-9]+).[a-z]+) at line ([0-9]+)/;
-            var found = tableCell.innerText.match(regex);
-            if (found !== null) {
-                var newHtml = tableCell.innerHTML.replace(
-                    found[1],
-                    `<a title="Link via SN Utils" href='/${found[2]}.do?sys_id=${found[3]}'>${found[1]}</a>`
-                );
-                tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
-            }
-        });
+        // Supports for 3 different patterns of script ids being present in logs:
+        // table_name:sys_id
+        // table_name.sys_id
+        // table_name_sys_id
+        document.querySelectorAll('td.vt',).forEach((tableCell,tableCellIndex) => {
+            var patterns = [
+                /(([a-z_]+):([a-z0-9]{32}))/gm, // table_name:sys_id
+                /(([a-z_]+)\.([a-z0-9]{32})\.([a-z_]+))/gm, // table_name.sys_id.field
+                /(([a-z_]+)_([a-z0-9]{32}))/gm, // table_name_sys_id_field
+            ];
 
-        // links for NiceError stack traces
-        jQuery("td.vt:contains('-------- STACK TRACE ---------')").each(function (
-            tableCellIndex,
-            tableCell
-        ) {
-            var regex = /(([a-z_]+):([a-z0-9]+))/gm;
-            var found = tableCell.innerText.match(regex);
-            if (found !== null) {
-                found.forEach(function (find) {
-                    var str = find.split(":");
-                    var t = str[0];
-                    var id = str[1];
-                    var newHtml = tableCell.innerHTML.replaceAll(
-                        find,
-                        `<a title="Link via SN Utils" href='/${t}.do?sys_id=${id}'>${find}</a>`
-                    );
-                    tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
-                });
-            }
+            patterns.forEach((pattern, idx) => {
+                var splitter = [":", ".", "_"][idx];
+
+                var found = tableCell.innerText.match(pattern);
+                if(found != null){
+                    found.forEach(find => {
+                        var segments = find.split(splitter);
+                        var table;
+                        var sys_id;
+                        if(splitter === "_"){
+                            /*
+                            Given this line: `com.glide.caller.gen.sys_script_include_b0dee9462f231110c30d2ca62799b62d_script.call(Unknown Source)`
+                            Pattern will give this regex match: "sys_script_include_fc70ddc629230010fa9bf7f97d737e2e"
+                            `segments` looks like this: ['sys', 'script', 'include', 'fc70ddc629230010fa9bf7f97d737e2e']
+                            Hence using slice and join to reconstruct the table name
+                            */
+                            var sys_id_idx = segments.length - 1;
+                            sys_id = segments[sys_id_idx];
+                            table = segments.slice(0, sys_id_idx).join(splitter);
+                        } else {
+                            table = segments[0];
+                            sys_id = segments[1];
+                        }
+
+                        var newHtml = tableCell.innerHTML.replaceAll(
+                            find,
+                            `<a title="Link via SN Utils" href='/${table}.do?sys_id=${sys_id}'>${find}</a>`
+                        );
+                        tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
+                    });
+                }
+            });
         });
     }
 }
