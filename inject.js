@@ -1670,7 +1670,10 @@ function snuAddErrorLogScriptLinks() {
             }
         });
 
-        // links for NiceError stack traces
+        // Added support for 3 different patterns of script ids being present in logs:
+        // table_name:sys_id
+        // table_name.sys_id
+        // table_name_sys_id
         jQuery("td.vt:contains('-------- STACK TRACE ---------')").each(function (
             tableCellIndex,
             tableCell
@@ -1688,7 +1691,6 @@ function snuAddErrorLogScriptLinks() {
                 if(idx == 2) splitter = "_";
 
                 var found = tableCell.innerText.match(pattern);
-                console.log(`Pattern: ${idx} Splitter ${splitter}`, found);
 
                 if(found != null){
                     found.forEach(find => {
@@ -1700,9 +1702,9 @@ function snuAddErrorLogScriptLinks() {
                             sys_id = segments[1];
                         } else if (idx == 2){
                             /*
-                            Given this line: com.glide.caller.gen.sys_script_include_b0dee9462f231110c30d2ca62799b62d_script.call(Unknown Source)
+                            Given this line: `com.glide.caller.gen.sys_script_include_b0dee9462f231110c30d2ca62799b62d_script.call(Unknown Source)`
                             Pattern will give this regex match: "sys_script_include_fc70ddc629230010fa9bf7f97d737e2e"
-                            Segments looks like this: ['sys', 'script', 'include', 'fc70ddc629230010fa9bf7f97d737e2e']
+                            `segments` looks like this: ['sys', 'script', 'include', 'fc70ddc629230010fa9bf7f97d737e2e']
                             Hence using slice and join to reconstruct the table name
                             */
                             var sys_id_idx = segments.length - 1;
