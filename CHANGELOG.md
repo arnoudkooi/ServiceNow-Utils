@@ -1,10 +1,11 @@
 # CHANGELOG.md
 
-## 6.3.2.3 (2022-12-6)
+## 6.3.2.3 (2022-12-10)
 
 Fixes / changes:
-  - Make refrences in NiceError errors clickable (Discussion #325, PR #332 by VanWeapon, work in progress)
-  - FirefFox containers support for codesearch
+  - Make refrences in NiceError errors clickable (Discussion #325, PR #332 / #334 by VanWeapon, version 6.3.2.2 published for FF only)
+  - FireFox containers support for codesearch (Issue #333)
+  - Fix for slashcommand switches type link, such as -c to work when using /-c
 
 
 ## 6.3.2.0 (2022-12-03)

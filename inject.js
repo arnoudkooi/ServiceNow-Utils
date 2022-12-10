@@ -702,7 +702,7 @@ function snuAddSlashCommandListener() {
                         }
                         query = query.replace(val, "");
                         if (snuslashswitches[prop].type == "link") {
-                            targeturl = switchValue.replace(/\$0/, tableName);
+                            targeturl = switchValue.replace(/\$0/g, tableName);
                             targeturl = targeturl.replace(/\$sysid/, mySysId);
                             targeturl = snuResolveVariables(targeturl);
                             linkSwitch = true;
@@ -930,7 +930,7 @@ function snuAddSlashCommandListener() {
                 if (typeof doc.GlideList2 != 'undefined') {
                     var qry = doc.GlideList2.get(doc.document.querySelector('#sys_target')?.value);
                     if (typeof qry != 'undefined') {
-                        if (targeturl.includes("{}")) {
+                        if (targeturl.includes("{}") || linkSwitch) {
                             targeturl = targeturl.replace('{}', qry.getTableName());
                             if (!targeturl.startsWith("$random")) window.open(targeturl, '_blank');
                         }
@@ -1659,10 +1659,9 @@ function snuAddGroupSortIcon() {
 function snuAddErrorLogScriptLinks() {
     if (location.pathname.includes("syslog_list.do")) {
         // Supports for 3 different patterns of script ids being present in logs:
-        // table_name:sys_id
-        // table_name.sys_id
-        // table_name_sys_id
-        document.querySelectorAll('td.vt',).forEach((tableCell,tableCellIndex) => {
+        // table_name:sys_id table_name.sys_id table_name_sys_id
+        
+        document.querySelectorAll('td.vt:not(snuified)').forEach((tableCell,tableCellIndex) => {
             var patterns = [
                 /(([a-z_]+):([a-z0-9]{32}))/gm, // table_name:sys_id
                 /(([a-z_]+)\.([a-z0-9]{32})\.([a-z_]+))/gm, // table_name.sys_id.field
@@ -1692,16 +1691,21 @@ function snuAddErrorLogScriptLinks() {
                             table = segments[0];
                             sys_id = segments[1];
                         }
+                        if (table != 'sys_id'){
+                            var newHtml = tableCell.innerHTML.replaceAll(
+                                find,
+                                `<a title="Link via SN Utils" target="_blank" href='/${table}.do?sys_id=${sys_id}'>${find}</a>`
+                            );
+                            tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
+                        }
 
-                        var newHtml = tableCell.innerHTML.replaceAll(
-                            find,
-                            `<a title="Link via SN Utils" href='/${table}.do?sys_id=${sys_id}'>${find}</a>`
-                        );
-                        tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
                     });
                 }
             });
+            tableCell.classList.add('snuified');
         });
+
+        setTimeout(snuAddErrorLogScriptLinks, 3000); // "recursive" call this incase we navigate to next page.
     }
 }
 
