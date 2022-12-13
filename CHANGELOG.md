@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 6.3.2.4 (2022-12-13)
+
+Fixes / changes:
+  - Improved guidance / errormessage on the ScriptSync helper tab
+
 ## 6.3.2.3 (2022-12-10)
 
 Fixes / changes:

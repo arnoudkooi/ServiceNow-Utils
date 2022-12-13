@@ -119,15 +119,40 @@ $(document).ready(function () {
                     else 
                         updateRecord(wsObj, true);
                 } else {
-                    t.row.add([
-                        new Date(), 'WebSocket', JSON.parse(evt.data)                        
-                    ]).draw(false);
                     increaseTitlecounter();
-                    if (evt.data.indexOf('error') > 0) {
+                    if (evt.data.includes('error') || evt.data.includes('errno')) {
+
+                        var data = JSON.parse(evt.data);
+
+                        if (data?.errno == -30 || data?.errno == -4048 ){ //-30 mac -4048 windows
+                            t.row.add([
+                                new Date(), 'VS Code', `Error, could not create sub folder. Please check the following:<br />
+                                <ol>
+                                    <li>Do you have full write access to the current folder in VS Code.</li>
+                                    <li>If you have opened a workspace with multiple (virtual)folders, close the workspace and open the folder direct in VS Code.</li>
+                                    <li>Restart sn-scriptsync in VS Code by clicking the sn-scriptsync in the bottom bar in VS Code twice.</li>
+                                </ol>
+                                It is recommended to create a folder named scriptsync in your documents folder and open that in VS Code. <br />
+                                Follow instructions in <a href='https://youtu.be/ZDDminMjGTA?t=40' target='_blank'>this video</a>.`                        
+                            ]).draw(false);
+                        }
+                        else {
+                            t.row.add([
+                                new Date(), '', `<pre> ${JSON.stringify(data,4,4)}</pre>`                        
+                            ]).draw(false);
+                            t.row.add([
+                                new Date(), 'VS Code', "Error, please check browser console or message below to review error details. Follow instructions in <a href='https://youtu.be/ZDDminMjGTA?t=40' target='_blank'>this video</a>"                        
+                            ]).draw(false);
+                        }
+
+                        console.dir(data);
                         flashFavicon('images/iconred48.png', 3);
                         ws.send(wsObj);
                     }
                     else{
+                        t.row.add([
+                            new Date(), 'WebSocket', JSON.parse(evt.data)                        
+                        ]).draw(false);
                         flashFavicon('/images/icon32.png', 1);
                     }
                 }
