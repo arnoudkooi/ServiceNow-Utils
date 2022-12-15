@@ -1713,7 +1713,7 @@ function snuAddErrorLogScriptLinks() {
 function snuAddWorkNoteTaskLinks() {
     if (document.querySelector('.sn-stream').length != 0) { //checks for the presense of an activity stream
         document.querySelectorAll('li.h-card',).forEach((card,cardIndex) => { // each individual card in the stream
-            var pattern = /[A-Z]{2,7}[0-9]{6,10}/gm;
+            var pattern = /[A-Z]{2,7}[0-9]{6,10}/gm; // This pattern is generic enough to capture pretty much any task number, but may have false positives
             var found = card.innerText.match(pattern);
             if(found != null){
                 found.forEach(number => {
