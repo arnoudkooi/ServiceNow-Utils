@@ -1448,6 +1448,7 @@ function snuSettingsAdded() {
         mouseEnterToConvertToHyperlink();
         snuAddGroupSortIcon();
         snuAddErrorLogScriptLinks();
+        snuAddWorkNoteTaskLinks();
         snuAddFormDesignScopeChange();
         snuAddPersonaliseListHandler();
         snuAddLinkToCachDo();
@@ -1706,6 +1707,27 @@ function snuAddErrorLogScriptLinks() {
         });
 
         setTimeout(snuAddErrorLogScriptLinks, 3000); // "recursive" call this incase we navigate to next page.
+    }
+}
+
+function snuAddWorkNoteTaskLinks() {
+    if (document.querySelector('.sn-stream').length != 0) { //checks for the presense of an activity stream
+        document.querySelectorAll('li.h-card',).forEach((card,cardIndex) => { // each individual card in the stream
+            var pattern = /[A-Z]{2,7}[0-9]{6,10}/gm;
+            var found = card.innerText.match(pattern);
+            if(found != null){
+                found.forEach(number => {
+                    var newHtml = card.innerHTML.replaceAll(
+                        number,
+                        // Using `sysparm_query=number=INC123` will handle converting from base task to the specific task table
+                        // using `sys_id=INC123` technically works, but will render certain forms on the task.do form layout 
+                        // same thing happens when `sysparm_refkey=name` is used, the task.do form layout is rendered
+                        `<a title="Link via SN Utils" target='_blank' href='/task.do?sysparm_query=number=${number}'>${number}</a>`
+                    );
+                    card.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
+                });
+            }
+        });
     }
 }
 
