@@ -1661,7 +1661,7 @@ function snuAddErrorLogScriptLinks() {
         // Supports for 3 different patterns of script ids being present in logs:
         // table_name:sys_id table_name.sys_id table_name_sys_id
         
-        document.querySelectorAll('td.vt:not(snuified)').forEach((tableCell,tableCellIndex) => {
+        document.querySelectorAll('td.vt:not(.snuified)').forEach((tableCell,tableCellIndex) => {
             var patterns = [
                 /(([a-z_]+):([a-z0-9]{32}))/gm, // table_name:sys_id
                 /(([a-z_]+)\.([a-z0-9]{32})\.([a-z_]+))/gm, // table_name.sys_id.field
