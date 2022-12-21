@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 6.3.2.5 (2022-12-21)
+
+Fixes / changes:
+  - Fix classname for the NiceError update
+
+
 ## 6.3.2.4 (2022-12-13)
 
 Fixes / changes:
