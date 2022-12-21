@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 6.3.2.6 (2022-12-)
+
+Fixes / changes:
+  - Add support for "click to list" in case when Reference Key Dictionary attribute is set (other then sys_id)
+
 ## 6.3.2.5 (2022-12-21)
 
 Fixes / changes:

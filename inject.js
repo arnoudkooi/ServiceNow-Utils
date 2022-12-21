@@ -1580,8 +1580,10 @@ function snuDoubleClickToShowFieldOrReload() {
                 //placeholder maybe move breadcrumb doubleclick here
             } else if (event?.target?.classList?.contains('btn-ref')) { //open refernece record
                 let field = event?.target.id.split(".").splice(2).join(".");
-                if (field)
-                    window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}`);
+                if (field){
+                    var refKey = g_form.getGlideUIElement(field)?.referenceKey || 'sys_id';
+                    window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}&syparm_refkey=${refKey}`);
+                }
                 else { //maybe a document ID
                     var data = event?.target?.parentElement.dataset;
                     if (data?.sysid && data?.table)
@@ -2500,9 +2502,10 @@ function snuUiActionInfo(event, si) {
 
 function snuOpenReference(refTable, refField, evt) {
     var sysIds = g_form.getValue(refField);
-    var url = '/' + refTable + '_list.do?sysparm_query=sys_idIN' + sysIds;
+    var refKey = g_form.getGlideUIElement(refField)?.referenceKey || 'sys_id';
+    var url = `/${refTable}_list.do?sysparm_query=${refKey}IN${sysIds}`;
     if ((evt.ctrlKey || evt.metaKey) && sysIds && !sysIds.includes(','))
-        url = '/' + refTable + '.do?sysparm_query=sys_idIN' + sysIds;
+        url = `/${refTable}.do?sysparm_query=${refKey}IN${sysIds}`;
     window.open(url, 'refTable');
 }
 
