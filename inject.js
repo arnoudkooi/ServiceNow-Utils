@@ -140,6 +140,11 @@ var snuslashcommands = {
         "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0^ORsourceLIKE$0",
         "hint": "Filter System Log Created Today <search>"
     },
+    "lus": {
+        "url": "sys_update_set_list.do?sysparm_query=nameLIKE$0",
+        "hint": "Filter Local Update Sets <name>",
+        "fields": "name"
+    },
     "mab": {
         "url": "/now/mobile-app-builder",
         "hint": "Mobile Application Builder"
