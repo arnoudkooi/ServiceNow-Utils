@@ -1,9 +1,10 @@
 # CHANGELOG.md
 
-## 6.3.2.6 (2022-12-)
+## 6.3.2.7 (2023-01-09)
 
 Fixes / changes:
   - Add support for "click to list" in case when Reference Key Dictionary attribute is set (other then sys_id)
+  - Next Experience picker text color now follows CSS variable --now-unified-nav_utility-menu-trigger--color
 
 ## 6.3.2.5 (2022-12-21)
 

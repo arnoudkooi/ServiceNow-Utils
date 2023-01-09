@@ -355,7 +355,7 @@ class SnuNextManager {
         snuSpacer.style.whiteSpace = 'nowrap';
         snuSpacer.style.overflow = 'hidden';
         snuSpacer.style.textOverflow = 'ellipsis';
-        snuSpacer.style.color = 'white';
+        snuSpacer.style.color = 'RGB(var(--now-unified-nav_utility-menu-trigger--color, 255,255,255))';
         snuSpacer.style.margin = '0 0 0 7px'
 
 
