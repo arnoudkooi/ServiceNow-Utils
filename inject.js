@@ -1408,7 +1408,7 @@ function snuSettingsAdded() {
     } catch (ex) { } 
 
 
-    setShortCuts();
+    snuSetShortCuts();
 
     if (!snusettings.nopasteimage) {
         snuBindPaste(snusettings.nouielements == false);
@@ -1451,6 +1451,7 @@ function snuSettingsAdded() {
         snuAddFormDesignScopeChange();
         snuAddPersonaliseListHandler();
         snuAddLinkToCachDo();
+        snuAddInfoButton();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -2623,7 +2624,7 @@ function searchLargeSelects() {
 
 }
 
-function setShortCuts() {
+function snuSetShortCuts() {
     var divstyle;
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
@@ -2802,12 +2803,25 @@ function enhanceTinMCE() {
     bg.append(editor.buttons['snexp']);
 }
 
+function snuAddInfoButton()
+{
+
+    let trgt = document.querySelector('.navbar-right .navbar-btn');
+    if (!trgt) return;
+    let btn = document.createElement("button");
+    btn.type = "submit";
+    btn.id = "formBtn";
+    btn.title = "[SN Utils] Show created/updated info about this record";
+    btn.classList = "btn btn-icon glyphicon glyphicon-question-sign navbar-btn";
+    btn.addEventListener('click', snuLoadInfoMessage);
+    trgt.after(btn);
+
+}
+
 function snuBindPaste(showIcon) {
 
     if (typeof g_form != 'undefined') {
 
-        if (showIcon && jQuery != 'undefined')
-            jQuery('#header_add_attachment').after('<button id="header_paste_image" title="[SN Utils] Paste screenshot as attachment" class="btn btn-icon glyphicon glyphicon-paste navbar-btn" aria-label="Paste Image as Attachments" data-original-title="Paste Image as Attachments" onclick="tryPaste()"></button>');
         document.querySelector('body').addEventListener('paste', (e) => {
             if (e.clipboardData.items.length > 0 && e.clipboardData.items[0].kind == "file") {
                 if (g_form.isNewRecord()) {
@@ -2866,11 +2880,44 @@ function snuNewFromPopupToTab() {
     }
 }
 
-function tryPaste() {
-    if (!document.execCommand('paste')) {
+function snuLoadInfoMessage() {
+    let reqUrl = `/api/now/table/${g_form.getTableName()}/${g_form.getUniqueValue()}?sysparm_display_value=true&sysparm_fields=sys_updated_on,sys_updated_by,sys_created_on,sys_created_by,sys_mod_count,sys_scope`;
+
+    g_form.clearMessages();
+    g_form.addInfoMessage(`<span style='font-size:9pt'>[SN Utils] Loading record info...`);
+
+
+    snuLoadXMLDoc(g_ck, reqUrl, null, res => {
+
+        let flds = res?.result;
+        let html;
+        if (flds) {
+            html = `<span style='font-size:9pt'>[SN Utils] Record info:
+            <div style='margin:5px; padding: 5px; font-size:9pt; font-family: Menlo, Monaco, Consolas, "Courier New", monospace;'>
+            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Created by :</span> ${flds?.sys_created_by}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Created on :</span> ${flds?.sys_created_on}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Updated by :</span> ${flds?.sys_updated_by}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Updated on :</span> ${flds?.sys_updated_on}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left; white-space: pre;'>Updates    :</span> ${flds?.sys_mod_count}</div>`;
+
+            if (flds?.sys_scope?.display_value) html += `
+            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left; white-space: pre;'>Scope      :</span> ${flds?.sys_scope?.display_value || 'n/a'}</div>`;
+            
+            
+            html += `</div>
+            Shortcuts: CTRL-V: Paste screenshot | CTRL-S: Save record | Double-click: Toggle Technical Names | 
+            More: <a href="https://www.arnoudkooi.com/cheatsheet/" target="_blank">cheatsheet</a></span>
+            `;
+        }
+        else html = 'Data could not be loaded...';
+
+
+
         g_form.clearMessages();
-        g_form.addInfoMessage("Please hit cmd-v or ctrl-v if you want to paste a copied screenshot as attachment to this record. (SN Utils Extension)");
-    }
+        g_form.addInfoMessage(html);
+
+    });
+
 }
 
 function getBlob(encoded) {

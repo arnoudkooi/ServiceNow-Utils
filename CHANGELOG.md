@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## 6.3.4.0 (2023-01-12)
+
+Features:
+  - Added info button in classic form header that shows updated / created info in a addinfomessage, as well as basic shortcut info.
+
+Fixes / changes:
+  - Removed paste (screenshot) button in classic form
+  - Renamed setShortCuts to snuSetShortCuts in inject.js
+
 ## 6.3.3.0 (2023-01-11)
 
 Fixes / changes:
