@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 6.3.3.0 (2023-01-11)
+
+Fixes / changes:
+  - Before scripts are added to the page, a check is done for the existance of cookie glide_user_route. This makes sure scripts are only added to actual ServiceNow instances.
+
+
 ## 6.3.2.7 (2023-01-09)
 
 Fixes / changes:

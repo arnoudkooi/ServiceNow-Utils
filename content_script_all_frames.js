@@ -19,25 +19,36 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 });
 
 (function () {
-    addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
-    addScript('inject.js', true);
 
-    if (location.pathname.startsWith("/now/") || location.pathname.startsWith("/x/"))
-        addScript('inject_next.js', false);
-    if (location.pathname.startsWith("/$flow-designer.do"))
-        addScript('js/inject_flow.js', false);
-    else if (location.pathname == "/sys.scripts.do") {
-        setTimeout(function(){
-            addScript('js/monaco/vs/loader.js', false);
-        },200)
-        setTimeout(function(){
-            addScript('js/monaco/libsource.js', false);
-            addScript('js/monaco/bgscript.js', false);
-        },600)
+    //this is a check via the existance of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
+    var msg = { 
+        "event" : "checkisservicenowinstance",
+        "origin" : location.origin 
     }
-    else if (location.pathname.startsWith("/merge_form_")) {
-        addScript('js/monaco/compare.js', false);
-    }
+    chrome.runtime.sendMessage(msg, isServiceNow => {
+        if (isServiceNow) {
+            addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
+            addScript('inject.js', true);
+        
+            if (location.pathname.startsWith("/now/") || location.pathname.startsWith("/x/"))
+                addScript('inject_next.js', false);
+            if (location.pathname.startsWith("/$flow-designer.do"))
+                addScript('js/inject_flow.js', false);
+            else if (location.pathname == "/sys.scripts.do") {
+                setTimeout(function () {
+                    addScript('js/monaco/vs/loader.js', false);
+                }, 200)
+                setTimeout(function () {
+                    addScript('js/monaco/libsource.js', false);
+                    addScript('js/monaco/bgscript.js', false);
+                }, 600)
+            }
+            else if (location.pathname.startsWith("/merge_form_")) {
+                addScript('js/monaco/compare.js', false);
+            }
+
+        }
+    });
 
 })();
 
@@ -50,10 +61,10 @@ function addScript(filePath, processSettings) {
             getFromSyncStorageGlobal("snusettings", function (settings) {
                 if (!settings) settings = {};
                 settings.extensionUrl = chrome.runtime.getURL('/');
-                var detail = { 
-                    "detail" : {
-                        "type" : "code", 
-                        "content" : 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()' 
+                var detail = {
+                    "detail": {
+                        "type": "code",
+                        "content": 'var snusettings =' + JSON.stringify(settings) + '; snuSettingsAdded()'
                     }
                 };
                 if (typeof cloneInto != 'undefined') detail = cloneInto(detail, document.defaultView); //required for ff
@@ -66,7 +77,7 @@ function addScript(filePath, processSettings) {
     (document.head || document.documentElement).appendChild(s);
 }
 
-document.addEventListener("snutils-event", function(data) {
+document.addEventListener("snutils-event", function (data) {
     chrome.runtime.sendMessage(data.detail); //forward the customevent message to the bg script.
     return true;
 })
@@ -81,10 +92,10 @@ function runFunction(f, myType = "code") {
         // don't run function meant for content frame if we're not in it
         return;
     }
-    var detail = { 
-        "detail" : {
-            "type" : myType, 
-            "content" : f 
+    var detail = {
+        "detail": {
+            "type": myType,
+            "content": f
         }
     };
     if (typeof cloneInto != 'undefined') detail = cloneInto(detail, document.defaultView); //required for ff
@@ -114,14 +125,14 @@ function getFromSyncStorageGlobal(theName, callback) {
     chrome.storage.sync.get(theName, function (resSync) {
         var dataSync = resSync[theName];
 
-        if (typeof dataSync !== 'object'){ //only objects can become large and merged.
+        if (typeof dataSync !== 'object') { //only objects can become large and merged.
             callback(dataSync);
             return;
         }
 
-        getFromChromeStorageGlobal(theName,function (resLocal) {
+        getFromChromeStorageGlobal(theName, function (resLocal) {
             var objLocal = resLocal || {};
-            var objMerged = { ...dataSync, ...objLocal};
+            var objMerged = { ...dataSync, ...objLocal };
             callback(objMerged);
         });
     });

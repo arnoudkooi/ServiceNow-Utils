@@ -96,7 +96,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         cookieStoreId = sender.tab.cookieStoreId;
     }
 
-    if (message.event == "scriptsync") {
+    if (message.event == "checkisservicenowinstance") {
+        chrome.cookies.get({ //this is a check via the existance of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
+            "name": "glide_user_route",
+            "url": message.origin
+        }, cookie => {
+            var isInstance = (cookie) ? true : false;
+            sendResponse(isInstance);
+        })
+    }
+    else if (message.event == "scriptsync") {
         createScriptSyncTab(cookieStoreId);
     }
     else if (message.event == "pop") {
