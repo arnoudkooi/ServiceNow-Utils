@@ -2,6 +2,11 @@
 
 ## 6.3.4.0 (2023-01-12)
 
+Fixes / changes:
+  - Improvements to the new info addmessage
+
+## 6.3.4.0 (2023-01-12)
+
 Features:
   - Added info button in classic form header that shows updated / created info in a addinfomessage, as well as basic shortcut info.
 

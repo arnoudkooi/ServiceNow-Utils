@@ -2806,12 +2806,14 @@ function enhanceTinMCE() {
 function snuAddInfoButton()
 {
 
+    if (typeof g_form == 'undefined') return ; 
+
     let trgt = document.querySelector('.navbar-right .navbar-btn');
     if (!trgt) return;
     let btn = document.createElement("button");
     btn.type = "submit";
     btn.id = "formBtn";
-    btn.title = "[SN Utils] Show created/updated info about this record";
+    btn.title = "[SN Utils] Show created/updated info about this record \n (Who the heck edited this?)";
     btn.classList = "btn btn-icon glyphicon glyphicon-question-sign navbar-btn";
     btn.addEventListener('click', snuLoadInfoMessage);
     trgt.after(btn);
@@ -2881,6 +2883,12 @@ function snuNewFromPopupToTab() {
 }
 
 function snuLoadInfoMessage() {
+
+    if (document.querySelector('#snuinfo')) {
+        g_form.clearMessages();
+        return;
+    }
+
     let reqUrl = `/api/now/table/${g_form.getTableName()}/${g_form.getUniqueValue()}?sysparm_display_value=true&sysparm_fields=sys_updated_on,sys_updated_by,sys_created_on,sys_created_by,sys_mod_count,sys_scope`;
 
     g_form.clearMessages();
@@ -2892,16 +2900,16 @@ function snuLoadInfoMessage() {
         let flds = res?.result;
         let html;
         if (flds) {
-            html = `<span style='font-size:9pt'>[SN Utils] Record info:
+            html = `<span id='snuinfo' style='font-size:9pt'>[SN Utils] Record info:
             <div style='margin:5px; padding: 5px; font-size:9pt; font-family: Menlo, Monaco, Consolas, "Courier New", monospace;'>
-            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Created by :</span> ${flds?.sys_created_by}</div>
-            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Created on :</span> ${flds?.sys_created_on}</div>
-            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Updated by :</span> ${flds?.sys_updated_by}</div>
-            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left;'>Updated on :</span> ${flds?.sys_updated_on}</div>
-            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left; white-space: pre;'>Updates    :</span> ${flds?.sys_mod_count}</div>`;
+            <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left;'>Created by :</span> ${flds?.sys_created_by}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left;'>Created on :</span> ${flds?.sys_created_on}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left;'>Updated by :</span> ${flds?.sys_updated_by}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left;'>Updated on :</span> ${flds?.sys_updated_on}</div>
+            <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left; white-space: pre;'>Updates    :</span> ${flds?.sys_mod_count}</div>`;
 
             if (flds?.sys_scope?.display_value) html += `
-            <div><span style='font-size:8pt; display: inline-block; width: 80px; float: left; white-space: pre;'>Scope      :</span> ${flds?.sys_scope?.display_value || 'n/a'}</div>`;
+            <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left; white-space: pre;'>Scope      :</span> ${flds?.sys_scope?.display_value || 'n/a'}</div>`;
             
             
             html += `</div>
