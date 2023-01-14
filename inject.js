@@ -1316,6 +1316,14 @@ function snuResolveVariables(variableString){
         variableString = variableString.replace(/\$table/g, g_form.getTableName());
         variableString = variableString.replace(/\$sysid/g, g_form.getUniqueValue());
     }
+    if (typeof GlideList2 !== 'undefined') { //get sysid and tablename from classic form
+        if (typeof g_form == 'undefined') {
+            let listName = document.querySelector('#sys_target')?.value;
+            let qry = GlideList2.get(listName);
+            variableString = variableString.replace(/\$table/g, qry.tableName);
+            variableString = variableString.replace(/\$encodedquery/g, qry.filter);
+        }
+    }
     if (location.pathname == "/$flow-designer.do"){ //flowdesigner
         let tableName;
         let sysId;
@@ -2900,7 +2908,7 @@ function snuLoadInfoMessage() {
         let flds = res?.result;
         let html;
         if (flds) {
-            html = `<span id='snuinfo' style='font-size:9pt'>[SN Utils] Record info:
+            html = `<span id='snuinfo' style='font-size:10pt'>[SN Utils] Record info for: ${g_form.getTableName()} - ${g_form.getUniqueValue()}
             <div style='margin:5px; padding: 5px; font-size:9pt; font-family: Menlo, Monaco, Consolas, "Courier New", monospace;'>
             <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left;'>Created by :</span> ${flds?.sys_created_by}</div>
             <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left;'>Created on :</span> ${flds?.sys_created_on}</div>

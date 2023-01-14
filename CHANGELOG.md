@@ -1,6 +1,13 @@
 # CHANGELOG.md
 
-## 6.3.4.0 (2023-01-12)
+## 6.3.4.6 (2023-01-14)
+
+Fixes / changes:
+  - Adding table name and sysid to new form infomessage
+  - New variable for slashcommands that resolves in classic lists: $encodedquery
+  - Usage of new $encodedquery variable in sample slashcommand /bgl
+
+## 6.3.4.3 (2023-01-13)
 
 Fixes / changes:
   - Improvements to the new info addmessage
