@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 6.3.4.7 (2023-01-17, Safari only)
+
+Fixes / changes:
+  - Temporary fix for Safari, that disabled the cookie check added in 6.3.3.0
+
 ## 6.3.4.6 (2023-01-14)
 
 Fixes / changes:

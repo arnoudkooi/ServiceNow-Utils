@@ -21,6 +21,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 (function () {
 
     //this is a check via the existance of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
+    // manual disabledi cookie check in Safari versiomn, need to be fixed for Safari
     var msg = { 
         "event" : "checkisservicenowinstance",
         "origin" : location.origin 

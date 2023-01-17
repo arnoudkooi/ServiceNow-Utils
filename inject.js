@@ -1316,7 +1316,7 @@ function snuResolveVariables(variableString){
         variableString = variableString.replace(/\$table/g, g_form.getTableName());
         variableString = variableString.replace(/\$sysid/g, g_form.getUniqueValue());
     }
-    if (typeof GlideList2 !== 'undefined') { //get sysid and tablename from classic form
+    if (typeof GlideList2 !== 'undefined') { //get tablename and encodequery from classic form
         if (typeof g_form == 'undefined') {
             let listName = document.querySelector('#sys_target')?.value;
             let qry = GlideList2.get(listName);
