@@ -2691,7 +2691,7 @@ function snuSetShortCuts() {
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
     <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.arnoudkooi.com/cheatsheet/" target="_blank">&gt;Download Cheatsheet!&lt;</a>&nbsp;</span></div>
-    <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="snufilter" name="snufilter" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
+    <input id="snufilter" name="snufilter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="both" aria-haspopup="false" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
     <div id="snuswitches"></div>

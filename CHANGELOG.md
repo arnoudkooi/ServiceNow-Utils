@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 6.3.4.8 (2023-01-25, Edge only)
+Fixes / changes:
+  - Prevent autocomplete popup for slash commands #352
+
 ## 6.3.4.7 (2023-01-17, Safari only)
 
 Fixes / changes:
