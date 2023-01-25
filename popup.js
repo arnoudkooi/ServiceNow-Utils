@@ -1416,6 +1416,7 @@ function getExploreData() {
                     if (link) {
                         var linksplit = link.split('/');
                         var href = url + '/' + linksplit[6] + '.do?sys_id=' + linksplit[7];
+                        if (!display_value) display_value = '(Empty Display Value)';
                         display_value = "<a href='" + href + "' target='_blank'>" + display_value + "</a>";
                     }
 
