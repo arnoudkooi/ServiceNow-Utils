@@ -2293,6 +2293,15 @@ function snuAddTechnicalNames() {
                         onclick: "snuOpenReference('" + reftable + "','" + elm + "',event);",
                         title: 'Open reference table list (click) or record (ctrl+click): ' + reftable
                     };
+
+                    if (fieldType == 'reference'  && g_form.getValue(elm)){
+                        var valDisp = g_form.getDisplayBox(elm) && g_form.getDisplayBox(elm).value;
+                        if (!valDisp){
+                            g_form.hideFieldMsg(elm, true);
+							g_form.showFieldMsg(elm, `[SN Utils] Deleted or no display value`, 'warning');
+                        }
+                    }
+
                 }
                 else if (fieldType == 'conditions') {
                     linkAttrs = {

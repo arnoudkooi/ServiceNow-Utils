@@ -1,8 +1,14 @@
 # CHANGELOG.md
 
+## 6.3.4.9 (2023-01-)
+Features:
+  - Added Missing reference, or no display value check in classic UI Reference fields
+Fixes / changes:
+  - Message: [Deleted reference or empty display value] in view data when displayvalue empty (Issue #353, PR #354)
+
 ## 6.3.4.8 (2023-01-25, Edge only)
 Fixes / changes:
-  - Prevent autocomplete popup for slash commands #352
+  - Prevent autocomplete popup for slash commands (Issue #352)
 
 ## 6.3.4.7 (2023-01-17, Safari only)
 
