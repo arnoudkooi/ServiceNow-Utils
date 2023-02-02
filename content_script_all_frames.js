@@ -22,15 +22,15 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     //this is a check via the existance of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
     // manual disabledi cookie check in Safari versiomn, need to be fixed for Safari
-    var msg = { 
-        "event" : "checkisservicenowinstance",
-        "origin" : location.origin 
+    var msg = {
+        "event": "checkisservicenowinstance",
+        "origin": location.origin
     }
     chrome.runtime.sendMessage(msg, isServiceNow => {
         if (isServiceNow) {
             addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
             addScript('inject.js', true);
-        
+
             if (location.pathname.startsWith("/now/") || location.pathname.startsWith("/x/"))
                 addScript('inject_next.js', false);
             if (location.pathname.startsWith("/$flow-designer.do"))
@@ -141,7 +141,9 @@ function getFromSyncStorageGlobal(theName, callback) {
 
 //get an instance sync parameter
 function getFromSyncStorage(theName, callback) {
-    var instance = location.host.replace(".service-now.com", "");
+    var instance = location.host
+        .replace(".servicenowservices.com", "")
+        .replace(".service-now.com", "");
     chrome.storage.sync.get(instance + "-" + theName, function (result) {
         callback(result[instance + "-" + theName]);
     });

@@ -15,6 +15,7 @@ Manifest Permissions:
 
 Content Security Policy:
 - https://*.service-now.com: Access instance via REST API  
+- https://*.servicenowservices.com: Access services/government instances via REST API
 - ws://127.0.0.1:1978/	Interact between Helper Tab and VS Code sn-scriptsync  
  
 Note that SN Utils on-prem for Chrome does not implement a CSP at this point, but it shares the same codebase

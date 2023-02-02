@@ -14,14 +14,16 @@ var lastCommand;
 var cmd = {};
 
 var urlContains = ".service-now.com";
+var serviceUrlContains = ".servicenowservices.com";
 var urlPattern = "https://*.service-now.com/*"
+var serviceUrlPattern = "https://*.servicenowservices.com/*"
 if (onprem) {
     urlContains = ".";
     urlPattern = "*://*/*";
 }
 
 var defaultMenuConf = {
-    "documentUrlPatterns": [urlPattern]
+    "documentUrlPatterns": [urlPattern, serviceUrlPattern]
 };
 
 if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatability
@@ -36,22 +38,30 @@ chrome.runtime.onInstalled.addListener(function (details) {
         //openFile("welcome.html");
     }
 
-    if (typeof chrome.declarativeContent !== 'undefined'){
+    if (typeof chrome.declarativeContent !== 'undefined') {
         chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
             chrome.declarativeContent.onPageChanged.addRules([
-            {
-                conditions: [ new chrome.declarativeContent.PageStateMatcher({
-                    pageUrl: {urlContains: urlContains},
-                })],
-                actions: [new chrome.declarativeContent.ShowAction()]
-            }
+                {
+                    conditions: [new chrome.declarativeContent.PageStateMatcher({
+                        pageUrl: { urlContains: urlContains },
+                    })],
+                    actions: [new chrome.declarativeContent.ShowAction()]
+                }
+            ]);
+            chrome.declarativeContent.onPageChanged.addRules([
+                {
+                    conditions: [new chrome.declarativeContent.PageStateMatcher({
+                        pageUrl: { urlContains: urlContains },
+                    })],
+                    actions: [new chrome.declarativeContent.ShowAction()]
+                }
             ]);
         });
     }
 
 });
 
-function initializeContextMenus(){
+function initializeContextMenus() {
 
     for (var itemIdx = 0; itemIdx < menuItems.length; itemIdx++) {
         chrome.contextMenus.create(Object.assign(menuItems[itemIdx], defaultMenuConf));
@@ -74,7 +84,7 @@ function initializeContextMenus(){
                 var customCommands = JSON.parse(snusettings.slashcommands || "{}");
                 Object.keys(customCommands).forEach(function (key) {
                     //contexts =  (customCommands[key].url.includes("$0") ? "selection" : "all");
-                    if (customCommands[key].url.includes("contextmenu")){
+                    if (customCommands[key].url.includes("contextmenu")) {
                         chrome.contextMenus.create(Object.assign({
                             "id": "sc" + key,
                             "contexts": ["all"],
@@ -182,7 +192,7 @@ chrome.commands.onCommand.addListener(function (command) {
 
 var menuItems = [{
     "type": "separator",
-    "id" : "sep1"
+    "id": "sep1"
 },
 
 {
@@ -410,13 +420,13 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
         slashCommand('copycells');
     else if (clickData.menuItemId.includes('snippet'))
         insertSnippet(clickData, tab);
-    else if (clickData.menuItemId.startsWith('sc')){
+    else if (clickData.menuItemId.startsWith('sc')) {
         getFromSyncStorageGlobal("snusettings", function (snusettings) {
             if (!snusettings) snusettings = {};
             if (snusettings.hasOwnProperty("slashcommands")) {
                 var cmd = clickData.menuItemId.slice(2);
                 var cmds = JSON.parse(snusettings.slashcommands);
-                openUrl(clickData, tab,cmds[cmd].url);
+                openUrl(clickData, tab, cmds[cmd].url);
             }
         })
     }
@@ -469,7 +479,7 @@ function slashCommand(cmd) {
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
-                myVars: "snuShowSlashCommand('"+ cmd +"',1)"
+                myVars: "snuShowSlashCommand('" + cmd + "',1)"
             });
         });
 
@@ -651,13 +661,13 @@ function pop() {
         var u = new URL(tabs[0].url);
         var tid = tabs[0].id;
         var baseUrl = u.origin
-        var navToIdx = u.href.indexOf("nav_to.do?uri=") 
+        var navToIdx = u.href.indexOf("nav_to.do?uri=")
         if (navToIdx == -1) navToIdx = u.href.indexOf('now/nav/ui/classic/params/target/');
         if (navToIdx > -1) {
             if (u.href.includes("nav_to.do?uri="))
                 pth = decodeURIComponent(u.search.substring(5));
             else { //polaris
-                pth = decodeURIComponent(u.pathname.replace("now/nav/ui/classic/params/target/","") + u.search);
+                pth = decodeURIComponent(u.pathname.replace("now/nav/ui/classic/params/target/", "") + u.search);
             }
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
@@ -699,7 +709,7 @@ function clearCookies(e, tabid, target) {
 
 function openUrl(e, f, u) {
 
-    var url = u.replace(/\$0/g,e.selectionText);
+    var url = u.replace(/\$0/g, e.selectionText);
     var tokens = e.pageUrl.split('/').slice(0, 3);
     if (!url.startsWith('http')) url = tokens.join('/') + url;
     var createObj = {
@@ -740,7 +750,9 @@ function contextCodeSearch(e, f) {
             function (response) {
                 g_ck = response.myVars.g_ck || '';
                 url = response.url;
-                instance = (new URL(url)).host.replace(".service-now.com", "");
+                instance = (new URL(url)).host
+                    .replace(".servicenowservices.com")
+                    .replace(".service-now.com", "");
 
                 var cookieStoreId;
                 if (f.hasOwnProperty('cookieStoreId')) {
@@ -911,14 +923,14 @@ function getFromSyncStorageGlobal(theName, callback) {
     chrome.storage.sync.get(theName, function (resSync) {
         var dataSync = resSync[theName];
 
-        if (typeof dataSync !== 'object'){ //only objects can become large and merged.
+        if (typeof dataSync !== 'object') { //only objects can become large and merged.
             callback(dataSync);
             return;
         }
 
-        getFromChromeStorageGlobal(theName,function (resLocal) {
+        getFromChromeStorageGlobal(theName, function (resLocal) {
             var objLocal = resLocal || {};
-            var objMerged = { ...dataSync, ...objLocal};
+            var objMerged = { ...dataSync, ...objLocal };
             callback(objMerged);
         });
     });
@@ -942,22 +954,22 @@ function snuFetch(token, url, post, callback) {
         'Content-Type': 'application/json'
     };
     if (token) //only for instances with high security plugin enabled
-        hdrs['X-UserToken'] = token; 
+        hdrs['X-UserToken'] = token;
 
     var requestInfo = {
-        method : 'get',
-        headers : hdrs
+        method: 'get',
+        headers: hdrs
     }
 
-    if (post){
+    if (post) {
         requestInfo.method = 'PUT';
         requestInfo.body = post;
     }
 
     fetch(url, requestInfo)
-    .then(response => response.json())
-    .then(data => { 
-        callback(data);
-    });
+        .then(response => response.json())
+        .then(data => {
+            callback(data);
+        });
 
 }

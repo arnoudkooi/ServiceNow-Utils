@@ -35,11 +35,11 @@ document.addEventListener('DOMContentLoaded', function () {
         tabid = tabs[0].id;
         var cookieStoreId = tabs[0].cookieStoreId || '';
         urlFull = tabs[0].url;
-        getBrowserVariables(tabid,cookieStoreId);
+        getBrowserVariables(tabid, cookieStoreId);
 
     });
 
-    if (typeof InstallTrigger !== 'undefined') $('input[type="color"]').attr('type','text') //bug in FireFox to use html5 color tag in popup
+    if (typeof InstallTrigger !== 'undefined') $('input[type="color"]').attr('type', 'text') //bug in FireFox to use html5 color tag in popup
 
 });
 
@@ -53,7 +53,7 @@ function getBrowserVariables(tid, cStoreId, callback) {
         if (response == null || typeof response !== 'object') return;
         g_ck = response.myVars.g_ck || '';
         url = response.url;
-        instance = (new URL(url)).host.replace(".service-now.com", "");
+        instance = (new URL(url)).host.replace(".service-now.com", "").replace(".servicenowservices.com", "");
         nme = response.myVars.NOWusername || response.myVars.NOWuser_name;
         setBrowserVariables(response);
         //callback(response);
@@ -121,10 +121,10 @@ function prepareJsonTable() {
             if (thedate == result[query[1]].toString()) {
                 setDataTableTables(result[query[0]]);
             }
-            else{
+            else {
                 getTables(dataset);
             }
-                
+
         }
         catch (err) {
             getTables(dataset);
@@ -146,17 +146,17 @@ function setActiveNode(node) {
         setActiveNodeInner(node)
     else { //first time when popup is open
         fetch(url + '/stats.do')
-        .then(response => response.text())
-        .then(statsDo => { 
-            statsDo = statsDo.replaceAll('<br />', '<br/>');
-            ipArr = statsDo
-                .match(/IP address: ([\s\S]*?)\<br\/>/g)[0]
-                .replace('IP address: ', '')
-                .replace('<br/>', '')
-                .replace('<br />', '')
-                .split('.');
+            .then(response => response.text())
+            .then(statsDo => {
+                statsDo = statsDo.replaceAll('<br />', '<br/>');
+                ipArr = statsDo
+                    .match(/IP address: ([\s\S]*?)\<br\/>/g)[0]
+                    .replace('IP address: ', '')
+                    .replace('<br/>', '')
+                    .replace('<br />', '')
+                    .split('.');
                 setActiveNodeInner(node);
-        });
+            });
     }
 
 
@@ -228,12 +228,12 @@ function prepareJsonNodes() {
             if (thedate == result[query[1]].toString()) {
                 getActiveNode(result[query[0]]);
             }
-            else{
-                getNodes(); 
+            else {
+                getNodes();
             }
         }
         catch (err) {
-            getNodes();      
+            getNodes();
         }
     });
 }
@@ -256,7 +256,7 @@ function setBrowserVariables(obj) {
 
     g_ck = obj.myVars.g_ck || '';
     url = obj.url;
-    instance = (new URL(url)).host.replace(".service-now.com", "");
+    instance = (new URL(url)).host.replace(".service-now.com", "").replace(".servicenowservices.com", "");
     userName = obj.myVars.NOWusername || obj.myVars.NOWuser_name;
     //roles = obj.myVars.NOWuserroles ;
     datetimeformat = obj.myVars.g_user_date_time_format;
@@ -306,14 +306,14 @@ function setBrowserVariables(obj) {
         setInstanceSettings();
     });
 
-    $('input.snu-instance-setting').on('keyup',function () {
+    $('input.snu-instance-setting').on('keyup', function () {
         setInstanceSettings();
     });
 
 
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
-        getNodes(); 
+        getNodes();
     });
 
     $('input').on('blur', function () {
@@ -342,12 +342,12 @@ function setBrowserVariables(obj) {
         chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
-    $('#slashcommands, #slashsswitches').on('dblclick',function(){
-        $(this).prop('readonly','');
+    $('#slashcommands, #slashsswitches').on('dblclick', function () {
+        $(this).prop('readonly', '');
     })
 
-    $('#iconallowbadge').on('change',function(){
-       iconSettingsDiv($(this).prop('checked'));
+    $('#iconallowbadge').on('change', function () {
+        iconSettingsDiv($(this).prop('checked'));
     })
 
 
@@ -431,7 +431,7 @@ function setBrowserVariables(obj) {
                 });
                 break;
             case "#tabsettings":
-                getSettings(function(){});
+                getSettings(function () { });
                 getInstanceSettings();
                 break;
             case "#tabslashcommands":
@@ -439,7 +439,7 @@ function setBrowserVariables(obj) {
                 setSampleCommandHref();
                 break;
             case "#tabwhitelist":
-                getSettings(function(){});
+                getSettings(function () { });
                 break;
         }
 
@@ -496,15 +496,15 @@ function getSettings(callback) {
         for (var setting in settings) {
 
             try {
-            if (typeof settings[setting] == "boolean")
-                document.getElementById(setting).checked = settings[setting];
-            else
-                document.getElementById(setting).value = settings[setting];
+                if (typeof settings[setting] == "boolean")
+                    document.getElementById(setting).checked = settings[setting];
+                else
+                    document.getElementById(setting).value = settings[setting];
             }
             catch (ex) { //property removed
             }
         };
-        iconSettingsDiv($('#iconallowbadge').prop('checked')); 
+        iconSettingsDiv($('#iconallowbadge').prop('checked'));
         callback();
     })
 }
@@ -517,7 +517,7 @@ function setSettings() {
             snusettingsSync[this.id] = this.checked;
         }
         else {
-            if (this.value.length < 6000) 
+            if (this.value.length < 6000)
                 snusettingsSync[this.id] = this.value;
             else { //overflow to local storage #204
                 snusettingsSync[this.id] = '';
@@ -528,7 +528,7 @@ function setSettings() {
     });
     setToChromeSyncStorageGlobal("snusettings", snusettingsSync);
     setToChromeStorageGlobal("snusettings", snusettings);
-    
+
 }
 
 function setInstanceSettings() {
@@ -542,7 +542,7 @@ function setInstanceSettings() {
 
 function getInstanceSettings() {
 
-    getFromSyncStorage("snuinstancesettings", function(settings){
+    getFromSyncStorage("snuinstancesettings", function (settings) {
         objSettings = settings || {};
         for (var setting in settings) {
 
@@ -557,30 +557,30 @@ function getInstanceSettings() {
     $('#instancename').text(instance);
 }
 
-function iconSettingsDiv(visible){
+function iconSettingsDiv(visible) {
     if (visible)
         $('#iconsettingsdiv').show();
-    else 
+    else
         $('#iconsettingsdiv').hide();
 }
 
-function applyFavIconBadge(settings){
-    document.getElementById("icontext").style.backgroundColor = settings?.iconcolorbg; 
-    document.getElementById("icontext").style.color = settings?.iconcolortext; 
-    chrome.tabs.sendMessage(tabid, { method: "setFavIconBadge", options: settings }, function () {});
+function applyFavIconBadge(settings) {
+    document.getElementById("icontext").style.backgroundColor = settings?.iconcolorbg;
+    document.getElementById("icontext").style.color = settings?.iconcolortext;
+    chrome.tabs.sendMessage(tabid, { method: "setFavIconBadge", options: settings }, function () { });
 }
 
 function setSampleCommandHref() {
-    
+
     var newHref = myFrameHref || urlFull;
     if ((newHref.split('?')[0]).indexOf('_list.do') > 1) {
         getListUrl();
     }
     else {
         if (newHref.includes('.do?')) //allow page with .do in url to default to the UI16 iframe
-            newHref = newHref.replace(url + '/','');
-        else 
-            newHref = newHref.replace(url,'');
+            newHref = newHref.replace(url + '/', '');
+        else
+            newHref = newHref.replace(url, '');
         setListUrl(newHref, '');
     }
 }
@@ -604,13 +604,13 @@ function getListUrl() {
     });
 }
 
-function setListUrl(listUrl, tableLabel, fields){
+function setListUrl(listUrl, tableLabel, fields) {
     var hrf = document.getElementById('cmdforma');
     hrf.href = url + '/' + listUrl
-    hrf.innerText =listUrl;
+    hrf.innerText = listUrl;
     hrf.setAttribute('data-tablelabel', tableLabel);
 
-    hrf.onclick = function(e) { 
+    hrf.onclick = function (e) {
         e.preventDefault();
         document.getElementById('tbxslashurl').value = this.innerText;
         if (tableLabel)
@@ -635,7 +635,7 @@ function getGRQueryList(varName, template, templatelines, fullvarname) {
             myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
         }, function (response) {
             var tableName = response.myVars.g_listtableName;
-            if (typeof tableName == 'undefined'){ //dealing with a table that ends with _list, like sys_ui_list
+            if (typeof tableName == 'undefined') { //dealing with a table that ends with _list, like sys_ui_list
                 getGRQueryForm(varName, template, templatelines, fullvarname);
                 return;
             }
@@ -698,7 +698,7 @@ function getGRQueryForm(varName, template, templatelines, fullvarname) {
                 sysId = parts[idx + 2];
             }
         }
-        
+
         varName = varName || grVarName(tableName, fullvarname);
         var fields = ('' + response.myVars.elNames).split(',');
         var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
@@ -859,7 +859,7 @@ function setDataTableUpdateSets(nme) {
     });
 
     $('#tbxupdatesets').keyup(function () {
-        dtUpdateSets.search($(this).val(),true).draw();
+        dtUpdateSets.search($(this).val(), true).draw();
     }).focus().trigger('keyup');
 
     $('a.updatesetlist').click(function () {
@@ -922,11 +922,11 @@ function setDataTableNodes(nme, node) {
     });
 
     $('#tbxnodes').keyup(function () {
-        dtNodes.search($(this).val(),true).draw();
+        dtNodes.search($(this).val(), true).draw();
     }).focus().trigger('keyup');
 
     $('a.setnode').click(function () {
-        var node = {"nodeId" : this.id, "nodeName" : $(this).attr('data-node') };
+        var node = { "nodeId": this.id, "nodeName": $(this).attr('data-node') };
         setActiveNode(node)
     });
 
@@ -983,7 +983,7 @@ function setDataTableUpdates(nme) {
     });
 
     $('#tbxupdates').keyup(function () {
-        dtUpdates.search($(this).val(),true).draw();
+        dtUpdates.search($(this).val(), true).draw();
     }).focus().trigger('keyup');
 
 
@@ -1017,7 +1017,7 @@ function getTables(dataset) {
 
     var myurl = url + '/api/now/table/sys_db_object?sysparm_fields=' + fields + '&sysparm_query=' + query;
     snuFetch(g_ck, myurl, null, function (jsn) {
-        if (jsn?.error){
+        if (jsn?.error) {
             document.querySelector('#divtblinfo').innerText = jsn?.status + ' - ' + jsn.error?.detail;
             document.querySelector('#divtblinfo').classList = 'alert alert-danger';
             $('#waitingtables').hide();
@@ -1126,7 +1126,7 @@ function setDataTableTables(nme) {
 
 
     $('#tbxtables').keyup(function () {
-        dtTables.search($(this).val(),true).draw();
+        dtTables.search($(this).val(), true).draw();
     }).focus().trigger('keyup');
 
 
@@ -1148,7 +1148,7 @@ function getSlashcommands() {
                 source = "3script";
                 url = 'Built in scripted command, cannot be overwritten';
             };
-            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "fields": fields, "overwriteurl" : overwriteurl,  "source": source, "order" : order  };
+            return { "command": key, "url": url, "hint": snuEncodeHtml(snuslashcommands[key].hint), "fields": fields, "overwriteurl": overwriteurl, "source": source, "order": order };
         });
 
         try {
@@ -1156,7 +1156,7 @@ function getSlashcommands() {
         } catch (e) { };
 
         Object.keys(objCustomCommands).forEach(function (key) {
-            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "fields": objCustomCommands[key].fields, "overwriteurl" : objCustomCommands[key].overwriteurl, "order" : objCustomCommands[key].order,  "source": "1custom" });
+            dataslashcommands.push({ "command": key, "url": objCustomCommands[key].url, "hint": snuEncodeHtml(objCustomCommands[key].hint), "fields": objCustomCommands[key].fields, "overwriteurl": objCustomCommands[key].overwriteurl, "order": objCustomCommands[key].order, "source": "1custom" });
         });
 
 
@@ -1192,7 +1192,7 @@ function getSlashcommands() {
                             html += "<a href='#'><i class='fas fa-edit' aria-hidden='true'></i></a> "
                         }
                         if (row.source == "1custom") {
-                            html += "<a class='deletecmd' href='#' data-cmd='"+ row.command +"' ><i class='far fa-trash-alt ' aria-hidden='true'></i></a>"
+                            html += "<a class='deletecmd' href='#' data-cmd='" + row.command + "' ><i class='far fa-trash-alt ' aria-hidden='true'></i></a>"
                         }
                         html += `<div class='snucmdurl'>${(row.order || 100)}</div>`;
                         return html;
@@ -1237,7 +1237,7 @@ function getSlashcommands() {
         });
 
         $('#tbxslashcommands').keyup(function () {
-            dtSlashcommands.search($(this).val(),true).draw();
+            dtSlashcommands.search($(this).val(), true).draw();
         }).focus().trigger('keyup');
 
         $('a.deletecmd').on('click', function (e) {
@@ -1249,15 +1249,15 @@ function getSlashcommands() {
             $('#slashcommands').val(JSON.stringify(objCustomCommands));
             setSettings();
             getSlashcommands();
-        
+
         });
 
         $('#tbxslashurl').on('change', function (e) {
             slashCommandShowFieldField();
         });
 
-        
-        if (JSON.stringify(objCustomCommands).length > 2){
+
+        if (JSON.stringify(objCustomCommands).length > 2) {
             $('#downloadcommands').on('click', downloadCommands).show();
         }
         else {
@@ -1273,16 +1273,16 @@ function getSlashcommands() {
                 cmds = JSON.parse($('#slashcommands').val());
             } catch (e) { };
             var cmdname = $('#tbxslashcmd').val().replace(/[^a-zA-Z0-9]/gi, '').toLowerCase();
-            if (!cmdname){
+            if (!cmdname) {
                 $('#divslashmsg').text('No command name defined');
                 return;
             }
             cmds[cmdname] = {
                 "url": $('#tbxslashurl').val(),
                 "hint": $('#tbxslashhint').val(),
-                "fields" : $('#tbxslashfields').val(),
-                "order" : Number($('#tbxslashorder').val()),
-                "overwriteurl" : $('#tbxslashoverwriteurl').val()
+                "fields": $('#tbxslashfields').val(),
+                "order": Number($('#tbxslashorder').val()),
+                "overwriteurl": $('#tbxslashoverwriteurl').val()
             };
             $('#slashcommands').val(JSON.stringify(cmds));
 
@@ -1290,46 +1290,47 @@ function getSlashcommands() {
 
             //send the update command direct to the browser, without need for reload
             var details = {
-                "action" : "updateSlashCommand",
-                "cmdname" : cmdname,
-                "cmd" : cmds[cmdname]
+                "action": "updateSlashCommand",
+                "cmdname": cmdname,
+                "cmd": cmds[cmdname]
             }
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, { 
-                    "method" : "snuUpdateSettingsEvent", 
-                    "detail" : details }, 
-                response => { });
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    "method": "snuUpdateSettingsEvent",
+                    "detail": details
+                },
+                    response => { });
             });
 
             setSettings();
             getSlashcommands();
 
-            chrome.runtime.sendMessage({ "event" : "initializecontextmenus"});
+            chrome.runtime.sendMessage({ "event": "initializecontextmenus" });
 
         });
     });
 }
 
 
-function getTableSysId(){ //extracted from inject.js snuResolveVariables, todo:merge methods
+function getTableSysId() { //extracted from inject.js snuResolveVariables, todo:merge methods
     var ts = {
-        tableName : '',
-        sysId : ''
+        tableName: '',
+        sysId: ''
     }
     const loc = new URL(urlFull);
     console.log(loc);
-    if (loc.pathname == "/$flow-designer.do"){ //flowdesigner
-        if (loc.hash.startsWith("#/flow-designer/")){
+    if (loc.pathname == "/$flow-designer.do") { //flowdesigner
+        if (loc.hash.startsWith("#/flow-designer/")) {
             ts.tableName = "sys_hub_flow";
-            ts.sysId = loc.hash.replace("#/flow-designer/","").substring(0,32);
+            ts.sysId = loc.hash.replace("#/flow-designer/", "").substring(0, 32);
         }
-        else if (loc.hash.startsWith("#/sub-flow-designer/")){
+        else if (loc.hash.startsWith("#/sub-flow-designer/")) {
             ts.tableName = "sys_hub_flow";
-            ts.sysId = loc.hash.replace("#/sub-flow-designer/","").substring(0,32);
+            ts.sysId = loc.hash.replace("#/sub-flow-designer/", "").substring(0, 32);
         }
-        else if (loc.hash.startsWith("#/action-designer/")){
+        else if (loc.hash.startsWith("#/action-designer/")) {
             ts.tableName = "sys_hub_action_type_definition";
-            ts.sysId = loc.hash.replace("#/action-designer/","").substring(0,32);
+            ts.sysId = loc.hash.replace("#/action-designer/", "").substring(0, 32);
         }
     }
     else { ///get sysid and tablename from portal or workspace
@@ -1359,7 +1360,7 @@ function getExploreData() {
         method: "getVars",
         myVars: "g_form.tableName,NOW.sysId,mySysId,elNames"
     }, function (response) {
-        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref) || getParameterByName('id', response.frameHref) || getTableSysId().tableName ;
+        var tableName = response.myVars.g_formtableName || getParameterByName("table", response.frameHref) || getParameterByName('id', response.frameHref) || getTableSysId().tableName;
         var sysId = response.myVars.NOWsysId || response.myVars.mySysId || getParameterByName("sys_id", response.frameHref) || getTableSysId().sysId;
 
         if (!tableName) { //try to find table and sys_id in workspace
@@ -1444,7 +1445,7 @@ function setDataExplore(nme) {
             nme[key].hasdata = (obj.value || obj.display_value) ? "hasdata" : "";
         }
     );
-    
+
     if (dtDataExplore) dtTables.destroy();
     //$('#dataexplore').html(nme);
     dtDataExplore = $('#dataexplore').DataTable({
@@ -1492,18 +1493,18 @@ function setDataExplore(nme) {
         ]
 
     });
-    
+
     dtDataExplore.column(5).visible(false);
 
     $('#tbxdataexplore').keyup(function () {
         var srch = ($('#cbxhideempty').prop('checked') ? "hasdata " : "") + $('#tbxdataexplore').val();
-        dtDataExplore.search(srch,true).draw();
+        dtDataExplore.search(srch, true).draw();
     }).focus().trigger('keyup');
 
-    
+
     $('#cbxhideempty').change(function (e) {
         var srch = ($('#cbxhideempty').prop('checked') ? "hasdata " : "") + $('#tbxdataexplore').val();
-        dtDataExplore.search(srch,true).draw();
+        dtDataExplore.search(srch, true).draw();
     });
 
     $('a.referencelink').click(function () {
@@ -1515,23 +1516,23 @@ function setDataExplore(nme) {
 
 }
 
-function slashCommandShowFieldField(){
-    if ($('#tbxslashurl').val().includes('sysparm_query=')){
+function slashCommandShowFieldField() {
+    if ($('#tbxslashurl').val().includes('sysparm_query=')) {
         $('.showfields').show();
 
     }
-    else{
+    else {
         $('.showfields').hide();
-    }       
+    }
 }
 
 function downloadCommands() {
     var text = document.getElementById('slashcommands').value;
-    if (text.length < 5){
+    if (text.length < 5) {
         alert("No custom commands found");
         return;
-    } 
-    var text = JSON.stringify(JSON.parse(text),4,4);
+    }
+    var text = JSON.stringify(JSON.parse(text), 4, 4);
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', "slashcommands.json.txt");
@@ -1539,7 +1540,7 @@ function downloadCommands() {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-  }
+}
 
 
 //Place the key value pair in the chrome local storage, with metafield for date added.
@@ -1590,20 +1591,20 @@ function getFromChromeStorageGlobal(theName, callback) {
         callback(result[theName]);
     });
 }
-    
+
 //get an instance independent sync parameter
 function getFromSyncStorageGlobal(theName, callback) {
     chrome.storage.sync.get(theName, function (resSync) {
         var dataSync = resSync[theName];
 
-        if (typeof dataSync !== 'object'){ //only objects can become large and merged.
+        if (typeof dataSync !== 'object') { //only objects can become large and merged.
             callback(dataSync);
             return;
         }
 
-        getFromChromeStorageGlobal(theName,function (resLocal) {
+        getFromChromeStorageGlobal(theName, function (resLocal) {
             var objLocal = resLocal || {};
-            var objMerged = { ...dataSync, ...objLocal};
+            var objMerged = { ...dataSync, ...objLocal };
             callback(objMerged);
         });
     });
@@ -1618,23 +1619,23 @@ function snuFetch(token, url, post, callback) {
         'Content-Type': 'application/json'
     };
     if (token) //only for instances with high security plugin enabled
-        hdrs['X-UserToken'] = token; 
+        hdrs['X-UserToken'] = token;
 
     var requestInfo = {
-        method : 'get',
-        headers : hdrs
+        method: 'get',
+        headers: hdrs
     }
 
-    if (post){
+    if (post) {
         requestInfo.method = 'PUT';
         requestInfo.body = post;
     }
 
     fetch(url, requestInfo)
-    .then(response => response.json())
-    .then(data => { 
-        callback(data);
-    });
+        .then(response => response.json())
+        .then(data => {
+            callback(data);
+        });
 
 }
 
