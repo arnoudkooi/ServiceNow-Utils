@@ -1889,6 +1889,10 @@ function snuCaptureFormClick() {
                     operator = 'ISEMPTY';
                 } else if (tpe == 'glide_list' && elm != 'sys_id') {
                     operator = 'LIKE';
+                } else if (tpe == 'currency') {
+                    val = (val.split(';').slice(-1)+ '');
+                    valDisp = val;
+                    val = val.replace(",",".");
                 } else if (tpe == 'glide_date_time' || tpe == 'glide_date') {
                     operator = 'ON';
                     var dte = val.substring(0, 10); //do some magic to get encodedquery to generate date

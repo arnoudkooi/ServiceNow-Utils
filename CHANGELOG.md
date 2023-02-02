@@ -1,10 +1,15 @@
 # CHANGELOG.md
 
-## 6.3.4.9 (2023-01-)
+## 6.3.5.2 (2023-02-02)
 Features:
   - Added Missing reference, or no display value check in classic UI Reference fields
 Fixes / changes:
   - Message: [Deleted reference or empty display value] in view data when displayvalue empty (Issue #353, PR #354)
+
+  Fixes / changes:
+  - Review message on scripsync page
+  - Basic Form label click to list query support for currency fields
+
 
 ## 6.3.4.8 (2023-01-25, Edge only)
 Fixes / changes:
