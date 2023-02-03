@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 6.3.5.4 (2023-02-03)
+Fixes / changes:
+  - Improved resolving of variables for slashcommands inside Next Experience or classic UI
+  - Add resolving of $encodedquery slashcommand variable in form view
+
 ## 6.3.5.2 (2023-02-02)
 Features:
   - Added Missing reference, or no display value check in classic UI Reference fields

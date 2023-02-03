@@ -1312,18 +1312,26 @@ function snuDiffXml(shortcut, instance = '') {
 
 
 function snuResolveVariables(variableString){
-    if (typeof g_form !== 'undefined') { //get sysid and tablename from classic form
-        variableString = variableString.replace(/\$table/g, g_form.getTableName());
-        variableString = variableString.replace(/\$sysid/g, g_form.getUniqueValue());
+
+    var gsft = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
+    var doc = gsft ? gsft.contentWindow : window;
+    if (typeof doc.g_form !== 'undefined') { //get sysid and tablename from classic form
+        variableString = variableString.replace(/\$table/g, doc.g_form.getTableName());
+        variableString = variableString.replace(/\$sysid/g, doc.g_form.getUniqueValue());
+
+        var eq = doc.g_form.getParameter('sysparm_query') || doc.g_form.getParameter('sysparm_record_list');
+        variableString = variableString.replace(/\$encodedquery/g, eq);
+
     }
-    if (typeof GlideList2 !== 'undefined') { //get tablename and encodequery from classic form
-        if (typeof g_form == 'undefined') {
-            let listName = document.querySelector('#sys_target')?.value;
-            let qry = GlideList2.get(listName);
+    if (typeof doc.GlideList2 !== 'undefined') { //get tablename and encodequery from classic form
+        if (typeof doc.g_form == 'undefined') {
+            let listName = doc.document.querySelector('#sys_target')?.value;
+            let qry = doc.GlideList2.get(listName);
             variableString = variableString.replace(/\$table/g, qry.tableName);
             variableString = variableString.replace(/\$encodedquery/g, qry.filter);
         }
     }
+
     if (location.pathname == "/$flow-designer.do"){ //flowdesigner
         let tableName;
         let sysId;
