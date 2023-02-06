@@ -1326,9 +1326,11 @@ function snuResolveVariables(variableString){
     if (typeof doc.GlideList2 !== 'undefined') { //get tablename and encodequery from classic form
         if (typeof doc.g_form == 'undefined') {
             let listName = doc.document.querySelector('#sys_target')?.value;
-            let qry = doc.GlideList2.get(listName);
-            variableString = variableString.replace(/\$table/g, qry.tableName);
-            variableString = variableString.replace(/\$encodedquery/g, qry.filter);
+            if (listName){
+                let qry = doc.GlideList2.get(listName) || {};
+                variableString = variableString.replace(/\$table/g, qry?.tableName || '');
+                variableString = variableString.replace(/\$encodedquery/g, qry?.filter || '');
+            }
         }
     }
 

@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 6.3.5.5 (2023-02-06)
+Fixes / changes:
+  - Bugfix slashcommand not working slash commands
+
+
 ## 6.3.5.4 (2023-02-03)
 Fixes / changes:
   - Improved resolving of variables for slashcommands inside Next Experience or classic UI

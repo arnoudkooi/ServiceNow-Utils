@@ -79,7 +79,6 @@ if (snusettings.applybgseditor && scrpt) {
 }
 
 document.addEventListener('snuEvent', function (e) {
-	debugger;
 	if (e.detail.type == "background") { //basic check for servicenow instance
 		document.getElementById('runscript').value = e.detail.content.content;
 		if (typeof editor != 'undefined') editor.getModel().setValue(e.detail.content.content);
