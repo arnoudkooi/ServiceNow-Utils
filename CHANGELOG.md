@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 6.3.5.8 (2023-02-11)
+Fixes / changes:
+  - CTRL-click on dashboard to open source report now only listens to header click (Discussion #350)
+  - Clarified the message  on classic responsive dashboards when ctrl-click does not work 
+  - Improved /diff1 / diff2 handling (Issue #359)
+
 ## 6.3.5.5 (2023-02-06)
 Fixes / changes:
   - Bugfix slashcommand not working slash commands

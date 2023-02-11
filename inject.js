@@ -1244,14 +1244,12 @@ function setSnuFilter(ev) {
 }
 
 function snuDiffXml(shortcut, instance = '') {
-    if (typeof g_form == 'undefined' && typeof window?.gsft_main?.g_form == 'undefined') {
-        //snuShowAlert("No form found","warning",2000)
+    var gsft = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
+    var doc = gsft ? gsft.contentWindow : window;
+
+    if (!doc.g_form) {
         snuSetInfoText('Diff only works in classic forms',false);
-        //snuHideSlashCommand();
         return;
-    }
-    else if (typeof g_form == 'undefined') {
-        g_form = gsft_main.g_form;
     }
 
     instance = instance.trim();
@@ -1268,7 +1266,7 @@ function snuDiffXml(shortcut, instance = '') {
         host = host.replace(window.location.host, newinstance);
     }
 
-    let thisUrl = `${origin}/${g_form.getTableName()}.do?XML=&sys_id=${g_form.getUniqueValue()}`;
+    let thisUrl = `${origin}/${doc.g_form.getTableName()}.do?XML=&sys_id=${doc.g_form.getUniqueValue()}`;
     let delay = 0;
 
     if (shortcut == 'diff1') {
@@ -1287,9 +1285,9 @@ function snuDiffXml(shortcut, instance = '') {
     setTimeout(function () {
         let data = {
             url: thisUrl,
-            tableName: g_form.getTableName(),
-            displayValue: g_form.getDisplayValue(),
-            sysId: g_form.getUniqueValue(),
+            tableName: doc.g_form.getTableName(),
+            displayValue: doc.g_form.getDisplayValue(),
+            sysId: doc.g_form.getUniqueValue(),
             host: host
         };
         let event = new CustomEvent(
@@ -1830,14 +1828,14 @@ function snuClickToOpenWidget() {
             el.setAttribute("title", "[SN Utils] CTRL or CMD-Click to open source");
         }));
         document.addEventListener("click", function (event) {
-            if ((event.ctrlKey || event.metaKey) && event.target.tagName != 'A') {
+            if ((event.ctrlKey || event.metaKey) && event.target.tagName != 'A'  && event.target.className.includes('title-content')) {
                 event.preventDefault();
                 try {
                     var lnk = event.target.closest('.grid-stack-item').querySelector('decoration').getAttribute("editlink");
                     window.open(lnk);
                 }
                 catch (e) {
-                    snuSetInfoText('CTRL-Click only works in same scope', false);
+                    snuSetInfoText('Editlink not found. CTRL-Click only works in same scope and as admin', false);
                 }
                 return true;
             }
@@ -4507,7 +4505,7 @@ function snuGetSlashNavigatorData(){ //get JSON from loacal storage and prepare
                                 si.target = si?.command || '';    
                             if (si?.target)           
                                 si.fulltext = si.fulltext + ' ' +  si?.target?.match(/[^.]*/)[0];
-                            if ((si?.fulltext || '').includes("undefined")) debugger;
+                            //if ((si?.fulltext || '').includes("undefined")) debugger;
                             if (si.description) si.label = si.label + ' 🛈 ' + si.description + ' '; 
                             si.labelnotime = si.label;
                             if (timeAgoString && !si?.actionType) si.label = si.label + ' ◷ ' + timeAgoString; 
@@ -4650,7 +4648,6 @@ function snuSlashLog(addValue = false) {
         try {
             localStorage.setItem('snuslashlog', JSON.stringify(slashLog));
         } catch (ex){
-            debugger;
             localStorage.clear(); 
             localStorage.setItem('snuslashlog', JSON.stringify(slashLog));
         }
