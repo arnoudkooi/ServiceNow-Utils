@@ -875,7 +875,7 @@ function snuAddSlashCommandListener() {
                 return;
             }
             else if (shortcut == 'diffenv') {
-                if (query.length > 3) {
+                if (query.length >= 2) {
                     snuDiffXml('diff1');
                     setTimeout(() => {
                         snuDiffXml('diff2', query);
@@ -2457,7 +2457,7 @@ function snuExtendedFieldInfo() {
     function objToHtml(tables, tableFields){
 
         var tblCnt = tables.length;
-        if (tblCnt > 1){
+        if (tblCnt > 0){
 
             for (let idx = tblCnt -1; idx >= 1; idx--) { //unduplicate the fields arrays
                 tableFields[tables[idx]] = tableFields[tables[idx]].filter( ( el ) => !tableFields[tables[idx-1]].includes( el ) );

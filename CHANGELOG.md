@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 6.3.5.9 (2023-02-13)
+Fixes / changes:
+ - Minimumlength /diffenv decreased (Issue #363)
+ - Showfields fucntion now works better with base tables.
+
 ## 6.3.5.8 (2023-02-11)
 Fixes / changes:
   - CTRL-click on dashboard to open source report now only listens to header click (Discussion #350)
