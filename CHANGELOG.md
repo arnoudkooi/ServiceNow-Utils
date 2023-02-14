@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 6.3.6.0 (2023-02-02)
+Features:
+- Added easier way to add sys_id field to customized list (Discussion: #364)
+
 ## 6.3.5.9 (2023-02-13)
 Fixes / changes:
  - Minimumlength /diffenv decreased (Issue #363)

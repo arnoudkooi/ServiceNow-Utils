@@ -2643,6 +2643,28 @@ function searchLargeSelects() {
                     }
                 }
 
+                var dv = document.createElement("a");
+                dv.innerText = '+ sys_id';
+                dv.style = 'height:20px; margin:7px 0; display:block;';
+                dv.href='#';
+                
+                //allow
+                if (!document.querySelector('select#slush_right option[value="sys_id"], select#field_list_select_1 option[value="sys_id"]')){
+                    dv.title = '[SN Utils] Add sys_id field to first position of list';
+                    dv.addEventListener('click', ev => { 
+                        ev.preventDefault();
+                        if (!document.querySelector('select#slush_right option[value="sys_id"], select#field_list_select_1 option[value="sys_id"]')){
+                            var sb = document.querySelector('select#slush_right, select#field_list_select_1');
+                            var option = document.createElement("option");
+                            option.style.backgroundColor = '#5274FF';
+                            option.text = "sys_id";
+                            option.value = "sys_id";
+                            sb.add(option, sb[0]);
+                        }
+                    });
+                    snuInsertAfter(dv,document.querySelector('label[for="slush_right"]'));
+                }
+
                 var elmCount = document.querySelectorAll('.glide-list').length;
                 var elmAfter =  document.querySelectorAll('.glide-list')[elmCount -1];
                 snuInsertAfter(input, elmAfter );
@@ -4415,16 +4437,16 @@ function snuAddPersonaliseListHandler() {
 
     let icon = document.createElement('i');
     icon.className = 'snuPersonaliseList icon-endpoint btn btn-icon table-btn-lg';
-    icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open`;
+    icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open, hold shift to add sys_id to beginning of list`;
     icon.role = 'button';
     icon.addEventListener('click', evt => {
         let autoclose = !(evt.metaKey || evt.ctrlKey);
-        snuPersonaliseList(autoclose);
+        snuPersonaliseList(autoclose, evt.shiftKey);
     });
     btn.parentNode.insertBefore(icon, btn.nextSibling);
 }
 
-function snuPersonaliseList(autoclose) {
+function snuPersonaliseList(autoclose, addsysid) {
     let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
     if (btn) btn.click();
     else return true;
@@ -4440,6 +4462,17 @@ function snuPersonaliseList(autoclose) {
                 loops++;
                 loop(); //not loaded, try again after xx ms
                 return;
+            }
+
+            if (addsysid){
+                if (!document.querySelector('select#slush_right option[value="sys_id"], select#field_list_select_1 option[value="sys_id"]')){
+                    var sb = document.querySelector('select#slush_right, select#field_list_select_1');
+                    var option = document.createElement("option");
+                    option.style.backgroundColor = '#5274FF';
+                    option.text = "sys_id";
+                    option.value = "sys_id";
+                    sb.add(option, sb[0]);
+                }
             }
 
             let add = snusettings.listfields.split(',');
