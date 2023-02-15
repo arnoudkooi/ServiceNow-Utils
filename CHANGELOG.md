@@ -1,6 +1,9 @@
 # CHANGELOG.md
+## 6.3.6.1 (2023-02-15 Safari only)
+Features:
+- Bypass cookie instance check in Safari (not supported)
 
-## 6.3.6.0 (2023-02-02)
+## 6.3.6.0 (2023-02-14)
 Features:
 - Added easier way to add sys_id field to customized list (Discussion: #364)
 

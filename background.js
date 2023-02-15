@@ -101,7 +101,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             "name": "glide_user_route",
             "url": message.origin
         }, cookie => {
-            var isInstance = (cookie) ? true : false;
+            var isInstance = (cookie) ? true : false || navigator.userAgent.includes('Safari');
             sendResponse(isInstance);
         })
     }
