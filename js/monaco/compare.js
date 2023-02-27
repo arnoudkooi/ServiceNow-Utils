@@ -49,8 +49,8 @@ function getCompareNames() {
     let nodeList = [...document.querySelectorAll("thead th.main")].map(el => el.innerHTML);
 
     return {
-        leftTitle: nodeList[0],
-        rightTitle: nodeList[1]
+        originalTitle: nodeList[0],
+        modifiedTitle: nodeList[1]
     };
 }
 
@@ -66,16 +66,18 @@ function openMonaceDiff(fieldName, context) {
     window.top.document.dispatchEvent(event);
 
     setTimeout(function () {
-        let rightBody = context ? context.rightBody : gel(fieldName).value;
-        let leftBody = context ? context.leftBody : _getElementByPrefix('pulled', fieldName).value;
+        // ServiceNow shows the original on modified on the left and the original on the right,
+        // however this looks wrong in a diff tool so we need to swap the values to show the correct diff
+        let originalBody = context ? context.rightBody : gel(fieldName).value;
+        let modifiedBody = context ? context.leftBody : _getElementByPrefix('pulled', fieldName).value;
 
         let names = getCompareNames();
         let data = {
             fieldName : fieldName,
-            leftBody: leftBody,
-            leftTitle: names.leftTitle,
-            rightBody: rightBody,
-            rightTitle: names.rightTitle,
+            leftBody: originalBody,
+            leftTitle: names.originalTitle,
+            rightBody: modifiedBody,
+            rightTitle: names.modifiedTitle,
             snusettings: snusettings
         };
         let event = new CustomEvent(
