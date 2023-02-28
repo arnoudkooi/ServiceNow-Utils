@@ -1449,8 +1449,8 @@ function snuSettingsAdded() {
     }
     if (snusettings.allowsavefromotherscope) {
         snuAllowSaveFromOtherScope();
-    }
-    if (snusettings.nouielements == false) {
+    }    
+    if (snusettings.nouielements == false) {    
         if (typeof addStudioLink != 'undefined') addStudioLink();
         if (typeof addDblClickToPin != 'undefined') addDblClickToPin();
         snuAddStudioSearch();
@@ -2242,12 +2242,11 @@ function snuToggleLabel() {
 
 function snuAddTechnicalNamesPortal() {
     if (typeof window?.NOW?.sp != 'undefined') { //basic serviceportal names
-        document.querySelectorAll('label.field-label, span.type-boolean').forEach(function (lbl) {
+        document.querySelectorAll('label.field-label:not(.snuified), span.type-boolean:not(.snuified)').forEach(function (lbl) {
             try {
                 var fld = angular.element(lbl).scope().field.name;
-                if (!lbl.innerText.includes('|')) {
-                    jQuery(lbl).append('<span class="snuwrap"> | <span style="font-family:monospace; font-size:small;">' + fld + '</span></span> ');
-                }
+                jQuery(lbl).append('<span class="snuwrap"> | <span style="font-family:monospace; font-size:small;">' + fld + '</span></span> ');
+                lbl.classList.add('snuified')         
             } catch (e) { }
         })
     }

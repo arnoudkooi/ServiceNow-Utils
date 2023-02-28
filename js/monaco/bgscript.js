@@ -176,7 +176,8 @@ function devidePage() {
 	container.appendChild(rightSide)
 
 	document.querySelector('body').append(container);
-	result.innerHTML = 'SN Utils - Background script result pane.<hr />'
+	result.innerHTML = 'SN Utils - Background script result pane. ' +
+	'<a href="/sys_script_execution_history_list.do?sysparm_query=^ORDERBYDESCstarted" target="_blank" >history</a><hr />';
 		
 
 	// Attach the handler

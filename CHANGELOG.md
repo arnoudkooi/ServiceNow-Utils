@@ -1,4 +1,17 @@
 # CHANGELOG.md
+
+## 6.3.6.5 (2023-02-28)
+Fixes / changes:
+  - Monaco editor better parsing of RGB values with spaces in JSON CSS
+  - Monaco diff editor: In case of uncomitted update show current version in left pane (Issue #370)
+  - Prevent double Technical Names on variables in portal
+  - Added link to sys_script_execution_history on BG script
+
+
+## 6.3.6.2 (2023-02-18)
+Fixes / changes:
+  - Removed function / setting "Allow saving metadata after scope has changed"
+
 ## 6.3.6.1 (2023-02-15 Safari only)
 Features:
 - Bypass cookie instance check in Safari (not supported)

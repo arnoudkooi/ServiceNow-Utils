@@ -45,7 +45,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 },
             
                 provideDocumentColors(model) {
-                    const crgbCallRegex = /(\d{1,3}),(\d{1,3}),(\d{1,3})/;
+                    const crgbCallRegex = /( *\d{1,3} *),( *\d{1,3} *),( *\d{1,3} *)/;
                     const regexp = new RegExp(crgbCallRegex, 'g');
                     const matches = model.findMatches(regexp.source, true, true, false, null, true);
                     const colorMarkers = [];

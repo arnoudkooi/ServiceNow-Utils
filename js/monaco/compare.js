@@ -78,6 +78,17 @@ function openMonaceDiff(fieldName, context) {
             rightTitle: names.rightTitle,
             snusettings: snusettings
         };
+
+        //In case of uncomitted update show current version in left pane (Issue #370)
+        if (location.pathname == '/merge_form_current_update.do'){
+            data = {
+                leftBody: rightBody,
+                leftTitle: names.rightTitle,
+                rightBody: leftBody,
+                rightTitle: names.leftTitle,
+            };
+        }
+
         let event = new CustomEvent(
             "snutils-event", {
                 detail: {
