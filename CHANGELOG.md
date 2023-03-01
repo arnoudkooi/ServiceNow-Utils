@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 6.3.6.6 (2023-03-01)
+Fixes / changes:
+  - Bugfix diffviewer #370
+
 ## 6.3.6.5 (2023-02-28)
 Fixes / changes:
   - Monaco editor better parsing of RGB values with spaces in JSON CSS

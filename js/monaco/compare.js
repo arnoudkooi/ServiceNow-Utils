@@ -81,12 +81,10 @@ function openMonaceDiff(fieldName, context) {
 
         //In case of uncomitted update show current version in left pane (Issue #370)
         if (location.pathname == '/merge_form_current_update.do'){
-            data = {
-                leftBody: rightBody,
-                leftTitle: names.rightTitle,
-                rightBody: leftBody,
-                rightTitle: names.leftTitle,
-            };
+            data.leftBody = rightBody;
+            data.leftTitle = names.rightTitle;
+            data.rightBody = leftBody;
+            data.rightTitle = names.leftTitle;
         }
 
         let event = new CustomEvent(
