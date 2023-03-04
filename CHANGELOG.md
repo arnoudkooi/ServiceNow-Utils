@@ -1,4 +1,10 @@
 # CHANGELOG.md
+## 6.3.6. (2023-03-0)
+Fixes / changes:
+  - Add message to the who the heck edited button (wthetb), in case it is a new record.
+  - include name in the /u command fields
+  - Add slash command links for created / updated / version to the "wthetb"
+  - Removed the setting "Prevent loss of work when scope is switched from another tab" as it could cause issues
 
 ## 6.3.6.6 (2023-03-01)
 Fixes / changes:

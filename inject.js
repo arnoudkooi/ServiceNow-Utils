@@ -259,7 +259,7 @@ var snuslashcommands = {
     "u": {
         "url": "sys_user_list.do?sysparm_query=user_nameLIKE$0^ORnameLIKE$0",
         "hint": "Filter Users <search>",
-        "fields": "user_name"
+        "fields": "user_name, name"
     },
     "ua": {
         "url": "sys_ui_action_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
@@ -1409,7 +1409,6 @@ function snuSettingsAdded() {
     if (typeof snusettings.codeeditor == 'undefined') snusettings.codeeditor = true;
     if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
     if (typeof snusettings.highlightdefaultupdateset == 'undefined') snusettings.highlightdefaultupdateset = true;
-    if (typeof snusettings.allowsavefromotherscope == 'undefined') snusettings.allowsavefromotherscope = false;
     if (typeof snusettings.slashnavigatorsearch == 'undefined') snusettings.slashnavigatorsearch = true;
     if (typeof snusettings.slashhistory == 'undefined') snusettings.slashhistory = 50;
     if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
@@ -1447,9 +1446,6 @@ function snuSettingsAdded() {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
         if (typeof snuNextManager != 'undefined') snuNextManager.linkPickers(0);
     }
-    if (snusettings.allowsavefromotherscope) {
-        snuAllowSaveFromOtherScope();
-    }    
     if (snusettings.nouielements == false) {    
         if (typeof addStudioLink != 'undefined') addStudioLink();
         if (typeof addDblClickToPin != 'undefined') addDblClickToPin();
@@ -1840,15 +1836,6 @@ function snuClickToOpenWidget() {
                 return true;
             }
         });
-    }
-}
-
-function snuAllowSaveFromOtherScope() {
-    if (typeof g_form != 'undefined') { //set sysparm_transaction_scope to current scope value, this way a record can be saved even when scope was changed
-        if (document.querySelector('#sysparm_transaction_scope') && document.querySelector('input[id$="sys_scope"]')) {
-            document.querySelector('#sysparm_transaction_scope').value =
-                document.querySelector('input[id$="sys_scope"]').value
-        }
     }
 }
 
@@ -2939,6 +2926,11 @@ function snuLoadInfoMessage() {
         return;
     }
 
+    if (g_form.isNewRecord()){
+        g_form.addInfoMessage("Nobody edited this, You are on a new record :)");
+        return;
+    }
+
     let reqUrl = `/api/now/table/${g_form.getTableName()}/${g_form.getUniqueValue()}?sysparm_display_value=true&sysparm_fields=sys_updated_on,sys_updated_by,sys_created_on,sys_created_by,sys_mod_count,sys_scope`;
 
     g_form.clearMessages();
@@ -2961,6 +2953,15 @@ function snuLoadInfoMessage() {
             if (flds?.sys_scope?.display_value) html += `
             <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left; white-space: pre;'>Scope      :</span> ${flds?.sys_scope?.display_value || 'n/a'}</div>`;
             
+            html += `</div>
+            <div>Slash commands: <a href="javascript:snuShowSlashCommand('/u user_name=${flds?.sys_created_by}',0)" >/u ${flds?.sys_created_by}</a>&nbsp;&nbsp;`;
+
+            if (flds?.sys_created_by != flds?.sys_updated_by)
+                html += ` <a href="javascript:snuShowSlashCommand('/u user_name=${flds?.sys_updated_by}',0)" >/u ${flds?.sys_updated_by}</a>&nbsp;&nbsp;`;
+
+            if (flds?.sys_scope?.display_value && flds?.sys_mod_count != "0")
+                html += ` <a href="javascript:snuShowSlashCommand('/versions',0)" >/versions</a>`;
+
             
             html += `</div>
             Shortcuts: CTRL-V: Paste screenshot | CTRL-S: Save record | Double-click: Toggle Technical Names | 
@@ -3317,13 +3318,12 @@ function snuShowSlashCommand(initialCommand, autoRun) {
             }, 10);
         }
         else {
-            if (autoRun === 0)
-                window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowRight' }));
             setTimeout(function () {
                 window.top.document.getElementById('snufilter').selectionStart =
                     window.top.document.getElementById('snufilter').selectionEnd = 10000;
-            }
-                , 10);
+                if (autoRun === 0)
+                    window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'ArrowRight' }));
+            }, 10);
         }
     }
 }
