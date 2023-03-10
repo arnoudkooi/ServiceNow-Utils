@@ -579,7 +579,7 @@ function changeFavicon(src) {
 
     try {
         fetch(instance.url + '/sys.scripts.do', {
-            method: 'POST', //POST does not work somehow
+            method: 'POST',
             headers: {
                 'Cache-Control': 'no-cache',
                 "Content-Type" : "application/x-www-form-urlencoded"

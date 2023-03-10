@@ -3206,7 +3206,7 @@ function snuLoadXMLDoc(token, url, post, callback) {
 function snuStartBackgroundScript(script, callback) {
     try {
         fetch('sys.scripts.do', {
-            method: 'POST', //POST does not work somehow
+            method: 'POST',
             headers: {
                 'Cache-Control': 'no-cache',
                 "Content-Type": "application/x-www-form-urlencoded"
