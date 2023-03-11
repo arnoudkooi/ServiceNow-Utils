@@ -1,5 +1,16 @@
 # CHANGELOG.md
-## 6.3.6. (2023-03-0)
+## 6.3.7. (2023-03-11)
+Fixes / changes:
+  - Change /plug command to use the Plugins UI Page
+  - Fixed typo in inject.js syparm_refkey to sysparm_refkey to support non sys_id ref button doubleclicks
+  - Hide review request on scriptsync page
+  - Update for the checkisservicenowinstance Safari check.
+  - Added .do to the Mobile Studio links
+  - Remove outdated comment
+  - Added /bgl to generate scipt template (Earlier annouced but was missing)
+  - Excluded true/false fields from scriptsync buttons.
+
+## 6.3.7.0 (2023-03-06)
 Fixes / changes:
   - Add message to the who the heck edited button (wthetb), in case it is a new record.
   - include name in the /u command fields

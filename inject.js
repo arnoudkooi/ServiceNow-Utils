@@ -63,6 +63,10 @@ var snuslashcommands = {
         "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord(%27$table%27);%0Acurrent.get(%27$sysid%27);%0A%0Ags.info(current.getDisplayValue());',
         "hint": "Background Script with var current"
     },
+    "bgl": {
+        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%27$table%27%29%3B%0Alist.addEncodedQuery%28%27$encodedquery%27%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D%3B",
+        "hint": "Background Script with list gr"
+    },
     "cls": {
         "url": "*",
         "hint": "Clear Local Storage" 
@@ -159,7 +163,7 @@ var snuslashcommands = {
         "fields": "name"
     },
     "plug": {
-        "url": "v_plugin_list.do?sysparm_query=nameLIKE$0^ORidLIKE$0",
+        "url": "$allappsmgmt.do?sysparm_search=$0",
         "hint": "Filter Plugins <search>",
         "fields": "id"
     },
@@ -1595,7 +1599,7 @@ function snuDoubleClickToShowFieldOrReload() {
                 let field = event?.target.id.split(".").splice(2).join(".");
                 if (field){
                     var refKey = g_form.getGlideUIElement(field)?.referenceKey || 'sys_id';
-                    window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}&syparm_refkey=${refKey}`);
+                    window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}&sysparm_refkey=${refKey}`);
                 }
                 else { //maybe a document ID
                     var data = event?.target?.parentElement.dataset;
@@ -3631,11 +3635,13 @@ function snuAddFieldSyncButtons() {
                     }
                 }
 
-                for (var i = 0; i < fieldTypes.length; i++) {
-                    if (fieldType.includes(fieldTypes[i]) || elm.startsWith(fieldTypes[i])) {
-                        fieldType = fieldTypes[i];
-                        jQuery(this).after(getBtns(elm, fieldType));
-                        break;
+                if (fieldType != 'boolean'){ //true false fields dont need this
+                    for (var i = 0; i < fieldTypes.length; i++) {
+                        if (fieldType.includes(fieldTypes[i]) || elm.startsWith(fieldTypes[i])) {
+                            fieldType = fieldTypes[i];
+                            jQuery(this).after(getBtns(elm, fieldType));
+                            break;
+                        }
                     }
                 }
 
@@ -3720,7 +3726,7 @@ function snuAddSgStudioPlatformLink() {
 
             var elm = document.querySelector("h1");
             if (elm)
-                elm.innerHTML = DOMPurify.sanitize("<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + "?sys_id=" + sysId + "'>" + elm.innerText + "</a>");
+                elm.innerHTML = DOMPurify.sanitize("<a class='snu-platformlink' title='Open in platform (Link by SN Utils)' target='_blank' href='/" + match[arr[1]] + ".do?sys_id=" + sysId + "'>" + elm.innerText + "</a>");
 
         }
 
