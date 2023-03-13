@@ -64,7 +64,7 @@ var snuslashcommands = {
         "hint": "Background Script with var current"
     },
     "bgl": {
-        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%27$table%27%29%3B%0Alist.addEncodedQuery%28%27$encodedquery%27%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D%3B",
+        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%27$table%27%29%3B%0Alist.addEncodedQuery%28%22$encodedquery%22%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D%3B",
         "hint": "Background Script with list gr"
     },
     "cls": {
