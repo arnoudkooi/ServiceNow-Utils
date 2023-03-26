@@ -263,7 +263,7 @@ function setBrowserVariables(obj) {
     myFrameHref = obj.frameHref;
 
     setFormFromSyncStorage(function () {
-        $('.nav-tabs a[data-target="' + $('#tbxactivetab').val() + '"]').tab('show');
+        $('.nav-tabs a[data-bs-target="' + $('#tbxactivetab').val() + '"]').tab('show');
     });
 
     //Attach eventlistners
@@ -354,8 +354,8 @@ function setBrowserVariables(obj) {
     $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
     $.fn.dataTable.moment(datetimeformat);
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        var target = $(e.target).data("target"); // activated tab
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var target = $(e.target).data("bsTarget"); // activated tab
 
         $('#tbxactivetab').val(target);
         setToChromeSyncStorage("formvalues", $('form .sync').serialize());
@@ -797,7 +797,7 @@ function setUserDetails(html) {
     $('#rspns').html(html);
 
     if ($('#createdby').length > 0) {
-        $('.nav-tabs a[data-target="#tabuser"]').tab('show');
+        $('.nav-tabs a[data-bs-target="#tabuser"]').tab('show');
         $('#createdby').click(function () {
             var usr = $(this).data('username');
             $('#tbxname').val(usr).focus(function () {

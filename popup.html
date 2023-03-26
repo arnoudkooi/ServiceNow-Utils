@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>SN Utils by arnoudkooi.com</title>
-    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/datatables.min.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -29,61 +29,61 @@
             <input id='tbxactivetab' name='tbxactivetab' value="tababout" class="sync" type="hidden" />
             <ul class="nav nav-tabs compact" id="myTab">
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-target="#tabupdatesets" data-toggle="tab">Update Set
+                    <a class="nav-link" data-bs-target="#tabupdatesets" data-bs-toggle="tab">Update Set
                         <span id="waitingupdatesets" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-target="#tabupdates" data-toggle="tab">Updates
+                    <a class="nav-link" data-bs-target="#tabupdates" data-bs-toggle="tab">Updates
                         <span id="waitingupdates" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-target="#tabnodes" data-toggle="tab">Nodes
+                    <a class="nav-link" data-bs-target="#tabnodes" data-bs-toggle="tab">Nodes
                         <span id="waitingnodes" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabtables" data-toggle="tab">Tables
+                    <a class="nav-link" data-bs-target="#tabtables" data-bs-toggle="tab">Tables
                         <span id="waitingtables" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabdataexplore" data-toggle="tab">View Data
+                    <a class="nav-link" data-bs-target="#tabdataexplore" data-bs-toggle="tab">View Data
                         <span id="waitingdataexplore" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabuser" data-toggle="tab">User
+                    <a class="nav-link" data-bs-target="#tabuser" data-bs-toggle="tab">User
                         <span id="waitinguser" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabgr" data-toggle="tab">GlideRecord</a>
+                    <a class="nav-link" data-bs-target="#tabgr" data-bs-toggle="tab">GlideRecord</a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabslashcommands" data-toggle="tab" id='navslashcommands'>Slashcommands</a>
+                    <a class="nav-link" data-bs-target="#tabslashcommands" data-bs-toggle="tab" id='navslashcommands'>Slashcommands</a>
                 </li>               
                 <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabsettings" data-toggle="tab">Settings</a>
+                    <a class="nav-link" data-bs-target="#tabsettings" data-bs-toggle="tab">Settings</a>
                 </li>
                 <!-- <li class='nav-item'>
-                    <a class="nav-link" data-target="#tabwhitelist" data-toggle="tab">Whitelist</a>
+                    <a class="nav-link" data-bs-target="#tabwhitelist" data-bs-toggle="tab">Whitelist</a>
                 </li> -->
                 <li class='nav-item'>
-                    <a class="nav-link active" data-target="#tababout" data-toggle="tab">About</a>
+                    <a class="nav-link active" data-bs-target="#tababout" data-bs-toggle="tab">About</a>
                 </li>
 
             </ul>
@@ -94,9 +94,7 @@
                         <input type="search" id="tbxupdatesets" name="tbxupdatesets"
                             class="form-control form-control-sm sync"
                             placeholder="Search in progress update set in current scope...">
-                        <span class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
-                        </span>
+                        <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
                     </div>
                     <table id="updatesets" class="display table-condensed">
                         <thead>
@@ -117,9 +115,7 @@
                     <div class="input-group">
                         <input type="search" id="tbxupdates" name="tbxupdates" class="form-control form-control-sm sync"
                             placeholder="Search in your last 20 updates...">
-                        <span class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
-                        </span>
+                        <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
                     </div>
                     <table id="updts" class="display table-condensed">
                         <thead>
@@ -138,10 +134,8 @@
                     <div class="input-group">
                         <input type="search" id="tbxnodes" name="tbxnodes" class="form-control form-control-sm"
                             placeholder="Search Instance Nodes...   |   Hit refresh button to update status >>">
-                        <span class="input-group-append">
-                            <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm"
-                                type="button">Refresh</button>
-                        </span>
+                        <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm"
+                            type="button">Refresh</button>
 
                     </div>
                     <table id="instancenodes" class="display table-condensed">
@@ -159,11 +153,10 @@
                 <div class="tab-pane" id="tabtables">
 
                     <div class="input-group">
-                        <input type="search" id="tbxtables" name="tbxtables" class="form-control form-control-sm sync"
+                        <input type="search" id="tbxtables" name="tbxtables" class="form-control form-control-sm w-50 sync"
                             placeholder="Search tables...                           >> Select dataset: Default, Advanced or Custom Tables >>">
 
-                        <span class="input-group-append">
-                            <select name="slctdataset" id="slctdataset" class="form-control form-control-sm sync wdth"
+                            <select name="slctdataset" id="slctdataset" class="form-select form-select-sm sync wdth"
                                 title="Select dataset: Default, Advanced or Custom Tables">
                                 <option value="default">Default</option>
                                 <option value="advanced">Advanced</option>
@@ -171,8 +164,6 @@
                             </select>
                             <button id='btnrefreshtables' class="btn btn-outline-secondary btn-sm"
                                 title="Force refresh of the ServiceNow tables (API Call)" type="button">Refresh</button>
-                        </span>
-
                     </div>
 
                     <table id="tbls" class="display table-condensed">
@@ -185,7 +176,7 @@
                         </thead>
                     </table>
                     <div id="divtblinfo" ></div>
-                    <select class="form-control form-control-sm sync mtfive" id="slctlistquery" name="slctlistquery">
+                    <select class="form-select form-select-sm sync mtfive" id="slctlistquery" name="slctlistquery">
                         <option value="&sysparm_filter_only=true&sysparm_filter_pinned=true">Listview query: None
                             (filter only, don't show records)</option>
                         <option
@@ -204,19 +195,15 @@
                     <div class="input-group">
                         <input type="search" id="tbxdataexplore" name="tbxdataexplore"
                             class="form-control form-control-sm sync" placeholder="Search data...">
-                        <span class="input-group-append">
-                            <div id="divhideempty">
-                                <input class="form-check-input sync" type="checkbox" id="cbxhideempty" name="cbxhideempty">
-                                <label class="form-check-label" for="cbxhideempty"
-                                    title="Hide rows where the field is empty">
-                                    Hide empty rows.
-                                </label></input>
-                            </div>
-                        </span>
-                        <span class="input-group-append">
-                            <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm"
-                                title="Refresh data" type="button">Refresh</button>
-                        </span>
+                        <div id="divhideempty">
+                            <input class="form-check-input sync" type="checkbox" id="cbxhideempty" name="cbxhideempty">
+                            <label class="form-check-label" for="cbxhideempty"
+                                title="Hide rows where the field is empty">
+                                Hide empty rows.
+                            </label></input>
+                        </div>
+                        <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm"
+                            title="Refresh data" type="button">Refresh</button>
                     </div>
                     <table id="dataexplore" class="display table-condensed dxp">
                         <thead>
@@ -233,14 +220,11 @@
 
                 </div>
 
-
                 <div class="tab-pane" id="tabuser">
                     <div class="input-group">
                         <input type="search" id="tbxname" name="tbxname" class="form-control form-control-sm"
                             placeholder="Search by username...">
-                        <span class="input-group-append">
-                            <button id='btnGetUser' class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
-                        </span>
+                        <button id='btnGetUser' class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
                     </div>
                     <div id="rspns"></div>
                 </div>
@@ -249,17 +233,15 @@
                     <div class="input-group">
                         <input id="tbxgrname" name="tbxgrname" class="form-control form-control-sm"
                             placeholder="Change default grTableName variable...">
-                        <span class="input-group-append">
-                            <button id='btnSetGRName' class="btn btn-outline-secondary btn-sm" type="button">Create
-                                GlideRecord Template.</button>
-                        </span>
+                        <button id='btnSetGRName' class="btn btn-outline-secondary btn-sm" type="button">Create
+                            GlideRecord Template.</button>
                     </div>
                     <div class="form-group">
                         <label for="tbxgrtemplate">Template for fields: ({0} = variable like gr, {1} = field name like
                             sys_created_on)</label>
                         <div class="input-group">
 
-                            <select class="form-control form-control-sm sync" name="tbxgrtemplate" id="tbxgrtemplate">
+                            <select class="form-select form-select-sm sync" name="tbxgrtemplate" id="tbxgrtemplate">
                                 <option>gs.info('{1}: ' + {0}.getValue('{1}'));</option>
                                 <option>{0}.getValue('{1}');</option>
                                 <option>{0}.setValue('{1}','');</option>
@@ -268,8 +250,7 @@
                                 <option>{0}.{1} = '';</option>
                                 <option value=''>- none -</option>
                             </select>
-                            <div class="input-group-append">&nbsp;&nbsp;</div>
-                            <div class="input-group-append">
+                            <div class="input-group-text">
                                 <div class="form-check push5up">
 
                                     <input class="form-check-input sync" type="checkbox" id="cbxtemplatelines"
@@ -296,17 +277,6 @@
                             </div>
                         </div>
 
-
-                    <!-- <div class="btns">
-                        <div class="dt-buttons">
-                            <button class="dt-button" id="btnSendBackGround">
-                                <span>Open in background</span>
-                            </button>
-                            <button class="dt-button" id="btnSendXplore">
-                                <span>Open in Xplore</span>
-                            </button>
-                        </div>
-                    </div> -->
                     <br />
 
                 </div>
@@ -329,7 +299,7 @@
                                     <input class="form-check-input snu-setting" type="checkbox" checked="checked" id="vsscriptsync"
                                         name="vsscriptsync">
                                     <label class="form-check-label" for="vsscriptsync">
-                                        Enable SN-ScriptSync buttons (VS Code)
+                                        Enable sn-scriptsync buttons (VS Code)
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -403,7 +373,7 @@
                                     <label class="form-check-label" for="slashoption">
                                         Slashcommands:
                                     </label>
-                                    <select class="snu-setting form-control form-control-sm" name="slashoption"
+                                    <select class="snu-setting form-select form-select-sm" name="slashoption"
                                         id="slashoption">
                                         <option value="on">On - Activate on / or CTRL-/</option>
                                         <option value="ctrl">On - Activate on CTRL-/</option>
@@ -415,7 +385,7 @@
                                     <label class="form-check-label" for="slashtheme">
                                         Slash popup theme:
                                     </label>
-                                    <select class="snu-setting form-control form-control-sm" name="slashtheme"
+                                    <select class="snu-setting form-select form-select-sm" name="slashtheme"
                                         id="slashtheme">
                                         <option value="dark">Dark</option>
                                         <option value="light">Light</option>
@@ -426,7 +396,7 @@
                                     <label class="form-check-label" for="slashhistory">
                                         Locally store slashcommands per instance:
                                     </label>
-                                    <select class="snu-setting form-control form-control-sm" name="slashhistory"
+                                    <select class="snu-setting form-select form-select-sm" name="slashhistory"
                                         id="slashhistory">
                                         <option value="0">0 - disabled</option>
                                         <option>20</option>
@@ -509,13 +479,11 @@
                         <input type="search" id="tbxslashcommands" name="tbxslashcommands"
                             class="form-control form-control-sm sync"
                             placeholder="Search existing slashcommands..." />
-                        <span class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
-                        </span>
+                        <button class="btn btn-outline-secondary btn-sm" type="button">Go!</button>
                     </div>
 
                     <form>
-                        <div class="form-row" id="cmdform">
+                        <div class="row" id="cmdform">
                           <div class="form-group col-md-2">
                             <label for="tbxslashcmd">Command</label>
                             <input type="text" size="12" class="form-control form-control-sm" id="tbxslashcmd" />
@@ -572,16 +540,20 @@
 
                 </div>
 
-
-
                 <div class="tab-pane active" id="tababout">
                     <h4>SN Utils <span id='snuVersion'></span></h4>
+                    <div class="wasabi">
+                        Do you ❤️ SN Utils? A review is appreciated! 
+                        <br />
+                        <a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/sn-utils-tools-for-servic/jgaodbdddndbaijmcljdbglhpdhnjobg/reviews" target="_blank">Chrome</a> / 
+                        <a rel="noreferrer noopener" href="https://addons.mozilla.org/nl/firefox/addon/servicenow-utils2/reviews/" target="_blank">Firefox</a> / 
+                        <a href="https://apps.apple.com/nl/app/sn-utils/id1542209967" target="_blank" rel="noreferrer noopener">Safari</a>
+                    </div>
+
+                    <br />
                     Developed by
                     <h3><a class="popuplinks" href="http://arnoudkooi.com" target="_blank">arnoudkooi.com</a></h3>
-                    <br />
-                    If you &#10084;&#65039; SN Utils, consider becoming a <a href="https://www.patreon.com/snutils" target="_blank"> Patreon!</a>
-                    <br />
-                    
+                    <br />                 
                     <!-- <br /> LinkedIn post:
                     <br />
 
@@ -603,7 +575,6 @@
                     <br />This tools comes as is, with no warranty.
                     <br />Redistribution or copying of functionality is not allowed!
                     <div id="livemessage"></div>
-
                 </div>
             </div>
         </form>

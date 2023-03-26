@@ -297,7 +297,7 @@ var menuItems = [{
 },
 {
     "id": "opentabscriptsync",
-    "title": "Open ScriptSync Helper Tab",
+    "title": "Open sn-scriptsync Helper Tab",
     "contexts": ["all"]
 },
 {
@@ -869,7 +869,6 @@ function setToChromeStorage(theName, theValue) {
 
 //set an instance independent parameter
 function setToChromeStorageGlobal(theName, theValue) {
-    console.log(theName, theValue)
     var myobj = {};
     myobj[theName] = theValue;
     chrome.storage.local.set(myobj, function () {

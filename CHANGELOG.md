@@ -1,5 +1,21 @@
 # CHANGELOG.md
-## 6.3.7. (2023-03-11)
+## 6.3.9.0 (2023-03-27)
+Features:
+- Added ability to generate delete script for sys_pd_context records, from within playbooks, linked to the Technical Names function.
+- Added approval step in sn-scriptsync helper tab. First time a instance is used, approval is now required.
+
+Fixes / changes:
+  - Fix quoute encodening /bgc /bgl command (PR 373)
+  - Double click to enable technical namers disabled when Don't Show UI elements is checked
+  - Call for reviews on about tab
+  - Link to /tn deepdive on Linkedin in popup, replaces cheatsheet link.
+  - Upgrade bootstrap from 4.6.0 to 5.2.3 and made needed adjustments to poput.html and others
+  - Upgrade datatables from 1.10.20 to 1.13.4
+  - Upgrade jQuery from 3.6.0 to 3.6.4
+  - Renamed occurences of SN ScriptSync to sn-scriptsync
+
+
+## 6.3.7.7 (2023-03-11)
 Fixes / changes:
   - Change /plug command to use the Plugins UI Page
   - Fixed typo in inject.js syparm_refkey to sysparm_refkey to support non sys_id ref button doubleclicks

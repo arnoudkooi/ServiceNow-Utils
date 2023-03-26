@@ -60,11 +60,11 @@ var snuslashcommands = {
         "hint": "Background Script"
     },
     "bgc": {
-        "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord(%27$table%27);%0Acurrent.get(%27$sysid%27);%0A%0Ags.info(current.getDisplayValue());',
+        "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord(%22$table%22);%0Acurrent.get(%22$sysid%22);%0A%0Ags.info(current.getDisplayValue());',
         "hint": "Background Script with var current"
     },
     "bgl": {
-        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%27$table%27%29%3B%0Alist.addEncodedQuery%28%27$encodedquery%27%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D%3B",
+        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%22$table%22%29%3B%0Alist.addEncodedQuery%28%22$encodedquery%22%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D%3B",
         "hint": "Background Script with list gr"
     },
     "cls": {
@@ -1608,7 +1608,8 @@ function snuDoubleClickToShowFieldOrReload() {
                 }
             }
             else if (['div', 'li', 'body'].includes(event.target.localName)) {
-                snuAddTechnicalNames();
+                if (!window?.snusettings?.nouielements) //disable the doubleclick when SN Utils UI elements off
+                    snuAddTechnicalNames();
             }
         }, true);
     }
@@ -2723,7 +2724,7 @@ function snuSetShortCuts() {
     var htmlFilter = document.createElement('div');
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.arnoudkooi.com/cheatsheet/" target="_blank">&gt;Download Cheatsheet!&lt;</a>&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.linkedin.com/feed/update/urn:li:activity:7039894217128570880/" target="_blank">/tn deep dive</a>&nbsp;</span></div>
     <input id="snufilter" name="snufilter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="both" aria-haspopup="false" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>

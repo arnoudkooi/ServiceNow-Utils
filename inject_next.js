@@ -8,8 +8,9 @@ class SnuNextManager {
             if (['textarea', 'input', 'select'].includes(eventPath[0]?.localName)) return; //not in form elements
             if (eventPath[0]?.className?.includes('snunodblclk') || eventPath[1]?.className?.includes('snunodblclk')) return; //not in list header with classname
             if (!eventPath[0]?.className?.includes('snuelm'))
-                if (!this._snuShowUpdateFieldNext(eventPath))
-                    this.addTechnicalNames();
+                if (!window?.snusettings?.nouielements) //disable the doubleclick when SN Utils UI elements off
+                    if (!this._snuShowUpdateFieldNext(eventPath))
+                        this.addTechnicalNames();
 
         });
         document.addEventListener('mouseup', evt => {
@@ -127,6 +128,7 @@ class SnuNextManager {
         })
 
         namesAdded += this.addTechnicalNamesLists();
+        namesAdded += this.playbookContextRemoveHelper();
 
         //toggle visibility
         querySelectorShadowDom.querySelectorAllDeep('.snutn').forEach(cls => {
@@ -210,6 +212,59 @@ class SnuNextManager {
             }
         })
         return namesAdded;
+    }
+
+
+    playbookContextRemoveHelper(){
+
+        if (!snusettings?.applybgseditor) return 0; //only when bg scripts use monaco editor
+
+
+        let namesAdded = 0;
+
+        let playbooks  = querySelectorShadowDom.querySelectorAllDeep('now-collapse-trigger.playbook-heading');
+
+        playbooks.forEach(pb =>{
+            let h2 = querySelectorShadowDom.querySelectorDeep('h2:not(.snuified)',pb);
+            
+            if (h2) {
+                let contextSsysId = pb.appendToPayload.playbookContextId
+                let prnt = this.closestElement('now-playbook-experience-connected',h2);
+                var template = `// SN Utils helper script to delete playbook contexts (Execute in global scope)
+// DO NOT use in prodoction, only for test / development.
+var grSPC = new GlideRecord('sys_pd_context');
+grSPC.addQuery("sys_id","${contextSsysId}")
+// // Uncomment line below to delete all contexts for this playbook
+// .addOrCondition("process_definition", "${prnt?.playbookExperienceId}") // ${h2?.innerText}
+// // Uncomment line below to delete all contexts from this record
+// .addOrCondition("input_record", "${prnt?.parentSysId}"); 
+// // Comment or change below to remove 25 context records linit
+grSPC.setLimit("25");
+grSPC.orderByDesc("sys_created_on");
+grSPC.query();
+grSPC.deleteMultiple();`;
+
+                h2.classList.add('snuified');
+
+                let lnk = document.createElement('a');
+                lnk.innerText = ' ❌';
+                lnk.style.fontSize = '9pt';
+                lnk.style.textDecoration = 'none';
+                lnk.title = '[SN Utils] Prefill backgroundscript to delete sys_pd_context record';
+                lnk.href = '/sys.scripts.do?content=' + encodeURIComponent(template);
+                lnk.target = '_blank';
+                lnk.className = 'snutn';
+                h2.append(lnk);
+
+                namesAdded++;
+            }
+
+    })
+
+
+
+        return namesAdded;
+
     }
 
     createLabelLink(elm) {

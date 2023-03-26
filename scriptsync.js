@@ -1,21 +1,89 @@
-var t;
-var realTimeUpdating = false;
-var msgCnt = 0;
-var msgShown = false;
-var scriptTabCreated = false;
-var ws;
-var thistabid
+let t;
+let realTimeUpdating = false;
+let msg;
+let msgCnt = 0;
+let msgShown = false;
+let scriptTabCreated = false;
+let ws;
+let thistabid
+let scriptsyncinstances;
 
 chrome.tabs.getCurrent( tab => { thistabid = tab.id });
 
 //this replaces the  webserver port 1977 communication to proxy ecverything through websocket/helpertab
 chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
     if (message.event == "scriptsyncpostdata") {
-        ws.send(JSON.stringify(message.command));
+
+        let instanceurl = message?.command?.instance?.url;
+        if (instanceurl && scriptsyncinstances?.allowed?.includes(instanceurl))
+            ws.send(JSON.stringify(message.command));
+        else if (instanceurl && scriptsyncinstances?.blocked?.includes(instanceurl)){
+            t.row.add([
+                new Date(), 'ServiceNow', 'Received from blocked source: <b>' + instanceurl + '</b><br />Message ignored'
+
+            ]).draw(false);
+            flashFavicon('images/iconred48.png', 3);
+        }
+        else if (instanceurl){
+            msg = message;
+            document.querySelector('#instanceurl').innerText = instanceurl
+            document.querySelector('#instanceapprovediv').classList.remove("hidden");
+            flashFavicon('images/iconred48.png', 3);
+            let audio = new Audio('/images/alert.mp3');
+            audio.play();
+            document.title = "[" + (++eventCount) + "] SN-SCRIPTSYNC ATTENTION";
+        }
+        else {
+            t.row.add([
+                new Date(), 'ServiceNow', 'Unkown message<br />Message ignored, check browser console'
+            ]).draw(false);
+            flashFavicon('images/iconred48.png', 3);
+            console.log(message);
+        }
+
     }
 });
 
+
+
+
 $(document).ready(function () {
+
+    document.querySelector('#instanceallow').addEventListener('click', (e) =>{
+        let instanceurl = msg?.command?.instance?.url;
+        scriptsyncinstances.allowed.push(instanceurl);
+        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances );
+        document.querySelector('#instanceapprovediv').classList.add("hidden");
+        t.row.add([
+            new Date(), 'Helper tab', 'Allowd source: <b>' + instanceurl + '</b><br />Message send to VS Code sn-scriptsync'
+        ]).draw(false);
+        ws.send(JSON.stringify(msg.command));
+        increaseTitlecounter();
+        msg = null;
+        setInstanceLists();
+    })
+    
+    document.querySelector('#instanceblock').addEventListener('click', (e) =>{
+        let instanceurl = msg?.command?.instance?.url;
+        scriptsyncinstances.blocked.push(instanceurl);
+        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances );
+        document.querySelector('#instanceapprovediv').classList.add("hidden");
+
+        t.row.add([
+            new Date(), 'Helper tab', 'Blocked source: <b>' + instanceurl + '</b><br />Message ignored'
+
+        ]).draw(false);
+        increaseTitlecounter();
+        msg = null;
+        setInstanceLists();
+
+    })
+
+    getFromChromeStorageGlobal('scriptsyncinstances', c => {
+        scriptsyncinstances = c || { allowed : [], blocked :[] } 
+        setInstanceLists();
+    });
+
     t = $('#synclog').DataTable({
         columnDefs: [{
             render: $.fn.dataTable.render.moment('X', 'HH:mm:ss'),
@@ -80,7 +148,33 @@ $(document).ready(function () {
 
         ws.onmessage = function (evt) {
             msgCnt++;
-            var wsObj = JSON.parse(evt.data);
+            let wsObj = JSON.parse(evt.data);
+            let instanceurl = wsObj?.instance?.url;
+            if (instanceurl && scriptsyncinstances?.allowed?.includes(instanceurl)){
+                // cleared!
+            }
+            else if (instanceurl && scriptsyncinstances?.blocked?.includes(instanceurl)){
+                t.row.add([
+                    new Date(), 'VS Code', 'Received from blocked source: <b>' + instanceurl + '</b><br />Message ignored'
+    
+                ]).draw(false);
+                flashFavicon('images/iconred48.png', 3);
+                return false;
+            }
+            else if (instanceurl) {
+                t.row.add([
+                    new Date(), 'VS Code', 'Unknown source: <b>' + instanceurl + '</b><br />'+
+                    'The last SN Utils update requires approval per instance, please run /token from the instance to approve or block.<br />' +
+                    '<b>Message not processed</b>'
+    
+                ]).draw(false);
+                flashFavicon('images/iconred48.png', 3);
+                let audio = new Audio('/images/alert.mp3');
+                audio.play();
+                document.title = "[" + (++eventCount) + "] SN-SCRIPTSYNC ATTENTION";
+                return false;
+            }
+
             if (wsObj.hasOwnProperty('liveupdate')) {
                 updateRealtimeBrowser(wsObj);
             }
@@ -540,7 +634,7 @@ function setIntervalX(callback, delay, repetitions) {
 var eventCount = 0;
 
 function increaseTitlecounter() {
-    document.title = "[" + (++eventCount) + "] Scriptsync SN Utils by arnoudkooi.com";
+    document.title = "[" + (++eventCount) + "] sn-scriptsync SN Utils by arnoudkooi.com";
 }
 
 function changeFavicon(src) {
@@ -673,6 +767,51 @@ function getFormData(object) {
     return formData;
 }
 
+//set an instance independent parameter
+function setToChromeStorageGlobal(theName, theValue) {
+    console.log(theName, theValue)
+    var myobj = {};
+    myobj[theName] = theValue;
+    chrome.storage.local.set(myobj, function () {
+    });
+}
+
+//get an instance independent global parameter
+function getFromChromeStorageGlobal(theName, callback) {
+    chrome.storage.local.get(theName, function (result) {
+        callback(result[theName]);
+    });
+}
+
+function setInstanceLists(){
+    
+    setInstanceList("allowed", scriptsyncinstances.allowed);
+    setInstanceList("blocked", scriptsyncinstances.blocked);
+
+    function setInstanceList(listtype, arr){
+        let cntnt = ''
+        arr.forEach(instance => {
+            cntnt += `<li>${instance} <a href='#' data-url='${instance}' class='${listtype}'>❌</a></li>`;
+        })
+        document.querySelector('#intanceslist' + listtype).innerHTML = cntnt || '<li>-none</li>';
+
+        document.querySelectorAll('#intanceslist' + listtype + ' a')?.forEach(a =>{
+            a.addEventListener('click', e =>{
+                e.preventDefault();
+                deleteInstance(a.className, a.dataset.url);
+            });
+        });
+    }
+}
+
+function deleteInstance(listtype, instance){
+    if (confirm(`Delete ${instance} from ${listtype} list?`)){
+        let newlist = scriptsyncinstances[listtype].filter(item => item !== instance);
+        scriptsyncinstances[listtype] = newlist;
+        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances );
+        setInstanceLists();
+    }
+}
 
 
 

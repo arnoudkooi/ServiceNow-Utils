@@ -280,18 +280,18 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
   var header =
     // '<div class="card"> <a class="anchor" name="'+ data.recordType+'"></a>' +
     // '<div class="card-header" id="head_' + data.recordType + '">' +
-    // '<h5 class="mb-0"><button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_' + data.recordType + '" aria-expanded="true" aria-controls="collapse_' + data.recordType + '">' +
+    // '<h5 class="mb-0"><button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_' + data.recordType + '" aria-expanded="true" aria-controls="collapse_' + data.recordType + '">' +
     // data.tableLabel + ' [' + data.recordType + '] (' + data.hits.length + ')' + '</button>' +
     // '</h5></div>' +
-    // '<div id="collapse_' + data.recordType + '" class="collapse show" aria-labelledby="' + data.recordType + '" idata-parent="#searchCodeAccordion">' +
+    // '<div id="collapse_' + data.recordType + '" class="collapse show" aria-labelledby="' + data.recordType + '" idata-bs-parent="#searchCodeAccordion">' +
     // '<div class="card-body">';<i class="fas fa-chevron-circle-down"></i>
     `<div class="card"> <a class="anchor" name="${data.recordType}"></a>
     <div class="card-header" id="head_${data.recordType}">
-    <h5 class="mb-0"><button class="btn btn-link" type="button" data-toggle="collapse" 
-    data-target="#collapse_${data.recordType}" aria-expanded="true" aria-controls="collapse_${data.recordType}">
+    <h5 class="mb-0"><button class="btn btn-link" type="button" data-bs-toggle="collapse" 
+    data-bs-target="#collapse_${data.recordType}" aria-expanded="true" aria-controls="collapse_${data.recordType}">
     <i class="fas fa-chevron-circle-right"></i></button>${data.tableLabel}' [${data.recordType}] | Hits:${data.hits.length}</h5></div>
     <div id="collapse_${data.recordType}" class="tablecollapse collapse show" aria-labelledby="${data.recordType}" 
-    idata-parent="#searchCodeAccordion"><div class="card-body">`;
+    idata-bs-parent="#searchCodeAccordion"><div class="card-body">`;
 
   var footer =
     `</div> <!--card-body-->
@@ -307,12 +307,12 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
     var recordHeader = `
       <div class="card">
       <div class="card-header" id="head_${hit.sysId}">
-      <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_${hit.sysId}" 
+      <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_${hit.sysId}" 
       aria-expanded="true" aria-controls="collapse_${hit.sysId}"><i class="fas fa-chevron-circle-right"></i></button>
       <span class="bigger"><a href="${url}/${data.recordType}.do?sys_id=${hit.sysId}" target="_blank">
       ${hit.name.replace(/<\/?[^>]+(>|$)/g, "")} (${hit.matches.length})</a></span></div>
       <div id="collapse_${hit.sysId}" class="collapse show" aria-labelledby="${hit.sysId}" 
-      idata-parent="#searchCodeTableAccordion_${data.recordType}"><div class="card-body">`;
+      idata-bs-parent="#searchCodeTableAccordion_${data.recordType}"><div class="card-body">`;
 
     var text = `<ul class="record">`;
     statisticsObj.hits += 1;

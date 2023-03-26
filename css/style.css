@@ -32,14 +32,14 @@ a.iscurrent {
     color: red;
 }
  
-ul.nav {
+#content ul.nav {
     background-color: #032D42;
     border-bottom: #86ED78 5px solid;
     padding-top: 7px;
 }
 
-.nav-tabs .nav-item.show .nav-link,
-.nav-tabs .nav-link.active {
+#content .nav-tabs .nav-item.show .nav-link,
+#content .nav-tabs .nav-link.active {
     border-radius: 0;
     color: #fff !important;
     background-color: #000000;
@@ -52,11 +52,11 @@ ul.nav {
     border-bottom-style: none;
 }
 
-.nav-link {
+#content .nav-link {
     color: #e5e5e5 !important;
 }
 
-.nav-link:hover:not(.active) {
+#content .nav-link:hover:not(.active) {
     color: #fff !important;
     border: none;
     text-decoration: underline !important;
@@ -209,26 +209,6 @@ table.dataTable tbody td {
     }
 }
 
-/* fix path to datatables sort images*/
-table.dataTable thead .sorting {
-    background: url("/images/sort_both.png") no-repeat center right;
-}
-
-table.dataTable thead .sorting_asc {
-    background: url("/images/sort_asc.png") no-repeat center right;
-}
-
-table.dataTable thead .sorting_desc {
-    background: url("/images/sort_desc.png") no-repeat center right;
-}
-
-table.dataTable thead .sorting_asc_disabled {
-    background: url("/images/sort_asc_disabled.png") no-repeat center right;
-}
-
-table.dataTable thead .sorting_desc_disabled {
-    background: url("/images/sort_desc_disabled.png") no-repeat center right;
-}
 
 img.halfwidth{
     width:30%;
@@ -407,4 +387,20 @@ label {
     text-align:right; 
     border:1px solid #ced4da;
     padding-right: 5px;
+}
+
+.wasabi {
+    background-color: #62D74E;
+    padding: 12px;
+    font-size: 20px;
+    border-radius: 4px;
+}
+
+textarea:read-only {
+    background-color: #e1e1e1 !important;
+  }
+
+#tabslashcommands .row>* {
+    padding-right: 4px;
+    padding-left: 4px;
 }
