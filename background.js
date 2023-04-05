@@ -24,11 +24,11 @@ var defaultMenuConf = {
     "documentUrlPatterns": [urlPattern]
 };
 
-if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatability
+if (!chrome.contextMenus) chrome.contextMenus = browser.menus; //safari compatibility
 
 chrome.contextMenus.removeAll(initializeContextMenus);
 
-//Attatch eventlistener, setting extension only active on matching urls
+//Attach eventlistener, setting extension only active on matching urls
 chrome.runtime.onInstalled.addListener(function (details) {
     // firefox uses manifest pageAction.show_matches for the same functionality
     var version = chrome.runtime.getManifest().version;
@@ -97,7 +97,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
 
     if (message.event == "checkisservicenowinstance") {
-        chrome.cookies.get({ //this is a check via the existance of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
+        chrome.cookies.get({ //this is a check via the existence of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
             "name": "glide_user_route",
             "url": message.origin
         }, cookie => {
@@ -549,7 +549,7 @@ function openFile(link) {
 
 function createScriptSyncTab(cookieStoreId) {
     getFromSyncStorageGlobal("synctab", function (tid) {
-        if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
+        if (tid) { //bit of a hack to prevent asking tabs permission, let prevent opening multiple same tabs
             chrome.tabs.get(tid, tb => {
                 if (!tb) {
                     var url = chrome.runtime.getURL("scriptsync.html");
@@ -772,7 +772,8 @@ function openScriptInclude(e, f) {
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
-    if (srch.length < 100) {
+    const MAX_SCRIPT_INCLUDE_NAME_LEN = 100;
+    if (srch.length <= MAX_SCRIPT_INCLUDE_NAME_LEN) {
         chrome.tabs.create(createObj);
     }
 }
@@ -787,7 +788,8 @@ function openTableList(e, f) {
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
-    if (srch.length < 50) {
+    const MAX_TABLE_NAME_LEN = 80;
+    if (srch.length <= MAX_TABLE_NAME_LEN) {
         chrome.tabs.create(createObj);
     }
 
@@ -803,7 +805,8 @@ function openPropertie(e, f) {
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
-    if (srch.length < 50) {
+    const MAX_PROPERTY_NAME_LEN = 100;
+    if (srch.length <= MAX_PROPERTY_NAME_LEN) {
         chrome.tabs.create(createObj);
     }
 
