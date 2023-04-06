@@ -182,7 +182,7 @@ function setActiveNode(node) {
             }, function (instanceCookies) {
                 var BIGipServerpoolCookie = instanceCookies.find(function (cookie) {
                     // matches BIGipServerpool_<alphanumeric instance name>
-                    return cookie.name.match(/^(BIGipServerpool_[\w\d]+)$/);
+                    return cookie.name.match(/^(BIGipServer[\w\d]+pool_[\w\d]+)$/);
                 });
                 chrome.cookies.set({
                     "name": BIGipServerpoolCookie.name,

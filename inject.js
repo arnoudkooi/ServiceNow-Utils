@@ -140,6 +140,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Switch language <lng>"
     },
+    "list": {
+        "url": "/$table_list.do?sysparm_query=sys_id=$sysid",
+        "hint": "Open current record in list view"
+    },
     "log": {
         "url": "syslog_list.do?sysparm_query=sys_created_onONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^messageLIKE$0^ORsourceLIKE$0",
         "hint": "Filter System Log Created Today <search>"
@@ -337,7 +341,6 @@ var snuslashcommands = {
 var snuslashswitches = {
     "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
     "n": { "description": "New Record", "value": "$0.do", "type": "link" },
-    "l": { "description": "View current record in list", "value": "$0_list.do?sysparm_query=sys_id=$sysid&sysparm_filter_pinned=true", "type": "link" },
     "r": { "description": "Open Random Record", "value": "$random.$0", "type": "link" },
     "ra": { "description": "REST API Explorer", "value": "$restapi.do?tableName=$0", "type": "link" },
     "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
@@ -1607,7 +1610,7 @@ function snuDoubleClickToShowFieldOrReload() {
                         window.open(`${data?.table}?sys_id=${data?.sysid}`);
                 }
             }
-            else if (['div', 'li', 'body'].includes(event.target.localName)) {
+            else if (['div', 'li', 'body'].includes(event.target.localName) && !event.target.parentElement.className.includes('monaco')) {
                 if (!window?.snusettings?.nouielements) //disable the doubleclick when SN Utils UI elements off
                     snuAddTechnicalNames();
             }
@@ -3563,6 +3566,7 @@ function snuPostToScriptSync(field, fieldType) {
         data.sys_id = g_form.getUniqueValue();
         data.content = g_form.getValue(field);
         data.fieldType = fieldType;
+        data.scope = g_form.getValue('sys_scope');
         data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
 
     }

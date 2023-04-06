@@ -5,6 +5,6 @@ datetime-moment.js https://cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-
 jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js
 moment.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js
 jquery.deserialize.js https://raw.githubusercontent.com/kflorence/jquery-deserialize/master/src/jquery.deserialize.js
-purify.min.js https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js
+purify.min.js https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.1/purify.min.js
 Tinycon.js https://github.com/tommoor/tinycon/blob/master/tinycon.js
 Monaco Editor: Files Copied from node_modules installation version 0.34.1

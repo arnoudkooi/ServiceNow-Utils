@@ -529,9 +529,10 @@ function refreshToken(instanceObj) { //todo check mv3 compatability
 
 function updateRecord(scriptObj, canRefreshToken) {
     var client = new XMLHttpRequest();
+    var scope = scriptObj?.scope ? '&sysparm_transaction_scope=' + scriptObj.scope : '';
     client.open("put", scriptObj.instance.url + '/api/now/table/' +
         scriptObj.tableName + '/' + scriptObj.sys_id +
-        '?sysparm_fields=sys_id');
+        '?sysparm_fields=sys_id' + scope);
     var data = {};
     data[scriptObj.fieldName] = scriptObj.content;
 

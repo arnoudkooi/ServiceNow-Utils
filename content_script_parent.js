@@ -1,16 +1,5 @@
 setTimeout(() => { //be sure content_script_all_frames.js is loaded first
 
-    if (document.getElementById("filter") != null || location.pathname.startsWith("/now/nav/ui/")) {
-
-        //add script to extend search field
-        var c = document.createElement('script');
-        c.src = chrome.runtime.getURL('inject_parent.js');
-        c.onload = function () {
-            this.remove();
-        };
-        (document.head || document.documentElement).appendChild(c);
-    }
-
     getFromSyncStorageGlobal("snusettings", function (snusettings) {
         if (snusettings && snusettings.hasOwnProperty('iconallowbadge') && !snusettings.iconallowbadge) return;
 

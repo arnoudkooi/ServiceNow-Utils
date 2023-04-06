@@ -21,7 +21,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 (function () {
 
     //this is a check via the existance of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
-    // manual disabledi cookie check in Safari versiomn, need to be fixed for Safari
     var msg = { 
         "event" : "checkisservicenowinstance",
         "origin" : location.origin 
@@ -30,6 +29,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (isServiceNow) {
             addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
             addScript('inject.js', true);
+            if (document.getElementById("filter") != null || location.pathname.startsWith("/now/nav/ui/")) {
+                addScript('inject_parent.js');
+            }
         
             if (location.pathname.startsWith("/now/") || location.pathname.startsWith("/x/"))
                 addScript('inject_next.js', false);
@@ -47,6 +49,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             else if (location.pathname.startsWith("/merge_form_")) {
                 addScript('js/monaco/compare.js', false);
             }
+
+
 
         }
     });
