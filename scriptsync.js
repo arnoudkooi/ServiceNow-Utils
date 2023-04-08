@@ -55,10 +55,11 @@ $(document).ready(function () {
         setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances );
         document.querySelector('#instanceapprovediv').classList.add("hidden");
         t.row.add([
-            new Date(), 'Helper tab', 'Allowd source: <b>' + instanceurl + '</b><br />Message send to VS Code sn-scriptsync'
+            new Date(), 'Helper tab', 'Allowed source: <b>' + instanceurl + '</b><br />Message send to VS Code sn-scriptsync'
         ]).draw(false);
         ws.send(JSON.stringify(msg.command));
         increaseTitlecounter();
+        flashFavicon('images/icongreen48.png', 1);
         msg = null;
         setInstanceLists();
     })

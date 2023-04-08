@@ -1,6 +1,10 @@
 # CHANGELOG.md
 
 ## 6.4.0.0 (2023-04-07)
+Fixes / changes:
+  - Codecleanup and typo fixes
+
+## 6.4.0.0 (2023-04-07)
 Features:
   - sn-scriptsync can save files when instances has a diffrent scope selected, requires sn-scriptsync >= 2.7.0
 

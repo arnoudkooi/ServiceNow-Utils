@@ -240,12 +240,11 @@ function prepareJsonNodes() {
 
 function getParameterByName(name, url) {
     if (!url) url = window.location.href.toLowerCase();
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
+    let srch = new URL(url).search;
+    const params = new Proxy(new URLSearchParams(srch), {
+        get: (searchParams, prop) => searchParams.get(prop),
+    });
+    return params[name];
 }
 
 //Set variables, called by BG page after calling getBrowserVariables

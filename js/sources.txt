@@ -1,7 +1,7 @@
 bootstrap.bundle.min.js https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js
 datatables-datetime.js https://cdn.datatables.net/plug-ins/1.10.21/dataRender/datetime.js
 datatables.min.js https://cdn.datatables.net/v/dt/dt-1.13.4/af-2.5.3/b-2.3.6/b-html5-2.3.6/datatables.min.js
-datetime-moment.js https://cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js
+datetime-moment.js https://cdn.datatables.net/plug-ins/1.13.4/sorting/datetime-moment.js
 jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js
 moment.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js
 jquery.deserialize.js https://raw.githubusercontent.com/kflorence/jquery-deserialize/master/src/jquery.deserialize.js
