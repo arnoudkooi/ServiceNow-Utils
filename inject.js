@@ -1344,15 +1344,15 @@ function snuResolveVariables(variableString){
         let sysId;
         if (location.hash.startsWith("#/flow-designer/")){
             tableName = "sys_hub_flow";
-            sysId = location.hash.replace("#/flow-designer/","").substring(0,32);
+            sysId =  snuFindReact(document.querySelector("#flow-editor"))?.props?.params?.id?.substring(0,32);;
         }
         else if (location.hash.startsWith("#/sub-flow-designer/")){
             tableName = "sys_hub_flow";
-            sysId = location.hash.replace("#/sub-flow-designer/","").substring(0,32);
+            sysId =  snuFindReact(document.querySelector("#flow-editor"))?.props?.params?.id?.substring(0,32);
         }
         else if (location.hash.startsWith("#/action-designer/")){
             tableName = "sys_hub_action_type_definition";
-            sysId = location.hash.replace("#/action-designer/","").substring(0,32);
+            sysId =  snuFindReact(document.querySelector("#action-editor"))?.props?.editorState?.actionId?.substring(0,32);
         }
         variableString = variableString.replace(/\$table/g, tableName);
         variableString = variableString.replace(/\$sysid/g, sysId);
