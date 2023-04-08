@@ -946,7 +946,7 @@ function snuAddSlashCommandListener() {
                             if (targeturl.startsWith("&sysparm_group_sort=COUNT")) {
                                 myurl = myurl.replace("&sysparm_group_sort=COUNTDESC", "").replace("&sysparm_group_sort=COUNT", "");
                             }
-                            doc.location = myurl + targeturl;
+                            doc.location = DOMPurify.sanitize(myurl + targeturl);
                         }
                         else {
                             var newQ = qry.filter.replace(targeturl, "")
@@ -957,7 +957,7 @@ function snuAddSlashCommandListener() {
                     }
                 }
                 if (targeturl.startsWith("&") && typeof doc?.g_form != 'undefined') {
-                    doc.location = doc.location.href + targeturl;
+                    doc.location = DOMPurify.sanitize(doc.location.href + targeturl);
                     snuHideSlashCommand();
                     return;
                 }
@@ -1088,7 +1088,7 @@ function snuAddSlashCommandListener() {
                             });
         
                         }
-                        else document.querySelector("#gsft_main").src = targeturl;
+                        else document.querySelector("#gsft_main").src = DOMPurify.sanitize(targeturl);
                     }
                     else
                         window.open(targeturl, '_blank');
@@ -1108,14 +1108,14 @@ function snuAddSlashCommandListener() {
                 }
                 else {
                     var gsft = document.querySelector("#gsft_main");
-                    if (gsft) document.querySelector("#gsft_main").src = targeturl;
+                    if (gsft) document.querySelector("#gsft_main").src = DOMPurify.sanitize(targeturl);
                     else window.open(targeturl, '_blank');
                 }
             }
             else {
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
                     e.preventDefault();
-                    window.location = targeturl;
+                    window.location = DOMPurify.sanitize(targeturl);
                 }
                 else {
 
@@ -2365,7 +2365,7 @@ function snuAddTechnicalNames() {
         var tname = jQuery(this).attr('name') || jQuery(this).data('column-name');
         if (!jQuery(this).hasClass("snutn")) {
             jQuery(this).addClass("snutn")
-            jQuery(this).find('a.list_hdrcell, a.sort-columns').parent().after('<div class="snuwrap" style="font-family:monospace;font-size:small;margin-left: 25px;margin-top: -3px; font-weight:normal">' + tname + '</div> ');
+            jQuery(this).find('a.list_hdrcell, a.sort-columns').parent().after(DOMPurify.sanitize('<div class="snuwrap" style="font-family:monospace;font-size:small;margin-left: 25px;margin-top: -3px; font-weight:normal">' + tname + '</div> '));
         }
     });
 
@@ -2394,7 +2394,7 @@ function snuAddTechnicalNames() {
     //also show viewname
     var viewName = jQuery('input#sysparm_view').val();
     if (viewName && !jQuery('i.viewName').length)
-        jQuery('.section-content').first().prepend('<i class="viewName snuwrap">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> ');
+        jQuery('.section-content').first().prepend(DOMPurify.sanitize('<i class="viewName snuwrap">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> '));
 
     showSelectFieldValues();
     searchLargeSelects();
@@ -2578,8 +2578,8 @@ function snuRemoveLinkLess() {
     if (!location.search.includes("&sysparm_link_less=true")) return;
     if (typeof jQuery == 'undefined') return;
     var newUrl = location.href.replace("&sysparm_link_less=true", "");
-    jQuery('.form_action_button_container').append("<span style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='" +
-        newUrl + "' title='Link added by SN Utils (This is NOT a UI Action!)' >Show Related links</a></span>");
+    jQuery('.form_action_button_container').append(DOMPurify.sanitize("<span style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='" +
+        newUrl + "' title='Link added by SN Utils (This is NOT a UI Action!)' >Show Related links</a></span>"));
 }
 
 function snuTableCollectionLink() {
