@@ -36,7 +36,7 @@ function strip (d) {
 
 		// Strip out surrounding white space
 		d = d.trim();
-	}§
+	}
 
 	return d;
 }
