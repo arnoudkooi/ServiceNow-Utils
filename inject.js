@@ -1354,16 +1354,16 @@ function snuResolveVariables(variableString){
             tableName = "sys_hub_action_type_definition";
             sysId =  snuFindReact(document.querySelector("#action-editor"))?.props?.editorState?.actionId?.substring(0,32);
         }
-        variableString = variableString.replace(/\$table/g, tableName);
-        variableString = variableString.replace(/\$sysid/g, sysId);
+        variableString = variableString.replace(/\$table/g, tableName.replace(/[^a-z0-9-_]/g, ''));
+        variableString = variableString.replace(/\$sysid/g, sysId.replace(/[^a-f0-9-_]/g, ''));
     }
     else { ///get sysid and tablename from portal or workspace
         let searchParams = new URLSearchParams(window.location.search)
         let tableName = searchParams.get('table') || searchParams.get('id');
         let sysId = searchParams.get('sys_id');
         if (tableName && sysId) { //portal
-            variableString = variableString.replace(/\$table/g, tableName);
-            variableString = variableString.replace(/\$sysid/g, sysId);
+            variableString = variableString.replace(/\$table/g, tableName.replace(/[^a-z0-9-_]/g, ''));
+            variableString = variableString.replace(/\$sysid/g, sysId.replace(/[^a-f0-9-_]/g, ''));
         }
         else { //workspace
             var parts = window.location.pathname.split("/");
@@ -1374,8 +1374,8 @@ function snuResolveVariables(variableString){
                 tableName = parts[idx + 1];
                 sysId = parts[idx + 2];
             }
-            variableString = variableString.replace(/\$table/g, tableName);
-            variableString = variableString.replace(/\$sysid/g, sysId);
+            variableString = variableString.replace(/\$table/g, tableName.replace(/[^a-z0-9-_]/g, ''));
+            variableString = variableString.replace(/\$sysid/g, sysId.replace(/[^a-f0-9-_]/g, ''));
         }
     }
     return variableString;
