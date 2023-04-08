@@ -267,9 +267,9 @@ function renderResults(url, result, searchTerm, tables) {
     searchTerm,
     statisticsObj
   );
-  if (tableIndex == 0) jQuery('#searchcontent').html('');
-  jQuery('#searchcontent').append(resultHtml);
-  jQuery('#searchmsgtablelinks').html(statisticsObj.tableNames || '');
+  if (tableIndex == 0) jQuery('#searchcontent').html(DOMPurify.sanitize(''));
+  jQuery('#searchcontent').append(DOMPurify.sanitize(resultHtml, { ADD_ATTR: ['target'] }));
+  jQuery('#searchmsgtablelinks').html(DOMPurify.sanitize(statisticsObj.tableNames || '', { ADD_ATTR: ['target'] }));
 }
 
 function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
@@ -372,7 +372,7 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
       };
     }
 
-    jQuery('#searchmsg').html('Searching table: ' + searchTables[idx] + '...');
+    jQuery('#searchmsg').html('Searching table: ' + DOMPurify.sanitize(searchTables[idx]) + '...');
 
     //console.log(endpoint + '&table=' + searchTables[idx]);
     loadXMLDoc(gck, endpoint + '&table=' + searchTables[idx], null).then(
@@ -388,12 +388,12 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
           var html =
             `Result of last search: <u>${jQuery('#query').val()}</u> | Tables: <u>${statisticsObj.tables}</u> | Records: <u>
             ${statisticsObj.hits} </u> | Hits: <u>${statisticsObj.lines}</u>`;
-          jQuery('#searchmsg').html(html);
+          jQuery('#searchmsg').html(DOMPurify.sanitize(html, { ADD_ATTR: ['target'] }));
 
           if (missingtables.length > 0) {
             statisticsObj.tableNames +=
               `<a class='whitebg' href='#suggestedtables'>${missingtables.length} suggested tables</a>`;
-            jQuery('#searchmsgtablelinks').html(statisticsObj.tableNames || '');
+            jQuery('#searchmsgtablelinks').html(DOMPurify.sanitize(statisticsObj.tableNames || '', { ADD_ATTR: ['target'] }));
 
             var missingTablesHtml =
               `<div class='card-body'><a class='anchor' name='suggestedtables'></a>Consider adding the following tables to code search. (Credit: <a href='https://jace.pro' target='_blank'>Jace Benson</a>)<br />
@@ -402,7 +402,7 @@ function executeCodeSearch(url, gck, searchTerm, searchGroup) {
               missingTablesHtml += `<li><a href='${tbl[3]}' target='tbls'>${tbl[0]}</a></li>`;
             });
             missingTablesHtml += `</ul></div>`;
-            jQuery('#missingtables').html(missingTablesHtml);
+            jQuery('#missingtables').html(DOMPurify.sanitize(missingTablesHtml, { ADD_ATTR: ['target'] }));
           }
         }
       }

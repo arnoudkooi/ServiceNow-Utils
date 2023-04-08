@@ -486,7 +486,7 @@ function getUpdates() {
 
 //Set message, on about tab, callback from getInfoMessage
 function setInfoMessage(html) {
-    $('#livemessage').html(html);
+    $('#livemessage').html(DOMPurify.sanitize(html));
 }
 
 function getSettings(callback) {
@@ -793,7 +793,7 @@ function getUserDetails(userName) {
 
 //Set the user details table
 function setUserDetails(html) {
-    $('#rspns').html(html);
+    $('#rspns').html(DOMPurify.sanitize(html));
 
     if ($('#createdby').length > 0) {
         $('.nav-tabs a[data-bs-target="#tabuser"]').tab('show');
@@ -1445,7 +1445,7 @@ function setDataExplore(nme) {
     );
     
     if (dtDataExplore) dtTables.destroy();
-    //$('#dataexplore').html(nme);
+    //$('#dataexplore').html(DOMPurify.sanitize(nme));
     dtDataExplore = $('#dataexplore').DataTable({
         "aaData": nme,
         "aoColumns": [

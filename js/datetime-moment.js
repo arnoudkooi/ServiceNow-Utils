@@ -32,7 +32,7 @@
 function strip (d) {
 	if ( typeof d === 'string' ) {
 		// Strip HTML tags and newline characters if possible
-		d = d.replace(/(<.*?>)|(\r?\n|\r)/g, '');
+		d = DOMPurify.sanitize(d.replace(/(<.*?>)|(\r?\n|\r)/g, ''));
 
 		// Strip out surrounding white space
 		d = d.trim();

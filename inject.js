@@ -2339,7 +2339,8 @@ function snuAddTechnicalNames() {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
                         linkAttrs.title + '" target="_blank">' + elm + '</a>';
                 }
-                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
+        jqEl.html(DOMPurify.sanitize(el.text + ' | ' + el.name, { ADD_ATTR: ['target'] }));
+                jQuery(this).html(DOMPurify.sanitize('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>', { ADD_ATTR: ['target'] }));
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
@@ -2539,12 +2540,12 @@ function showSelectFieldValues() {
 
     jQuery('option').not(":contains('|')").each(function (i, el) {
         var jqEl = jQuery(el);
-        jqEl.html(el.text + ' | ' + el.value);
+        jqEl.html(DOMPurify.sanitize(el.text + ' | ' + el.name, { ADD_ATTR: ['target'] }));
     });
 
     jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('|')").each(function (i, el) {
         var jqEl = jQuery(el);
-        jqEl.html(el.text + ' | ' + el.name);
+        jqEl.html(DOMPurify.sanitize(el.text + ' | ' + el.name, { ADD_ATTR: ['target'] }));
     });
 }
 
@@ -3255,7 +3256,7 @@ function snuShowAlert(msg, type, timeout) {
     msg = '<a href="javascript:snuHideAlert()">[x] </a> SN Utils: ' + msg;
     if (typeof type == 'undefined') type = 'info';
     if (typeof timeout == 'undefined') timeout = 3000;
-    window.top.jQuery('.service-now-util-alert>div>span').html(msg);
+    window.top.jQuery('.service-now-util-alert>div>span').html(DOMPurify.sanitize(msg, { ADD_ATTR: ['target'] }));
     window.top.jQuery('.service-now-util-alert').addClass('visible').show();
     window.top.jQuery('.service-now-util-alert>.notification').addClass('notification-' + type);
     window.top.setTimeout(function () {
