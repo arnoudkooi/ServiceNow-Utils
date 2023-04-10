@@ -182,8 +182,12 @@ function setActiveNode(node) {
             }, function (instanceCookies) {
                 var BIGipServerpoolCookie = instanceCookies.find(function (cookie) {
                     // matches BIGipServerpool_<alphanumeric instance name>
-                    return cookie.name.match(/^(BIGipServer[\w\d]+pool_[\w\d]+)$/);
+                    return cookie.name.match(/^(BIGipServer[\w\d]+)$/);
                 });
+                if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){
+                    document.querySelector('#nodemessage').innerText = `Switching nodes may not work on this instance.. (BIGipServerpool cookie complex encoding). Contact me to search for a solution. Debug info cookie: ${BIGipServerpoolCookie.name} : ${BIGipServerpoolCookie.value} `;
+                    document.querySelector('#nodemessage').classList.remove('hidden');
+                }
                 chrome.cookies.set({
                     "name": BIGipServerpoolCookie.name,
                     "url": new URL(url).origin,

@@ -795,7 +795,7 @@ function setInstanceLists(){
         arr.forEach(instance => {
             cntnt += `<li>${instance} <a href='#' data-url='${instance}' class='${listtype}'>❌</a></li>`;
         })
-        document.querySelector('#intanceslist' + listtype).innerHTML = cntnt || '<li>-none</li>';
+        document.querySelector('#intanceslist' + listtype).innerHTML = cntnt || '<li>-none-</li>';
 
         document.querySelectorAll('#intanceslist' + listtype + ' a')?.forEach(a =>{
             a.addEventListener('click', e =>{

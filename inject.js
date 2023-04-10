@@ -1344,7 +1344,7 @@ function snuResolveVariables(variableString){
         let sysId;
         if (location.hash.startsWith("#/flow-designer/")){
             tableName = "sys_hub_flow";
-            sysId =  snuFindReact(document.querySelector("#flow-editor"))?.props?.params?.id?.substring(0,32);;
+            sysId =  snuFindReact(document.querySelector("#flow-editor"))?.props?.params?.id?.substring(0,32);
         }
         else if (location.hash.startsWith("#/sub-flow-designer/")){
             tableName = "sys_hub_flow";
@@ -1359,8 +1359,8 @@ function snuResolveVariables(variableString){
     }
     else { ///get sysid and tablename from portal or workspace
         let searchParams = new URLSearchParams(window.location.search)
-        let tableName = searchParams.get('table') || searchParams.get('id');
-        let sysId = searchParams.get('sys_id');
+        let tableName = searchParams.get('table') || searchParams.get('id') || '';
+        let sysId = searchParams.get('sys_id') || '';
         if (tableName && sysId) { //portal
             variableString = variableString.replace(/\$table/g, tableName.replace(/[^a-z0-9-_]/g, ''));
             variableString = variableString.replace(/\$sysid/g, sysId.replace(/[^a-f0-9-_]/g, ''));
@@ -1371,8 +1371,8 @@ function snuResolveVariables(variableString){
             if (idx != -1) parts = parts.slice(idx);
             idx = parts.indexOf("record")
             if (idx > -1 && parts.length >= idx + 2) {
-                tableName = parts[idx + 1];
-                sysId = parts[idx + 2];
+                tableName = parts[idx + 1] || '';
+                sysId = parts[idx + 2] || '';
             }
             variableString = variableString.replace(/\$table/g, tableName.replace(/[^a-z0-9-_]/g, ''));
             variableString = variableString.replace(/\$sysid/g, sysId.replace(/[^a-f0-9-_]/g, ''));
@@ -1967,11 +1967,11 @@ function snuCaptureFormClick() {
 
             if (event.target.className.includes('scriptSync icon-save')) {
                 snuPostToScriptSync(event.target.dataset.field, event.target.dataset.fieldtype);
-                event.target.style.color = '#81B5A1';
+                event.target.style.opacity = 0.3;
             }
             if (event.target.className.includes('scriptSync icon-code')) {
                 snuPostToMonaco(event.target.dataset.field, event.target.dataset.fieldtype);
-                event.target.style.color = '#81B5A1';
+                event.target.style.opacity = 0.3;
             }
 
         }, true);
@@ -3652,9 +3652,9 @@ function snuAddFieldSyncButtons() {
                 function getBtns(elm, fieldType) {
                     var btns = '';
                     if (snusettings.vsscriptsync == true)
-                        btns += `<span style="color: #293E40; cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
+                        btns += `<span style="color: rgb(var(--now-button--secondary--border-color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
                     if (snusettings.codeeditor == true)
-                        btns += `<span style="color: #293E40; cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
+                        btns += `<span style="color: rgb(var(--now-button--secondary--border-color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
                     return btns;
                 }
 
@@ -4044,7 +4044,6 @@ var snuGetParents = function (elem, selector) {
     }
     return parents;
 };
-var xx;
 
 function snuGetNav(shortcut) {
 
@@ -4058,7 +4057,6 @@ function snuGetNav(shortcut) {
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             var resp = this.response.result;
-            xx = resp;
             var navArr = [];
             Object.entries(resp['applications']).forEach(([key, val]) => {
                 Object.entries(val.modules).forEach(([key2, val2]) => {

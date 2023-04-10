@@ -1,8 +1,13 @@
 # CHANGELOG.md
 
-## 6.4.0.0 (2023-04-07)
+## 6.4.0.5 (2023-04-07)
 Fixes / changes:
-  - Codecleanup and typo fixes
+  - Code cleanup, improvements and typo fixes following CodeQL findings
+  - Added PRIVACY.md and CONTRIBUTING.md
+  - scriptsync and monaco button in forms now use a next experience css variable (to better support dark theme)
+  - Node switching regex update BIGipServerpool cookie regex update
+  - Node switching show alert if nodeswitching not supported
+
 
 ## 6.4.0.0 (2023-04-07)
 Features:
