@@ -1,6 +1,11 @@
 # CHANGELOG.md
 
-## 6.4.0.5 (2023-04-07)
+## 6.4.0.6 (2023-04-11)
+Fixes / changes:
+ - Bugfix technical names (Issue: #385)
+
+
+## 6.4.0.5 (2023-04-10)
 Fixes / changes:
   - Code cleanup, improvements and typo fixes following CodeQL findings
   - Added PRIVACY.md and CONTRIBUTING.md
