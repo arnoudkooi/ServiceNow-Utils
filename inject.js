@@ -3948,7 +3948,7 @@ function snuSearchSysIdTables(sysId) {
                 }
 
                 var tblsGr = new GlideRecord("sys_db_object");
-                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^nameNOT INsys_metadata,task,cmdb_ci,sys_user,cmdb_ire_partial_payloads_index^scriptable_table=false");
+                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^nameNOT INsys_metadata,task,cmdb_ci,sys_user,cmdb_ire_partial_payloads_index^scriptable_table=false^ORscriptable_tableISEMPTY");
                 tblsGr.query();
                 while (tblsGr.next()) {
                     var tableName = tblsGr.getValue('name');
