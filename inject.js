@@ -3931,7 +3931,7 @@ function sncWait(ms) { //dirty. but just need to wait a sec...
 
 function snuSearchSysIdTables(sysId) {
     try {
-        snuSetInfoText("Searching for sys_id. This could take some seconds...<br />", false);
+        snuSetInfoText("Searching for sys_id. This may take a few seconds...<br />", false);
         var script = `      
             function findSysID(sysId) {
                 var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
