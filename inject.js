@@ -2337,7 +2337,7 @@ function snuAddTechnicalNames() {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
                         linkAttrs.title + '" target="_blank">' + elm + '</a>';
                 }
-                jQuery(this).html(DOMPurify.sanitize('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>', { ADD_ATTR: ['target'] }));
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";

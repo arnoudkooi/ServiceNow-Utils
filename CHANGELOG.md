@@ -1,6 +1,10 @@
 # CHANGELOG.md
 
-## 6.4.0.6 (2023-04-11)
+## 6.4.0.8 (2023-04-13)
+Fixes / changes:
+ - Restore label click function / technical names (Issue: #388)
+
+## 6.4.0.7 (2023-04-11)
 Fixes / changes:
  - Bugfix technical names (Issue: #385)
 
