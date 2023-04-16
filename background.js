@@ -117,6 +117,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     else if (message.event == "codesearch") {
         codeSearch(message, cookieStoreId);
     }
+    else if (message.event == "viewdata") {
+        viewData(message, cookieStoreId);
+    }
     else if (message.event == "opencodediff") {
         openCodeDiff(message);
     }
@@ -469,7 +472,7 @@ function slashCommand(cmd) {
         function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
-                myVars: "snuShowSlashCommand('"+ cmd +"',1)"
+                myVars: `snuSlashCommandShow('${cmd}',1)`
             });
         });
 
@@ -507,6 +510,22 @@ function sendToggleSearchFocus() {
 function codeSearch(message, cookieStoreId) {
     var url = chrome.runtime.getURL("codesearch.html");
     var args = '?query=' + message.command["query"] +
+        '&instance=' + message.command["instance"] +
+        '&url=' + message.command["url"] +
+        '&g_ck=' + message.command["g_ck"];
+
+    var createObj = {
+        'url': url + args,
+        'active': true
+    }
+    if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    chrome.tabs.create(createObj);
+}
+
+function viewData(message, cookieStoreId) {
+    var url = chrome.runtime.getURL("viewdata.html");
+    var args = '?tablename=' + message.command["tableName"] +
+        '&sysid=' + message.command["sysId"] +
         '&instance=' + message.command["instance"] +
         '&url=' + message.command["url"] +
         '&g_ck=' + message.command["g_ck"];

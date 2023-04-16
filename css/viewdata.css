@@ -1,0 +1,134 @@
+body {
+    font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
+    font-size: 10pt;
+
+    margin: 0 10px;
+    padding: 10px 10px;
+}
+
+#fixheader{
+    background-color: white;
+    position: sticky; top: 0;
+}
+
+a.anchor {
+    display: block;
+    position: relative;
+    top: -170px;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.fas{
+    color: #353535;
+}
+
+#searchmsgtablelinks
+{
+    margin-bottom: 10px;
+}
+
+.whitebg{
+    background-color: #ffffff !important;
+    color: #c3c3c3 !important;
+    border: 1pt solid #81B5A1 !important;
+}
+
+.sticky {
+    position: fixed;
+    top: -10px;
+    padding-top: 10px;
+    width:97vw;
+}
+
+.sticky+.results {
+    padding-top: 80px;
+}
+
+.code {
+    font-family: Menlo, "Courier New", Courier, monospace;
+}
+
+.dataTables_scrollBody {
+
+}
+
+.wdth40 {
+    width: 40px;
+}
+
+.tbl {
+    width: 100%;
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+.ft7 {
+    font-size: 7pt;
+}
+
+/* welcome.html */
+
+#sn4 {
+    width: 400px;
+}
+
+#sn4div {
+    font-size: 12pt;
+}
+
+h5{
+    font-size: 1rem;
+}
+
+#missingtables card-body{
+    border: 1px solid rgba(0,0,0,.125);
+}
+
+.msg{
+    margin: 10px 0;
+    padding: 5px;
+    border: 1pt solid #cccccc;
+    background-color: #f2f2f2;
+    font-size: 11pt;
+    text-align: center;
+}
+
+table.dataTable tbody th,
+table.dataTable tbody td {
+    padding: 2px 2px;
+}
+table.dataTable tbody td {
+    vertical-align: top !important;
+}
+
+table.dataTable td {
+    word-break: break-word;
+    font-size: 10pt;
+}
+
+table.dataTable thead th,
+table.dataTable tfoot th {
+  text-align: left;
+  padding-left: 3px;
+}
+
+.dt-button {
+    padding: 0.2em 0.5em !important;
+    font-size: 8pt !important;
+    margin: 5px;
+}
+
+.dataTables_info {
+    font-size: 8pt;
+    display: flex;
+    justify-content: center;
+}
+
+#divhideempty {
+    width: 150px;
+    text-align: right;
+    border: 1px solid #ced4da;
+    padding-right: 5px;
+}

@@ -461,9 +461,9 @@ grSPC.deleteMultiple();`;
         try {
             if (evt.ctrlKey || evt.metaKey) {
                 var txt = elm.innerText.toLowerCase();
-                if (txt.startsWith('domain')) snuShowSlashCommand('/sd ', true);
-                else if (txt.startsWith('application')) snuShowSlashCommand('/sa ', true);
-                else if (txt.startsWith('update')) snuShowSlashCommand('/su ', true);
+                if (txt.startsWith('domain')) snuSlashCommandShow('/sd ', true);
+                else if (txt.startsWith('application')) snuSlashCommandShow('/sa ', true);
+                else if (txt.startsWith('update')) snuSlashCommandShow('/su ', true);
                 return;
             }
 

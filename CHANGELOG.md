@@ -1,6 +1,15 @@
 # CHANGELOG.md
 
 ## 6.4.0.8 (2023-04-13)
+Features:
+  - Viewdata, new page with record info similar to the viedata tab in the popup, can be opened via slashcommand /vd
+
+
+Fixes / changes:
+ - Renamed Slash command related functions ie snuShowSlashCommand to snuSlashCommandShow
+ - Extended function snuResolveVariables to return object instead of string
+
+## 6.4.0.8 (2023-04-13)
 Fixes / changes:
  - Restore label click function / technical names (Issue: #388)
 

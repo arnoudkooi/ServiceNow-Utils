@@ -41,7 +41,7 @@ function addStudioLink() {
         if (addStudio) {
                 widgetHtml = '<div class="navpage-header-content">' +
                     '<button data-placement="auto" class="btn btn-icon icon-cards"' +
-                    ' title="Quick Application Switch (By SN Utils)\nSlashcommand: /sa" data-original-title="Studio" onclick="snuShowSlashCommand(\'/sa\',1);">' +
+                    ' title="Quick Application Switch (By SN Utils)\nSlashcommand: /sa" data-original-title="Studio" onclick="snuSlashCommandShow(\'/sa\',1);">' +
                     '<span class="sr-only">Studio</span>' +
                     '</button>' + 
                     '<button data-placement="auto" class="btn btn-icon icon-script"' +
