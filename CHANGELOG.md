@@ -1,6 +1,10 @@
 # CHANGELOG.md
 
-## 6.4.0.8 (2023-04-13)
+## 6.4.1.1 (2023-04-18 published for Safari only)
+Features:
+  - Update purify.min.js to 3.0.2 and removed redundant copy in root folder
+
+## 6.4.1.0 (2023-04-13)
 Features:
   - Viewdata, new page with record info similar to the viedata tab in the popup, can be opened via slashcommand /vd
 
