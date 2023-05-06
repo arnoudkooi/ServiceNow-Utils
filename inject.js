@@ -1496,8 +1496,8 @@ function snuSettingsAdded() {
         if (typeof snuNextManager != 'undefined') snuNextManager.linkPickers(0);
     }
     if (snusettings.nouielements == false) {    
-        if (typeof addStudioLink != 'undefined') addStudioLink();
-        if (typeof addDblClickToPin != 'undefined') addDblClickToPin();
+        if (typeof snuAddStudioLink != 'undefined') snuAddStudioLink();
+        if (typeof snuAddDblClickToPin != 'undefined') snuAddDblClickToPin();
         snuAddStudioSearch();
         snuAddSgStudioPlatformLink();
         snuEnhanceNotFound();
@@ -2438,7 +2438,7 @@ function snuAddTechnicalNames() {
         jQuery('.section-content').first().prepend(DOMPurify.sanitize('<i class="viewName snuwrap">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> '));
 
     showSelectFieldValues();
-    searchLargeSelects();
+    snuSearchLargeSelects();
     snuCreateHyperLinkForGlideLists();
 
 
@@ -2578,7 +2578,8 @@ function showSelectFieldValues() {
     if (["/sys_report_template.do", "/$queryBuilder.do"].includes(location.pathname)) return; //not in report or query builder
 
     jQuery('option').not(":contains('|')").each(function (i, el) {
-        el.innerText = el.text + ' | ' + el.value;    
+        el.innerText = el.text + ' | ' + el.value;  
+        el. title =  el.text + ' | ' + el.value;  
     });
 
     jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('|')").each(function (i, el) {
@@ -2629,7 +2630,7 @@ function snuTableCollectionLink() {
         tbl + "^internal_type=collection^' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
 }
 
-function searchLargeSelects() {
+function snuSearchLargeSelects() {
 
     var mdl = document.querySelector('#list_mechanic .modal-dialog');
     if (mdl) mdl.style = 'width:80% !important; padding:20px'; //give it more width...
@@ -2647,10 +2648,14 @@ function searchLargeSelects() {
                 input.className = "form-control";
                 input.style.marginBottom = "2px";
                 input.addEventListener('keyup',evt =>{
-                    let options = document.querySelectorAll('select#slush_left option, select#select_0 option, select#field_list_select_0 option');
+                    console.time("option loop");
+                    let select = document.querySelector('select#slush_left, select#select_0, select#field_list_select_0');
+                    select.style.display = 'none';
+                    let options = select.querySelectorAll('option');
                     options.forEach(option => {
-                        option.style.display = (option.innerText.includes(evt.target.value)) ? '' : 'none';
+                        option.style.display = (option.innerText.toLowerCase().includes(evt.target.value.toLowerCase())) ? '' : 'none';
                     });
+                    select.style.display = '';
                 })
                 snuInsertAfter(input, document.querySelector('label[for=slush_left], label[for=select_0], label[for=field_list_select_0]'))
                 document.querySelector('select#slush_left, select#select_0, select#field_list_select_0').classList.add('searchified');

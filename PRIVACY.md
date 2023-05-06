@@ -1,5 +1,7 @@
 # Privacy Policy
-Arnoud Kooi built the SN Utils app as an Open Source app. This SERVICE is provided by Arnoud Kooi at no cost and is intended for use as is.
+SN Utils is built and owned by Arnoud Kooi.
+SN Utils comes without warranty and as is. It is not allowed to copy or republish functionality without consent.
+The source code is available on GitHub so that you can review if you trust it as an individual, or corporation.
 
 This page is used to inform visitors regarding my policies with the collection, use, and disclosure of Personal Information if anyone decided to use SN Utils.
 

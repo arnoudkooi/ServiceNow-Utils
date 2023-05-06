@@ -5,30 +5,38 @@ setTimeout(function () { //be sure dompurify is loaded
     var alertContainer = document.createElement('div');
     alertContainer.innerHTML = DOMPurify.sanitize('<input id="sn_gck" type="hidden" value="' + (g_ck || '') + '" /><div style="display:none" class="notification-container service-now-util-alert" role="alert" ><div class="notification outputmsg outputmsg_has_text" style="top: 20px;"><span class="outputmsg_text role="alert"></span></div></div>');
     parent.insertBefore(alertContainer, parent.firstChild);
-},1500);
+}, 1500);
 
 
-function addDblClickToPin(){
-
-    setTimeout(function () {
-        var snuHeader = document.querySelector("macroponent-f51912f4c700201072b211d4d8c26010")?.
-        shadowRoot?.querySelector("sn-polaris-layout")?.
-        shadowRoot?.querySelector("sn-polaris-header");
-        snuHeader?.shadowRoot?.querySelectorAll(".sn-polaris-tab:not(.tab-overflow)").forEach(div => {
-            div.title = '[SN Utils] Doubleclick to pin';
-            div.addEventListener('dblclick', evt => {
-                evt.preventDefault();
-                snuHeader.dispatch('MAIN_MENU#PINNED', { "isPrimary": false,
-                    "primaryMenuId": "all",
-                    "secondaryMenuId": div.id,
-                    "doPinning": true})
+function snuAddDblClickToPin(cntr = 0) {
+    if (typeof querySelectorShadowDom !== 'undefined') {        
+        setTimeout( () => {
+            attatchDblClickEvent();
+        }, 2000);
+        function attatchDblClickEvent(){
+            let menus = querySelectorShadowDom.querySelectorAllDeep(".sn-polaris-tab:not(.tab-overflow)")
+            if (menus.length == 0 && cntr <= 7)  snuAddDblClickToPin(++cntr); //try up to 8x to give dom time to load.
+            menus.forEach(div => {
+                div.title = '[SN Utils] Doubleclick to pin';
+                div.addEventListener('dblclick', evt => {
+                    evt.preventDefault();
+                    let snuHeader = querySelectorShadowDom.querySelectorDeep("sn-polaris-header");
+                    if (snuHeader){
+                        snuHeader.dispatch('MAIN_MENU#PINNED', {
+                            "isPrimary": false,
+                            "primaryMenuId": "all",
+                            "secondaryMenuId": div.id,
+                            "doPinning": true
+                        })
+                    };
+                })
             })
-        })
-    },6500);
+        }
+    }
 }
 
 
-function addStudioLink() {
+function snuAddStudioLink() {
 
     if (typeof jQuery == 'undefined') return;
     waitForEl('#concourse_application_tree li', function () {
@@ -39,17 +47,17 @@ function addStudioLink() {
         if (!isUI16) return;
 
         if (addStudio) {
-                widgetHtml = '<div class="navpage-header-content">' +
-                    '<button data-placement="auto" class="btn btn-icon icon-cards"' +
-                    ' title="Quick Application Switch (By SN Utils)\nSlashcommand: /sa" data-original-title="Studio" onclick="snuSlashCommandShow(\'/sa\',1);">' +
-                    '<span class="sr-only">Studio</span>' +
-                    '</button>' + 
-                    '<button data-placement="auto" class="btn btn-icon icon-script"' +
-                    ' title="Open Studio IDE (Link by SN Utils)\nSlashcommand: /st" data-original-title="Studio" onclick="window.open(\'/$studio.do\', \'_blank\');">' +
-                    '<span class="sr-only">Studio</span>' +
-                    '</button></div>';
-                jQuery('#sysparm_search').parents('div.navpage-header-content').first().after(widgetHtml);
-                
+            widgetHtml = '<div class="navpage-header-content">' +
+                '<button data-placement="auto" class="btn btn-icon icon-cards"' +
+                ' title="Quick Application Switch (By SN Utils)\nSlashcommand: /sa" data-original-title="Studio" onclick="snuSlashCommandShow(\'/sa\',1);">' +
+                '<span class="sr-only">Studio</span>' +
+                '</button>' +
+                '<button data-placement="auto" class="btn btn-icon icon-script"' +
+                ' title="Open Studio IDE (Link by SN Utils)\nSlashcommand: /st" data-original-title="Studio" onclick="window.open(\'/$studio.do\', \'_blank\');">' +
+                '<span class="sr-only">Studio</span>' +
+                '</button></div>';
+            jQuery('#sysparm_search').parents('div.navpage-header-content').first().after(widgetHtml);
+
 
         }
     });

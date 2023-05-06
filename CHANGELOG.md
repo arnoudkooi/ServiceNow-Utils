@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 7.0.0.8 (2023-04-2)
+Fixes / changes:
+ - 🎉 7 year annniversary => version bump to 7.0.0.0
+ - Fix where the cancel transaction on BG script page did not work.
+ - Show text and value as title for List selector options, after /tn is activated, so that whole text can be viewed when text is wider then the select
+ - List selectors (slushbucket) search function is now case insensitive
+ - Optimized List selectors (slushbucket) search function (Details: https://youtu.be/x39p9fR2hM4)
+ - Updates to PRIVACY.md
+ - Added LinkedIn post links and link to edge on info page of popup
+ - Update the DoubleClick to pin function for next experience menus
+
 ## 6.4.1.1 (2023-04-18 published for Safari only)
 Features:
   - Update purify.min.js to 3.0.2 and removed redundant copy in root folder

@@ -1,13 +1,13 @@
 //do some magic on sys.script.do to add monaco editor and autocomplete (beta)
 
-var s = document.body.firstChild;
-var editor;
-var div = document.createElement('div');
-var divInfo = document.createElement('div');
+let s = document.body.firstChild;
+let editor;
+let div = document.createElement('div');
+let divInfo = document.createElement('div');
 divInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bg to open this page | Editor and shortcut added by SN Utils';
 divInfo.style.fontSize = '9pt';
 divInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
-var scrpt = document.getElementById('runscript');
+let scrpt = document.getElementById('runscript');
 document.querySelector('form').setAttribute('onsubmit', '');
 
 let leftSide, resizer, rightSide, result, timerInterval;
@@ -20,7 +20,7 @@ if (snusettings.applybgseditor && scrpt) {
 
 	devidePage();
 	
-	var monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
+	let monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
 	if (navigator.userAgent.toLowerCase().includes('firefox')) { //fix to allow autocomplete issue FF #134, didnt work :(
 		monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
 	}
@@ -46,7 +46,7 @@ if (snusettings.applybgseditor && scrpt) {
 		monaco.languages.typescript.javascriptDefaults.addExtraLib(serverglobal);
 		monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
 
-		var theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
+		let theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
 		scrpt.value = scrpt.value || urlparams.content;
 
 		editor = monaco.editor.create(document.getElementById('container'), {
@@ -101,11 +101,12 @@ function devidePage() {
 	document.addEventListener('submit', (e) => {
 
 		document.querySelector('input[name=runscript]').disabled = true;
+		result.innerHTML = '<span id="timer"></span> - Background script running... <a href="/cancel_my_transactions.do" target="_blank" title="Cancel running this backgroundscript">cancel</a><hr />';
 		startStopWatch();
 		top.document.title ="🔴 BG script running.."
 		
 		const form = e.target;
-		var postData = new URLSearchParams(new FormData(form));
+		let postData = new URLSearchParams(new FormData(form));
 		postData.append('runscript', 'Run script');
 
 		fetch(form.action, {
@@ -145,14 +146,14 @@ function devidePage() {
 
 	//devide page and add panel
 
-	var link = document.createElement("link");
+	let link = document.createElement("link");
 	link.href = `${snusettings.extensionUrl}css/background.css`
 	link.type = "text/css";
 	link.rel = "stylesheet";
 	document.getElementsByTagName("head")[0].appendChild(link);
 
 	content = document.querySelector('body').children
-	var container = document.createElement('div');
+	let container = document.createElement('div');
 	container.className = 'container';
 
 	leftSide = document.createElement('div');
@@ -189,19 +190,19 @@ function devidePage() {
 function downloadResult() {
 
     function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
-	var instance = window.location.hostname.split('.')[0];
-    var date = new Date();
+	let instance = window.location.hostname.split('.')[0];
+    let date = new Date();
     fileName = 'bgscript_' + instance + '_' + date.getFullYear().toString() +
         pad2(date.getMonth() + 1) + pad2(date.getDate()) + '_' +
         pad2(date.getHours()) + pad2(date.getMinutes()) +
         pad2(date.getSeconds()) + '.txt';
 
-	var link = document.querySelector('.result a').href;
-    var text = document.querySelector('.result pre').innerText;
+	let link = document.querySelector('.result a').href;
+    let text = document.querySelector('.result pre').innerText;
 
 	text = 'Backgroundscript result exported via SN Utils\n' + link + '\n\n' + text;
 
-    var element = document.createElement('a');
+    let element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', fileName);
     element.style.display = 'none';
@@ -266,9 +267,10 @@ function mouseUpHandler() {
 };
 
 function startStopWatch() {
-	var startTime = Date.now();
+	let startTime = Date.now();
 	timerInterval = setInterval(function() {
-		var elapsedTime = Date.now() - startTime;
-		result.innerHTML = (elapsedTime / 1000).toFixed(3) + ' - Background script running... <a href="/cancel_my_transaction.do" target="_blink" title="Cancel running this backgrundscript">cancel</a><hr />';
+		let elapsedTime = Date.now() - startTime;
+		let timer = result.querySelector('#timer');
+		if (timer) timer.innerHTML = (elapsedTime / 1000).toFixed(3);
 	}, 100);
 }
