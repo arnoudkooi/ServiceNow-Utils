@@ -1,6 +1,13 @@
 # CHANGELOG.md
 
-## 7.0.0.8 (2023-04-2)
+## 7.0.0.3 (2023-05-12)
+Fixes / changes:
+ - Updated tokyo slash commands (/docs and /dev) to utah
+ - Fixed / added links in info tab of popup
+ - Fixed slash comand problem where javascript: commands did not work when not outside iframe (These may not work in Firefox anyway) (Issue: #395)
+
+ 
+## 7.0.0.8 (2023-05-06)
 Fixes / changes:
  - 🎉 7 year annniversary => version bump to 7.0.0.0
  - Fix where the cancel transaction on BG script page did not work.

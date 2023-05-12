@@ -101,7 +101,7 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/tokyo/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/utah/All/$0",
         "hint": "Search developer portal <search>"
     },
     "diff1": {
@@ -117,7 +117,7 @@ var snuslashcommands = {
         "hint": "Compare current record XML with XML of <instance>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=tokyo",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=utah",
         "hint": "Search Docs <search>"
     },
     "env": {
@@ -1150,7 +1150,10 @@ function snuSlashCommandAddListener() {
                 }
                 else {
 
-                    if (!targeturl.startsWith("//")) {
+                    if (targeturl.startsWith("javascript:")) {
+                        window.location = DOMPurify.sanitize(targeturl);
+                    }
+                    else if (!targeturl.startsWith("//")) {
                         if ((new Date()).getTime() - snuLastOpened > 500) {
                             snuLastOpened = (new Date()).getTime();
                             window.open(targeturl, '_blank');
