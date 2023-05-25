@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## 7.0.2.0 (2023-05-26)
+Features:
+  - Monaco editor gets the setting Wordwrap true and contextmenu true applied on page load. Settings can be configured via a JSON string in the settings tab for Monaco editor.
+  - Added shortcuts to monaco editor to toggle wordwrap (ALT-SHIFT-W) and contextmenu (ALT-SHIFT-M)
+
+Fixes / changes:
+ - Fix slash commands not working when no tablename or syId can be resolved.
+ - Added grey border around Slash command popup in dark mode.
+
+
 ## 7.0.0.3 (2023-05-12)
 Fixes / changes:
  - Updated tokyo slash commands (/docs and /dev) to utah
@@ -25,7 +35,6 @@ Features:
 ## 6.4.1.0 (2023-04-13)
 Features:
   - Viewdata, new page with record info similar to the viedata tab in the popup, can be opened via slashcommand /vd
-
 
 Fixes / changes:
  - Renamed Slash command related functions ie snuShowSlashCommand to snuSlashCommandShow

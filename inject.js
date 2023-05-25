@@ -1353,9 +1353,9 @@ function snuDiffXml(shortcut, instance = '') {
 function snuResolveVariables(variableString){
 
     let gsft = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
-    let tableName;
-    let sysId;
-    let encodedQuery;
+    let tableName = '';
+    let sysId = '';
+    let encodedQuery = '';
     let doc = gsft ? gsft.contentWindow : window;
     if (typeof doc.g_form !== 'undefined') { //get sysid and tablename from classic form
         tableName = doc.g_form.getTableName();
@@ -1468,6 +1468,7 @@ function snuSettingsAdded() {
     if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
     if (typeof snusettings.listfields == 'undefined') snusettings.listfields = 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
     if (typeof snusettings.slashsswitches == 'undefined' || snusettings.slashsswitches == '') snusettings.slashsswitches = '{}';
+    if (typeof snusettings.monacooptions == 'undefined') snusettings.monacooptions = `{ "wordWrap" : "on", "contextmenu" : true }`;
 
     try { //ignore if not valid json
         let addedslashsswitches = JSON.parse(snusettings.slashsswitches);
@@ -1539,6 +1540,51 @@ function snuSettingsAdded() {
     if (snusettings.addtechnicalnames == true) {
         snuAddTechnicalNames();
         setTimeout(snuAddTechnicalNamesPortal, 5000);
+    }
+
+    if (snusettings.monacooptions){
+        try{
+            if (typeof GlideEditorMonaco !== 'undefined'){
+                let monacooptions = JSON.parse(snusettings.monacooptions);
+                let editors = GlideEditorMonaco.getAll()
+                editors.forEach(editor => {
+                    editor.editor.updateOptions(monacooptions);
+
+                    editor.editor.addAction({
+                        id: "snutils",
+                        label: "Added by SN Utils...",
+                        contextMenuGroupId: "2_info",
+                        contextMenuOrder : 0,
+                        run: () => {
+                            snuSlashCommandInfoText('Contextmenu enabled by SN Utils<br/>Ideas to add options here, give me feedback!',false);
+                        },
+                    });
+                    editor.editor.addAction({
+                        id: "wordwrap",
+                        label: "Toggle Word wrap",
+                        keybindings: [monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KEY_W],
+                        contextMenuGroupId: "2_info",
+                        contextMenuOrder : 1,
+                        run: () => {
+                            let ww =  (editor.editor.getRawOptions().wordWrap == "off") ? "on" : "off";
+                            editor.editor.updateOptions({"wordWrap" : ww});
+                        },
+                    });
+                    editor.editor.addAction({
+                        id: "contextmenu",
+                        label: "Toggle Monaco context Menu",
+                        keybindings: [monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KEY_M],
+                        contextMenuGroupId: "2_info",
+                        contextMenuOrder : 2,
+                        run: () => {
+                            let cm =  !(editor.editor.getRawOptions().contextmenu);
+                            editor.editor.updateOptions({"contextmenu" : cm});
+                        },
+                    });
+
+                })
+            }
+        }catch(ex){};
     }
 }
 
@@ -2752,12 +2798,12 @@ function snuSetShortCuts() {
     }
     else {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; border: #333333 1pt solid; }
         div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
         ul#snuhelper li {margin-top:2px}
         span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
-        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:100%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
+        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:99%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
         span.cmdlabel { color: #FFFFFF; font-size:7pt; }
         a.cmdlink { font-size:10pt; color: #1f8476; } 
         span.semihidden { font-size:6pt; color: #999; }
