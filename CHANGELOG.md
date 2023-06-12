@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 7.0.3.0 (2023-06-12)
+Fixes / changes:
+ - Automate clearing local cache for tables in the popup when data expired  via fucntion clearInvalidatedLocalStorageCache()
+ - Added xmlstats.do to manifest for Firefox so that it renders correct. (Discussion #403)
+ - Assign global g_form when dump variables is clicked in workspace
+ - Changes to nodeswitching, detecting ADCv2 load balancing (will try to find a way to support node switching in this case)
+
 ## 7.0.2.0 (2023-05-26)
 Features:
   - Monaco editor gets the setting Wordwrap true and contextmenu true applied on page load. Settings can be configured via a JSON string in the settings tab for Monaco editor.

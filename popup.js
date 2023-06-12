@@ -13,6 +13,7 @@ var dtDataExplore;
 var dtSlashcommands;
 var objCustomCommands = {};
 var ipArr = [];
+var jsnNodes;
 
 var objSettings;
 var tablesloaded = false;
@@ -41,7 +42,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (typeof InstallTrigger !== 'undefined') $('input[type="color"]').attr('type','text') //bug in FireFox to use html5 color tag in popup
 
+    clearInvalidatedLocalStorageCache();
+
 });
+
+//clear all invalidated cached items like tablenames and nodes
+//each items has a accomanied item with a date string value, remove both if not the current day
+function clearInvalidatedLocalStorageCache(){
+    chrome.storage.local.get(null, function(items) {
+        let allKeys = Object.keys(items);
+        let dt = new Date().toDateString();
+        let arr = []
+        allKeys.forEach(key => {
+            if (key.endsWith('-date') && dt != items[key]){
+                arr.push(key.replace('-date',''));
+                 arr.push(key);
+            }
+    
+        })
+        chrome.storage.local.remove(arr, () =>{
+        let error = chrome.runtime.lastError;
+            if (error) {
+                console.error(error);
+            }
+        })
+    });
+}
 
 //Retrieve variables from browser tab, passing them back to popup
 function getBrowserVariables(tid, cStoreId, callback) {
@@ -142,9 +168,6 @@ function getNodes() {
 
 function setActiveNode(node) {
 
-    if (ipArr.length) //subsequent time when popup is open. Becose of cookie changes, avoid server call to stats.do
-        setActiveNodeInner(node)
-    else { //first time when popup is open
         fetch(url + '/stats.do')
         .then(response => response.text())
         .then(statsDo => { 
@@ -155,10 +178,21 @@ function setActiveNode(node) {
                 .replace('<br/>', '')
                 .replace('<br />', '')
                 .split('.');
-                setActiveNodeInner(node);
-        });
-    }
 
+            let nodeId = statsDo
+            .match(/Node ID: ([\s\S]*?)\<br\/>/g)[0]
+            .replace('Node ID: ', '')
+            .replace('<br/>', '');
+
+            let nodeName = statsDo
+            .match(/Connected to cluster node: ([\s\S]*?)\<br\/>/g)[0]
+            .replace('Connected to cluster node: ', '')
+            .replace('<br/>', '');
+
+            let realNode = {"nodeId" : nodeId, "nodeName" : nodeName };
+            
+            setActiveNodeInner(realNode);
+        });
 
     function setActiveNodeInner(node) {
         var nodeArr = node.nodeName.split(".");
@@ -184,27 +218,56 @@ function setActiveNode(node) {
                     // matches BIGipServerpool_<alphanumeric instance name>
                     return cookie.name.match(/^(BIGipServer[\w\d]+)$/);
                 });
-                if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){
-                    document.querySelector('#nodemessage').innerText = `Switching nodes may not work on this instance.. (BIGipServerpool cookie complex encoding). Contact me to search for a solution. Debug info cookie: ${BIGipServerpoolCookie.name} : ${BIGipServerpoolCookie.value} `;
-                    document.querySelector('#nodemessage').classList.remove('hidden');
-                }
-                chrome.cookies.set({
-                    "name": BIGipServerpoolCookie.name,
-                    "url": new URL(url).origin,
-                    "secure": true,
-                    "httpOnly": true,
-                    "value": encodeBIGIP
-                }, s => {
+                if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){ 
+                    //this is a test to allow node switching on ADCv2 migrated instances
+
+                    // chrome.cookies.remove({
+                    //     "name": BIGipServerpoolCookie.name,
+                    //     "url": new URL(url).origin
+
                     chrome.cookies.set({
-                        "name": "glide_user_route",
+                        "name": BIGipServerpoolCookie.name,
                         "url": new URL(url).origin,
                         "secure": true,
                         "httpOnly": true,
-                        "value": 'glide.' + node.nodeId
+                        "value": encodeBIGIP
                     }, s => {
-                        getActiveNode(jsnNodes);
+                        chrome.cookies.set({
+                            "name": "glide_user_route",
+                            "url": new URL(url).origin,
+                            "secure": true,
+                            "httpOnly": true,
+                            "value": 'glide.' + node.nodeId
+                        }, s => {
+                            getActiveNode(jsnNodes);
+                        });
                     });
-                });
+
+                    document.querySelector('#nodemessage').innerText = `This instance uses ADCv2 loadbalancing, node switching may not work or switch to a random node. Try a few times... `;
+                    document.querySelector('#nodemessage').classList.remove('hidden');
+                }
+                else {
+
+                    chrome.cookies.set({
+                        "name": BIGipServerpoolCookie.name,
+                        "url": new URL(url).origin,
+                        "secure": true,
+                        "httpOnly": true,
+                        "value": encodeBIGIP
+                    }, s => {
+                        chrome.cookies.set({
+                            "name": "glide_user_route",
+                            "url": new URL(url).origin,
+                            "secure": true,
+                            "httpOnly": true,
+                            "value": 'glide.' + node.nodeId
+                        }, s => {
+                            getActiveNode(jsnNodes);
+                        });
+                    });
+
+                }
+
             });
         });
     }
@@ -820,7 +883,7 @@ function setUserDetails(html) {
 function setDataTableUpdateSets(nme) {
 
     if (nme == 'error') {
-        $('#updatesets').hide().after('<br /><div class="alert alert-danger">Data can not be retrieved, are you Admin?</div>');
+        $('#updatesets').hide().after('<br /><div class="alert alert-danger">Data can not be retrieved, are you an Admin?</div>');
         $('#waitingupdatesets').hide();
         return false;
     }
@@ -883,7 +946,7 @@ function setDataTableUpdateSets(nme) {
 function setNodes(jsn) {
 
     if (typeof jsn == "undefined" || jsn == "error") {
-        $('#instancenodes').hide().after('<br /><div class="alert alert-danger">Nodes data can not be retrieved, are you Admin?</div>');
+        $('#instancenodes').hide().after('<br /><div class="alert alert-danger">Nodes data can not be retrieved, are you an Admin?</div>');
         $('#waitingnodes').hide();
         return false;
     }
@@ -941,7 +1004,7 @@ function setDataTableNodes(nme, node) {
 function setDataTableUpdates(nme) {
 
     if (nme == 'error') {
-        $('#updts').hide().after('<br /><div class="alert alert-danger">Data can not be retrieved, are you Admin?</div>');
+        $('#updts').hide().after('<br /><div class="alert alert-danger">Data can not be retrieved, are you an Admin?</div>');
         $('#waitingupdates').hide();
         return false;
     }

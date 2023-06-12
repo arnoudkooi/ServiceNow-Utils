@@ -70,8 +70,9 @@ class SnuNextManager {
                     console.dir(frm);
                     console.log('SN Utils: sn-form-data-connected.nowRecordFormBlob');
                     console.dir(frm.nowRecordFormBlob);
-                    console.log('SN Utils: sn-form-data-connected.nowRecordFormBlob.gForm');
-                    console.dir(frm.nowRecordFormBlob.gForm);
+                    console.log('SN Utils: sn-form-data-connected.nowRecordFormBlob.gForm, available as g_form');
+                    window.g_form = frm.nowRecordFormBlob.gForm;
+                    console.dir(g_form);
                 })
             }
             let elms = querySelectorShadowDom.collectAllElementsDeep('*', frm);

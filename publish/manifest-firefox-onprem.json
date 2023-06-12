@@ -52,6 +52,7 @@
           ],
           "exclude_matches": [
             "*://*.azure.com/*",
+            "*://*/xmlstats.do",
             "*://*/*?XML*",
             "*://*/*&XML*",
             "*://*/*?WSDL*",

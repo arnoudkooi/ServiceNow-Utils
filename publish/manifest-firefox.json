@@ -33,11 +33,13 @@
                 "https://*.servicenowservices.com/*"
             ],
             "exclude_matches": [
+                "https://*.service-now.com/xmlstats.do",
                 "https://*.service-now.com/*?XML*",
                 "https://*.service-now.com/*&XML*",
                 "https://*.service-now.com/*?WSDL*",
                 "https://*.service-now.com/*&WSDL*",
                 "https://*.service-now.com/api/now*",
+                "https://*.servicenowservices.com/xmlstats.do",
                 "https://*.servicenowservices.com/*?XML*",
                 "https://*.servicenowservices.com/*&XML*",
                 "https://*.servicenowservices.com/*?WSDL*",
@@ -56,11 +58,13 @@
                 "https://*.servicenowservices.com/*"
             ],
             "exclude_matches": [
+                "https://*.service-now.com/xmlstats.do",
                 "https://*.service-now.com/*?XML*",
                 "https://*.service-now.com/*&XML*",
                 "https://*.service-now.com/*?WSDL*",
                 "https://*.service-now.com/*&WSDL*",
                 "https://*.service-now.com/api/now*",
+                "https://*.servicenowservices.com/xmlstats.do",
                 "https://*.servicenowservices.com/*?XML*",
                 "https://*.servicenowservices.com/*&XML*",
                 "https://*.servicenowservices.com/*?WSDL*",
