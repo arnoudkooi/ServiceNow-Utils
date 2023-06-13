@@ -316,9 +316,9 @@ class GlideServletRequest{
     /** Retrieves the name of the display field */
     getDisplayName() : string {};
     
-    /** Add a filter to return records by specifying a field and a value it should equal */
+    /** Adds a filter to return records by specifying a field and a value it should equal */
     addQuery(name: string, value: string) : GlideQueryCondition {};
-    /** Add a filter to return records based on a field, an operator, and a value */
+    /** Adds a filter to return records based on a field, an operator, and a value */
     addQuery(name: string, operator: string, value: string) : GlideQueryCondition {};
     
     /** Sets the maximum number of records in the GlideRecord to be fetched in the next query */
@@ -2930,9 +2930,9 @@ class GlideServletRequest{
     /** Retrieves the name of the display field */
     getDisplayName() : string {};
     
-    /** Add a filter to return records by specifying a field and a value it should equal */
+    /** Adds a filter to return records by specifying a field and a value it should equal */
     addQuery(name: string, value: string) : GlideQueryCondition {};
-    /** Add a filter to return records based on a field, an operator, and a value */
+    /** Adds a filter to return records based on a field, an operator, and a value */
     addQuery(name: string, operator: string, value: string) : GlideQueryCondition {};
     
     /** Sets the maximum number of records in the GlideRecord to be fetched in the next query */
