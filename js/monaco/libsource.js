@@ -316,8 +316,10 @@ class GlideServletRequest{
     /** Retrieves the name of the display field */
     getDisplayName() : string {};
     
-    /** Adds a filter to return records by specifying a field and value. You can use an optional 'operator' as a second parameter */
+    /** Add a filter to return records by specifying a field and a value it should equal */
     addQuery(name: string, value: string) : GlideQueryCondition {};
+    /** Add a filter to return records based on a field, an operator, and a value */
+    addQuery(name: string, operator: string, value: string) : GlideQueryCondition {};
     
     /** Sets the maximum number of records in the GlideRecord to be fetched in the next query */
     setLimit(limit: number) {};
@@ -2928,8 +2930,10 @@ class GlideServletRequest{
     /** Retrieves the name of the display field */
     getDisplayName() : string {};
     
-    /** Adds a filter to return records by specifying a field and value. You can use an optional 'operator' as a second parameter */
+    /** Add a filter to return records by specifying a field and a value it should equal */
     addQuery(name: string, value: string) : GlideQueryCondition {};
+    /** Add a filter to return records based on a field, an operator, and a value */
+    addQuery(name: string, operator: string, value: string) : GlideQueryCondition {};
     
     /** Sets the maximum number of records in the GlideRecord to be fetched in the next query */
     setLimit(limit: number) {};
