@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-    if (typeof InstallTrigger !== 'undefined') $('input[type="color"]').attr('type','text') //bug in FireFox to use html5 color tag in popup
+     if(navigator.userAgent.match(/firefox/i)) $('input[type="color"]').attr('type','text') //bug in FireFox to use html5 color tag in popup
 
     clearInvalidatedLocalStorageCache();
 

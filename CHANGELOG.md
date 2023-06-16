@@ -2,6 +2,10 @@
 
 ## 7.0.3.0 (2023-06-12)
 Fixes / changes:
+ - Replace InstallTrigger check to useragent check to detect Firefox #406
+
+## 7.0.3.0 (2023-06-12)
+Fixes / changes:
  - Automate clearing local cache for tables in the popup when data expired  via fucntion clearInvalidatedLocalStorageCache()
  - Added xmlstats.do to manifest for Firefox so that it renders correct. (Discussion #403)
  - Assign global g_form when dump variables is clicked in workspace
