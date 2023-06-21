@@ -713,7 +713,7 @@ function getGRQueryList(varName, template, templatelines, fullvarname) {
             var fields = ('' + response.myVars.g_listfields).split(',');
             var rowsPerPage = response.myVars.g_listrowsPerPage;
             var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
-            queryStr += varName + ".addEncodedQuery(\"" + encQuery + "\");\n";
+            queryStr += varName + ".addEncodedQuery(\"" + encQuery.replaceAll('"', '\\"') + "\");\n";
             if (isDesc)
                 queryStr += varName + ".orderByDesc('" + orderBy + "');\n";
             else
