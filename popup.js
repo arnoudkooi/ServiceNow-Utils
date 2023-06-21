@@ -701,7 +701,7 @@ function getGRQueryList(varName, template, templatelines, fullvarname) {
             myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
         }, function (response) {
             var tableName = response.myVars.g_listtableName;
-            if (typeof tableName == 'undefined'){ //dealing with a table that ends with _list, like sys_ui_list
+            if (!tableName) { //dealing with a table that ends with _list, like sys_ui_list
                 getGRQueryForm(varName, template, templatelines, fullvarname);
                 return;
             }
