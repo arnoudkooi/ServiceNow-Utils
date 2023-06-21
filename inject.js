@@ -4380,6 +4380,12 @@ function snuGetLastScopes(query) {
 }
 
 function snuSwitchTo(switchType, key, val) {
+
+    //prevent caching issues, showing old values form localstoragecache after switching
+    Object.keys(localStorage).filter(key => key.includes('.available')).forEach(k => {
+        localStorage.removeItem(k);
+    });
+
     let payload = {}
     payload[key] = val; //
     let headers = {

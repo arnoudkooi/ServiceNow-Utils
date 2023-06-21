@@ -1,6 +1,10 @@
 # CHANGELOG.md
 
-## 7.0.3.0 (2023-06-12)
+## 7.0.4.0 (2023-06-21)
+Fixes / changes:
+ - Improved switching of app / updateset, clearing relevant cache, to show the new value after pge reload
+
+## 7.0.3.1 (2023-06-16) Firefox only
 Fixes / changes:
  - Replace InstallTrigger check to useragent check to detect Firefox #406
 
