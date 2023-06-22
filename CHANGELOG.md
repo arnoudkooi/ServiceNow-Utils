@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 7.0.5.0 (2023-06-22)
+Features:
+  - Adding context menu items: Open in BG Script, Code Search and Google search to the Monaco editor context menu.
+Fixes / changes:
+ - Fix genertaing GlideRecord template for tables ending with _list (Issue #407)
+ - Better escaping in GlideRecord template generation (Issue #409)
+
 ## 7.0.4.0 (2023-06-21)
 Fixes / changes:
  - Improved switching of app / updateset, clearing relevant cache, to show the new value after pge reload
@@ -32,7 +39,7 @@ Fixes / changes:
  - Fixed slash comand problem where javascript: commands did not work when not outside iframe (These may not work in Firefox anyway) (Issue: #395)
 
  
-## 7.0.0.8 (2023-05-06)
+## 7.0.0.0 (2023-05-06)
 Fixes / changes:
  - 🎉 7 year annniversary => version bump to 7.0.0.0
  - Fix where the cancel transaction on BG script page did not work.

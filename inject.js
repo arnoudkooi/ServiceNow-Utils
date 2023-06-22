@@ -1581,6 +1581,40 @@ function snuSettingsAdded() {
                             editor.editor.updateOptions({"contextmenu" : cm});
                         },
                     });
+                    editor.editor.addAction({
+                        id: "openbg",
+                        label: "Open in BG script...",
+                        contextMenuGroupId: "2_info",
+                        precondition: "editorHasSelection",
+                        contextMenuOrder : 3,
+                        run: (editor) => {
+                            let selection = editor.getModel().getValueInRange(editor.getSelection());
+                            window.open('/sys.scripts.do?content=' + encodeURIComponent(selection));
+                        }
+                    })
+                    editor.editor.addAction({
+                        id: "codesearch",
+                        label: "Code search...",
+                        contextMenuGroupId: "2_info",
+                        precondition: "editorHasSelection",
+                        contextMenuOrder : 4,
+                        run: (editor) => {
+                            let selection = editor.getModel().getValueInRange(editor.getSelection());
+                            snuSlashCommandShow('/code ' + selection,true);
+                        }
+                    })
+                    editor.editor.addAction({
+                        id: "google",
+                        label: "Google search...",
+                        contextMenuGroupId: "2_info",
+                        precondition: "editorHasSelection",
+                        contextMenuOrder : 5,
+                        run: (editor) => {
+                            let selection = editor.getModel().getValueInRange(editor.getSelection());
+                            window.open('https://www.google.com/search?q=' + selection);
+                        }
+                    })
+
 
                 })
             }
