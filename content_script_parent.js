@@ -15,6 +15,8 @@ setTimeout(() => { //be sure content_script_all_frames.js is loaded first
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.method == "getSelection")
         sendResponse({ selectedText: getSelection() });
+    else if (request.method == "snuFetch")
+        snuFetch(request.options, (resp)=>{ sendResponse(resp) });
     else if (request.method == "setFavIconBadge")
         setFavIconBadge(request.options);
     else if (request.method == "getVars")
@@ -31,6 +33,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         );
         document.dispatchEvent(event);
     } 
+    return true;
     //else
     //sendResponse({ url: location.origin });
 
@@ -119,6 +122,37 @@ function setGList(doc) {
     var event = new CustomEvent('snuEvent', detail);
     doc.dispatchEvent(event);
 }
+
+
+//Function to query Servicenow API
+function snuFetch(options, callback) {
+    var hdrs = {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+    if (options.token) //only for instances with high security plugin enabled
+        hdrs['X-UserToken'] = options.token; 
+
+    var requestInfo = {
+        method : 'get',
+        headers : hdrs
+    }
+
+    if (options.post){
+        requestInfo.method = 'PUT';
+        requestInfo.body = options.post;
+    }
+
+    fetch(options.url, requestInfo)
+    .then(response => response.json())
+    .then(data => { 
+        callback(data);
+    });
+
+}
+
+
 
 
 //try to return the window variables, defined in the comma separated varstring string

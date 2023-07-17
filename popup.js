@@ -1676,30 +1676,16 @@ function getFromSyncStorageGlobal(theName, callback) {
 }
 
 
-//Function to query Servicenow API
+// Function to query Servicenow API
+// To work with Firefox containers, this is routed via the content page Issue #415
 function snuFetch(token, url, post, callback) {
-    var hdrs = {
-        'Cache-Control': 'no-cache',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    };
-    if (token) //only for instances with high security plugin enabled
-        hdrs['X-UserToken'] = token; 
-
-    var requestInfo = {
-        method : 'get',
-        headers : hdrs
+    let options = {
+        token : token,
+        url : url,
+        post : post
     }
-
-    if (post){
-        requestInfo.method = 'PUT';
-        requestInfo.body = post;
-    }
-
-    fetch(url, requestInfo)
-    .then(response => response.json())
-    .then(data => { 
-        callback(data);
+    chrome.tabs.sendMessage(tabid, { method: "snuFetch", options: options }, function (resp) {
+        callback(resp);
     });
 
 }

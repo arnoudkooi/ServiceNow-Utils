@@ -384,7 +384,7 @@ grSPC.deleteMultiple();`;
             cursor: pointer;
         }
         div.snupicker:hover {
-            background-color: #53526A;
+            background-color: RGB(var(--now-unified-nav_nav-menu-trigger--background-color--hover,83, 82, 106));
         }
 
         div.snudefault, div.snudefault:hover {

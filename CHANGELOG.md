@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 7.0.6.0 (2023-07-18)
+Fixes / changes:
+ - Changing snuFetch in popup.js to fix support for Firefox containers, this is routed via the content page (Issue #415)
+ (Work in Progress)
+ - Applying css variable to picker hover state
+ - Heads up message on sriptsync page regarding upcoming changes
+ 
+
 ## 7.0.5.0 (2023-06-22)
 Features:
   - Adding context menu items: Open in BG Script, Code Search and Google search to the Monaco editor context menu.
