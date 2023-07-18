@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.0.7.0 (2023-07-18)
+Fixes / changes:
+ - Add link to switch to scope of current record (Discussion #416)
+ - Additional fix for opening links from popup in correct Firefox container.
+
 ## 7.0.6.0 (2023-07-18)
 Fixes / changes:
  - Changing snuFetch in popup.js to fix support for Firefox containers, this is routed via the content page (Issue #415)

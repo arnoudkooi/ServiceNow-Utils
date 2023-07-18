@@ -1517,6 +1517,7 @@ function snuSettingsAdded() {
         snuAddPersonaliseListHandler();
         snuAddLinkToCachDo();
         snuAddInfoButton();
+        snuAddSwitchToApplication();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -2989,6 +2990,30 @@ function snuAddInfoButton()
     btn.addEventListener('click', (e) => { snuLoadInfoMessage() });
     btn.addEventListener('dblclick', (e) => { snuSlashCommandShow('/vd',true) });
     trgt.after(btn);
+
+}
+
+function snuAddSwitchToApplication() {
+
+    if (typeof g_form == 'undefined') return; 
+    let elm = document.querySelector('.outputmsg_nav_inner');
+    if (!elm) return; 
+
+    let scopeId = g_form.getValue('sys_scope');
+    if (!scopeId) return; 
+    let scopeVal = g_form.getDisplayBox('sys_scope').value;
+
+
+    let spn = document.createElement("span");
+    spn.innerHTML = `&nbsp; [SN Utils] Switch to ${scopeVal} application click `;
+    spn.title = "Application switch function is added by SN Utils";
+
+    let a = document.createElement("a");
+    a.innerText = "here";
+    a.addEventListener('click', (e) => { snuSwitchTo("application", "app_id", scopeId); });
+    spn.append(a);
+    elm.append(spn);
+
 
 }
 

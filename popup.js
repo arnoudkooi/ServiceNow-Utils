@@ -1,4 +1,5 @@
 var tabid;
+var cookieStoreId;
 var g_ck;
 var url;
 var instance;
@@ -34,7 +35,7 @@ $.fn.dataTable.ext.errMode = 'none';
 document.addEventListener('DOMContentLoaded', function () {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabid = tabs[0].id;
-        var cookieStoreId = tabs[0].cookieStoreId || '';
+        cookieStoreId = tabs[0].cookieStoreId || '';
         urlFull = tabs[0].url;
         getBrowserVariables(tabid,cookieStoreId);
 
@@ -111,13 +112,13 @@ function setRecordVariables(obj) {
 
     var xmllink = url + '/' + obj.myVars.NOWtargetTable + '.do?sys_id=' + obj.myVars.NOWsysId + '&sys_target=&XML';
     $('#btnviewxml').click(function () {
-        chrome.tabs.create({ "url": xmllink, "active": false });
+        tabCreate({ "url": xmllink, "active": false });
     }).prop('disabled', isNoRecord);
 
 
 
     $('#btnupdatesets').click(function () {
-        chrome.tabs.create({ "url": url + '/sys_update_set_list.do?sysparm_query=state%3Din%20progress', "active": false });
+        tabCreate({ "url": url + '/sys_update_set_list.do?sysparm_query=state%3Din%20progress', "active": false });
     });
 
 
@@ -356,13 +357,6 @@ function setBrowserVariables(obj) {
         var dataset = document.querySelector('#slctdataset').value;
         getTables(dataset);
     });
-    $('#btnSendXplore').click(function () {
-        var script = $('#txtgrquery').val();
-        var win = chrome.tabs.create({ "url": url + "/snd_xplore.do", "active": !(event.ctrlKey || event.metaKey) }); //window.open('');
-        jQuery(win).bind('load', function () {
-            win.snd_xplore_editor.setValue(script);
-        });
-    });
 
     $('.snu-setting').change(function () {
         setSettings();
@@ -405,7 +399,7 @@ function setBrowserVariables(obj) {
 
     $('a.popuplinks').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
+        tabCreate({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
     $('#slashcommands, #slashsswitches').on('dblclick',function(){
@@ -930,7 +924,7 @@ function setDataTableUpdateSets(nme) {
 
     $('a.updatesetlist').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
+        tabCreate({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
     $('a.setcurrent').click(function () {
@@ -1045,7 +1039,7 @@ function setDataTableUpdates(nme) {
 
     $('a.updatetarget').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
+        tabCreate({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
     $('#tbxupdates').keyup(function () {
@@ -1181,12 +1175,12 @@ function setDataTableTables(nme) {
             if (url.indexOf("syslog") > 1) {
                 url = url.replace(/sys_updated_on/g, 'sys_created_on'); //syslog tables have no updated columnn.
             }
-            chrome.tabs.create({ "url": url, "active": !(event.ctrlKey || event.metaKey) });
+            tabCreate({ "url": url, "active": !(event.ctrlKey || event.metaKey) });
         }).addClass('evented');
 
         $('a.tabletarget:not(.evented)').click(function () {
             event.preventDefault();
-            chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
+            tabCreate({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
         }).addClass('evented');
     });
 
@@ -1574,7 +1568,7 @@ function setDataExplore(nme) {
 
     $('a.referencelink').click(function () {
         event.preventDefault();
-        chrome.tabs.create({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
+        tabCreate({ "url": $(this).attr('href'), "active": !(event.ctrlKey || event.metaKey) });
     });
 
     $('#waitingdataexplore').hide();
@@ -1690,12 +1684,20 @@ function snuFetch(token, url, post, callback) {
 
 }
 
+// Create a new browser tab via the content page
+// To work with Firefox containers, this is adding the cookiestoreid the content page Issue #415
+function tabCreate(createObj) {
+    if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
+    chrome.tabs.create(createObj);
+}
+
 
 function openGrInBgScript(active) {
     let content = encodeURIComponent(document.getElementById('txtgrquery').value);
-    var createObj = {
+    let createObj = {
         'url': url + "/sys.scripts.do?content=" + content,
         'active': active
     }
+    if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
     chrome.tabs.create(createObj);
 }
