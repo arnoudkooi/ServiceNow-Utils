@@ -392,7 +392,6 @@ if (typeof jQuery != "undefined") {
     (function() {
         if (typeof angular != "undefined") {
             setTimeout(function () {
-                getListV3Fields();
                 updateReportDesignerQuery();
             }, 2000);
 
@@ -3231,45 +3230,6 @@ function renamePasted(sysID, check) {
         }
     };
     client.send(JSON.stringify(requestBody));
-}
-
-function getListV3Fields() {
-    try {
-        //g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.,g_list.fields
-
-        if (document.getElementsByClassName('list-container').length == 0) return false;
-        if (document.getElementById('related_lists_wrapper') != null) return false; //not on form with related lists
-
-        var ang = angular.element('.list-container').scope().$parent.$parent;
-
-        for (var i = 0; i < ang.data.columns.length; i++) {
-            fields.push(ang.data.columns[i].name);
-        }
-        g_list = {
-            "filter": ang.queryString,
-            "tableName": ang.table,
-            "sortBy": ang.data.filterWidgetConfig.sort[0].column_name,
-            "sortDir": ang.data.filterWidgetConfig.sort[0].ascending ? "ASC" : "DESC",
-            "rowsPerPage": ang.parameters.sysparm_limit,
-            "fields": fields.toString()
-
-        };
-        //dbl click to view and update filter condition
-        jQuery('div.breadcrumb-container').on("dblclick", function (event) {
-            var qry = angular.element('.list-container').scope().$parent.$parent.queryString;
-            var newValue = prompt('[SN Utils]\Filter condition:', qry);
-            if (newValue !== qry && newValue !== null) {
-                qry = angular.element('.list-container').scope().$parent.$parent.queryString = newValue || '';
-                setTimeout(function () {
-                    angular.element('.list-container').scope().$parent.$parent.updateList();
-                }, 300);
-            }
-        });
-
-    } catch (err) {
-        console.log(err);
-
-    }
 }
 
 function updateReportDesignerQuery() {

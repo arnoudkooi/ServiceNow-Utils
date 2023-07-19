@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 7.0.8.0 (2023-07-19)
+Fixes / changes:
+ - Upgrade Monaco editor to version 0.40.0
+ - Remove List v3 support
+ - Enabled bracketPairColorization in BG Script and SN Utils codeeditor
+ - Disabled minimap in BG Script
+ - Mark not started BG script with title: ⚪ BG script not started
+
 ## 7.0.7.0 (2023-07-18)
 Fixes / changes:
  - Add link to switch to scope of current record (Discussion #416)
@@ -11,7 +19,6 @@ Fixes / changes:
  (Work in Progress)
  - Applying css variable to picker hover state
  - Heads up message on sriptsync page regarding upcoming changes
- 
 
 ## 7.0.5.0 (2023-06-22)
 Features:

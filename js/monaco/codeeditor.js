@@ -93,7 +93,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 value: message.command.content,
                 language: lang,
                 theme: theme,
-                colorDecorators: true
+                colorDecorators: true,
+                "bracketPairColorization.enabled": true
             });
 
             const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";

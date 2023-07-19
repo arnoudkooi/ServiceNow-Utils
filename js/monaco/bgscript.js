@@ -4,6 +4,7 @@ let s = document.body.firstChild;
 let editor;
 let div = document.createElement('div');
 let divInfo = document.createElement('div');
+top.document.title ="⚪ BG script not started"
 divInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bg to open this page | Editor and shortcut added by SN Utils';
 divInfo.style.fontSize = '9pt';
 divInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
@@ -55,7 +56,10 @@ if (snusettings.applybgseditor && scrpt) {
 			lineNumbers: "on",
 			language: "javascript",
 			wordWrap: "on",
-			automaticLayout: true
+			automaticLayout: true,
+			"bracketPairColorization.enabled": true,
+			minimap: { enabled: false }
+			
 		});
 
 		editor.onDidChangeModelContent((e) => {

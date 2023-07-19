@@ -13,18 +13,29 @@ setTimeout(() => { //be sure content_script_all_frames.js is loaded first
 
 //attach event listener from popup
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.method == "getSelection")
+    if (request.method == "getSelection"){
         sendResponse({ selectedText: getSelection() });
-    else if (request.method == "snuFetch")
+        return true;
+    }
+    else if (request.method == "snuFetch"){
         snuFetch(request.options, (resp)=>{ sendResponse(resp) });
-    else if (request.method == "setFavIconBadge")
+        return true;
+    }
+    else if (request.method == "setFavIconBadge"){
         setFavIconBadge(request.options);
-    else if (request.method == "getVars")
+        return true;
+    }
+    else if (request.method == "getVars"){
         sendResponse({ myVars: getVars(request.myVars), url: location.origin, frameHref: getFrameHref() });
-    else if (request.method == "getLocation")
+        return true;
+    }
+    else if (request.method == "getLocation"){
         sendResponse({ url: location.origin, frameHref: getFrameHref() });
+        return true;
+    }
     else if (request.method == "toggleSearch") {
         toggleSearch();
+        return true;
     } 
     else if (request.method == "snuUpdateSettingsEvent") { //pass settings to page
         if (typeof cloneInto != 'undefined') request = cloneInto(request, document.defaultView); //required for ff
@@ -32,6 +43,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             request.method, request
         );
         document.dispatchEvent(event);
+        return true;
     } 
     return true;
     //else

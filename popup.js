@@ -686,56 +686,50 @@ function setListUrl(listUrl, tableLabel, fields){
 function getGRQueryList(varName, template, templatelines, fullvarname) {
 
     chrome.tabs.sendMessage(tabid, {
-        method: "runFunction",
-        myVars: "getListV3Fields()"
-    }, function () {
+        method: "getVars",
+        myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
+    }, function (response) {
+        var tableName = response.myVars.g_listtableName;
+        if (!tableName) { //dealing with a table that ends with _list, like sys_ui_list
+            getGRQueryForm(varName, template, templatelines, fullvarname);
+            return;
+        }
 
-        chrome.tabs.sendMessage(tabid, {
-            method: "getVars",
-            myVars: "g_list.filter,g_list.tableName,g_list.sortBy,g_list.sortDir,g_list.rowsPerPage,g_list.fields"
-        }, function (response) {
-            var tableName = response.myVars.g_listtableName;
-            if (!tableName) { //dealing with a table that ends with _list, like sys_ui_list
-                getGRQueryForm(varName, template, templatelines, fullvarname);
-                return;
+        varName = varName || grVarName(tableName, fullvarname);
+        var encQuery = response.myVars.g_listfilter;
+        var orderBy = response.myVars.g_listsortBy;
+        var isDesc = (response.myVars.g_listsortDir == "DESC");
+        var fields = ('' + response.myVars.g_listfields).split(',');
+        var rowsPerPage = response.myVars.g_listrowsPerPage;
+        var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
+        queryStr += varName + ".addEncodedQuery(\"" + encQuery.replaceAll('"', '\\"') + "\");\n";
+        if (isDesc)
+            queryStr += varName + ".orderByDesc('" + orderBy + "');\n";
+        else
+            queryStr += varName + ".orderBy('" + orderBy + "');\n";
+        queryStr += varName + ".setLimit(" + rowsPerPage + ");\n";
+        queryStr += varName + ".query();\n";
+        queryStr += "while (" + varName + ".next()) {\n";
+        if (templatelines) {
+            queryStr += "    //" + varName + ".initialize();\n";
+        }
+        if (template) {
+            for (var i = 0; i < fields.length; i++) {
+                queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
             }
+        } else
+            queryStr += "\n\n    //todo: code ;)\n\n";
+        if (templatelines) {
 
-            varName = varName || grVarName(tableName, fullvarname);
-            var encQuery = response.myVars.g_listfilter;
-            var orderBy = response.myVars.g_listsortBy;
-            var isDesc = (response.myVars.g_listsortDir == "DESC");
-            var fields = ('' + response.myVars.g_listfields).split(',');
-            var rowsPerPage = response.myVars.g_listrowsPerPage;
-            var queryStr = "var " + varName + " = new GlideRecord('" + tableName + "');\n";
-            queryStr += varName + ".addEncodedQuery(\"" + encQuery.replaceAll('"', '\\"') + "\");\n";
-            if (isDesc)
-                queryStr += varName + ".orderByDesc('" + orderBy + "');\n";
-            else
-                queryStr += varName + ".orderBy('" + orderBy + "');\n";
-            queryStr += varName + ".setLimit(" + rowsPerPage + ");\n";
-            queryStr += varName + ".query();\n";
-            queryStr += "while (" + varName + ".next()) {\n";
-            if (templatelines) {
-                queryStr += "    //" + varName + ".initialize();\n";
-            }
-            if (template) {
-                for (var i = 0; i < fields.length; i++) {
-                    queryStr += "    " + template.replace(/\{0\}/g, varName).replace(/\{1\}/g, fields[i]) + "\n";
-                }
-            } else
-                queryStr += "\n\n    //todo: code ;)\n\n";
-            if (templatelines) {
+            queryStr += "    //" + varName + ".autoSysFields(false);\n";
+            queryStr += "    //" + varName + ".setWorkflow(false);\n";
+            queryStr += "    //" + varName + ".update();\n";
+            queryStr += "    //" + varName + ".insert();\n";
+            queryStr += "    //" + varName + ".deleteRecord();\n";
+        }
+        queryStr += "}";
 
-                queryStr += "    //" + varName + ".autoSysFields(false);\n";
-                queryStr += "    //" + varName + ".setWorkflow(false);\n";
-                queryStr += "    //" + varName + ".update();\n";
-                queryStr += "    //" + varName + ".insert();\n";
-                queryStr += "    //" + varName + ".deleteRecord();\n";
-            }
-            queryStr += "}";
-
-            setGRQuery(queryStr);
-        });
+        setGRQuery(queryStr);
     });
 }
 

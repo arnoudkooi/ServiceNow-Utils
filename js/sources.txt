@@ -7,4 +7,4 @@ moment.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js
 jquery.deserialize.js https://raw.githubusercontent.com/kflorence/jquery-deserialize/master/src/jquery.deserialize.js
 purify.min.js https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.2/purify.min.js
 Tinycon.js https://github.com/tommoor/tinycon/blob/master/tinycon.js
-Monaco Editor: Files Copied from node_modules installation version 0.34.1
+Monaco Editor: Files Copied from node_modules installation version 0.40.0
