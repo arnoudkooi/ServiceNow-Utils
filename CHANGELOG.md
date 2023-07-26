@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.0.8.0 (2023-07-26 Firefox only)
+Fixes / changes:
+ - Workaround for issue #420 releated to Firefox containers compatability
+ - Added wildcard in scriptsync condition
+
 ## 7.0.8.0 (2023-07-19)
 Fixes / changes:
  - Upgrade Monaco editor to version 0.40.0

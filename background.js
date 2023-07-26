@@ -92,18 +92,34 @@ function initializeContextMenus(){
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     var cookieStoreId = '';
-    if (sender.tab.hasOwnProperty('cookieStoreId')) {
-        cookieStoreId = sender.tab.cookieStoreId;
-    }
+    if (sender){ //In Firefox the sender object can be empty #420 this construct is around that
+       if (sender.tab.hasOwnProperty('cookieStoreId')) 
+            cookieStoreId = sender.tab.cookieStoreId 
+    } 
 
     if (message.event == "checkisservicenowinstance") {
-        chrome.cookies.get({ //this is a check via the existence of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
-            "name": "glide_user_route",
-            "url": message.origin
-        }, cookie => {
-            var isInstance = (cookie) ? true : false || /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-            sendResponse(isInstance);
-        })
+
+        if (!cookieStoreId && typeof chrome.contextualIdentities != 'undefined' ){
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                cookieStoreId = tabs[0].cookieStoreId || '';
+                cookieCheck();
+            });
+        }
+        else 
+            cookieCheck();
+        
+        function cookieCheck(){ //nested function because sender object can be empty in FF
+            let params = { 
+                "name": "glide_user_route",
+                "url": message.origin
+            }
+            if (cookieStoreId) params['storeId'] = cookieStoreId;
+
+            chrome.cookies.get(params, cookie => { //this is a check via the existence of a cookie, to make sure we only add the scripts on actual ServiceNow instances.
+                var isInstance = (cookie) ? true : false || /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                sendResponse(isInstance);
+            })
+        }
     }
     else if (message.event == "scriptsync") {
         createScriptSyncTab(cookieStoreId);

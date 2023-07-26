@@ -454,7 +454,7 @@ function mirrorBgScript(scriptObj) {
 
 
     chrome.tabs.query({ //in iframe
-        url: scriptObj.instance.url + "/*sys.scripts.do"
+        url: scriptObj.instance.url + "/*sys.scripts.do*"
     }, function (arrayOfTabs) {
 
 
