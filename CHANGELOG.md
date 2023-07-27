@@ -1,6 +1,7 @@
 # CHANGELOG.md
 
 ## 7.0.8.3 (2023-07-28)
+Remark: For Chrome this version is published as 7.0.8.1
 Fixes / changes:
  - Escape display value in View Data (Issue: #421)
  - Added function to scriptsync page to set banner message from sn-scriptsync
