@@ -203,8 +203,8 @@ $(document).ready(function () {
                     requestRecords(wsObj);
                 } else if (wsObj.action == 'requestAppMeta') {
                     requestAppMeta(wsObj);
-                } else if (wsObj.action == 'linkAppToVSCode') {
-                    // no need to log more..
+                } else if (wsObj.action == 'bannerMessage') {
+                   setBannerMessage(wsObj);
                 } else if ('instance' in wsObj) {
                     if (wsObj.tableName == 'flow_action_scripts'){
                         updateActionScript(wsObj);                        
@@ -303,6 +303,14 @@ function requestRecord(requestJson) {
     };
     client.send();
 }
+
+function setBannerMessage(wsObj) {
+    let bnr = document.querySelector('#bannermessage');
+    bnr.innerHTML = wsObj.message;
+    bnr.className = wsObj.class;
+}
+
+
 
 function requestToken(scriptObj) {
     t.row.add([

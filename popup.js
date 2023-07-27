@@ -1450,6 +1450,7 @@ function getExploreData() {
                     "type": "TABLE"
                 };
                 propObj.display_value = "<a class='referencelink' href='" + url + "/" + tableName + ".do?sys_id=" + sysId + "' target='_blank'>" + tableName + " / " + sysId + "</a>";
+                propObj.link = url + "/" + tableName + ".do?sys_id=" + sysId;
                 propObj.value = tableName + " / " + sysId;
                 dataExplore.push(propObj);
 
@@ -1496,6 +1497,11 @@ function setDataExplore(nme) {
     Object.entries(nme).forEach( // add check of empty fields to be able to filter out
         ([key, obj]) => {
             nme[key].hasdata = (obj.value || obj.display_value) ? "hasdata" : "";
+            if (!nme[key].link ) {
+                let escpd = escape(nme[key].display_value);
+                if (nme[key].display_value != escpd)
+                    nme[key].display_value = '<pre style="white-space: pre-wrap; max-width:300px;"><code>' + escpd + '</code></pre>'
+            }
         }
     );
     
@@ -1695,3 +1701,12 @@ function openGrInBgScript(active) {
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
     chrome.tabs.create(createObj);
 }
+
+function escape(htmlStr) {
+    return htmlStr.replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");        
+ 
+ }
