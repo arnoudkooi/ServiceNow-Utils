@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 7.0.8.4 (2023-07-28)
+Fixes / changes:
+ - Fix for display value in View Data (Issue: #421)
+
 ## 7.0.8.3 (2023-07-28)
 Remark: For Chrome this version is published as 7.0.8.1
 Fixes / changes:

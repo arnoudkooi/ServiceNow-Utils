@@ -1703,6 +1703,7 @@ function openGrInBgScript(active) {
 }
 
 function escape(htmlStr) {
+    if (!htmlStr) return '';
     return htmlStr.replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
