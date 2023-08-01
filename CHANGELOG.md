@@ -1,6 +1,11 @@
 # CHANGELOG.md
 
-## 7.0.8.4 (2023-07-28)
+## 7.0.8.6 (2023-08-01)
+Fixes / changes:
+ - sn-scriptsync and Monaco icons now show on new records, and show a message when clicked.
+ - Fix for direct calling a slash command switch that opens a link, such as /-ra to open the REST Api explorer from a record.
+
+## 7.0.8.4 (2023-07-29)
 Fixes / changes:
  - Fix for display value in View Data (Issue: #421)
 

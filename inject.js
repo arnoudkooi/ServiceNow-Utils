@@ -995,7 +995,7 @@ function snuSlashCommandAddListener() {
                     if (targeturl.includes("{}")) {
                         targeturl = targeturl.replace('{}', g_form.getTableName());
                     }
-                    else {
+                    else if (!linkSwitch){
                         targeturl = "/" + g_form.getTableName() + "_list.do?sysparm_query=" + targeturl;
                     }
                     if (!targeturl.startsWith("$random"))
@@ -2091,10 +2091,18 @@ function snuCaptureFormClick() {
             }
 
             if (event.target.className.includes('scriptSync icon-save')) {
+                if (g_form.isNewRecord()) {
+                    snuSlashCommandInfoText('This is a new record, try again after saving',false);
+                    return true;
+                }
                 snuPostToScriptSync(event.target.dataset.field, event.target.dataset.fieldtype);
                 event.target.style.opacity = 0.3;
             }
             if (event.target.className.includes('scriptSync icon-code')) {
+                if (g_form.isNewRecord()) {
+                    snuSlashCommandInfoText('This is a new record, try again after saving',false);
+                    return true;
+                }
                 snuPostToMonaco(event.target.dataset.field, event.target.dataset.fieldtype);
                 event.target.style.opacity = 0.3;
             }
@@ -3724,7 +3732,7 @@ function snuAddFieldSyncButtons() {
     if (typeof jQuery == 'undefined') return; //not in studio
 
     if (typeof g_form != 'undefined') {
-        if (g_form.isNewRecord()) return;
+        //if (g_form.isNewRecord()) return;
         var tableName = g_form.getTableName();
         var isSysTable = tableName.startsWith('sys_');
         jQuery(".label-text").each(function (index, value) {
