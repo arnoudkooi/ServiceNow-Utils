@@ -343,29 +343,29 @@ var snuslashcommands = {
 }
 
 var snuslashswitches = {
-    "t": { "description": "View Table Structure", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
-    "n": { "description": "New Record", "value": "$0.do", "type": "link" },
-    "r": { "description": "Open Random Record", "value": "$random.$0", "type": "link" },
-    "ra": { "description": "REST API Explorer", "value": "$restapi.do?tableName=$0", "type": "link" },
-    "c": { "description": "Table Config", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
-    "erd": { "description": "View Schema Map", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
+    "t": { "description": "View Table Structure ➚", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
+    "n": { "description": "New Record ➚", "value": "$0.do", "type": "link" },
+    "r": { "description": "Open Random Record ➚", "value": "$random.$0", "type": "link" },
+    "ra": { "description": "REST API Explorer ➚", "value": "$restapi.do?tableName=$0", "type": "link" },
+    "c": { "description": "Table Config ➚", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
+    "erd": { "description": "View Schema Map ➚", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
 
-    "a": { "description": "Active is True", "value": "^active=true", "type": "encodedquerypart" },
-    "f": { "description": "Filter Only", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
-    "ga": { "description": "Group Count Ascending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNT", "type": "querypart" },
-    "gd": { "description": "Group Count Descending (Grouped Lists Only)", "value": "&sysparm_group_sort=COUNTDESC", "type": "querypart" },
-    "s": { "description": "Current Scope", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
-    "uct": { "description": "Updated or Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORsys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
-    "ut": { "description": "Updated Today", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
-    "ct": { "description": "Created Today", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
-    "um": { "description": "Updated by Me", "value": "^sys_updated_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
-    "cm": { "description": "Created by Me", "value": "^sys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
-    "m": { "description": "Updated or Created by Me", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
-    "ou": { "description": "Order by Updated Descending", "value": "^ORDERBYDESCsys_updated_on", "type": "encodedquerypart" },
-    "oc": { "description": "Order by Created Descending", "value": "^ORDERBYDESCsys_created_on", "type": "encodedquerypart" },
-    "pf": { "description": "Use Polaris = False", "value": "&sysparm_use_polaris=false", "type": "querypart" },
-    "p": { "description": "Filter Pinned", "value": "&sysparm_filter_pinned=true", "type": "querypart" },
-    "pi": { "description": "Pop In - Open in full UI", "value": "/nav_to.do?uri=", "type": "prepend" },
+    "a": { "description": "Active is True ∀", "value": "^active=true", "type": "encodedquerypart" },
+    "f": { "description": "Filter Only ↝", "value": "&sysparm_filter_only=true&sysparm_filter_pinned=true", "type": "querypart" },
+    "ga": { "description": "Group Count Ascending (Grouped Lists Only) ↧", "value": "&sysparm_group_sort=COUNT", "type": "querypart" },
+    "gd": { "description": "Group Count Descending (Grouped Lists Only) ↥", "value": "&sysparm_group_sort=COUNTDESC", "type": "querypart" },
+    "s": { "description": "Current Scope ∀", "value": "^sys_scope=javascript:gs.getCurrentApplicationId()", "type": "encodedquerypart" },
+    "uct": { "description": "Updated or Created Today ∀", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORsys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
+    "ut": { "description": "Updated Today ∀", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
+    "ct": { "description": "Created Today ∀", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
+    "um": { "description": "Updated by M ∀", "value": "^sys_updated_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
+    "cm": { "description": "Created by Me ∀", "value": "^sys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
+    "m": { "description": "Updated or Created by Me ∀", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
+    "ou": { "description": "Order by Updated Descending ↧", "value": "^ORDERBYDESCsys_updated_on", "type": "encodedquerypart" },
+    "oc": { "description": "Order by Created Descending ↧", "value": "^ORDERBYDESCsys_created_on", "type": "encodedquerypart" },
+    "pf": { "description": "Use Polaris = False ↝", "value": "&sysparm_use_polaris=false", "type": "querypart" },
+    "p": { "description": "Filter Pinned ↝", "value": "&sysparm_filter_pinned=true", "type": "querypart" },
+    "pi": { "description": "Pop In - Open in full UI ↝", "value": "/nav_to.do?uri=", "type": "prepend" },
 };
 
 var snuslashswitchesvalueoverwrites = { 
@@ -687,6 +687,14 @@ function snuSlashCommandAddListener() {
 
         var switchText = '<br /> Switches:<br />';
 
+
+        if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
+            let encodedQ = query.split(' ')[0]; //encodedquery should be first
+            targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + encodeURIComponent(encodedQ) + (e.key.length == 1 ? e.key : ""));
+            switchText = '<br />Encodedquery detected<br /><br /><br /> Switches:<br />';
+        }
+
+
         if (targeturl.includes('sysparm_query=') || originalShortcut.startsWith("-")) {
             if (originalShortcut.startsWith("-")) query = shortcut;
             var extraParams = "";
@@ -742,10 +750,7 @@ function snuSlashCommandAddListener() {
         }
         query = query.trim();
 
-        if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
-            targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + encodeURIComponent(query) + (e.key.length == 1 ? e.key : ""));
-            switchText = '<br />Encodedquery detected<br /><br />'
-        }
+
         targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
         if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
             var queryArr = query.split(" ");
@@ -2329,29 +2334,37 @@ function snuViewTranslationsMeta(fieldName) {
 
 function unhideFields() {
     if (typeof g_form == 'undefined') return; //only on forms and only if admin
-    var bulb = '<span class="icon-lightbulb color-orange" title="Field displayed by SN Utils"></span>';
     var sections = g_form.getSectionNames();
     for (var sec = 0; sec < sections.length; sec++) {
         g_form.setSectionDisplay(sections[sec], true);
     }
     for (var ij = 0; ij < g_form.elements.length; ij++) {
         try {
+            var bulb = '<span class="icon-lightbulb color-orange" title="Field displayed by SN Utils"></span>';
             var element = g_form.elements[ij];
             var fieldName = element.fieldName;
             var isVariable = fieldName.startsWith('ni.');
             if (!isVariable) {
-                var hidden = element.elementParentNode.getAttribute('style').includes('none');
-                if (hidden) {
+                if (element.elementParentNode.getAttribute('style').includes('none')) {
                     jQuery(element.elementParentNode).find('label:not(.checkbox-label)').prepend(bulb);
                     g_form.setDisplay(fieldName, true);
                 }
+                if (element.elementParentNode.getAttribute('style').includes('hidden')) { //unhide via setvisible as well #422
+                    bulb = '<span class="icon-lightbulb color-orange" title="Field set visible by SN Utils"></span>';
+                    jQuery(element.elementParentNode).find('label:not(.checkbox-label)').prepend(bulb);
+                    g_form.setVisible(fieldName, true);
+                }
             } else {
                 var variableElement = g_sc_form.getSCUIElement(fieldName);
-                var hidden = variableElement.getElementParentNode().getAttribute('style').includes('none');
-                if (hidden) {
+                if (variableElement.getElementParentNode().getAttribute('style').includes('none')) {
                     // Variables have only one label. Unfortunately, in the case of a checkbox, the bulb will be on the right side.
                     jQuery(variableElement.getElementParentNode()).find('label').prepend(bulb);
                     g_form.setDisplay('variables.' + fieldName, true);
+                }
+                if (variableElement.getElementParentNode().getAttribute('style').includes('hidden')) {
+                    bulb = '<span class="icon-lightbulb color-orange" title="Field set visible by SN Utils"></span>';
+                    jQuery(variableElement.getElementParentNode()).find('label').prepend(bulb);
+                    g_form.setVisible('variables.' + fieldName, true);
                 }
             }
         } catch (e) { };
@@ -2718,7 +2731,7 @@ function snuTableCollectionLink() {
     if (typeof jQuery == 'undefined') return;
     var tbl = g_form.getValue('name');
     jQuery('.related_links_container').append("<li style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='sys_dictionary.do?sysparm_query=name=" +
-        tbl + "^internal_type=collection^' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
+        tbl + "^internal_type=collection&sysparm_view=advanced' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
 }
 
 function snuSearchLargeSelects() {

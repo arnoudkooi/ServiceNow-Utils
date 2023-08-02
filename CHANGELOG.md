@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 7.0.9.0 (2023-08-02)
+Fixes / changes:
+ - Change collection link on sys_db_object record link to always open advanced view
+ - Allow slash command that have a encodedquery as argument to work with additional switches
+ - Add a symbol to switch text to give an indication what it does:  
+    - ∀ add a filter condition
+    - ↧ Add list sorting 
+    - ↝ Add a sysparm
+    - ➚ Open page in new tab
+ - Fix for showing setVisible(false) fields with the /uh command #422 
+
 ## 7.0.8.6 (2023-08-01)
 Fixes / changes:
  - sn-scriptsync and Monaco icons now show on new records, and show a message when clicked.
