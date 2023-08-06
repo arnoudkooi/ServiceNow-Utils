@@ -1981,8 +1981,9 @@ function snuCaptureFormClick() {
 
     if (typeof g_form != 'undefined') {
         document.addEventListener('click', function (event) {
+            console.log(event);
 
-            if (event.ctrlKey || event.metaKey) {
+            if (event.ctrlKey || event.metaKey || event?.target?.className == "dict") {
                 var tpe = '';
                 var tbl = g_form.getTableName();
                 var elm = '';
@@ -1990,12 +1991,25 @@ function snuCaptureFormClick() {
                 var val;
                 var valDisp = '';
                 var operator = '=';
-                if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text')) {
+                if (event.target.classList.contains('label-text') || event.target.parentElement.classList.contains('label-text') || event?.target?.className == "dict" ) {
                     elm = event.target.closest('div.form-group').getAttribute('id').split('.').slice(2).join('.');
                     tpe = g_form.getGlideUIElement(elm).type;
                     val = g_form.getValue(elm);
                     elmDisp = event.target.textContent;
                     valDisp = g_form.getDisplayBox(elm) && g_form.getDisplayBox(elm).value || g_form.getValue(elm);
+                    if (event?.target?.className == "dict" && !(event.ctrlKey || event.metaKey)){ //clicked the secret link to open dictioonary
+                        event.preventDefault();
+                        if (!window.NOW.user.roles.split(',').includes('admin')) {
+                            snuSlashCommandInfoText("Only available for admin", false);
+                            return;
+                        }
+                        if (elm.includes('.')) {
+                            snuSlashCommandInfoText("This trick does not work for dot walked fields :(", false);
+                            return;
+                        }
+                        window.open(`sys_dictionary.do?sysparm_query=name=javascript:new PAUtils().getTableAncestors('${tbl}')^element=${elm}&sysparm_view=advanced`, '_blank');
+                        return;
+                    }
                 } else if (event.target.parentElement.classList.contains('sc_editor_label')) {
                     elm = event.target.closest('tr').getAttribute('id').split('.').slice(1).join('.');
                     tpe = g_sc_form.getSCUIElement(elm).type;
@@ -2113,6 +2127,14 @@ function snuCaptureFormClick() {
             }
 
         }, true);
+
+        //helper to make the secret dictionary a bit visible
+        let style = document.createElement('style');
+        style.appendChild(document.createTextNode(`span.snuwrap:hover span.pillar { display: none }
+        span.snuwrap span.dict { display: none }
+        span.snuwrap:hover span.dict { display : inline }`));
+        document.head.appendChild(style);
+
     }
 }
 
@@ -2483,7 +2505,7 @@ function snuAddTechnicalNames() {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
                         linkAttrs.title + '" target="_blank">' + elm + '</a>';
                 }
-                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"> | <span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"><span class="dict" title="Open dictionary entry">&nbsp;! </span><span class="pillar">&nbsp;| </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
@@ -3785,9 +3807,9 @@ function snuAddFieldSyncButtons() {
                 function getBtns(elm, fieldType) {
                     var btns = '';
                     if (snusettings.vsscriptsync == true)
-                        btns += `<span style="color: rgb(var(--now-button--secondary--border-color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
+                        btns += `<span style="color: rgb(var(--now-button--bare_primary--color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
                     if (snusettings.codeeditor == true)
-                        btns += `<span style="color: rgb(var(--now-button--secondary--border-color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
+                        btns += `<span style="color: rgb(var(--now-button--bare_primary--color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
                     return btns;
                 }
 

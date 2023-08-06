@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 7.1.0.0 (2023-08-02)
+Features:
+ - Clicking the pillar | on a form field when Technical Names is active, will open the dictionary in advanced view. A hover over the pillar shows a ! to give users a clue. Does not work for non admin and dotwalked fields. Besides it does not work when CMD or CTRL is pressed. (This still builds a filter)
+Fixes / changes:
+ - Changes VS Code button color to --now-button--bare_primary--color
+ 
+
 ## 7.0.9.0 (2023-08-02)
 Fixes / changes:
  - Change collection link on sys_db_object record link to always open advanced view
