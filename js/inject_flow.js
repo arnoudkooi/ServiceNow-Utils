@@ -25,29 +25,27 @@ function snuActionSendScriptsToScriptSync(){
 
     let actionReact = snuFindReact(document.querySelector("#action-editor"));
     if (!actionReact?.props?.propertiesState?.data.security?.can_write !== false){
-        alert('Can not edit read only action'); 
+        snuSlashCommandInfoText('Can not edit read only action'); 
         return 
     }
 
 
     let sidePanelReact = snuFindReact(document.querySelector(".actionOutline.pn-content"));
     let actionName = document.querySelector('#header-title-input')?.value;
+    let scope = sidePanelReact?.props?.editorState?.actProps.scope;
     let actSteps = sidePanelReact?.props?.editorState?.actSteps;
     let allSteps = sidePanelReact?.props?.allSteps; //the sys_id of the sys_hub_step_instance record only found here
     
     if (!allSteps) { 
-        alert('No action steps found'); 
+        snuSlashCommandInfoText('No action steps found'); 
         return 
     };
     if (!allSteps.filter(f => f.DB_TYPE == 'SCRIPT').length){
-        alert('No script steps found'); 
+        snuSlashCommandInfoText('No script steps found'); 
         return 
     }
     if (actSteps.length != allSteps.length) { // mismatch in length of objects
-        alert('Cannot sync scripts'); 
-        return 
-    }; 
-    if (!confirm('This is a beta function, please use wise, at own risk or cancel!')) { // mismatch in length of objects
+        snuSlashCommandInfoText('Cannot sync scripts'); 
         return 
     }; 
     var pushed = 0;
@@ -57,6 +55,7 @@ function snuActionSendScriptsToScriptSync(){
             if (allSteps[step]?.readonly) continue; 
             let data = {
                 "sysId" : actSteps[step].step_id,
+                "scope" : scope,
                 "script" : allSteps[step].data.script,
                 "actionName" : actionName.replace(/[^a-z0-9_\-+]+/gi, '-'),
                 "scriptName" : allSteps[step].step_name.replace(/[^a-z0-9_\-+]+/gi, '-')

@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## 7.1.1.0 (2023-08-11)
+Features:
+ - Add in a context menu item to swap panes in the code diff viewer (PR #425)
+Fixes / changes:
+ - Remove beta warning from scriptsync actions sync
+ - Adding scope sysid to payload on scriptsync of Action scripts
+ - Change the /debug slash command to a scripted command, so it works more consitent.
+
+
 ## 7.1.0.0 (2023-08-02)
 Features:
  - Clicking the pillar | on a form field when Technical Names is active, will open the dictionary in advanced view. A hover over the pillar shows a ! to give users a clue. Does not work for non admin and dotwalked fields. Besides it does not work when CMD or CTRL is pressed. (This still builds a filter)

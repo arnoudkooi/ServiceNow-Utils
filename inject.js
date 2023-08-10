@@ -52,7 +52,7 @@ var snuslashcommands = {
         "hint": "Copy Selected Cell Values from List [-s for SysIDs]"
     },
     "debug": {
-        "url": "javascript:window.top.launchScriptDebugger();",
+        "url": "*",
         "hint": "Open Script Debugger"
     },
     "bg": {
@@ -823,6 +823,13 @@ function snuSlashCommandAddListener() {
                 snuPostRequestToScriptSync();
                 snuSlashCommandInfoText("Trying to send current token to VS Code<br />", false);
                 snuSlashCommandHide();
+                return;
+            }
+            else if (shortcut == "debug") {
+                if (typeof window.top.launchScriptDebugger != "undefined")
+                    window.top.launchScriptDebugger();
+                else 
+                    snuSlashCommandInfoText("Cannot start debugger from here.");
                 return;
             }
             else if (shortcut == "code") {
@@ -3708,6 +3715,7 @@ function snuPostToScriptSync(field, fieldType) {
     if (fieldType == 'flowaction') {
         data.field = field.actionName;
         data.table = 'flow_action_scripts'
+        data.scope = field.scope;
         data.sys_id = field.sysId;
         data.content = field.script;
         data.fieldType = 'script';
