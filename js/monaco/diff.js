@@ -43,9 +43,30 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 else if (message.command.fieldName.includes('xml')) lang = 'xml';
                 else if (message.command.fieldName.includes('html')) lang = 'html';
 
+                let originalModel = monaco.editor.createModel(message.command.leftBody, lang);
+                let modifiedModel = monaco.editor.createModel(message.command.rightBody, lang);
+
                 editor.setModel({
-                    original: monaco.editor.createModel(message.command.leftBody, lang),
-                    modified: monaco.editor.createModel(message.command.rightBody, lang)
+                    original: originalModel,
+                    modified: modifiedModel
+                });
+
+                let swapped = false;
+                editor.addAction({
+                    id: "diff-swapper",
+                    label: "Swap Diff Panes",
+                    contextMenuGroupId: "navigation",
+
+                    run: function () {
+                        editor.setModel({
+                            original: swapped ? originalModel : modifiedModel,
+                            modified: swapped ? modifiedModel : originalModel
+                        })
+
+                        document.querySelector('#left').innerText = swapped ? message.command.leftTitle : message.command.rightTitle;
+                        document.querySelector('#right').innerText = swapped ? message.command.rightTitle : message.command.leftTitle;
+                        swapped = !swapped
+                    },
                 });
 
                 document.querySelector('.inline-it').addEventListener('change', (e) => {
