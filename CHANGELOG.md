@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.1.1.2 (2023-08-14)
+Fixes / changes:
+ - Resolve reports for tablename and sysid on sys_report_template.do (enables View Data and for example /list command)
+ - Add the link: [SN Utils] Switch to SCOPENAME application click here to cases without sys_scope on the form, when on a page in different scope.
+
 ## 7.1.1.0 (2023-08-11)
 Features:
  - Add in a context menu item to swap panes in the code diff viewer (PR #425)

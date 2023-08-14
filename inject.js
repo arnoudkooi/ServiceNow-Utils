@@ -1377,6 +1377,13 @@ function snuResolveVariables(variableString){
         encodedQuery = doc.g_form.getParameter('sysparm_query') || doc.g_form.getParameter('sysparm_record_list');
         variableString = variableString.replace(/\$encodedquery/g, encodedQuery);
     }
+    else if (location.pathname == "/sys_report_template.do"){ //report
+        let searchParams = new URLSearchParams(window.location.search);
+        tableName = "sys_report";
+        sysId =(searchParams.get('jvar_report_id') || '').replace(/[^a-f0-9-_]/g, '');
+        variableString = variableString.replace(/\$table/g,tableName);
+        variableString = variableString.replace(/\$sysid/g,sysId);
+    }
     else if (typeof doc.GlideList2 !== 'undefined') { //get tablename and encodequery from classic form
         if (typeof doc.g_form == 'undefined') {
             let listName = doc.document.querySelector('#sys_target')?.value;
@@ -3044,17 +3051,17 @@ function snuAddInfoButton()
 
 function snuAddSwitchToApplication() {
 
-    if (typeof g_form == 'undefined') return; 
+    if (!location.pathname.includes('.do')) return; 
     let elm = document.querySelector('.outputmsg_nav_inner');
     if (!elm) return; 
 
-    let scopeId = g_form.getValue('sys_scope');
+    let lnk = elm.querySelector('a'); //get the first link...
+    let scopeId =  (lnk.href.split('=').length == 2) ? lnk.href.split('=')[1] : '';
     if (!scopeId) return; 
-    let scopeVal = g_form.getDisplayBox('sys_scope').value;
-
+    let scopeVal = lnk.innerHTML;
 
     let spn = document.createElement("span");
-    spn.innerHTML = `&nbsp; [SN Utils] Switch to ${scopeVal} application click `;
+    spn.innerHTML = `&nbsp; [SN Utils] Switch to ${scopeVal} click `;
     spn.title = "Application switch function is added by SN Utils";
 
     let a = document.createElement("a");

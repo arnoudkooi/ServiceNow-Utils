@@ -1371,8 +1371,13 @@ function getTableSysId(){ //extracted from inject.js snuResolveVariables, todo:m
         sysId : ''
     }
     const loc = new URL(urlFull);
-    console.log(loc);
-    if (loc.pathname == "/$flow-designer.do"){ //flowdesigner
+    //console.log(loc);
+    if (loc.pathname == "/sys_report_template.do"){ //report
+        let searchParams = new URLSearchParams(loc.search);
+        ts.tableName = 'sys_report';
+        ts.sysId =(searchParams.get('jvar_report_id') || '').replace(/[^a-f0-9-_]/g, '');
+    }
+    else if (loc.pathname == "/$flow-designer.do"){ //flowdesigner
         if (loc.hash.startsWith("#/flow-designer/")){
             ts.tableName = "sys_hub_flow";
             ts.sysId = loc.hash.replace("#/flow-designer/","").substring(0,32);
