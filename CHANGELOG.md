@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 7.1.1.3 (2023-08-15)
+Fixes / changes:
+ - Remove scriptsync name clean regex (scriptsync issue #87)
+
 ## 7.1.1.2 (2023-08-14)
 Fixes / changes:
  - Resolve reports for tablename and sysid on sys_report_template.do (enables View Data and for example /list command)

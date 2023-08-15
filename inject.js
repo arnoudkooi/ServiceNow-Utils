@@ -3736,7 +3736,7 @@ function snuPostToScriptSync(field, fieldType) {
         data.content = g_form.getValue(field);
         data.fieldType = fieldType;
         data.scope = g_form.getValue('sys_scope');
-        data.name = g_form.getDisplayValue().replace(/[^a-z0-9_\-+]+/gi, '-');
+        data.name = g_form.getDisplayValue();  
 
     }
     else { //bgscript
