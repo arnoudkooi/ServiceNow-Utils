@@ -2854,57 +2854,62 @@ function snuSearchLargeSelects() {
 
 function snuSetShortCuts() {
     var divstyle;
-    if (snusettings.slashtheme == 'light') {
-        divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
-        div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
-        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
-        ul#snuhelper li {margin-top:2px}
-        span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; min-width: 40px; cursor: pointer; display: inline-block;}
-        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; font-weight:bold; width:99%; border: 1px solid #ffffff; margin:8px 2px 4px 2px; background-color:#ffffff }
-        span.cmdlabel { color: #333333; font-size:7pt; font-family:verdana, arial }
-        a.cmdlink { font-size:10pt; color: #1f8476; }
-        span.semihidden { font-size:6pt; color: #999; }
-        ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey { border-color: #8BB3A2}
-        ul#snuhelper li.active span.cmdlabel { color: black}
-        div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
-        div#snudirectlinks a {color:#22885c; text-decoration: none; }
-        div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        div.snutils a.patreon {color:#1f1cd2;}
-        </style>`;
-    }
-    else if (snusettings.slashtheme == 'stealth') {
-        divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
-        div.snuheader {display:none}
-        ul#snuhelper { display:none } 
-        ul#snuhelper li {display:none}
-        span.cmdkey {display:none}
-        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; background: transparent; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; width:100%; border: 0px; margin:8px 2px 4px 2px; }
-        span.cmdlabel { display:none }
-        a.cmdlink { display:none }
-        span.semihidden { display:none }
-        div#snudirectlinks {display:none;}
-        </style>`;
-    }
-    else {
-        divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; border: #333333 1pt solid; }
-        div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
-        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
-        ul#snuhelper li {margin-top:2px}
-        span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
-        input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:99%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
-        span.cmdlabel { color: #FFFFFF; font-size:7pt; }
-        a.cmdlink { font-size:10pt; color: #1f8476; } 
-        span.semihidden { font-size:6pt; color: #999; }
-        ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey  { border-color: yellow}
-        ul#snuhelper li.active span.cmdlabel { color: yellow}
-        div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
-        div#snudirectlinks a {color:#1cad6e; text-decoration: none; }
-        div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        div.snutils a.patreon {color:#0cffdd;}
-        </style>`;
+    switch(snusettings.slashtheme){
+        case 'light':
+            divstyle = `<style>
+            div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
+            div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
+            .impersonating { position: absolute; z-index: 100000; background: red; width: 100vw; height: 5px;}
+            ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
+            ul#snuhelper li {margin-top:2px}
+            span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #e3e3e3; background-color:#f3f3f3; min-width: 40px; cursor: pointer; display: inline-block;}
+            input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; font-weight:bold; width:99%; border: 1px solid #ffffff; margin:8px 2px 4px 2px; background-color:#ffffff }
+            span.cmdlabel { color: #333333; font-size:7pt; font-family:verdana, arial }
+            a.cmdlink { font-size:10pt; color: #1f8476; }
+            span.semihidden { font-size:6pt; color: #999; }
+            ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey { border-color: #8BB3A2}
+            ul#snuhelper li.active span.cmdlabel { color: black}
+            div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
+            div#snudirectlinks a {color:#22885c; text-decoration: none; }
+            div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            div.snutils a.patreon {color:#1f1cd2;}
+            </style>`;
+            break;
+        case 'stealth':
+            divstyle = `<style>
+            div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:1000000000000; font-size:10pt; position: fixed; top: 1px; left: 1px; padding: 0px; border: 0px; min-width:30px; }
+            div.snuheader {display:none}
+            .impersonating { position: absolute; z-index: 100000; background: red; width: 100vw; height: 5px;}
+            ul#snuhelper { display:none } 
+            ul#snuhelper li {display:none}
+            span.cmdkey {display:none}
+            input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:8pt; background: transparent; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; width:100%; border: 0px; margin:8px 2px 4px 2px; }
+            span.cmdlabel { display:none }
+            a.cmdlink { display:none }
+            span.semihidden { display:none }
+            div#snudirectlinks {display:none;}
+            </style>`;
+            break;
+        default:
+            divstyle = `<style>
+            div.snutils {font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; border: #333333 1pt solid;}
+            div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
+            .impersonating { position: absolute; z-index: 100000; background: red; width: 100vw; height: 5px;}
+            ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
+            ul#snuhelper li {margin-top:2px}
+            span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
+            input.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; outline: none; font-size:10pt; color:#00e676; font-weight:bold; width:99%; border: 1px solid #000000; margin:8px 2px 4px 2px; background-color:#000000F7 }
+            span.cmdlabel { color: #FFFFFF; font-size:7pt; }
+            a.cmdlink { font-size:10pt; color: #1f8476; } 
+            span.semihidden { font-size:6pt; color: #999; }
+            ul#snuhelper li:hover span.cmdkey, ul#snuhelper li.active span.cmdkey  { border-color: yellow}
+            ul#snuhelper li.active span.cmdlabel { color: yellow}
+            div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
+            div#snudirectlinks a {color:#1cad6e; text-decoration: none; }
+            div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            div.snutils a.patreon {color:#0cffdd;}
+            </style>`;
+            break;
     }
 
     var htmlFilter = document.createElement('div');
@@ -2920,7 +2925,21 @@ function snuSetShortCuts() {
     if (!window.top.document.querySelectorAll('#snufilter').length) { //prevent reinject 
         window.top.document.body.appendChild(htmlFilter);
         window.top.document.getElementById('cmdhidedot').addEventListener('click', evt => { snuSlashCommandHide(false, evt) });
+        window.top.document.querySelector('body').addEventListener('keydown', function (e) {
+            if (e.key == 'Escape') snuSlashCommandHide(false, e);
+        })
         window.top.document.getElementById('snufilter').addEventListener('focus', function () { this.select() });
+
+        var isImpersonatingElement = document.querySelector('script[data-description="NOW ucm, analytics related props"]')
+        if(isImpersonatingElement)
+            var isImpersonating = isImpersonatingElement.innerHTML.split('user_impersonating =')[1].split(';')[0].trim() == "true";
+    
+        if(isImpersonating){
+            let impersonationBar = document.createElement('div');
+            impersonationBar.className = 'impersonating';
+    
+            document.querySelector('body').prepend(impersonationBar);
+        }    
     }
     snuSlashCommandAddListener();
 
