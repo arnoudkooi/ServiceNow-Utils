@@ -2560,7 +2560,7 @@ function snuAddTechnicalNames() {
                     var sysid = vari.realName.substr(vari.realName.length - 32);
                     var tableName = g_form.getTableName();
                     // The variable definition table in case of the order form and the variable storage table in other cases
-                    var linkTableName = tableName == 'ni' ? 'item_option_new' : 'sc_item_option';
+                    var linkTableName = 'question';//tableName == 'ni' ? 'item_option_new' : 'sc_item_option';
                     newElm.innerHTML = "<span class='snuwrap'> | <a target='_blank' href='/" + linkTableName + ".do?sys_id=" + sysid + "'>" + vari.prettyName + "</a></span>"; newElm.style = "font-family:monospace;";
                     if (elm.tagName == 'DIV')
                         elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
@@ -3051,6 +3051,15 @@ function snuAddInfoButton()
 
 function snuAddSwitchToApplication() {
 
+    let msg =  window.querySelectorShadowDom?.querySelectorDeep('now-alert-content');
+    if (msg){
+        console.dir(msg);
+    }
+    else {
+        console.log("no msg");
+
+    }
+    
     if (!location.pathname.includes('.do')) return; 
     let elm = document.querySelector('.outputmsg_nav_inner');
     if (!elm) return; 

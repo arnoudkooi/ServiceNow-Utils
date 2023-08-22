@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 7.1.2.0 (2023-08-22)
+Features:
+ - Add swapbutton and imrpovements to diff editor (Issue #429 / PR #430 PromoFaux)
+Fixes / changes:
+ - Improve finding variable names for /tn function in formatter on forms
+
+
 ## 7.1.1.3 (2023-08-15)
 Fixes / changes:
  - Remove scriptsync name clean regex (scriptsync issue #87)

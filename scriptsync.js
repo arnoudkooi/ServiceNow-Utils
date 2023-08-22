@@ -205,12 +205,12 @@ $(document).ready(function () {
                     requestAppMeta(wsObj);
                 } else if (wsObj.action == 'bannerMessage') {
                    setBannerMessage(wsObj);
+                } else if (wsObj.action == 'updateVar') {
+                    updateVar(wsObj); 
                 } else if ('instance' in wsObj) {
                     if (wsObj.tableName == 'flow_action_scripts'){
                         updateActionScript(wsObj);                        
                     }
-                    else if (wsObj.fieldName.includes(".var__"))
-                        updateVar(wsObj);
                     else 
                         updateRecord(wsObj, true);
                 } else {
@@ -748,13 +748,12 @@ function updateActionScript(wsObj){
 
 function updateVar(wsObj){
    
-    var field = wsObj.fieldName.split(".")[2];
     var val = wsObj.content || "";
     val = JSON.stringify(val).slice(1, -1);
 
     var scrpt = `
     var grVar = new GlideRecord('sys_variable_value');
-    grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${field}");
+    grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${wsObj.fieldName}");
     grVar.setLimit(1);
     grVar.query();
     while (grVar.next()) {
