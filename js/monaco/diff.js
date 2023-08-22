@@ -34,7 +34,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             require(['vs/editor/editor.main'], () => {
                 editor = monaco.editor.createDiffEditor(document.getElementById('container'), {
-                    theme: theme
+                    theme: theme,
+                    automaticLayout: true,
+                    readOnly: true
                 });
 
                 var lang = '';
@@ -51,28 +53,25 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     modified: modifiedModel
                 });
 
-                let swapped = false;
-                editor.addAction({
-                    id: "diff-swapper",
-                    label: "Swap Diff Panes",
-                    contextMenuGroupId: "navigation",
-
-                    run: function () {
-                        editor.setModel({
-                            original: swapped ? originalModel : modifiedModel,
-                            modified: swapped ? modifiedModel : originalModel
-                        })
-
-                        document.querySelector('#left').innerText = swapped ? message.command.leftTitle : message.command.rightTitle;
-                        document.querySelector('#right').innerText = swapped ? message.command.rightTitle : message.command.leftTitle;
-                        swapped = !swapped
-                    },
-                });
-
                 document.querySelector('.inline-it').addEventListener('change', (e) => {
                     editor.updateOptions({
                         renderSideBySide: !e.target.checked
                     });
+                });
+
+                var swapit = true;
+                document.querySelector('.swap-it').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    editor.setModel({
+                        original: swapit ? modifiedModel : originalModel,
+                        modified: swapit ? originalModel : modifiedModel
+                    })
+
+                    var leftHeader = document.querySelector('#left').innerHTML;
+                    var rightHeader = document.querySelector('#right').innerHTML;
+                    document.querySelector('#left').innerHTML = rightHeader;
+                    document.querySelector('#right').innerHTML = leftHeader;
+                    swapit = !swapit
                 });
             });
 
@@ -114,17 +113,38 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
                     require(['vs/editor/editor.main'], () => {
                         editor = monaco.editor.createDiffEditor(document.getElementById('container'), {
-                            theme: theme
+                            theme: theme,
+                            automaticLayout: true,
+                            readOnly: true
                         });
+
+                        let originalModel = monaco.editor.createModel(leftXml, 'xml');
+                        let modifiedModel = monaco.editor.createModel(data, 'xml');
+
                         editor.setModel({
-                            original: monaco.editor.createModel(leftXml, 'xml'),
-                            modified: monaco.editor.createModel(data, 'xml')
+                            original: originalModel,
+                            modified: modifiedModel
                         });
 
                         document.querySelector('.inline-it').addEventListener('change', (e) => {
                             editor.updateOptions({
                                 renderSideBySide: !e.target.checked
                             });
+                        });
+
+                        var swapit = true;
+                        document.querySelector('.swap-it').addEventListener('click', (e) => {
+                            e.preventDefault();
+                            editor.setModel({
+                                original: swapit ? modifiedModel : originalModel,
+                                modified: swapit ? originalModel : modifiedModel
+                            })
+
+                            var leftHeader = document.querySelector('#left').innerHTML;
+                            var rightHeader = document.querySelector('#right').innerHTML;
+                            document.querySelector('#left').innerHTML = rightHeader;
+                            document.querySelector('#right').innerHTML = leftHeader;
+                            swapit = !swapit
                         });
                     });
                 })
