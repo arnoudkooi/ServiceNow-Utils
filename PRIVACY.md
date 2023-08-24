@@ -3,9 +3,7 @@ SN Utils is built and owned by Arnoud Kooi.
 SN Utils comes without warranty and as is. It is not allowed to copy or republish functionality without consent.
 The source code is available on GitHub so that you can review it if you trust it as an individual or corporation.
 
-This page is used to inform visitors regarding my policies regarding the collection, use, and disclosure of Personal Information if anyone decided to use SN Utils.
-
-If you choose to use my SN Utils, then you agree to the collection and use of information in relation to this policy. The Personal Information that I collect is used for providing and improving the Service. I will not use or share your information with anyone except as described in this Privacy Policy.
+This page is used to inform visitors regarding my policies regarding the collection, use, and disclosure of Personal Information if anyone decides to use SN Utils.
 
 ## Data collection
 SN Utils does not collect data.
