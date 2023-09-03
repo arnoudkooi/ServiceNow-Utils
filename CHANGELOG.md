@@ -1,8 +1,22 @@
 # CHANGELOG.md
 
+## 7.1.3.0 (2023-09-04)
+Fixes / changes:
+ - Embed /bgc script inside if statement for the .get function
+ - Add a link to the workflow editor from a workflow context
+ - Improve dispatching slashcommand in Next Experience (adding context to payload)
+ - Prevent showing duplicates in /sa (Switch Application) slash command
+ - Rewrite multiple function in inject.js to use fetch instead of XMLHttpRequest
+ - Remove no longer used snuGetNav and snuShowSlashCommand functions
+ - Rename snuLoadXMLDoc function to snuFetchData in inject.js
+ - Removing some console.log statements in inject.js
+ - Update Utah slash commands to Vancouver
+ - Add link to linkedin post in popup info page
+
+
 ## 7.1.2.0 (2023-08-22)
 Features:
- - Add swapbutton and imrpovements to diff editor (Issue #429 / PR #430 PromoFaux)
+ - Add swapbutton and improvements to diff editor (Issue #429 / PR #430 PromoFaux)
 Fixes / changes:
  - Improve finding variable names for /tn function in formatter on forms
 

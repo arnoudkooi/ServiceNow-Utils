@@ -60,7 +60,7 @@ var snuslashcommands = {
         "hint": "Background Script"
     },
     "bgc": {
-        "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord(%22$table%22);%0Acurrent.get(%22$sysid%22);%0A%0Ags.info(current.getDisplayValue());',
+        "url": '/sys.scripts.do?content=var%20current%20%3D%20new%20GlideRecord%28%22$table%22%29%3B%0Aif%20%28current.get%28%22$sysid%22%29%29%7B%0A%20%20%20%20gs.info%28current.getDisplayValue%28%29%29%3B%0A%7D',
         "hint": "Background Script with var current"
     },
     "bgl": {
@@ -101,7 +101,7 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/utah/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/vancouver/All/$0",
         "hint": "Search developer portal <search>"
     },
     "diff1": {
@@ -117,7 +117,7 @@ var snuslashcommands = {
         "hint": "Compare current record XML with XML of <instance>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=utah",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=vancouver",
         "hint": "Search Docs <search>"
     },
     "env": {
@@ -438,7 +438,7 @@ function snuGetTables(shortcut) {
     }
 
     var myurl = '/api/now/table/sys_db_object?sysparm_limit=100&sysparm_fields=name,label&sysparm_query=sys_update_nameISNOTEMPTY^nameNOT LIKE$^nameNOT LIKE00' + qry + '^ORDERBYname';
-    snuLoadXMLDoc(g_ck, myurl, null, function (jsn) {
+    snuFetchData(g_ck, myurl, null, function (jsn) {
 
         if (jsn.hasOwnProperty('result')) {
             var results = jsn.result;
@@ -484,7 +484,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
         } catch (ex) {
             return false;
         }
-        snuLoadXMLDoc(g_ck, url, null, function (jsn) {
+        snuFetchData(g_ck, url, null, function (jsn) {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
                 var results = jsn.result;
@@ -544,7 +544,6 @@ function snuGetDirectLinks(targeturl, shortcut) {
         })
     }
 }
-
 
 function snuExcuteHashCommand(args) {
     if (args.length == 4 && args[0] == 'switchto') {
@@ -1042,32 +1041,27 @@ function snuSlashCommandAddListener() {
                     snuSlashCommandInfoText("You are not impersonating anyone", false);
                 }
             }
-            else if (shortcut == "lang") {
-                {
-
-                    if (query.length != 2) {
-                        snuSlashCommandInfoText("Please provide a 2 character language code like 'en'", false);
-                        return;
-                    }
-                    var payload = { "current": query };
-
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4) {
-                            location.reload();
-                        }
-                    };
-                    xhttp.open("PUT", "/api/now/ui/concoursepicker/language", true);
-                    xhttp.setRequestHeader("Accept", "application/json, text/plain, */*");
-                    xhttp.setRequestHeader("Cache-Control", "no-cache");
-                    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                    if (g_ck) xhttp.setRequestHeader("X-UserToken", g_ck);
-                    xhttp.setRequestHeader("X-WantSessionNotificationMessages", true)
-                    xhttp.send(JSON.stringify(payload));
-
-                    return;
+            else if (shortcut === "lang") {
+                if (query.length !== 2) {
+                  snuSlashCommandInfoText("Please provide a 2 character language code like 'en'", false);
+                  return;
                 }
-            }
+                const headers = {
+                  "Accept": "application/json, text/plain, */*",
+                  "Cache-Control": "no-cache",
+                  "Content-Type": "application/json;charset=UTF-8",
+                  "X-UserToken": g_ck || undefined,
+                  "X-WantSessionNotificationMessages": true
+                };
+                fetch("/api/now/ui/concoursepicker/language", {
+                  method: "PUT",
+                  headers,
+                  body: JSON.stringify({ "current": query })
+                }).then(response => {
+                  if (response.ok) location.reload();
+                });
+                return;
+            }              
             else if (!snuslashcommands.hasOwnProperty(shortcut)) {
 
                 var inIFrame = (shortcut == snufilter.slice(0, idx) && sameWindow)
@@ -1126,7 +1120,11 @@ function snuSlashCommandAddListener() {
                                 "params": {
                                     "target": targeturl
                                 },
-                                "route": "classic"
+                                "route": "classic",
+                                "context": {
+                                    "experienceName": "Unified Navigation App",
+                                    "path": "now/nav/ui"
+                                }
                             });
         
                         }
@@ -1144,7 +1142,11 @@ function snuSlashCommandAddListener() {
                         "params": {
                             "target": targeturl
                         },
-                        "route": "classic"
+                        "route": "classic",
+                        "context": {
+                            "experienceName": "Unified Navigation App",
+                            "path": "now/nav/ui"
+                        }
                     });
 
                 }
@@ -1536,6 +1538,7 @@ function snuSettingsAdded() {
         snuAddLinkToCachDo();
         snuAddInfoButton();
         snuAddSwitchToApplication();
+        snuOpenWorkflowLink();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1772,7 +1775,6 @@ function flowDesignerDoubleClick() {
             if (elm) {
                 let angElm = angular.element(elm).scope().$parent;
                 let oldValue = angElm.filterConfig.encodedQuery;
-                console.log(angElm);
                 if (event.ctrlKey || event.metaKey) {
                     window.open(`${angElm.table}_list.do?sysparm_query=${oldValue}&sysparm_filter_pinned=true`);
                 } else {
@@ -1916,7 +1918,7 @@ function snuAddFormDesignScopeChange() {
                 if (section) {
                     var scope = section.getAttribute('form-scope');
                     var urlScope = '/api/now/table/sys_scope?sysparm_fields=sys_id&sysparm_display_value=true&sysparm_query=scope=' + scope;
-                    snuLoadXMLDoc(g_ck, urlScope, null, res => {
+                    snuFetchData(g_ck, urlScope, null, res => {
                         var scopeId = res.result[0].sys_id;
                         snuSlashCommandInfoText(`<br />Switch to scope of this view: <a id='snuswitcscope' href='#'  >${scope}</a>`);
                         document.querySelector('#snuswitcscope').addEventListener('click', e => {
@@ -1995,7 +1997,6 @@ function snuCaptureFormClick() {
 
     if (typeof g_form != 'undefined') {
         document.addEventListener('click', function (event) {
-            console.log(event);
 
             if (event.ctrlKey || event.metaKey || event?.target?.className == "dict") {
                 var tpe = '';
@@ -2180,7 +2181,7 @@ function snuEnhanceNotFound(advanced) {
         }
     }
 
-    snuLoadXMLDoc(g_ck, myurl, null, function (jsn) {
+    snuFetchData(g_ck, myurl, null, function (jsn) {
         var results = jsn.result;
         if (results.length == 0) html += '<li>None found...</li>'
         for (var i = 0; i < results.length; i++) {
@@ -2597,7 +2598,7 @@ function snuExtendedFieldInfo() {
     var tableFields = {};
     var tableName = g_form.getTableName();
     //get all fields and group them by the table they are on.
-    snuLoadXMLDoc(g_ck, `/api/now/table/sys_dictionary?sysparm_query=nameINjavascript:new PAUtils().getTableAncestors('${tableName}')^element!=NULL^ORDERBYname,element^ORDERBYname&sysparm_exclude_reference_link=false&sysparm_suppress_pagination_header=true&sysparm_fields=element%2Cname&sysparm_no_count=true`, null, jsn => {
+    snuFetchData(g_ck, `/api/now/table/sys_dictionary?sysparm_query=nameINjavascript:new PAUtils().getTableAncestors('${tableName}')^element!=NULL^ORDERBYname,element^ORDERBYname&sysparm_exclude_reference_link=false&sysparm_suppress_pagination_header=true&sysparm_fields=element%2Cname&sysparm_no_count=true`, null, jsn => {
         jsn.result.forEach(elm => {
             (tableFields[elm.name]) ? tableFields[elm.name].push(elm.element) : tableFields[elm.name] = [elm.element];
         })
@@ -2607,7 +2608,7 @@ function snuExtendedFieldInfo() {
         
         if (tables.length <= 2) objToHtml(tables, tableFields);
         else { //more tables in hierarchy we need to determine order via a server call
-            snuLoadXMLDoc(g_ck, `/api/now/table/sys_db_object?sysparm_query=nameIN${tables.join(',')}&sysparm_display_value=true&sysparm_fields=name%2Csuper_class.name`, null, tbls => {
+            snuFetchData(g_ck, `/api/now/table/sys_db_object?sysparm_query=nameIN${tables.join(',')}&sysparm_display_value=true&sysparm_fields=name%2Csuper_class.name`, null, tbls => {
                 var loop = true;
                 var loops = 0;
                 var tablesOrdered = [];
@@ -2910,7 +2911,7 @@ function snuSetShortCuts() {
     var htmlFilter = document.createElement('div');
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.linkedin.com/feed/update/urn:li:activity:7039894217128570880/" target="_blank">/tn deep dive</a>&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.linkedin.com/posts/arnoudkooi_sn-utils-slash-commands-table-form-navigation-activity-7099348581974712321-gh9u?utm_source=share&utm_medium=member_desktop" target="_blank">🌟 Table navigation</a>&nbsp;</span></div>
     <input id="snufilter" name="snufilter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="both" aria-haspopup="false" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks"></div>
@@ -3052,13 +3053,6 @@ function snuAddInfoButton()
 function snuAddSwitchToApplication() {
 
     let msg =  window.querySelectorShadowDom?.querySelectorDeep('now-alert-content');
-    if (msg){
-        console.dir(msg);
-    }
-    else {
-        console.log("no msg");
-
-    }
     
     if (!location.pathname.includes('.do')) return; 
     let elm = document.querySelector('.outputmsg_nav_inner');
@@ -3079,6 +3073,25 @@ function snuAddSwitchToApplication() {
     spn.append(a);
     elm.append(spn);
 
+
+}
+
+function snuOpenWorkflowLink(){
+    
+        if (location.pathname != '/context_workflow.do') return; 
+        let sysId = document.querySelector('#tab1')?.attributes['ontabactivate'].value.match(/\b[a-f\d]{32}\b/)[0];
+        if (!sysId) return;
+
+        snuFetchData(g_ck, '/api/now/table/wf_context/' +sysId + '?sysparm_display_value=false&sysparm_exclude_reference_link=true&sysparm_fields=workflow_version', null, res => {
+            let wfv = res.result.workflow_version;
+            let nbar = document.querySelector('h1.navbar-title');
+            let a = document.createElement("a");
+            a.innerText = "[SN Utils] Edit Workflow";
+            a.href = "/workflow_ide.do?sysparm_sys_id=" + wfv;
+            a.title = "Link added by SN Utils";
+            a.target = "_blank";
+            nbar.append(a);
+        })
 
 }
 
@@ -3162,7 +3175,7 @@ function snuLoadInfoMessage() {
     g_form.addInfoMessage(`<span style='font-size:9pt'>[SN Utils] Loading record info...`);
 
 
-    snuLoadXMLDoc(g_ck, reqUrl, null, res => {
+    snuFetchData(g_ck, reqUrl, null, res => {
 
         let flds = res?.result;
         let html;
@@ -3226,51 +3239,53 @@ function getBlob(encoded) {
     });
 }
 
-function snuSaveImage(imgData, fileInfo, tableName, sysId) {
-    function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
-    var date = new Date();
-    fileName = 'screenshot_' + date.getFullYear().toString() +
-        pad2(date.getMonth() + 1) + pad2(date.getDate()) + '_' +
-        pad2(date.getHours()) + pad2(date.getMinutes()) +
-        pad2(date.getSeconds()) + '.png';
+async function snuSaveImage(imgData, fileInfo, tableName, sysId) {
+    const pad2 = n => n < 10 ? '0' + n : n;
+    const date = new Date();
+    const fileName = `screenshot_${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(date.getDate())}_${pad2(date.getHours())}${pad2(date.getMinutes())}${pad2(date.getSeconds())}.png`;
 
-    var URL = "/api/now/attachment/file?table_name=" +
-        tableName + "&table_sys_id=" + sysId + "&file_name=" + fileName;
+    const URL = `/api/now/attachment/file?table_name=${tableName}&table_sys_id=${sysId}&file_name=${fileName}`;
+    const headers = {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json',
+        'Content-Type': fileInfo.type,
+        'X-UserToken': g_ck || undefined
+    };
 
-    var request = new XMLHttpRequest();
-    request.open("POST", URL, true);
-    request.setRequestHeader('Cache-Control', 'no-cache');
-    request.setRequestHeader('Accept', 'application/json');
-    request.setRequestHeader('Content-Type', fileInfo.type);
-    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
+    try {
+        const response = await fetch(URL, {
+            method: 'POST',
+            headers,
+            body: imgData
+        });
 
-    request.onload = function (resp) {
-        if (this.status >= 200 && this.status < 400) {
-            var r = JSON.parse(this.response);
-            if (typeof g_form != 'undefined') {
+        if (response.ok) {
+            const r = await response.json();
+            if (typeof g_form !== 'undefined') {
                 g_form.clearMessages();
-                g_form.addInfoMessage("<span>Pasted image added as attachment<br /><a href='/" + r.result.sys_id + ".iix' target='myimg'><img src='" + r.result.sys_id + ".iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />" +
+                g_form.addInfoMessage(
+                    `<span>Pasted image added as attachment<br /><a href='/${r.result.sys_id}.iix' target='myimg'><img src='${r.result.sys_id}.iix?t=small' alt='upload' style='display:inline!important; padding:20px;'/></a><br />` +
                     `<div class="input-group">
-                <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("` + r.result.sys_id + `")' type="text" value="` + r.result.file_name.replace('.png', '') + `" style='width:260px;'class="form-control" placeholder="Image name">
-                <span class="input-group-btn" style="display: inline; ">
-                <button class="btn btn-primary" onClick='renamePasted("` + r.result.sys_id + `")' style="width: 80px;" type="button">.png Save..</button>
-                </span>
-            </div><span id='divRenamed'></span></form>`);
-                jQuery('#tbxImageName').focus().select();
+                    <input id='tbxImageName' onKeyUp='if (event.keyCode == 13) renamePasted("${r.result.sys_id}")' type="text" value="${r.result.file_name.replace('.png', '')}" style='width:260px;' class="form-control" placeholder="Image name">
+                    <span class="input-group-btn" style="display: inline; ">
+                    <button class="btn btn-primary" onClick='renamePasted("${r.result.sys_id}")' style="width: 80px;" type="button">.png Save..</button>
+                    </span>
+                    </div><span id='divRenamed'></span></form>`
+                );
+                const inputElem = document.getElementById('tbxImageName');
+                inputElem.focus();
+                inputElem.select();
             }
-        } else {
-            //callback(this);
         }
-    };
-    request.onerror = function (error) {
+    } catch (error) {
         console.log(error);
-        if (typeof g_form != 'undefined') {
+        if (typeof g_form !== 'undefined') {
             g_form.clearMessages();
-            g_form.addErrorMessage(error.responseJSON.error.detail);
+            g_form.addErrorMessage(error.responseJSON?.error?.detail || 'An error occurred');
         }
-    };
-    request.send(imgData);
+    }
 }
+
 
 function renamePasted(sysID, check) {
 
@@ -3337,36 +3352,26 @@ function snuGetFormElementNames() {
 }
 snuGetFormElementNames();
 
-function snuLoadXMLDoc(token, url, post, callback) {
+async function snuFetchData(token, url, post, callback) {
+    const headers = {
+      'Cache-Control': 'no-cache',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-UserToken': token || undefined
+    };
+    
     try {
-
-        var method = "GET";
-        if (post) method = "PUT";
-
-        var request = new XMLHttpRequest();
-        request.open(method, url, true);
-        request.setRequestHeader('Cache-Control', 'no-cache');
-        request.setRequestHeader('Accept', 'application/json');
-        request.setRequestHeader('Content-Type', 'application/json');
-        if (token) request.setRequestHeader('X-UserToken', token);
-
-        request.onload = function () {
-            if (this.status >= 200 && this.status < 400) {
-                callback(JSON.parse(this.response));
-            } else {
-                callback(this);
-            }
-        };
-        request.onerror = function () {
-            // There was a connection error of some sort
-        };
-        request.send(post || "");
-
+      const response = await fetch(url, {
+        method: post ? 'PUT' : 'GET',
+        headers,
+        body: post ? JSON.stringify(post) : null
+      });
+  
+      callback(response.ok ? await response.json() : response);
     } catch (error) {
-        console.log('Server Request failed (' + error + ')');
+      console.log(`Server Request failed (${error})`);
     }
 }
-
 
 // async function snuFetch(pathToResource) {
 // todo: move rest api call to fetch api / async functions
@@ -3405,7 +3410,6 @@ function snuStartBackgroundScript(script, callback) {
             }).toString()
         }).then(response => response.text())
             .then(data => {
-                console.log(data);
                 callback(data);
             }).catch(error => {
                 snuSlashCommandInfoText('Background Script failed (' + error + ')<br />', true);
@@ -3564,14 +3568,36 @@ function snuFillFields(query) {
                     return;
                 }
                 var manFields = frm.contentWindow.g_form.getMissingFields();
-                if (g_form.getTableName() != 'ni')
+                if (g_form.getTableName() != 'ni'){
                     setRandom(g_form.getTableName(), manFields, frm.contentWindow);
+                    //setRandomAll(g_form.getTableName(), frm.contentWindow);
+                }
                 else
                     snuSlashCommandInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog.<br />`, false);
 
             }
         });
     }
+
+    function setRandomAll(tbl, doc) {
+
+
+        snuSlashCommandInfoText(`<b>Log</b><br />- ${flds.length} Empty mandatory fields found.<br />`, false);
+
+        flds.push("");
+        var encQ = flds.join("ISNOTEMPTY^");
+        flds.pop();
+        snuGetRandomRecord(tbl, encQ, true, res => {
+            flds.forEach(fld => {
+                snuSlashCommandInfoText(`- Applying data to mandatory field`, true);
+
+                var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string") && doc.g_form.getControl(fld).tagName != "SELECT") ? "RANDOM TEST DATA " : "") + res[fld].value;
+                doc.g_form.setValue(fld, val, res[fld].display_value);
+                setTimeout(snuSlashCommandHide, 3000);
+            })
+        })
+    }
+
     function setRandom(tbl, flds, doc) {
 
         if (!flds.length) {
@@ -3586,7 +3612,6 @@ function snuFillFields(query) {
         snuGetRandomRecord(tbl, encQ, true, res => {
             flds.forEach(fld => {
                 snuSlashCommandInfoText(`- Applying data to mandatory field`, true);
-                console.log(doc.g_form.getControl(fld).tagName != "SELECT");
 
                 var val = ((doc.g_form.getGlideUIElement(fld).type.includes("string") && doc.g_form.getControl(fld).tagName != "SELECT") ? "RANDOM TEST DATA " : "") + res[fld].value;
                 doc.g_form.setValue(fld, val, res[fld].display_value);
@@ -4224,67 +4249,6 @@ var snuGetParents = function (elem, selector) {
     return parents;
 };
 
-function snuGetNav(shortcut) {
-
-    if (shortcut == 'hist' && ((new Date()).getTime() - snuNav.loadedLastTime) > 60000) snuNav.loading = 'mustload';
-    snuNav.loadedLastTime = (new Date()).getTime(); //in case of history refresh every 60sec
-
-    if (snuNav.loading != 'mustload' || !g_ck) return;
-    snuNav.loading = 'loading';
-    var xhttp = new XMLHttpRequest();
-    xhttp.responseType = 'json';
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            var resp = this.response.result;
-            var navArr = [];
-            Object.entries(resp['applications']).forEach(([key, val]) => {
-                Object.entries(val.modules).forEach(([key2, val2]) => {
-                    if (val2.type == "SEPARATOR") {
-                        Object.entries(val2.modules).forEach(([key3, val3]) => {
-                            navArr.push({ "app": (val.title + " - " + (val2.title || "")).replace("  ", " "), "item": val3.title, "uri": val3.uri })
-                        });
-                    }
-                    else {
-                        navArr.push({ "app": val.title, "item": val2.title, "uri": val2.uri })
-                    }
-                });
-            });
-            snuNav['applications'] = navArr;
-
-            navArr = [];
-            Object.entries(resp['favorites']).forEach(([key, val]) => {
-                if (val.hasOwnProperty('favorites')) {
-                    Object.entries(val.favorites).forEach(([key2, val2]) => {
-                        if (val2.separator) {
-                            Object.entries(val2.favorites).forEach(([key3, val3]) => {
-                                navArr.push({ "app": (val.title + " - " + (val2.title || "")).replace("  ", " "), "item": val3.title, "uri": val3.url })
-                            });
-                        }
-                        else {
-                            navArr.push({ "app": val.title, "item": val2.title, "uri": val2.url })
-                        }
-                    });
-                }
-            });
-            snuNav['favorites'] = navArr;
-
-            navArr = [];
-            Object.entries(resp['history']).forEach(([key, val]) => {
-
-                navArr.push({ "app": val.title, "item": val.description || val.title, "uri": val.url })
-
-            });
-            snuNav['history'] = navArr;
-
-            snuNav.loading = 'loaded';
-
-        }
-    };
-    xhttp.open("GET", "api/now/ui/navigator/favorites", true);
-    xhttp.send();
-}
-
-
 function snuInsertAfter(newNode, referenceNode) {
     referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
@@ -4381,24 +4345,30 @@ function snuGetUsersForImpersonate(query) {
     client.send();
 }
 
-function snuImpersonate(userName) {
-    var client = new XMLHttpRequest();
-    client.open("post", "/api/now/ui/impersonate/" + userName);
-    client.setRequestHeader('Accept', 'application/json');
-    client.setRequestHeader('Content-Type', 'application/json');
-    if (g_ck) client.setRequestHeader("X-UserToken", g_ck);
-    client.onreadystatechange = function () {
-        if (this.readyState == this.DONE) {
-            location.reload();
-            snuSlashCommandHide();
+async function snuImpersonate(userName) {
+    try {
+      const res = await fetch(`/api/now/ui/impersonate/${userName}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-UserToken': g_ck || ''
         }
-    };
-    client.send("");
+      });
+      if (res.ok) {
+        location.reload();
+        snuSlashCommandHide();
+      } else {
+         snuSlashCommandInfoText(`Failed: ${res.status} ${res.statusText}`,false);
+      }
+    } catch (err) {
+        snuSlashCommandInfoText(`Error: ${err}`,false);
+    }
 }
-
+  
 function snuGetLastScopes(query) {
     var urlPref = "/api/now/table/sys_user_preference?sysparm_limit=10&sysparm_fields=sys_id,name,sys_updated_on&sysparm_display_value=true&sysparm_query=nameSTARTSWITHupdateSetForScope^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_updated_on";
-    snuLoadXMLDoc(g_ck, urlPref, null, res => {
+    snuFetchData(g_ck, urlPref, null, res => {
         snuSlashCommandInfoText(`<b>Log</b><br />- Looking up recent scopes in preferences.<br />`, false);
 
         var scopes = []
@@ -4415,9 +4385,9 @@ function snuGetLastScopes(query) {
         if (query) {
             urlScope = `/api/now/table/sys_scope?sysparm_fields=sys_id,scope,name&sysparm_display_value=true&sysparm_query=nameLIKE${query}^ORscopeLIKE${query}`;
         }
-        snuLoadXMLDoc(g_ck, urlScope, null, res => {
+        snuFetchData(g_ck, urlScope, null, res => {
 
-            //this is a fix to suppor searching for scopes, instead of displaying last 10
+            //this is a addition to support searching for scopes, instead of displaying last 10
             if (query) {
                 res.result.forEach(scp => {
                     scopes.push(scp.sys_id)
@@ -4434,6 +4404,7 @@ function snuGetLastScopes(query) {
 
             //var lastScopes = []
             var scopeDirectLinks = '';
+            scopes = [...new Set(scopes)]; //remove duplicates
             scopes.forEach(scp => {
                 if (returnScopes.hasOwnProperty(scp)) {
                     returnScopes[scp]['date'] = scopesObj[scp];
@@ -4503,44 +4474,34 @@ function snuSwitchTo(switchType, key, val) {
         });
 }
 
-function snuGetRandomRecord(table, query, fullRecord, callback) {
-    var url = "/api/now/table/" + table + "?sysparm_limit=1&sysparm_fields=sys_id&sysparm_display_value=false&sysparm_query=" + query;
-    var request = new XMLHttpRequest();
-    request.open("GET", url, true);
-    request.setRequestHeader('Cache-Control', 'no-cache');
-    request.setRequestHeader('Accept', 'application/json');
-    request.setRequestHeader('Content-Type', 'application/json');
-    if (g_ck) request.setRequestHeader('X-UserToken', g_ck);
-    request.onload = function () {
-        var rows = request.getResponseHeader("X-Total-Count");
-        var rnd = Math.floor(Math.random() * rows);
-
-        if (fullRecord) {
-            if (Number(rows))
-                snuSlashCommandInfoText(`- Found ${rows} matching rows<br />- Fetching data from match ${rnd}<br />`, true);
-            else {
-                snuSlashCommandInfoText(`- No template found, try setting some values and run again<br />`, true);
-                return
-            }
-        }
-
-
-        url = "/api/now/table/" + table + "?sysparm_limit=1&" + ((fullRecord) ? "" : "sysparm_fields=sys_id&") + "sysparm_display_value=all&sysparm_query=" + query + "&sysparm_offset=" + rnd;
-
-        snuLoadXMLDoc(g_ck, url, "", res => {
-            if (res.result[0])
-                res = (fullRecord) ? res.result[0] : res.result[0].sys_id.value;
-            else
-                res = 0;
-            callback(res);
-        });
-
+async function snuGetRandomRecord(table, query, fullRecord, callback) {
+    const headers = {
+      'Cache-Control': 'no-cache',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-UserToken': g_ck || undefined
     };
-    request.onerror = function () {
-        snuSlashCommandInfoText("- Could not load data. (no access)<br />", true);
-    };
-    request.send();
-}
+    
+    let url = `/api/now/table/${table}?sysparm_limit=1&sysparm_fields=sys_id&sysparm_display_value=false&sysparm_query=${query}`;
+    let response = await fetch(url, { headers });
+    const rows = response.headers.get("X-Total-Count");
+    const rnd = Math.floor(Math.random() * rows);
+    
+    if (fullRecord) {
+      if (Number(rows))
+        snuSlashCommandInfoText(`- Found ${rows} matching rows<br />- Fetching data from match ${rnd}<br />`, true);
+      else {
+        snuSlashCommandInfoText(`- No template found, try setting some values and run again<br />`, true);
+        return;
+      }
+    }
+  
+    url = `/api/now/table/${table}?sysparm_limit=1&${fullRecord ? "" : "sysparm_fields=sys_id&"}sysparm_display_value=all&sysparm_query=${query}&sysparm_offset=${rnd}`;
+    const res = await (await fetch(url, { headers })).json();
+    const result = res.result[0] ? (fullRecord ? res.result[0] : res.result[0].sys_id.value) : 0;
+    callback(result);
+  }
+  
 
 
 function snuSetRandomPortal(allFields, iteration) {
@@ -4633,7 +4594,7 @@ function snuImpersonater(doc) {
     if (!impersonatingUser) {
         try {
             var client = new XMLHttpRequest();
-            client.open("get", "notfoundthispage.do", false);
+            client.open("get", "notfoundthispage.do", false); //false makes it sync
             client.send();
             impersonatingUser = client.response.match(/(\'user.impersonation\', \')([^&]*)\'\)/)[2];
         } catch (e) { }
@@ -4674,8 +4635,6 @@ function snuPersonaliseList(autoclose, addsysid) {
 
     function loop() {
         setTimeout(() => {
-            console.log("len " + document.querySelectorAll(`#slush_left option, #slush_right option`).length);
-
             if (document.querySelectorAll(`#slush_left option, #slush_right option`).length < 3 && loops < 10) {
                 loops++;
                 loop(); //not loaded, try again after xx ms
@@ -4905,9 +4864,3 @@ function snuSlashLog(addValue = false) {
     }
     return slashLog;
 }
-
-function snuShowSlashCommand(){
-    alert('snuShowSlashCommand function is renamed to snuSlashCommandShow please update your code');
-}
-
-
