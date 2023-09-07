@@ -1279,7 +1279,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
     window.top.document.querySelectorAll("#snuhelper li.cmdfilter").forEach(function (elm) { elm.addEventListener("click", setSnuFilter) });
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
 
-    if (snusettings.slashnavigatorsearch && snuPropertyNames.length == 0 && switchText.length <=25)
+    if (snusettings.slashnavigatorsearch && snuPropertyNames.length <= 3 && switchText.length <=25)
         snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter);
 }
 
@@ -1320,7 +1320,7 @@ function snuDiffXml(shortcut, instance = '') {
         host = host.replace(window.location.host, newinstance);
     }
 
-    let thisUrl = `${origin}/${doc.g_form.getTableName()}.do?XML=&sys_id=${doc.g_form.getUniqueValue()}`;
+    let thisUrl = `${origin}/${doc.g_form.getTableName()}.do?sys_target=&XML=&sys_id=${doc.g_form.getUniqueValue()}`; //adding sys_target returns display values in XML
     let delay = 0;
 
     if (shortcut == 'diff1') {
@@ -1474,22 +1474,22 @@ function snuSlashCommandAdd(cmd) {
 function snuSettingsAdded() {
     if (snuSettingsParsed) return;
     snuSettingsParsed = true; //only run once when installed both normal and OnPrem version
-    if (typeof snusettings.nouielements == 'undefined') snusettings.nouielements = false;
-    if (typeof snusettings.applybgseditor == 'undefined') snusettings.applybgseditor = true;
-    if (typeof snusettings.nopasteimage == 'undefined') snusettings.nopasteimage = false;
-    if (typeof snusettings.vsscriptsync == 'undefined') snusettings.vsscriptsync = true;
-    if (typeof snusettings.codeeditor == 'undefined') snusettings.codeeditor = true;
-    if (typeof snusettings.s2ify == 'undefined') snusettings.s2ify = false;
-    if (typeof snusettings.highlightdefaultupdateset == 'undefined') snusettings.highlightdefaultupdateset = true;
-    if (typeof snusettings.slashnavigatorsearch == 'undefined') snusettings.slashnavigatorsearch = true;
-    if (typeof snusettings.slashhistory == 'undefined') snusettings.slashhistory = 50;
-    if (typeof snusettings.addtechnicalnames == 'undefined') snusettings.addtechnicalnames = false;
-    if (typeof snusettings.slashoption == 'undefined') snusettings.slashoption = 'on';
-    if (typeof snusettings.slashtheme == 'undefined') snusettings.slashtheme = 'dark';
-    if (typeof snusettings.listfields == 'undefined') snusettings.listfields = 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
-    if (typeof snusettings.slashsswitches == 'undefined' || snusettings.slashsswitches == '') snusettings.slashsswitches = '{}';
-    if (typeof snusettings.monacooptions == 'undefined') snusettings.monacooptions = `{ "wordWrap" : "on", "contextmenu" : true }`;
-
+    snusettings.nouielements ??= false; //set default values in case property is not set
+    snusettings.applybgseditor ??= true;
+    snusettings.nopasteimage ??= false;
+    snusettings.vsscriptsync ??= true;
+    snusettings.codeeditor ??= true;
+    snusettings.s2ify ??= false;
+    snusettings.highlightdefaultupdateset ??= true;
+    snusettings.slashnavigatorsearch ??= true;
+    snusettings.slashhistory ??= 50;
+    snusettings.addtechnicalnames ??= false;
+    snusettings.slashoption ??= 'on';
+    snusettings.slashtheme ??= 'dark';
+    snusettings.listfields ??= 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
+    snusettings.slashsswitches ??= '{}';
+    snusettings.monacooptions ??= `{ "wordWrap" : "on", "contextmenu" : true }`;
+    
     try { //ignore if not valid json
         let addedslashsswitches = JSON.parse(snusettings.slashsswitches);
         snuslashswitches = {...snuslashswitches, ...addedslashsswitches};
@@ -4779,11 +4779,12 @@ function snuDoSlashNavigatorSearch(search) {
     let words = [...new Set(search.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
         (unique, item) => ( unique.filter(e => item.includes(item)).length > 5 ? unique : [...unique, item]),[],); //todo check undouble
 
-    let directlinks = '<div style="font-weight:bold; margin-bottom:5px;">🔍 Navigator search [Beta]</div>';
+    let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">🔍 Navigator search</div>';
     let idx = 0;
     let dispIdx = 0;
     let lastgroup = '';
     let filtered = snuSlashNavigatorData.filter(itm => containsWords(itm.fulltext));
+    if (!filtered.length) directlinks = "";
     filtered.forEach(res => {
         let link = res?.route?.params?.target || res?.route?.external?.url || res?.route?.external?.target || '';
         //var target = "gsft_main";
