@@ -1,4 +1,12 @@
 # CHANGELOG.md
+## 7.1.3.4 (2023-09-07)
+Fixes / changes:
+ - Expand the fucntion to add link to syslog table to sys_update_xml name field
+ - Renamed function snuAddErrorLogScriptLinks to snuAddListLinks for this reason
+ - Updated links that open XML in monaco editor so it shows XML attributes like displayvalue
+
+
+# CHANGELOG.md
 ## 7.1.3.3 (2023-09-06)
 Fixes / changes:
  - Rewrite multiple function in scriptsync.js to use fetch instead of XMLHttpRequest

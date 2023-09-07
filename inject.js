@@ -323,7 +323,7 @@ var snuslashcommands = {
         "hint": "Impersonate User"
     },
     "xml": {
-        "url": "/$table.do?XML=&sys_id=$sysid ",
+        "url": "/$table.do?XML=&sys_target=&sys_id=$sysid ",
         "hint": "Open current record's XML view"
     },
     "xmlsrc": {
@@ -1532,7 +1532,7 @@ function snuSettingsAdded() {
         snuCreateHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
         snuAddGroupSortIcon();
-        snuAddErrorLogScriptLinks();
+        snuAddListLinks();
         snuAddFormDesignScopeChange();
         snuAddPersonaliseListHandler();
         snuAddLinkToCachDo();
@@ -1825,16 +1825,16 @@ function snuAddGroupSortIcon() {
     }
 }
 
-function snuAddErrorLogScriptLinks() {
-    if (location.pathname.includes("syslog_list.do")) {
+function snuAddListLinks() {
+    if (["/syslog_list.do","/sys_update_set.do","/sys_update_xml_list.do"].includes(location.pathname)) {
         // Supports for 3 different patterns of script ids being present in logs:
         // table_name:sys_id table_name.sys_id table_name_sys_id
         
         document.querySelectorAll('td.vt:not(.snuified)').forEach((tableCell,tableCellIndex) => {
             var patterns = [
-                /(([a-z_]+):([a-z0-9]{32}))/gm, // table_name:sys_id
-                /(([a-z_]+)\.([a-z0-9]{32})\.([a-z_]+))/gm, // table_name.sys_id.field
-                /(([a-z_]+)_([a-z0-9]{32}))/gm, // table_name_sys_id_field
+                /(([a-z0-9_]+):([a-z0-9]{32}))/gm, // table_name:sys_id
+                /(([a-z0-9_]+)\.([a-z0-9]{32})\.([a-z_]+))/gm, // table_name.sys_id.field
+                /(([a-z0-9_]+)_([a-z0-9]{32}))/gm, // table_name_sys_id_field
             ];
 
             patterns.forEach((pattern, idx) => {
@@ -1861,11 +1861,13 @@ function snuAddErrorLogScriptLinks() {
                             sys_id = segments[1];
                         }
                         if (table != 'sys_id'){
-                            var newHtml = tableCell.innerHTML.replaceAll(
-                                find,
-                                `<a title="Link via SN Utils" target="_blank" href='/${table}.do?sys_id=${sys_id}'>${find}</a>`
-                            );
-                            tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
+                            if (!tableCell.parentElement.innerText.includes('DELETE')) {
+                                var newHtml = tableCell.innerHTML.replaceAll(
+                                    find,
+                                    `<a title="Link via SN Utils" target="_blank" href='/${table}.do?sys_id=${sys_id}'>${find}</a>`
+                                );
+                                tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
+                            }
                         }
 
                     });
@@ -1874,9 +1876,12 @@ function snuAddErrorLogScriptLinks() {
             tableCell.classList.add('snuified');
         });
 
-        setTimeout(snuAddErrorLogScriptLinks, 3000); // "recursive" call this incase we navigate to next page.
+        setTimeout(snuAddListLinks, 3000); // "recursive" call this incase we navigate to next page.
     }
 }
+
+
+
 
 //toggle Select2 for Application and updatesetpicker
 function snuS2Ify() {
