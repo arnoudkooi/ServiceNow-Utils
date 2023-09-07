@@ -247,47 +247,49 @@ const changeFavicon = link => {
 }
 
 
-function updateRecord() {
-
-    //check for errors, exclude service portal client script first line
-    var errorCount = monaco.editor.getModelMarkers().filter(function (marker) {
-        return marker.severity > 3 && !(marker.startLineNumber == 1 && marker.code == '1003');
-    }).length;
+async function updateRecord() {
+    // Check for errors, exclude service portal client script first line
+    const errorCount = monaco.editor.getModelMarkers().filter(marker => 
+        marker.severity > 3 && !(marker.startLineNumber === 1 && marker.code === '1003')
+    ).length;
 
     if (errorCount) {
         if (!confirm('Your code has errors!\nContinue with save action?')) return;
     }
+    try {
+        const url = `${data.instance.url}/api/now/table/${data.table}/${data.sys_id}?sysparm_fields=sys_id`;
+        const postData = {
+            [data.field]: editor.getModel().getValue()
+        };
 
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-UserToken': data.instance.g_ck
+            },
+            body: JSON.stringify(postData)
+        });
 
-
-    var client = new XMLHttpRequest();
-    client.open("put", data.instance.url + '/api/now/table/' +
-        data.table + '/' + data.sys_id +
-        '?sysparm_fields=sys_id');
-    var postData = {};
-    postData[data.field] = editor.getModel().getValue();
-
-    client.setRequestHeader('Accept', 'application/json');
-    client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader('X-UserToken', data.instance.g_ck);
-
-    client.onreadystatechange = function () {
-        if (this.readyState == this.DONE) {
-            var resp = JSON.parse(this.response);
-            if (resp.hasOwnProperty('result')) {
-                document.querySelector('#response').innerHTML = 'Saved: ' + new Date().toLocaleTimeString();
-                versionid = editor.getModel().getAlternativeVersionId();
-            } else {
-                var resp = JSON.parse(this.response);
-                if (resp.hasOwnProperty('error')) {
-                    document.querySelector('#response').innerHTML = 'Error: ' + new Date().toLocaleTimeString() + '<br />' +
-                        JSON.stringify(resp.error);
-                }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const resp = await response.json();
+        if (resp.hasOwnProperty('result')) {
+            document.querySelector('#response').innerHTML = `Saved: ${new Date().toLocaleTimeString()}`;
+            versionid = editor.getModel().getAlternativeVersionId();
+        } else {
+            if (resp.hasOwnProperty('error')) {
+                document.querySelector('#response').innerHTML = `Error: ${new Date().toLocaleTimeString()}<br />${JSON.stringify(resp.error)}`;
             }
         }
-    };
-    client.send(JSON.stringify(postData));
+    } catch (error) {
+        // Handle error
+        document.querySelector('#response').innerHTML = `Error: ${new Date().toLocaleTimeString()}<br />${error.message}`;
+    }
 }
+
 
 
 

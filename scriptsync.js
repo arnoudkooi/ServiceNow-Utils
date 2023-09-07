@@ -8,23 +8,23 @@ let ws;
 let thistabid
 let scriptsyncinstances;
 
-chrome.tabs.getCurrent( tab => { thistabid = tab.id });
+chrome.tabs.getCurrent(tab => { thistabid = tab.id });
 
 //this replaces the  webserver port 1977 communication to proxy ecverything through websocket/helpertab
-chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.event == "scriptsyncpostdata") {
 
         let instanceurl = message?.command?.instance?.url;
         if (instanceurl && scriptsyncinstances?.allowed?.includes(instanceurl))
             ws.send(JSON.stringify(message.command));
-        else if (instanceurl && scriptsyncinstances?.blocked?.includes(instanceurl)){
+        else if (instanceurl && scriptsyncinstances?.blocked?.includes(instanceurl)) {
             t.row.add([
                 new Date(), 'ServiceNow', 'Received from blocked source: <b>' + instanceurl + '</b><br />Message ignored'
 
             ]).draw(false);
             flashFavicon('images/iconred48.png', 3);
         }
-        else if (instanceurl){
+        else if (instanceurl) {
             msg = message;
             document.querySelector('#instanceurl').innerText = instanceurl
             document.querySelector('#instanceapprovediv').classList.remove("hidden");
@@ -49,10 +49,10 @@ chrome.runtime.onMessage.addListener( (message, sender, sendResponse) => {
 
 $(document).ready(function () {
 
-    document.querySelector('#instanceallow').addEventListener('click', (e) =>{
+    document.querySelector('#instanceallow').addEventListener('click', (e) => {
         let instanceurl = msg?.command?.instance?.url;
         scriptsyncinstances.allowed.push(instanceurl);
-        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances );
+        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances);
         document.querySelector('#instanceapprovediv').classList.add("hidden");
         t.row.add([
             new Date(), 'Helper tab', 'Allowed source: <b>' + instanceurl + '</b><br />Message send to VS Code sn-scriptsync'
@@ -63,11 +63,11 @@ $(document).ready(function () {
         msg = null;
         setInstanceLists();
     })
-    
-    document.querySelector('#instanceblock').addEventListener('click', (e) =>{
+
+    document.querySelector('#instanceblock').addEventListener('click', (e) => {
         let instanceurl = msg?.command?.instance?.url;
         scriptsyncinstances.blocked.push(instanceurl);
-        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances );
+        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances);
         document.querySelector('#instanceapprovediv').classList.add("hidden");
 
         t.row.add([
@@ -81,7 +81,7 @@ $(document).ready(function () {
     })
 
     getFromChromeStorageGlobal('scriptsyncinstances', c => {
-        scriptsyncinstances = c || { allowed : [], blocked :[] } 
+        scriptsyncinstances = c || { allowed: [], blocked: [] }
         setInstanceLists();
     });
 
@@ -151,23 +151,23 @@ $(document).ready(function () {
             msgCnt++;
             let wsObj = JSON.parse(evt.data);
             let instanceurl = wsObj?.instance?.url;
-            if (instanceurl && scriptsyncinstances?.allowed?.includes(instanceurl)){
+            if (instanceurl && scriptsyncinstances?.allowed?.includes(instanceurl)) {
                 // cleared!
             }
-            else if (instanceurl && scriptsyncinstances?.blocked?.includes(instanceurl)){
+            else if (instanceurl && scriptsyncinstances?.blocked?.includes(instanceurl)) {
                 t.row.add([
                     new Date(), 'VS Code', 'Received from blocked source: <b>' + instanceurl + '</b><br />Message ignored'
-    
+
                 ]).draw(false);
                 flashFavicon('images/iconred48.png', 3);
                 return false;
             }
             else if (instanceurl) {
                 t.row.add([
-                    new Date(), 'VS Code', 'Unknown source: <b>' + instanceurl + '</b><br />'+
+                    new Date(), 'VS Code', 'Unknown source: <b>' + instanceurl + '</b><br />' +
                     'The last SN Utils update requires approval per instance, please run /token from the instance to approve or block.<br />' +
                     '<b>Message not processed</b>'
-    
+
                 ]).draw(false);
                 flashFavicon('images/iconred48.png', 3);
                 let audio = new Audio('/images/alert.mp3');
@@ -204,14 +204,14 @@ $(document).ready(function () {
                 } else if (wsObj.action == 'requestAppMeta') {
                     requestAppMeta(wsObj);
                 } else if (wsObj.action == 'bannerMessage') {
-                   setBannerMessage(wsObj);
+                    setBannerMessage(wsObj);
                 } else if (wsObj.action == 'updateVar') {
-                    updateVar(wsObj); 
+                    updateVar(wsObj);
                 } else if ('instance' in wsObj) {
-                    if (wsObj.tableName == 'flow_action_scripts'){
-                        updateActionScript(wsObj);                        
+                    if (wsObj.tableName == 'flow_action_scripts') {
+                        updateActionScript(wsObj);
                     }
-                    else 
+                    else
                         updateRecord(wsObj, true);
                 } else {
                     increaseTitlecounter();
@@ -219,7 +219,7 @@ $(document).ready(function () {
 
                         var data = JSON.parse(evt.data);
 
-                        if (data?.errno == -30 || data?.errno == -4048 ){ //-30 mac -4048 windows
+                        if (data?.errno == -30 || data?.errno == -4048) { //-30 mac -4048 windows
                             t.row.add([
                                 new Date(), 'VS Code', `Error, could not create sub folder. Please check the following:<br />
                                 <ol>
@@ -228,15 +228,15 @@ $(document).ready(function () {
                                     <li>Restart sn-scriptsync in VS Code by clicking the sn-scriptsync in the bottom bar in VS Code twice.</li>
                                 </ol>
                                 It is recommended to create a folder named scriptsync in your documents folder and open that in VS Code. <br />
-                                Follow instructions in <a href='https://youtu.be/ZDDminMjGTA?t=40' target='_blank'>this video</a>.`                        
+                                Follow instructions in <a href='https://youtu.be/ZDDminMjGTA?t=40' target='_blank'>this video</a>.`
                             ]).draw(false);
                         }
                         else {
                             t.row.add([
-                                new Date(), '', `<pre> ${JSON.stringify(data,4,4)}</pre>`                        
+                                new Date(), '', `<pre> ${JSON.stringify(data, 4, 4)}</pre>`
                             ]).draw(false);
                             t.row.add([
-                                new Date(), 'VS Code', "Error, please check browser console or message below to review error details. Follow instructions in <a href='https://youtu.be/ZDDminMjGTA?t=40' target='_blank'>this video</a>"                        
+                                new Date(), 'VS Code', "Error, please check browser console or message below to review error details. Follow instructions in <a href='https://youtu.be/ZDDminMjGTA?t=40' target='_blank'>this video</a>"
                             ]).draw(false);
                         }
 
@@ -244,9 +244,9 @@ $(document).ready(function () {
                         flashFavicon('images/iconred48.png', 3);
                         ws.send(wsObj);
                     }
-                    else{
+                    else {
                         t.row.add([
-                            new Date(), 'WebSocket', JSON.parse(evt.data)                        
+                            new Date(), 'WebSocket', JSON.parse(evt.data)
                         ]).draw(false);
                         flashFavicon('/images/icon32.png', 1);
                     }
@@ -264,45 +264,44 @@ $(document).ready(function () {
 
 });
 
-function requestRecord(requestJson) {
-    var client = new XMLHttpRequest();
-    client.open("get", requestJson.instance.url + '/api/now/table/' +
-        requestJson.tableName + '/' + requestJson.sys_id);
-
-    client.setRequestHeader('Accept', 'application/json');
-    client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader('X-UserToken', requestJson.instance.g_ck);
-
-    client.onreadystatechange = function () {
-        if (this.readyState == this.DONE) {
-            var resp = JSON.parse(this.response);
-
-            if (resp.hasOwnProperty('result')) {
-                if (requestJson.hasOwnProperty('actionGoal')) {
-                    if (requestJson.actionGoal != 'updateCheck') {
-                        t.row.add([
-                            new Date(), 'VS Code', 'Received from ServiceNow: <b>' + requestJson.name + '</b><br /><span class="code">Instance: ' +
-                            requestJson.instance.name + ' | Table: ' + requestJson.tableName + '</span>'
-
-                        ]).draw(false);
-                    }
-                }
-                increaseTitlecounter();
-                requestJson.type = "requestRecord";
-                requestJson.result = resp.result;
-                ws.send(JSON.stringify(requestJson));
-
-            } else {
-                t.row.add([
-                    new Date(), 'VS Code', this.response
-                ]).draw(false);
-                increaseTitlecounter();
-                ws.send(JSON.stringify(this.response));
+async function requestRecord(requestJson) {
+    try {
+        const response = await fetch(`${requestJson.instance.url}/api/now/table/${requestJson.tableName}/${requestJson.sys_id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-UserToken': requestJson.instance.g_ck
             }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    };
-    client.send();
+        const resp = await response.json();
+
+        if (resp.hasOwnProperty('result')) {
+            if (requestJson.hasOwnProperty('actionGoal') && requestJson.actionGoal !== 'updateCheck') {
+                t.row.add([new Date(), 'VS Code', `Received from ServiceNow: <b>${requestJson.name}</b><br /><span class="code">Instance: ${requestJson.instance.name} | Table: ${requestJson.tableName}</span>`
+                ]).draw(false);
+            }
+            increaseTitlecounter();
+            requestJson.type = "requestRecord";
+            requestJson.result = resp.result;
+            ws.send(JSON.stringify(requestJson));
+        } else {
+            t.row.add([new Date(), 'VS Code', resp
+            ]).draw(false);
+            increaseTitlecounter();
+            ws.send(JSON.stringify(resp));
+        }
+    } catch (error) {
+        t.row.add([new Date(), 'VS Code', `An error occurred: ${error}`]).draw(false);
+        increaseTitlecounter();
+        ws.send(JSON.stringify({ error: error.message }));
+    }
 }
+
 
 function setBannerMessage(wsObj) {
     let bnr = document.querySelector('#bannermessage');
@@ -312,122 +311,126 @@ function setBannerMessage(wsObj) {
 
 
 
-function requestToken(scriptObj) {
-    t.row.add([
-        new Date(), 'WebSocket', 'Trying to acquire new token from instance'
-    ]).draw(false);
-
-    var client = new XMLHttpRequest();
-    client.open("get", scriptObj.instance.url + '/sn_devstudio_/v1/get_publish_info.do');
-    client.setRequestHeader('Accept', 'application/json');
-    client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader("Authorization" , "BasicCustom");
-    
-    client.onreadystatechange = function () {
-        if (this.readyState == this.DONE) {
-            var resp = JSON.parse(this.response);
-            if (resp.hasOwnProperty('ck')) {
-                scriptObj.instance.g_ck = resp.ck;
-
-                var data = {
-                    "action" : "writeInstanceSettings",
-                    "instance" : scriptObj.instance
-                }
-                increaseTitlecounter();
-                ws.send(JSON.stringify(data));
-
-                t.row.add([
-                    new Date(), 'WebSocket', 'New token acquired from: ' + scriptObj.instance.name
-                ]).draw(false);
-                updateRecord(scriptObj,false)
+async function requestToken(scriptObj) {
+    try {
+        t.row.add([
+            new Date(), 'WebSocket', 'Trying to acquire new token from instance'
+        ]).draw(false);
+        const response = await fetch(`${scriptObj.instance.url}/sn_devstudio_/v1/get_publish_info.do`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'BasicCustom'
             }
-            else{
-                t.row.add([
-                    new Date(), 'WebSocket', 'Error: ' + JSON.stringify(this.response)
-                ]).draw(false);
-            }
+        });
+
+        if (!response.ok) {
+            t.row.add([new Date(), 'WebSocket', `Error: ${JSON.stringify(resp)}`
+            ]).draw(false);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    };
-    client.send();
+
+        const resp = await response.json();
+
+        if (resp.hasOwnProperty('ck')) {
+            scriptObj.instance.g_ck = resp.ck;
+            const data = {
+                "action": "writeInstanceSettings",
+                "instance": scriptObj.instance
+            };
+            increaseTitlecounter();
+            ws.send(JSON.stringify(data));
+
+            t.row.add([new Date(), 'WebSocket', `New token acquired from: ${scriptObj.instance.name}`
+            ]).draw(false);
+
+            updateRecord(scriptObj, false);
+        } else {
+            t.row.add([new Date(), 'WebSocket', `Error: ${JSON.stringify(resp)}`
+            ]).draw(false);
+        }
+    } catch (error) {
+        t.row.add([new Date(), 'WebSocket', `An error occurred: ${error}`
+        ]).draw(false);
+    }
 }
 
 
-
-function requestRecords(requestJson) {
-    var client = new XMLHttpRequest();
-    client.open("get", requestJson.instance.url + '/api/now/table/' +
-        requestJson.tableName + '?' + requestJson.queryString);
-
-    client.setRequestHeader('Accept', 'application/json');
-    client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader('X-UserToken', requestJson.instance.g_ck);
-
-    client.onreadystatechange = function () {
-        if (this.readyState == this.DONE) {
-            var resp = JSON.parse(this.response);
-
-            if (resp.hasOwnProperty('result')) {
-                t.row.add([
-                    new Date(), 'VS Code', 'Received from ServiceNow: <b>' + resp.result.length + ' records</b><br /><span class="code">Instance: ' +
-                    requestJson.instance.name + ' | Table: ' + requestJson.tableName + '</span>'
-
-                ]).draw(false);
-                increaseTitlecounter();
-                requestJson.type = "requestRecords";
-                requestJson.results = resp.result;
-                ws.send(JSON.stringify(requestJson));
-
-            } else {
-                t.row.add([
-                    new Date(), 'VS Code', this.response
-                ]).draw(false);
-                increaseTitlecounter();
-                ws.send(JSON.stringify(resp));
+async function requestRecords(requestJson) {
+    try {
+        const url = `${requestJson.instance.url}/api/now/table/${requestJson.tableName}?${requestJson.queryString}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-UserToken': requestJson.instance.g_ck
             }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    };
-    client.send();
-}
+        const resp = await response.json();
+        if (resp.hasOwnProperty('result')) {
+            t.row.add([
+                new Date(), 'VS Code', `Received from ServiceNow: <b>${resp.result.length} records</b><br /><span class="code">Instance: ${requestJson.instance.name} | Table: ${requestJson.tableName}</span>`
+            ]).draw(false);
 
-function requestAppMeta(requestJson) {
-    var client = new XMLHttpRequest();
-    client.open("get", requestJson.instance.url + '/_sn/sn_devstudio_/v1/ds?sysparm_transaction_scope=' + requestJson.appId);
-
-    client.setRequestHeader('Accept', 'application/json');
-    client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader('X-UserToken', requestJson.instance.g_ck);
-
-    client.onreadystatechange = function () {
-        if (this.readyState == this.DONE) {
-            var resp = JSON.parse(this.response);
-
-            if (resp.hasOwnProperty('artifacts')) {
-
-                t.row.add([
-                    new Date(), 'VS Code', 'Received Scope artifacts from app: <b>' + requestJson.appName + '</b><br /><span class="code">Instance: ' +
-                    requestJson.instance.name + ' | scope: ' + requestJson.appScope + '</span>'
-
-                ]).draw(false);
-
-                increaseTitlecounter();
-                requestJson.type = "requestRecord";
-                requestJson.result = resp;
-                ws.send(JSON.stringify(requestJson));
-
-            } else {
-                t.row.add([
-                    new Date(), 'VS Code', this.response
-                ]).draw(false);
-                increaseTitlecounter();
-                ws.send(JSON.stringify(this.response));
-            }
+            increaseTitlecounter();
+            requestJson.type = "requestRecords";
+            requestJson.results = resp.result;
+            ws.send(JSON.stringify(requestJson));
+        } else {
+            t.row.add([new Date(), 'VS Code', JSON.stringify(resp)
+            ]).draw(false);
+            increaseTitlecounter();
+            ws.send(JSON.stringify(resp));
         }
-    };
-    client.send();
+    } catch (error) {
+        t.row.add([new Date(), 'VS Code', `An error occurred: ${error}`
+        ]).draw(false);
+        increaseTitlecounter();
+    }
 }
 
 
-
+async function requestAppMeta(requestJson) {
+    try {
+        const url = `${requestJson.instance.url}/_sn/sn_devstudio_/v1/ds?sysparm_transaction_scope=${requestJson.appId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-UserToken': requestJson.instance.g_ck
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const resp = await response.json();
+        if (resp.hasOwnProperty('artifacts')) {
+            t.row.add([new Date(), 'VS Code', `Received Scope artifacts from app: <b>${requestJson.appName}</b><br /><span class="code">Instance: ${requestJson.instance.name} | scope: ${requestJson.appScope}</span>`
+            ]).draw(false);
+            increaseTitlecounter();
+            requestJson.type = "requestRecord";
+            requestJson.result = resp;
+            ws.send(JSON.stringify(requestJson));
+        } else {
+            t.row.add([
+                new Date(), 'VS Code', JSON.stringify(resp)
+            ]).draw(false);
+            increaseTitlecounter();
+            ws.send(JSON.stringify(resp));
+        }
+    } catch (error) {
+        t.row.add([new Date(), 'VS Code', `An error occurred: ${error}`
+        ]).draw(false);
+        increaseTitlecounter();
+    }
+}
 
 function updateRealtimeBrowser(scriptObj) {
     if (!realTimeUpdating) {
@@ -442,7 +445,7 @@ function updateRealtimeBrowser(scriptObj) {
         active: true
     },
         function (tabs) {
-        if (tabs[0].id == thistabid) return;
+            if (tabs[0].id == thistabid) return;
             chrome.tabs.sendMessage(tabs[0].id, {
                 method: "runFunction",
                 myVars: "document.getElementById('v" + scriptObj.sys_id + "-s').innerHTML = `" + DOMPurify.sanitize(scriptObj.css) + "`"
@@ -466,11 +469,11 @@ function mirrorBgScript(scriptObj) {
     }, function (arrayOfTabs) {
 
 
-        if (arrayOfTabs.length){
+        if (arrayOfTabs.length) {
             scriptTabCreated = false;
             var prefix = "document.";
             if (arrayOfTabs[0].url.includes("nav_to.do?uri=%2Fsys.scripts.do")) prefix = "gsft_main.document.";
-            else if (arrayOfTabs[0].url.includes("now/nav/ui/classic/params/target/sys.scripts.do")) prefix =  "document.querySelector('[component-id]').shadowRoot.querySelector('#gsft_main').contentDocument.";
+            else if (arrayOfTabs[0].url.includes("now/nav/ui/classic/params/target/sys.scripts.do")) prefix = "document.querySelector('[component-id]').shadowRoot.querySelector('#gsft_main').contentDocument.";
 
             console.log(arrayOfTabs);
             chrome.tabs.sendMessage(arrayOfTabs[0].id, {
@@ -504,9 +507,9 @@ function mirrorBgScript(scriptObj) {
 
 }
 
-function refreshedToken(instanceObj){
+function refreshedToken(instanceObj) {
     t.row.add([
-        new Date(), 'VS Code',  instanceObj.response
+        new Date(), 'VS Code', instanceObj.response
     ]).draw(false);
 }
 
@@ -515,106 +518,108 @@ function refreshToken(instanceObj) { //todo check mv3 compatability
     t.row.add([
         new Date(), 'WebSocket', "Invalid token, trying to get new g_ck token from instance: " + instanceObj.name
     ]).draw(false);
-    
+
 
     chrome.tabs.query({
         url: instanceObj.url + "/*"
     }, function (arrayOfTabs) {
         if (arrayOfTabs.length) {
-            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": "document.getElementById('sn_gck').value" }, 
-            function (g_ck){ 
-                console.log(g_ck) 
-            });
+            chrome.tabs.executeScript(arrayOfTabs[0].id, { "code": "document.getElementById('sn_gck').value" },
+                function (g_ck) {
+                    console.log(g_ck)
+                });
         }
-        else{
+        else {
             t.row.add([
                 new Date(), 'WebSocket', "Request g_ck failed, please open a new session " + instanceObj.name
-            ]).draw(false);           
+            ]).draw(false);
         }
     });
 }
 
 
 
-function updateRecord(scriptObj, canRefreshToken) {
-    var client = new XMLHttpRequest();
-    var scope = scriptObj?.scope ? '&sysparm_transaction_scope=' + scriptObj.scope : '';
-    client.open("put", scriptObj.instance.url + '/api/now/table/' +
-        scriptObj.tableName + '/' + scriptObj.sys_id +
-        '?sysparm_fields=sys_id' + scope);
-    var data = {};
-    data[scriptObj.fieldName] = scriptObj.content;
+async function updateRecord(scriptObj, canRefreshToken) {
+    try {
+        const scope = scriptObj?.scope ? `&sysparm_transaction_scope=${scriptObj.scope}` : '';
+        const url = `${scriptObj.instance.url}/api/now/table/${scriptObj.tableName}/${scriptObj.sys_id}?sysparm_fields=sys_id${scope}`;
+        const data = {
+            [scriptObj.fieldName]: scriptObj.content
+        };
 
-    client.setRequestHeader('Accept', 'application/json');
-    client.setRequestHeader('Content-Type', 'application/json');
-    client.setRequestHeader('X-UserToken', scriptObj.instance.g_ck);
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-UserToken': scriptObj.instance.g_ck
+            },
+            body: JSON.stringify(data)
+        });
 
-    client.onreadystatechange = function () {
-        if (this.readyState == this.DONE) {
-            var resp = JSON.parse(this.response);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-            if (resp.hasOwnProperty('result')) {
-                t.row.add([
-                    new Date(), 'VS Code', 'Saved to ServiceNow: <b>' + scriptObj.name + '</b><br /><span class="code">Instance: ' +
-                    scriptObj.instance.name + 
-                    ' | Field: ' + scriptObj.tableName + '.' + scriptObj.fieldName + 
-                    ' | Save source: ' + (scriptObj.saveSource || "unknown") + 
-                    ' | Characters: ' + scriptObj.content.length + '</span>'
+        const resp = await response.json();
 
-                ]).draw(false);
-                flashFavicon('images/icongreen48.png', 4);
-                increaseTitlecounter();
+        if (resp.hasOwnProperty('result')) {
+            t.row.add([
+                new Date(), 'VS Code', 'Saved to ServiceNow: <b>' + scriptObj.name + '</b><br /><span class="code">Instance: ' +
+                scriptObj.instance.name +
+                ' | Field: ' + scriptObj.tableName + '.' + scriptObj.fieldName +
+                ' | Save source: ' + (scriptObj.saveSource || "unknown") +
+                ' | Characters: ' + scriptObj.content.length + '</span>'
 
-                if (scriptObj.hasOwnProperty('testUrls')) {
-                    for (var i = 0; i < scriptObj.testUrls.length; i++) {
-                        chrome.tabs.query({
-                            url: scriptObj.testUrls[i]
-                        }, function (arrayOfTabs) {
-                            if (arrayOfTabs.length)
-                                chrome.tabs.reload(arrayOfTabs[0].id);
-                        });
-                    }
-                }
-                if (document.querySelector('#reloadactivetab').checked) {
+            ]).draw(false);
+            flashFavicon('images/icongreen48.png', 4);
+            increaseTitlecounter();
+
+            if (scriptObj.hasOwnProperty('testUrls')) {
+                for (var i = 0; i < scriptObj.testUrls.length; i++) {
                     chrome.tabs.query({
-                        active: true, 
-                        currentWindow: true
+                        url: scriptObj.testUrls[i]
                     }, function (arrayOfTabs) {
-                        console.log(arrayOfTabs[0]);
-                        console.log(scriptObj);
-
-                        if (arrayOfTabs.length  && arrayOfTabs[0].hasOwnProperty("url") && arrayOfTabs[0].url.startsWith(scriptObj.instance.url) )
+                        if (arrayOfTabs.length)
                             chrome.tabs.reload(arrayOfTabs[0].id);
                     });
                 }
+            }
+            if (document.querySelector('#reloadactivetab').checked) {
+                chrome.tabs.query({
+                    active: true,
+                    currentWindow: true
+                }, function (arrayOfTabs) {
+                    console.log(arrayOfTabs[0]);
+                    console.log(scriptObj);
 
-
-            } else {
-
-                var resp = JSON.parse(this.response);
-
-                if (resp.hasOwnProperty('error')){
-                    if (resp.error.hasOwnProperty('message')){
-                        // if (resp.error.message == "User Not Authenticated"){
-                        //     if (canRefreshToken){
-                        //         requestToken(scriptObj);
-                        //         return;
-                        //     }
-                        // }
-                    }
-                }
-
-                t.row.add([
-                    new Date(), 'VS Code', this.response
-                ]).draw(false);
-                flashFavicon('images/iconred48.png', 3);
-                increaseTitlecounter();
-                ws.send(this.response);
-
+                    if (arrayOfTabs.length && arrayOfTabs[0].hasOwnProperty("url") && arrayOfTabs[0].url.startsWith(scriptObj.instance.url))
+                        chrome.tabs.reload(arrayOfTabs[0].id);
+                });
             }
         }
-    };
-    client.send(JSON.stringify(data));
+        else {
+            resp = JSON.parse(this.response);
+            if (resp.hasOwnProperty('error')) {
+                if (resp.error.hasOwnProperty('message')) {
+                    // if (resp.error.message == "User Not Authenticated"){
+                    //     if (canRefreshToken){
+                    //         requestToken(scriptObj);
+                    //         return;
+                    //     }
+                    // }
+                }
+            }
+            t.row.add([
+                new Date(), 'VS Code', this.response
+            ]).draw(false);
+            flashFavicon('images/iconred48.png', 3);
+            increaseTitlecounter();
+            ws.send(this.response);
+        }
+    } catch (error) {
+        // Handle error
+    }
 }
 
 var favIconIsFlashing = false;
@@ -665,7 +670,7 @@ function changeFavicon(src) {
 // async function snuFetch(pathToResource) {
 // todo: move rest api call to fetch api / async functions
 
-      
+
 //       const response = await fetch(pathToResource,  { headers: snuHeaders });
 //       console.log(response);
 //       return response;
@@ -678,36 +683,36 @@ function changeFavicon(src) {
  * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
  * @return {undefined}
  */
- function snuStartBackgroundScript(script, instance, callback) {
-    document.querySelector('base').setAttribute('href',instance.url + '/');
+function snuStartBackgroundScript(script, instance, callback) {
+    document.querySelector('base').setAttribute('href', instance.url + '/');
 
     try {
         fetch(instance.url + '/sys.scripts.do', {
             method: 'POST',
             headers: {
                 'Cache-Control': 'no-cache',
-                "Content-Type" : "application/x-www-form-urlencoded"
+                "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({
                 script: script,
                 runscript: "Run script",
                 sysparm_ck: instance.g_ck,
                 sys_scope: "e24e9692d7702100738dc0da9e6103dd",
-                quota_managed_transaction: "on" 
+                quota_managed_transaction: "on"
             }).toString()
         }).then(response => response.text())
-        .then((data) => {
-            console.log(data);
-            t.row.add([
-                new Date(), 'VS Code', 'Background Script Executed: <br />' + data.replace("<HTML><BODY>","").replace("</BODY><HTML>","")
-            ]).draw(false);
-        })
-        .catch((error) => {
-            console.log(error);
-            t.row.add([
-                new Date(), 'VS Code', 'Background Script failed (' + error + ')<br />'
-            ]).draw(false);
-        });
+            .then((data) => {
+                console.log(data);
+                t.row.add([
+                    new Date(), 'VS Code', 'Background Script Executed: <br />' + data.replace("<HTML><BODY>", "").replace("</BODY><HTML>", "")
+                ]).draw(false);
+            })
+            .catch((error) => {
+                console.log(error);
+                t.row.add([
+                    new Date(), 'VS Code', 'Background Script failed (' + error + ')<br />'
+                ]).draw(false);
+            });
 
     } catch (error) {
         t.row.add([
@@ -716,12 +721,12 @@ function changeFavicon(src) {
     }
 }
 
-function updateActionScript(wsObj){
+function updateActionScript(wsObj) {
 
     var field = 'script';
     var val = wsObj.content || "";
     val = JSON.stringify(val).slice(1, -1);
-    
+
     var scrpt = `
     //set state of action to draft
     var grAction = new GlideRecord('sys_hub_action_type_definition');
@@ -742,15 +747,12 @@ function updateActionScript(wsObj){
     }
     `;
     snuStartBackgroundScript(scrpt, wsObj.instance);
-    
-    }
-    
+}
 
-function updateVar(wsObj){
-   
+function updateVar(wsObj) {
+
     var val = wsObj.content || "";
     val = JSON.stringify(val).slice(1, -1);
-
     var scrpt = `
     var grVar = new GlideRecord('sys_variable_value');
     grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${wsObj.fieldName}");
@@ -764,8 +766,7 @@ function updateVar(wsObj){
     var rec = new GlideRecord('${wsObj.tableName}');
     rec.get('${wsObj.sys_id}');
     var um = new GlideUpdateManager2();
-    um.saveRecord(rec);
-    `;
+    um.saveRecord(rec);`;
     snuStartBackgroundScript(scrpt, wsObj.instance);
 
 }
@@ -792,20 +793,19 @@ function getFromChromeStorageGlobal(theName, callback) {
     });
 }
 
-function setInstanceLists(){
-    
+function setInstanceLists() {
+
     setInstanceList("allowed", scriptsyncinstances.allowed);
     setInstanceList("blocked", scriptsyncinstances.blocked);
-
-    function setInstanceList(listtype, arr){
+    function setInstanceList(listtype, arr) {
         let cntnt = ''
         arr.forEach(instance => {
             cntnt += `<li>${instance} <a href='#' data-url='${instance}' class='${listtype}'>❌</a></li>`;
         })
         document.querySelector('#intanceslist' + listtype).innerHTML = cntnt || '<li>-none-</li>';
 
-        document.querySelectorAll('#intanceslist' + listtype + ' a')?.forEach(a =>{
-            a.addEventListener('click', e =>{
+        document.querySelectorAll('#intanceslist' + listtype + ' a')?.forEach(a => {
+            a.addEventListener('click', e => {
                 e.preventDefault();
                 deleteInstance(a.className, a.dataset.url);
             });
@@ -813,14 +813,11 @@ function setInstanceLists(){
     }
 }
 
-function deleteInstance(listtype, instance){
-    if (confirm(`Delete ${instance} from ${listtype} list?`)){
+function deleteInstance(listtype, instance) {
+    if (confirm(`Delete ${instance} from ${listtype} list?`)) {
         let newlist = scriptsyncinstances[listtype].filter(item => item !== instance);
         scriptsyncinstances[listtype] = newlist;
-        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances );
+        setToChromeStorageGlobal('scriptsyncinstances', scriptsyncinstances);
         setInstanceLists();
     }
 }
-
-
-

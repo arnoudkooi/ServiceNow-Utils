@@ -1,4 +1,10 @@
 # CHANGELOG.md
+## 7.1.3.3 (2023-09-06)
+Fixes / changes:
+ - Rewrite multiple function in scriptsync.js to use fetch instead of XMLHttpRequest
+ - Refactor some code in inject.js 
+ - Diff viewer (/diff1 /diff2) now show display values in the XML
+- Show navigator items in slash commands when < 3 slash commands
 
 ## 7.1.3.0 (2023-09-04)
 Fixes / changes:
