@@ -1,4 +1,10 @@
 # CHANGELOG.md
+## 7.1.3.6 (2023-09-15)
+Fixes / changes:
+ - Add optional chaning to a technical names function
+ - Disable adding links to lists from last update when first column. (already a reference link in this case)
+
+# CHANGELOG.md
 ## 7.1.3.4 (2023-09-07)
 Fixes / changes:
  - Expand the fucntion to add link to syslog table to sys_update_xml name field

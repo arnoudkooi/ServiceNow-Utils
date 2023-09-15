@@ -1841,7 +1841,7 @@ function snuAddListLinks() {
                 var splitter = [":", ".", "_"][idx];
 
                 var found = tableCell.innerText.match(pattern);
-                if(found != null){
+                if(found != null && !tableCell.innerHTML.startsWith("<a")){
                     found.forEach(find => {
                         var segments = find.split(splitter);
                         var table;
@@ -1864,7 +1864,7 @@ function snuAddListLinks() {
                             if (!tableCell.parentElement.innerText.includes('DELETE')) {
                                 var newHtml = tableCell.innerHTML.replaceAll(
                                     find,
-                                    `<a title="Link via SN Utils" target="_blank" href='/${table}.do?sys_id=${sys_id}'>${find}</a>`
+                                    `<a title="Link via SN Utils" target="_blank" href='/${table}.do?sys_id=${sys_id}'>${find} ➚</a>`
                                 );
                                 tableCell.innerHTML = DOMPurify.sanitize(newHtml, { ADD_ATTR: ["target"] });
                             }
@@ -2452,7 +2452,7 @@ function snuAddTechnicalNames() {
                 } catch (e) { dataListId = '-.-' };
             }
             var tbl = (typeof g_form != 'undefined') ? dataListId.split('.')[1] : dataListId; // ? form : list 
-            if (tbl.startsWith("REL:")) {
+            if (tbl?.startsWith("REL:")) {
                 tbl = `<a target='_blank' href='sys_relationship.do?sys_id=${tbl.replace('REL:', '')}' >[scripted relation]</a>`;
             }
             lr.innerHTML += DOMPurify.sanitize('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + tbl + '</span></span>', { ADD_ATTR: ['target'] })
