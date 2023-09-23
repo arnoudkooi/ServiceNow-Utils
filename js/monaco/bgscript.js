@@ -22,9 +22,9 @@ if (snusettings.applybgseditor && scrpt) {
 	devidePage();
 	
 	let monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
-	if (navigator.userAgent.toLowerCase().includes('firefox')) { //fix to allow autocomplete issue FF #134, didnt work :(
-		monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
-	}
+	// if (navigator.userAgent.toLowerCase().includes('firefox')) { //fix to allow autocomplete issue FF #134, didnt work :(
+	// 	monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
+	// }
 
 	require.config({
 		paths: {

@@ -10,7 +10,7 @@ zip -r publish/chrome-snutils.zip . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -
 mv manifest.json publish/manifest-chrome.json
 mv publish/manifest-firefox.json manifest.json
 mv js/monaco/vs/language/typescript/tsWorker.js publish/tsWorker.js 
-mv publish/tsWorkerDummy.js js/monaco/vs/language/typescript/tsWorker.js
+mv publish/tsWorkerFF.js js/monaco/vs/language/typescript/tsWorker.js
 zip -r publish/firefox-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
 mv publish/tsWorker.js js/monaco/vs/language/typescript/tsWorker.js
 mv manifest.json publish/manifest-firefox.json
@@ -26,7 +26,7 @@ mv manifest.json publish/manifest-onprem.json
 
 mv publish/manifest-firefox-onprem.json manifest.json
 mv js/monaco/vs/language/typescript/tsWorker.js publish/tsWorker.js 
-mv publish/tsWorkerDummy.js js/monaco/vs/language/typescript/tsWorker.js
+mv publish/tsWorkerFF.js js/monaco/vs/language/typescript/tsWorker.js
 zip -r publish/onprem-firefox-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
 mv publish/tsWorker.js js/monaco/vs/language/typescript/tsWorker.js
 mv manifest.json publish/manifest-firefox-onprem.json

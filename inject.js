@@ -1138,16 +1138,22 @@ function snuSlashCommandAddListener() {
             else if (inIFrame) {
                 var nxtHdr = window.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
                 if (nxtHdr){ //next experience
-                    nxtHdr.dispatch("NAV_ITEM_SELECTED", {
-                        "params": {
-                            "target": targeturl
-                        },
-                        "route": "classic",
-                        "context": {
-                            "experienceName": "Unified Navigation App",
-                            "path": "now/nav/ui"
-                        }
-                    });
+                    if (!targeturl.startsWith("javascript:")){
+                        nxtHdr.dispatch("NAV_ITEM_SELECTED", {
+                            "params": {
+                                "target": targeturl
+                            },
+                            "route": "classic",
+                            "context": {
+                                "experienceName": "Unified Navigation App",
+                                "path": "now/nav/ui"
+                            }
+                        });
+                    }
+                    else {
+                        window.location = targeturl;
+                    }
+
 
                 }
                 else {
@@ -1479,7 +1485,7 @@ function snuSettingsAdded() {
     snusettings.nopasteimage ??= false;
     snusettings.vsscriptsync ??= true;
     snusettings.codeeditor ??= true;
-    snusettings.s2ify ??= false;
+    snusettings.s2ify ??= true;
     snusettings.highlightdefaultupdateset ??= true;
     snusettings.slashnavigatorsearch ??= true;
     snusettings.slashhistory ??= 50;
@@ -2895,8 +2901,8 @@ function snuSetShortCuts() {
     }
     else {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; border: #333333 1pt solid; }
-        div.snuheader {font-weight:bold; margin: -4px; background-color:#333333}
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; border: #333333 1pt solid; border-radius:  10px;}
+        div.snuheader {font-weight:bold; margin: -4px; background-color:#333333; border-radius:  10px 10px 0px 0px;}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh;} 
         ul#snuhelper li {margin-top:2px}
         span.cmdkey { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; border:1pt solid #00e676; background-color:#00e676; color: #000000; min-width: 40px; cursor: pointer; display: inline-block;}
@@ -3378,19 +3384,6 @@ async function snuFetchData(token, url, post, callback) {
     }
 }
 
-// async function snuFetch(pathToResource) {
-// todo: move rest api call to fetch api / async functions
-//     const snuHeaders = new Headers({
-//         'Cache-Control' :'no-cache',
-//         'Accept' : 'application/json',
-//         'Content-Type' : 'application/json',
-//         'X-UserToken' : token || ''
-//     });
-
-//       const response = await fetch(pathToResource,  { headers: snuHeaders });
-//       console.log(response);
-//       return response;
-//   }
 
 /**
  * @function snuStartBackgroundScript

@@ -1,18 +1,28 @@
 # CHANGELOG.md
+
+## 7.1.4.0 (2023-09-23)
+Fixes / changes:
+ - Support javascript: in Next Experience slash commands
+ - Try to deduplicate tsWorker.js so it can be embedded in FireFox version (Issue #437 and Issue #3915 in Mozilla Add-ons linter and Monaco Editor Issue #4184)
+ - CSS adjustmenst slash command window (dark mode)
+ - Setting the default for show pickers in Next UI to true (Requested by Jorn)
+ - Remove commented function snuFetch from inject.js
+ - Upgrade Monaco editor to 43.0
+ - Upgrade jQuery to 3.7.1
+ - Upgrade Bootstrap to 5.3.2
+ - Upgrade DOMPurify to 3.0.5
+
 ## 7.1.3.6 (2023-09-15)
 Fixes / changes:
  - Add optional chaning to a technical names function
- - Disable adding links to lists from last update when first column. (already a reference link in this case)
+ - Disable adding links to lists from last update when first column. (already a reference link in this case) (Issue #435)
 
-# CHANGELOG.md
 ## 7.1.3.4 (2023-09-07)
 Fixes / changes:
  - Expand the fucntion to add link to syslog table to sys_update_xml name field
  - Renamed function snuAddErrorLogScriptLinks to snuAddListLinks for this reason
  - Updated links that open XML in monaco editor so it shows XML attributes like displayvalue
 
-
-# CHANGELOG.md
 ## 7.1.3.3 (2023-09-06)
 Fixes / changes:
  - Rewrite multiple function in scriptsync.js to use fetch instead of XMLHttpRequest
