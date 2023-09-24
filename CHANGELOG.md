@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 7.1.4.1 (2023-09-25 FF OnPrem only)
+Fixes / changes:
+ - Modify the publish.sh build script (Issue #437)
+
 ## 7.1.4.0 (2023-09-23)
 Fixes / changes:
  - Support javascript: in Next Experience slash commands

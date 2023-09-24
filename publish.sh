@@ -12,6 +12,8 @@ mv publish/manifest-firefox.json manifest.json
 mv js/monaco/vs/language/typescript/tsWorker.js publish/tsWorker.js 
 mv publish/tsWorkerFF.js js/monaco/vs/language/typescript/tsWorker.js
 zip -r publish/firefox-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
+echo "1th"
+mv js/monaco/vs/language/typescript/tsWorker.js publish/tsWorkerFF.js
 mv publish/tsWorker.js js/monaco/vs/language/typescript/tsWorker.js
 mv manifest.json publish/manifest-firefox.json
 
@@ -28,6 +30,8 @@ mv publish/manifest-firefox-onprem.json manifest.json
 mv js/monaco/vs/language/typescript/tsWorker.js publish/tsWorker.js 
 mv publish/tsWorkerFF.js js/monaco/vs/language/typescript/tsWorker.js
 zip -r publish/onprem-firefox-snutils.xpi . -x "*.DS_Store" -x "*.git*" -x ".jshintrc" -x ".docx" -x "*.sh" -x "*.md" -x "*publish*"
+echo "2nd"
+mv js/monaco/vs/language/typescript/tsWorker.js publish/tsWorkerFF.js
 mv publish/tsWorker.js js/monaco/vs/language/typescript/tsWorker.js
 mv manifest.json publish/manifest-firefox-onprem.json
 
