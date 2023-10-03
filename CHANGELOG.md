@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 7.1.4.4 (2023-10-03)
+Fixes / changes:
+ - Prevent showing the Monaco editor context menu, when there is a ServiceNow context menu available
+ - Fix keyboardshortcut for Monaco function: Toggle Monaco context Menu (ALT-SHIFT-M)
+ - Fix keyboardshortcut for Monaco function: Toggle Word wrap (ALT-SHIFT-W)
+
 ## 7.1.4.1 (2023-09-25 FF OnPrem only)
 Fixes / changes:
  - Modify the publish.sh build script (Issue #437)

@@ -1576,6 +1576,18 @@ function snuSettingsAdded() {
                 let monacooptions = JSON.parse(snusettings.monacooptions);
                 let editors = GlideEditorMonaco.getAll()
                 editors.forEach(editor => {
+                    editor.editor.onMouseDown(function (e) { //Prevent showing the Monaco contextmenu when there is a ServiceNow context menu to show
+                        if (e?.target?.element?.classList?.contains("discoverable-text")){ //this class indicates there is a ServiceNow menu
+                            let showMonacoContextMenu =  (editor.editor.getRawOptions().contextmenu);
+                            if (showMonacoContextMenu) {
+                                editor.editor.updateOptions({"contextmenu" : false});
+                                setTimeout(() => { //revert back to true after 200ms
+                                    editor.editor.updateOptions({"contextmenu" : true});
+                                }, 200);
+                            }
+                        };
+                    });
+
                     editor.editor.updateOptions(monacooptions);
 
                     editor.editor.addAction({
@@ -1590,7 +1602,7 @@ function snuSettingsAdded() {
                     editor.editor.addAction({
                         id: "wordwrap",
                         label: "Toggle Word wrap",
-                        keybindings: [monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KEY_W],
+                        keybindings: [monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyW],
                         contextMenuGroupId: "2_info",
                         contextMenuOrder : 1,
                         run: () => {
@@ -1601,7 +1613,7 @@ function snuSettingsAdded() {
                     editor.editor.addAction({
                         id: "contextmenu",
                         label: "Toggle Monaco context Menu",
-                        keybindings: [monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KEY_M],
+                        keybindings: [monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyM],
                         contextMenuGroupId: "2_info",
                         contextMenuOrder : 2,
                         run: () => {
