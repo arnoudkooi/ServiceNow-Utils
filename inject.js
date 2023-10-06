@@ -1157,9 +1157,14 @@ function snuSlashCommandAddListener() {
 
                 }
                 else {
-                    var gsft = document.querySelector("#gsft_main");
-                    if (gsft) document.querySelector("#gsft_main").src = DOMPurify.sanitize(targeturl);
-                    else window.open(targeturl, '_blank');
+                    var gsft = window.top.document.querySelector("#gsft_main");
+                    if (gsft) window.top.document.querySelector("#gsft_main").src = DOMPurify.sanitize(targeturl);
+                    
+                    else {
+                        if (window.location.pathname.startsWith("/images") && !targeturl.startsWith("/")) 
+                        targeturl = "/" + targeturl; //ui15 adds /images to url
+                        window.top.window.open(targeturl, '_blank');
+                    }
                 }
             }
             else {
@@ -1175,6 +1180,8 @@ function snuSlashCommandAddListener() {
                     else if (!targeturl.startsWith("//")) {
                         if ((new Date()).getTime() - snuLastOpened > 500) {
                             snuLastOpened = (new Date()).getTime();
+                            if (window.location.pathname.startsWith("/images") && !targeturl.startsWith("/")) 
+                                targeturl = "/" + targeturl;//ui15 adds /images to url
                             window.open(targeturl, '_blank');
                         }
                         snuLastOpened = (new Date()).getTime();
@@ -1580,10 +1587,13 @@ function snuSettingsAdded() {
                         if (e?.target?.element?.classList?.contains("discoverable-text")){ //this class indicates there is a ServiceNow menu
                             let showMonacoContextMenu =  (editor.editor.getRawOptions().contextmenu);
                             if (showMonacoContextMenu) {
-                                editor.editor.updateOptions({"contextmenu" : false});
-                                setTimeout(() => { //revert back to true after 200ms
-                                    editor.editor.updateOptions({"contextmenu" : true});
-                                }, 200);
+                                let selection = editor.editor.getModel().getValueInRange(editor.editor.getSelection());
+                                if (!selection){ //if no selection, show the ServiceNow contextmenu
+                                    editor.editor.updateOptions({"contextmenu" : false});
+                                    setTimeout(() => { //revert back to true after 200ms
+                                        editor.editor.updateOptions({"contextmenu" : true});
+                                    }, 200);
+                                }
                             }
                         };
                     });
@@ -2584,7 +2594,7 @@ function snuAddTechnicalNames() {
                     var sysid = vari.realName.substr(vari.realName.length - 32);
                     var tableName = g_form.getTableName();
                     // The variable definition table in case of the order form and the variable storage table in other cases
-                    var linkTableName = 'question';//tableName == 'ni' ? 'item_option_new' : 'sc_item_option';
+                    var linkTableName = tableName == 'ni' ? 'item_option_new' : 'sc_item_option';
                     newElm.innerHTML = "<span class='snuwrap'> | <a target='_blank' href='/" + linkTableName + ".do?sys_id=" + sysid + "'>" + vari.prettyName + "</a></span>"; newElm.style = "font-family:monospace;";
                     if (elm.tagName == 'DIV')
                         elm.querySelector('span.sn-tooltip-basic').appendChild(newElm);
@@ -3376,26 +3386,29 @@ function snuGetFormElementNames() {
 snuGetFormElementNames();
 
 async function snuFetchData(token, url, post, callback) {
-    const headers = {
-      'Cache-Control': 'no-cache',
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'X-UserToken': token || undefined
-    };
-    
-    try {
-      const response = await fetch(url, {
-        method: post ? 'PUT' : 'GET',
-        headers,
-        body: post ? JSON.stringify(post) : null
-      });
+    return new Promise(async (resolve, reject) => {
+      const headers = {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-UserToken': token || undefined
+      };
+      try {
+        const response = await fetch(url, {
+          method: post ? 'PUT' : 'GET',
+          headers,
+          body: post ? JSON.stringify(post) : null
+        });
+        const data = response.ok ? await response.json() : response;
+        if (callback) callback(data);
+        resolve(data);
+      } catch (error) {
+        if (callback) callback(error);
+        reject(error);
+      }
+    });
+  }
   
-      callback(response.ok ? await response.json() : response);
-    } catch (error) {
-      console.log(`Server Request failed (${error})`);
-    }
-}
-
 
 /**
  * @function snuStartBackgroundScript
@@ -3682,7 +3695,7 @@ function snuCopySelectedCellValues(copySysIDs) {
     }
 };
 
-function snuPostRequestToScriptSync(requestType) {
+async function snuPostRequestToScriptSync(requestType) {
 
     snuScriptSync();
 
@@ -3706,6 +3719,11 @@ function snuPostRequestToScriptSync(requestType) {
         data.name = angularData.title;
         data.sys_id = angularData.sys_id;
         data.widget = angularData.f._fields;
+        if (!data.widget.hasOwnProperty('sys_scope')){
+            let resp = await snuFetchData(g_ck,"/api/now/table/sp_widget/" + data.sys_id +
+            "?sysparm_display_value=all&sysparm_exclude_reference_link=true&sysparm_fields=sys_scope");
+            data.widget.sys_scope = resp?.result?.sys_scope || '';
+        }
         if (data.widget.hasOwnProperty('data_table'))
             if (data.widget.data_table.hasOwnProperty('choices'))
                 data.widget.data_table.choices = []; //skip useless data

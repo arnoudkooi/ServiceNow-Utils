@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## 7.1.5.0 (2023-10-06)
+Fixes / changes:
+ - Improvement for the contextmenu switching in Monaco editor
+ - Modify the snuFetchData function in inject.js to support both Promise and callback
+ - Async fetch the sys_scope in function snuPostRequestToScriptSync for widgets sync when it is not present in the JSON (Happens when sys_scope not on the underlying form)
+ - Fix resolving /tn variables in formatter (Issue #439)
+ - Fix UI15! issue using slash commands (Discussion #442)
+
+
 ## 7.1.4.4 (2023-10-03)
 Fixes / changes:
  - Prevent showing the Monaco editor context menu, when there is a ServiceNow context menu available
