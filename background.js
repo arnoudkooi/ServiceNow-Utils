@@ -698,7 +698,8 @@ function pop() {
                 url: baseUrl + pth
             });
         } else {
-            pth = "/nav_to.do?uri=" + encodeURIComponent(u.pathname + u.search);
+            let pathName = u.pathname.replace(/^\//, ''); //remove leading slash #444
+            pth = "/nav_to.do?uri=" + encodeURIComponent(pathName + u.search);
             chrome.tabs.update(tid, {
                 url: baseUrl + pth
             });

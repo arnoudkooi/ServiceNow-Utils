@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.1.5.2 (2023-10-16)
+Fixes 
+ - Add switcher to propertie pages (system_properties_ui.do)
+ - Fix for /pop on onprem instances (Issue #444)
+
 ## 7.1.5.0 (2023-10-06)
 Fixes / changes:
  - Improvement for the contextmenu switching in Monaco editor

@@ -3088,7 +3088,7 @@ function snuAddSwitchToApplication() {
     let msg =  window.querySelectorShadowDom?.querySelectorDeep('now-alert-content');
     
     if (!location.pathname.includes('.do')) return; 
-    let elm = document.querySelector('.outputmsg_nav_inner');
+    let elm = document.querySelector('.outputmsg_nav_inner, #scope_alert_msg');
     if (!elm) return; 
 
     let lnk = elm.querySelector('a'); //get the first link...
