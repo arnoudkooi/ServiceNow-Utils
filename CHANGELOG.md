@@ -1,7 +1,19 @@
 # CHANGELOG.md
 
+## 7.1.6.0 (2023-11-04)
+Features:
+  - Added slash command: /elev to toggle elevation of the security admin role, or a specified role name
+  - Pattern table_name_db1b28a777032300a4e85ce4ea1061c1 is now recognized as a slashcommand to open that record. (Discussion #447)
+  - Enter key excutes filter in List Filter (slushbucket)
+
+Fixes / changes:
+ - Beter handle slash commands with numbers. Prevent keyboard navigation to unified nav results when slash command contains that number (Isssue #449)
+ - Prevent copying the ➚ symbol when copying via /copycells
+ - Add sys_upgrade_history_log to convert pattern table_name_db1b28a777032300a4e85ce4ea1061c1 to link to source record in list (Discussion #447)
+ - Some code cleanup
+
 ## 7.1.5.2 (2023-10-16)
-Fixes 
+Fixes / changes:
  - Add switcher to propertie pages (system_properties_ui.do)
  - Fix for /pop on onprem instances (Issue #444)
 

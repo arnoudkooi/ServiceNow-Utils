@@ -120,6 +120,10 @@ var snuslashcommands = {
         "url": "https://docs.servicenow.com/search?q=$0&labelkey=vancouver",
         "hint": "Search Docs <search>"
     },
+    "elev": {
+        "url": "*",
+        "hint": "Toggle Security Admin role <role>"
+    },
     "env": {
         "url": "*",
         "hint": "Open this page in <instance>"
@@ -780,6 +784,11 @@ function snuSlashCommandAddListener() {
                 //snuSlashCommandHide();
                 return;
             }
+            if (/.*_([0-9a-fA-F]{32})$/.test(shortcut)) {//table_name_sysid pattern
+                const result = shortcut.split(/_(?=[0-9a-fA-F]{32}$)/);
+                window.open(result[0] + ".do?sys_id=" + result[1], '_blank');
+                return;
+            }
             else if (shortcut == "help") {
 
                 var event = new CustomEvent(
@@ -901,6 +910,10 @@ function snuSlashCommandAddListener() {
                 window.top.document.dispatchEvent(event);
                 snuSlashCommandHide();
                 return;
+            }
+            else if (shortcut == "elev") {
+                snuElevate(query);
+                return
             }
             else if (shortcut == "env") {
                 if (query) {
@@ -1252,12 +1265,16 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
 
     var html = "";
     var lastfavorite = 0;
+    var arrDigits = [];
     for (i = 0; i < snuPropertyNames.length && i < snuMaxHints; i++) {
         var cssclass = (snuIndex == i) ? 'active' : '';
-        var lbl = ((snuslashcommands[snuPropertyNames[i]]?.fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyNames[i]]?.hint);
-        html += `<li id='cmd${snuPropertyNames[i]}' data-index='${i}' class='cmdfilter ${cssclass} nth${(snuslashcommands[snuPropertyNames[i]]?.order || 100)}' >
-                 <span class='cmdkey'>/${snuPropertyNames[i]}</span>
+        var snuPropertyName = snuPropertyNames[i] || '';
+        var lbl = ((snuslashcommands[snuPropertyName]?.fields || "") ? "<span>⇲ </span>" : "") + snuEncodeHtml(snuslashcommands[snuPropertyName]?.hint);
+        html += `<li id='cmd${snuPropertyName}' data-index='${i}' class='cmdfilter ${cssclass} nth${(snuslashcommands[snuPropertyName]?.order || 100)}' >
+                 <span class='cmdkey'>/${snuPropertyName}</span>
                  <span class='cmdlabel'>${lbl}</span></li>`;
+        const uniqueDigits = [...new Set(snuPropertyName.match(/\d/g))].map(Number); //get unique digits from the slash command, ie [1] for the /diff1 command
+        arrDigits = [...new Set([...arrDigits, ...uniqueDigits])]; //merge unique digits from all slash commands (unlikely to find many)         
 
         if (fltr.value.includes(" ")) {
             break;
@@ -1267,12 +1284,16 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
     if (snuPropertyNames.length > snuMaxHints) {
         html += "<li class='cmdexpand' data-shortcut='" + shortcut + "' ><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
     }
-
-    if (!html && shortcut.replace(/['" ]+/g, '').length == 32) {
+    else if (!html && shortcut.replace(/['" ]+/g, '').length == 32) {
         html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/sys_id</span> " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
-    if (!html && shortcut.includes(".do")) {
+    else if (!html && /.*_([0-9a-fA-F]{32})$/.test(shortcut)) {
+        const result = shortcut.split(/_(?=[0-9a-fA-F]{32}$)/);
+        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/" + result[0] + "</span> " +
+            "<span class='cmdlabel'>Open record " + result[1] + "</span></li>"
+    }
+    else if (!html && shortcut.includes(".do")) {
         html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
             "<span class='cmdlabel'>Direct navigation</span></li>"
     }
@@ -1293,7 +1314,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
     window.top.document.querySelectorAll("#snuhelper li.cmdexpand").forEach(function (elm) { elm.addEventListener("click", snuExpandHints) });
 
     if (snusettings.slashnavigatorsearch && snuPropertyNames.length <= 3 && switchText.length <=25)
-        snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter);
+        snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter, arrDigits);
 }
 
 function setSnuFilter(ev) {
@@ -1552,6 +1573,7 @@ function snuSettingsAdded() {
         snuAddInfoButton();
         snuAddSwitchToApplication();
         snuOpenWorkflowLink();
+        snuEnterToFilterSlushBucket();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1854,7 +1876,7 @@ function snuAddGroupSortIcon() {
 }
 
 function snuAddListLinks() {
-    if (["/syslog_list.do","/sys_update_set.do","/sys_update_xml_list.do"].includes(location.pathname)) {
+    if (["/syslog_list.do","/sys_update_set.do","/sys_update_xml_list.do","/sys_upgrade_history_log_list.do"].includes(location.pathname)) {
         // Supports for 3 different patterns of script ids being present in logs:
         // table_name:sys_id table_name.sys_id table_name_sys_id
         
@@ -2804,6 +2826,16 @@ function snuTableCollectionLink() {
         tbl + "^internal_type=collection&sysparm_view=advanced' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
 }
 
+function snuEnterToFilterSlushBucket() {
+    if (location.pathname != "/sys_m2m_template.do") return;
+    if (typeof acRequest == 'undefined') return; 
+    document.addEventListener("keydown", (event) => {
+        if (event.key == 'Enter') {
+            acRequest();
+        }
+    });
+}
+
 function snuSearchLargeSelects() {
 
     var mdl = document.querySelector('#list_mechanic .modal-dialog');
@@ -2822,7 +2854,6 @@ function snuSearchLargeSelects() {
                 input.className = "form-control";
                 input.style.marginBottom = "2px";
                 input.addEventListener('keyup',evt =>{
-                    console.time("option loop");
                     let select = document.querySelector('select#slush_left, select#select_0, select#field_list_select_0');
                     select.style.display = 'none';
                     let options = select.querySelectorAll('option');
@@ -3045,24 +3076,6 @@ function snuSplitContainsToAnd(event) {
             qaNew.push(qa[i]);
     }
     qry.setFilterAndRefresh(qaNew.join('^'));
-}
-
-function enhanceTinMCE() {
-    if (typeof (tinymce) == 'undefined') return;
-    var editor = tinymce.activeEditor;
-    if (typeof editor === 'undefined' || editor == null) return;
-    if (editor.buttons.hasOwnProperty('snexp')) return;
-    editor.addButton('snexp', {
-        text: '+/-',
-        title: 'SN Utils: Add template to expand collapse content',
-        onclick: function () {
-            editor.insertContent('<details style="padding-bottom:10px; padding-top:10px"><summary style="font-size:14pt; font-weight:bold;">SubTitle</summary><p>Expand and collapse this block.</p></details>');
-        }
-    });
-
-    var bg = editor.theme.panel.find('toolbar buttongroup')[editor.theme.panel.find('toolbar buttongroup').length - 1];
-    bg._lastRepaintRect = bg._layoutRect;
-    bg.append(editor.buttons['snexp']);
 }
 
 function snuAddInfoButton()
@@ -3684,7 +3697,7 @@ function snuCopySelectedCellValues(copySysIDs) {
                         str += '"' + oTitle.replace(/"/g, '""') + '"\n';
                 }
                 else
-                    str += cElem.innerText + '\n';
+                    str += cElem.innerText.replace(' ➚','') + '\n';
             }
                 
         });
@@ -4289,7 +4302,7 @@ function snuGetElevateRoles() {
         'X-WantSessionNotificationMessages': false            
     };
     if (g_ck) headers['X-UserToken'] = g_ck
-    fetch(`/api/now/ui/impersonate/has_elevated_role`, {
+    fetch(`/api/now/ui/impersonate/role`, {
         "method": 'GET',
         "headers": headers
         })
@@ -4306,6 +4319,33 @@ function snuGetElevateRoles() {
         });
 
 }
+
+async function snuElevate(roles) {
+    try {
+      roles = roles || "security_admin";
+      const res = await fetch(`/api/now/ui/impersonate/role`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-UserToken': g_ck || ''
+        },
+        body: JSON.stringify({"roles": roles })
+      });
+      if (res.ok) {
+        location.reload();
+        snuSlashCommandHide();
+      } else {
+         snuSlashCommandInfoText(`Failed: ${res.status} ${res.statusText}`,false);
+      }
+    } catch (err) {
+        snuSlashCommandInfoText(`Error: ${err}`,false);
+    }
+    return;
+}
+
+
+
 
 function snuGetUsersForImpersonate(query) {
 
@@ -4798,7 +4838,7 @@ function snuTimeAgo (timestamp, locale = 'en') {
     return value;
   }
 
-function snuDoSlashNavigatorSearch(search) {
+function snuDoSlashNavigatorSearch(search, arrDigits = []) {
     const MAXROWS = 25;
     
     if (search.trim().length < 2) return;
@@ -4808,7 +4848,7 @@ function snuDoSlashNavigatorSearch(search) {
         (unique, item) => ( unique.filter(e => item.includes(item)).length > 5 ? unique : [...unique, item]),[],); //todo check undouble
 
     let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">🔍 Navigator search</div>';
-    let idx = 0;
+    let idx = 1;
     let dispIdx = 0;
     let lastgroup = '';
     let filtered = snuSlashNavigatorData.filter(itm => containsWords(itm.fulltext));
@@ -4818,9 +4858,8 @@ function snuDoSlashNavigatorSearch(search) {
         //var target = "gsft_main";
         let target = "_blank";
         let idattr
-        if (idx < 10 && (dispIdx !== '>')) {
-            dispIdx++;
-            dispIdx = dispIdx % 10;
+        if (idx <=10 && (!arrDigits.includes(idx % 10))) { 
+            dispIdx = idx % 10;
             idattr = 'id="snulnk' + dispIdx + '"';
         }
         else {
@@ -4857,12 +4896,12 @@ function snuDoSlashNavigatorSearch(search) {
     window.top.document.getElementById('snudirectlinks');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize('');
     window.top.document.querySelectorAll("#snudirectlinks a").forEach(elm => {
-        if (filtered[Number(elm.dataset.idx)]?.route) {
+        if (filtered[Number(elm.dataset.idx)-1]?.route) {
             elm.addEventListener("click", (evt) =>{
                 var nxtHdr = window?.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
                 if (nxtHdr && !(evt.shiftKey || evt.ctrlKey || evt.metaKey)){
                     evt.preventDefault();
-                        nxtHdr.dispatch("NAV_ITEM_SELECTED", filtered[Number(elm.dataset.idx)].route);
+                        nxtHdr.dispatch("NAV_ITEM_SELECTED", filtered[Number(elm.dataset.idx)-1].route);
                 }
                 snuSlashLog(true);
                 snuSlashCommandHide();
