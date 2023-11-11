@@ -43,4 +43,9 @@ sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-edge.json
 
-node publish/publish.mjs
+#Remove the chrome extension and reunpack it
+rm -rf publish/chrome-snutils
+unzip publish/chrome-snutils.zip -d publish/chrome-snutils
+open "http://reload.extensions/"
+
+# node publish/publish.mjs
