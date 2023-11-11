@@ -49,6 +49,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             else if (location.pathname.startsWith("/merge_form_")) {
                 addScript('js/monaco/compare.js', false);
             }
+            if (parent && parent.location.pathname.startsWith("/$studio.do")) {
+                addScript('/js/inject_studio.js', false);
+            }
 
 
 
