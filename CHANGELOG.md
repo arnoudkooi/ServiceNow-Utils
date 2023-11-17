@@ -1,4 +1,7 @@
 # CHANGELOG.md
+## 7.1.6.1 (2023-11-18 Chrome only)
+Fixes / changes:
+  - Fix when User Icon does not show in Next Experience (Issue #453) 
 
 ## 7.1.6.0 (2023-11-04)
 Features:
