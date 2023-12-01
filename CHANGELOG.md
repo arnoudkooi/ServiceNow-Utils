@@ -1,4 +1,12 @@
 # CHANGELOG.md
+## 7.1.7.0 (2023-12-01)
+Fixes / changes:
+  - The random switch -r now works together with other switches and search text (Issue #450)
+  - Slash commands that search tables, but have no return fields defined now default to sys_updated_on,sys_updated_by so that you can use the right arrow to run query inline anyway.
+  - Slash commands that search tables, now show the total results when running inline query 
+  - Fix typo innfo > info in inject.js 
+  - Fix the /up UI Policy slash command (PR #454)
+
 ## 7.1.6.1 (2023-11-18 Chrome only)
 Fixes / changes:
   - Fix when User Icon does not show in Next Experience (Issue #453) 
