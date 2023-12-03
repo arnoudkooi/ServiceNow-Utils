@@ -1,4 +1,9 @@
 # CHANGELOG.md
+
+## 7.1.8.0 (2023-12-04)
+Fixes / changes:
+  - Show the quick add button on related lists (Discussion #451)
+
 ## 7.1.7.0 (2023-12-01)
 Fixes / changes:
   - The random switch -r now works together with other switches and search text (Issue #450)

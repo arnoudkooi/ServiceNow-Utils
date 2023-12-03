@@ -2648,7 +2648,6 @@ function snuAddTechnicalNames() {
     snuSearchLargeSelects();
     snuCreateHyperLinkForGlideLists();
 
-
     //toggle the Technical names function
     if (hasRun) {
         var display = (document.querySelector('.snuwrap')?.style?.display == 'none') ? '' : 'none';
@@ -2656,8 +2655,6 @@ function snuAddTechnicalNames() {
             cls.style.display = display;
         });
     }
-
-
 }
 
 function snuExtendedFieldInfo() {
@@ -4682,31 +4679,39 @@ function snuImpersonater(doc) {
     return impersonatingUser;
 }
 
-
 function snuAddPersonaliseListHandler() {
-    if (typeof GlideList2 == 'undefined' || typeof g_form != 'undefined') return; //only lists for now
-    let tableName = document.querySelector('#sys_target')?.value;
-    if (!tableName) return;
-    let g_list = GlideList2.get(tableName);
-    let missingFields = snusettings.listfields.split(',').filter(x => !g_list.fields.split(',').includes(x)).join(',');
-    if (!missingFields || (missingFields == 'sys_scope' && !g_list.tableName.startsWith('sys_'))) return; //do not show if not needed, fields already in list (best try)
 
-    let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
-    if (!btn) return;
+    if (typeof GlideList2 == 'undefined') return;
 
-    let icon = document.createElement('i');
-    icon.className = 'snuPersonaliseList icon-endpoint btn btn-icon table-btn-lg';
-    icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open, hold shift to add sys_id to beginning of list`;
-    icon.role = 'button';
-    icon.addEventListener('click', evt => {
-        let autoclose = !(evt.metaKey || evt.ctrlKey);
-        snuPersonaliseList(autoclose, evt.shiftKey);
-    });
-    btn.parentNode.insertBefore(icon, btn.nextSibling);
+    let wrapper = document.querySelector('#related_lists_wrapper'); //add buttons to async loaded related lists on moeuseenter
+    if (wrapper) wrapper.addEventListener("mouseenter", snuAddPersonaliseListHandler);
+
+    let relatedListsButtons = document.querySelectorAll('[data-type="list_mechanic2_open"]:not(.snuified)');
+
+    if (!relatedListsButtons) return;
+    relatedListsButtons.forEach(rlb => {
+        let tableName = rlb?.dataset?.table;
+        if (!tableName) return;
+        let g_list = GlideList2.get(rlb?.dataset?.list_id);
+        let missingFields = snusettings.listfields.split(',').filter(x => !g_list.fields.split(',').includes(x)).join(',');
+        if (!missingFields || (missingFields == 'sys_scope' && !g_list.tableName.startsWith('sys_'))) return; //do not show if not needed, fields already in list (best try)
+
+        let icon = document.createElement('i');
+        icon.className = 'snuPersonaliseList icon-endpoint btn btn-icon table-btn-lg';
+        icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open, hold shift to add sys_id to beginning of list`;
+        icon.role = 'button';
+        icon.addEventListener('click', evt => {
+            let autoclose = !(evt.metaKey || evt.ctrlKey);
+            snuPersonaliseList(rlb, autoclose, evt.shiftKey);
+        });
+        rlb.parentNode.insertBefore(icon, rlb.nextSibling);
+        rlb.classList.add('snuified');
+
+    })
+
 }
 
-function snuPersonaliseList(autoclose, addsysid) {
-    let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
+function snuPersonaliseList(btn, autoclose, addsysid) {
     if (btn) btn.click();
     else return true;
 
@@ -4758,10 +4763,7 @@ document.addEventListener('snuEvent', function (e) {
     }
 });
 
-
 //menu handling inside
-
-
 function snuGetSlashNavigatorData(){ //get JSON from loacal storage and prepare
     var prtl = Object.entries(localStorage)
     .filter(ent => ent[0].includes((window?.NOW?.user?.userID || window?.NOW?.user_id || '') + '.headerMenuItems'));
