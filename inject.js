@@ -310,9 +310,9 @@ var snuslashcommands = {
         "hint": "UnManadtory; Set all mandatory fields to false (Admin only)"
     },
     "up": {
-        "url": "sys_ui_policy_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
+        "url": "sys_ui_policy_list.do?sysparm_query=short_descriptionLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "UI Policies <name>",
-        "fields": "name"
+        "fields": "short_description,sys_updated_on"
     },
     "va": {
         "url": "/$conversation-builder.do",
@@ -353,7 +353,7 @@ var snuslashcommands = {
 var snuslashswitches = {
     "t": { "description": "View Table Structure ➚", "value": "sys_db_object.do?sys_id=$0&sysparm_refkey=name", "type": "link" },
     "n": { "description": "New Record ➚", "value": "$0.do", "type": "link" },
-    "r": { "description": "Open Random Record ➚", "value": "$random.$0", "type": "link" },
+    "r": { "description": "Open Random Record ➚", "value": "&snurandom=true", "type": "querypart" },
     "ra": { "description": "REST API Explorer ➚", "value": "$restapi.do?tableName=$0", "type": "link" },
     "c": { "description": "Table Config ➚", "value": "personalize_all.do?sysparm_rules_table=$0&sysparm_rules_label=$0", "type": "link" },
     "erd": { "description": "View Schema Map ➚", "value": "generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=$0,show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext", "type": "link" },
@@ -384,7 +384,7 @@ var snuslashswitchesvalueoverwrites = {
 var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", "DYNAMIC", "EMPTY", "ENDSWITH", "GT_FIELD", "GT_OR_EQUALS_FIELD", //"IN", //removed, to common ie: INC00010001
     "ISEMPTY", "ISNOTEMPTY", "LESSTHAN", "LIKE", "LT_FIELD", "LT_OR_EQUALS_FIELD", "MORETHAN", "NOT IN", "NOT LIKE", "NOTEMPTY", "NOTLIKE", "NOTONToday", "NSAMEAS", "ONToday", "RELATIVE", "SAMEAS", "STARTSWITH"];
 
-if (typeof g_ck == 'undefined' || g_ck === 'null') g_ck = null;  //prevent not defined errors when not provided in older instances
+if (typeof g_ck == 'undefined') g_ck = null;  //prevent not defined errors when not provided in older instances , also see #453
 
 
 document.addEventListener('snuUpdateSettingsEvent', function (e) {
@@ -473,7 +473,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
     var fields = "";
     var overwriteurl = "";
     try {
-        fields = (snuslashcommands[shortcut].hasOwnProperty("fields")) ? snuslashcommands[shortcut].fields || "" : "";
+        fields = (snuslashcommands[shortcut].hasOwnProperty("fields")) ? snuslashcommands[shortcut].fields || "sys_updated_on,sys_updated_by" : "sys_updated_on,sys_updated_by";
     } catch (e) { }
 
     try {
@@ -492,7 +492,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
         } catch (ex) {
             return false;
         }
-        snuFetchData(g_ck, url, null, function (jsn) {
+        snuFetchData(g_ck, url, null, jsn => {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
                 var results = jsn.result;
@@ -529,6 +529,9 @@ function snuGetDirectLinks(targeturl, shortcut) {
                     }
                     directlinks += dispIdx + ' <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
                 });
+                if (directlinks.length > 50) 
+                    directlinks += `<span style="opacity:0.4; font:smaller">Results: ${jsn.resultcount}</br><br />`;
+                
             }
             else {
                 directlinks = `No access to data`;
@@ -758,14 +761,7 @@ function snuSlashCommandAddListener() {
         query = query.trim();
 
 
-        targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
-        if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
-            var queryArr = query.split(" ");
-            for (var i = 0; i <= queryArr.length; i++) {
-                var re = new RegExp("\\$" + (i + 1), "g");
-                targeturl = targeturl.replace(re, queryArr[i] || "");
-            }
-        }
+        targeturl = snuResolve$(targeturl, query, e);
         if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly && !(e.ctrlKey || e.metaKey))) {
             snuSlashLog(true);
             snuGetDirectLinks(targeturl, shortcut);
@@ -1001,7 +997,7 @@ function snuSlashCommandAddListener() {
                     if (typeof qry != 'undefined') {
                         if (targeturl.includes("{}") || linkSwitch) {
                             targeturl = targeturl.replace('{}', qry.getTableName());
-                            if (!targeturl.startsWith("$random")) window.open(targeturl, '_blank');
+                            if (!targeturl.includes("snurandom=true")) window.open(targeturl, '_blank');
                         }
                         else if (targeturl.startsWith("&")) {
                             var myurl = doc.location.href
@@ -1030,10 +1026,10 @@ function snuSlashCommandAddListener() {
                     else if (!linkSwitch){
                         targeturl = "/" + g_form.getTableName() + "_list.do?sysparm_query=" + targeturl;
                     }
-                    if (!targeturl.startsWith("$random"))
+                    if (!targeturl.includes("snurandom=true"))
                         window.open(targeturl, '_blank');
                 }
-                if (!targeturl.startsWith("$random")) {
+                if (!targeturl.includes("snurandom=true")) {
                     snuSlashCommandHide();
                     return;
                 }
@@ -1130,10 +1126,13 @@ function snuSlashCommandAddListener() {
 
             var inIFrame = !targeturl.startsWith("http") && !targeturl.startsWith("/") && sameWindow;
             if (e.target.className == "snutils") inIFrame = false;
-            if (targeturl.startsWith("$random")) {
+            if (targeturl.includes("snurandom=true")) {
+                let searchParams = new URLSearchParams(targeturl.split("?")[1]);
+                let q = searchParams.get("sysparm_query") || "";
+                let tableName = targeturl.split("_list.do")[0] || "notable";
                 targeturl = targeturl.substring(8)
-                snuGetRandomRecord(targeturl, "", false, res => {
-                    targeturl = targeturl + ".do?sys_id=" + res;
+                snuGetRandomRecord(tableName, q, false, res => {
+                    targeturl = tableName + ".do?sys_id=" + res;
                     if (inIFrame){
                         var nxtHdr = window.querySelectorShadowDom?.querySelectorDeep("sn-polaris-header");
                         if (nxtHdr){ //next experience
@@ -1404,6 +1403,18 @@ function snuDiffXml(shortcut, instance = '') {
     return;
 }
 
+
+function snuResolve$(targeturl, query, e) {
+    targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
+    if (query.split(" ").length > 0) {  //replace $1,$2 for Xth word in string
+        var queryArr = query.split(" ");
+        for (var i = 0; i <= queryArr.length; i++) {
+            var re = new RegExp("\\$" + (i + 1), "g");
+            targeturl = targeturl.replace(re, queryArr[i] || "");
+        }
+    }
+    return targeturl;
+}
 
 function snuResolveVariables(variableString){
 
@@ -2521,7 +2532,7 @@ function snuAddTechnicalNames() {
         try {
             jQuery('h1.navbar-title div.pointerhand').css("float", "left");
             jQuery("h1.navbar-title:not(:contains('|'))").first().append('<span class="snuwrap">&nbsp;| <span style="font-family:monospace; font-size:small;">' + g_form.getTableName() +
-                ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="Show the originating table innfo of fields" onclick="snuExtendedFieldInfo()">[table fields]</a>'+
+                ' <a onclick="snuShowScratchpad()">[scratchpad]</a><a title="Show the originating table info of fields" onclick="snuExtendedFieldInfo()">[table fields]</a>'+
                 '<a title="For easier copying of field names" onclick="snuToggleLabel()">[toggle label]</a> </span></span>');
 
             jQuery(".label-text:not(:contains('|'))").each(function (index, elem) {
@@ -2645,7 +2656,6 @@ function snuAddTechnicalNames() {
     snuSearchLargeSelects();
     snuCreateHyperLinkForGlideLists();
 
-
     //toggle the Technical names function
     if (hasRun) {
         var display = (document.querySelector('.snuwrap')?.style?.display == 'none') ? '' : 'none';
@@ -2653,8 +2663,6 @@ function snuAddTechnicalNames() {
             cls.style.display = display;
         });
     }
-
-
 }
 
 function snuExtendedFieldInfo() {
@@ -3639,7 +3647,8 @@ async function snuFetchData(token, url, post, callback) {
           headers,
           body: post ? JSON.stringify(post) : null
         });
-        const data = response.ok ? await response.json() : response;
+        let data = response.ok ? await response.json() : response;
+        data.resultcount = response.headers.get("X-Total-Count");
         if (callback) callback(data);
         resolve(data);
       } catch (error) {
@@ -4961,31 +4970,39 @@ function snuImpersonater(doc) {
     return impersonatingUser;
 }
 
-
 function snuAddPersonaliseListHandler() {
-    if (typeof GlideList2 == 'undefined' || typeof g_form != 'undefined') return; //only lists for now
-    let tableName = document.querySelector('#sys_target')?.value;
-    if (!tableName) return;
-    let g_list = GlideList2.get(tableName);
-    let missingFields = snusettings.listfields.split(',').filter(x => !g_list.fields.split(',').includes(x)).join(',');
-    if (!missingFields || (missingFields == 'sys_scope' && !g_list.tableName.startsWith('sys_'))) return; //do not show if not needed, fields already in list (best try)
 
-    let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
-    if (!btn) return;
+    if (typeof GlideList2 == 'undefined') return;
 
-    let icon = document.createElement('i');
-    icon.className = 'snuPersonaliseList icon-endpoint btn btn-icon table-btn-lg';
-    icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open, hold shift to add sys_id to beginning of list`;
-    icon.role = 'button';
-    icon.addEventListener('click', evt => {
-        let autoclose = !(evt.metaKey || evt.ctrlKey);
-        snuPersonaliseList(autoclose, evt.shiftKey);
-    });
-    btn.parentNode.insertBefore(icon, btn.nextSibling);
+    let wrapper = document.querySelector('#related_lists_wrapper'); //add buttons to async loaded related lists on moeuseenter
+    if (wrapper) wrapper.addEventListener("mouseenter", snuAddPersonaliseListHandler);
+
+    let relatedListsButtons = document.querySelectorAll('[data-type="list_mechanic2_open"]:not(.snuified)');
+
+    if (!relatedListsButtons) return;
+    relatedListsButtons.forEach(rlb => {
+        let tableName = rlb?.dataset?.table;
+        if (!tableName) return;
+        let g_list = GlideList2.get(rlb?.dataset?.list_id);
+        let missingFields = snusettings.listfields.split(',').filter(x => !g_list.fields.split(',').includes(x)).join(',');
+        if (!missingFields || (missingFields == 'sys_scope' && !g_list.tableName.startsWith('sys_'))) return; //do not show if not needed, fields already in list (best try)
+
+        let icon = document.createElement('i');
+        icon.className = 'snuPersonaliseList icon-endpoint btn btn-icon table-btn-lg';
+        icon.title = `[SN Utils] Try to quick add:\n ${missingFields}\nto the list. \nHold ctrl/cmd to keep modal open, hold shift to add sys_id to beginning of list`;
+        icon.role = 'button';
+        icon.addEventListener('click', evt => {
+            let autoclose = !(evt.metaKey || evt.ctrlKey);
+            snuPersonaliseList(rlb, autoclose, evt.shiftKey);
+        });
+        rlb.parentNode.insertBefore(icon, rlb.nextSibling);
+        rlb.classList.add('snuified');
+
+    })
+
 }
 
-function snuPersonaliseList(autoclose, addsysid) {
-    let btn = document.querySelector('i[data-type="list_mechanic2_open"]');
+function snuPersonaliseList(btn, autoclose, addsysid) {
     if (btn) btn.click();
     else return true;
 
@@ -5037,10 +5054,7 @@ document.addEventListener('snuEvent', function (e) {
     }
 });
 
-
 //menu handling inside
-
-
 function snuGetSlashNavigatorData(){ //get JSON from loacal storage and prepare
     var prtl = Object.entries(localStorage)
     .filter(ent => ent[0].includes((window?.NOW?.user?.userID || window?.NOW?.user_id || '') + '.headerMenuItems'));
