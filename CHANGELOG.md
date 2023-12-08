@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 7.1.9.0 (2023-12-08)
+Features:
+  - Added /copycolumn command, in addition to /copycells It will copy all non empty values of the column where a cell is selected.
+Fixes / changes:
+  - Adjust manifest file for Edge to allow servicenowservices.com domain
+  - Expand the doubleclick area in the headerbar to trigger page reload
+  - Fix to support the /um unmnadatory command inside Next Experience
+
 ## 7.1.8.0 (2023-12-04)
 Fixes / changes:
   - Show the quick add button on related lists (Discussion #451)

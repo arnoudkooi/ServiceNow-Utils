@@ -51,6 +51,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Copy Selected Cell Values from List [-s for SysIDs]"
     },
+    "copycolumn": {
+        "url": "*",
+        "hint": "Copy All Values from Selected Column [-s for SysIDs]"
+    },
     "debug": {
         "url": "*",
         "hint": "Open Script Debugger"
@@ -883,8 +887,8 @@ function snuSlashCommandAddListener() {
                 }
                 return;
             }
-            else if (shortcut == "copycells") {
-                snuCopySelectedCellValues(query);
+            else if (shortcut == "copycells" || shortcut == "copycolumn") {
+                snuCopySelectedCellValues(query, shortcut);
                 snuSlashCommandHide();
                 return;
             }
@@ -1802,7 +1806,7 @@ function snuDoubleClickToShowFieldOrReload() {
                 } else {
                     alert('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + '\nValue:' + val);
                 }
-            } else if (event.target.classList.contains('container-fluid')) {
+            } else if (event.target.classList.contains('container-fluid') || event.target.classList.contains('navbar_ui_actions')) {
                 location.reload();
             } else if (event.target.classList.contains('breadcrumb_container')) {
                 //placeholder maybe move breadcrumb doubleclick here
@@ -3666,9 +3670,9 @@ function snuFillFields(query) {
     }
 };
 
-function snuCopySelectedCellValues(copySysIDs) {
+function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
     var hasCopied = false;
-    var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell');
+    var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
     if (selCells.length > 0) {
         doCopy(selCells);
         hasCopied = true;
@@ -3678,7 +3682,7 @@ function snuCopySelectedCellValues(copySysIDs) {
             iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
         Array.from(iframes).forEach(function (frm) {
-            selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell');
+            selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
             if (selCells.length > 0) {
                 doCopy(selCells, frm);
                 hasCopied = true;
@@ -3689,6 +3693,14 @@ function snuCopySelectedCellValues(copySysIDs) {
     function doCopy(selCells, frm) {
         var str = '';
         var wdw = (frm) ? frm.contentWindow : window;
+
+        if (shortcut == "copycolumn") {
+            let firstCell = selCells[0]; 
+            let columnIndex = Array.from(firstCell.parentElement.children).indexOf(firstCell);
+            let rows = firstCell.closest('table').querySelectorAll('tr');
+            selCells = Array.from(rows).map(row => row.cells[columnIndex]).filter(td => td !== undefined && td.classList.contains('vt') && td.innerText);
+        }
+
         selCells.forEach(function (cElem) {
             if (copySysIDs) {
                 if (cElem.querySelector('a')) {
@@ -3941,6 +3953,16 @@ function snuAddBGScriptButton() {
 }
 
 function snuSetAllMandatoryFieldsToFalse() {
+
+    var iframes = window.top.document.querySelectorAll("iframe");
+    if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+        iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+
+    iframes.forEach((iframe) => { 
+        if (typeof iframe.contentWindow.unhideFields != 'undefined')
+            iframe.contentWindow.snuSetAllMandatoryFieldsToFalse(); 
+    });
+
     if (typeof g_form != 'undefined' && typeof g_user != 'undefined') {
         if (g_user.hasRole('admin')) {
             var fields = g_form.getEditableFields();

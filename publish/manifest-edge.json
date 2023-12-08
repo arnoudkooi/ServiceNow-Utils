@@ -102,7 +102,8 @@
         "js/*"
       ],
       "matches": [
-        "https://*.service-now.com/*"
+        "https://*.service-now.com/*",
+        "https://*.servicenowservices.com/*"
       ]
     }
   ],
