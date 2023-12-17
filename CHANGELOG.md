@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## 7.2.0.0 (2023-12-18)
+Features:
+  - Doubleclick on label now shows choices for choice fields
+Fixes / changes:
+  - Choicelist values now toggle with toggle of technical names (Issue #289)
+  - Rename showSelectFieldValues to snuShowSelectFieldValues in inject.js
+  - Remove maxheight of addInfoMessage for Show Fields or show Scratchpad when link is clicked
+  - Change table index for Show Fields from 0 to 1, fix related bugs
+
 ## 7.1.9.0 (2023-12-08)
 Features:
   - Added /copycolumn command, in addition to /copycells It will copy all non empty values of the column where a cell is selected.

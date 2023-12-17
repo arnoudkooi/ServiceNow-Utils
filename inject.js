@@ -1799,12 +1799,17 @@ function snuDoubleClickToShowFieldOrReload() {
                 }
 
                 var val = g_form.getValue(elm);
+                var options = "";
+                g_form.getOptionControl(elm)?.querySelectorAll('option').forEach(opt =>{
+                    options += "\n" + opt.value + ": " + (opt.dataset.snuoriginal || opt.innerText) ;
+                });
+                if (options) options = "\nOptions:" + options;
                 if (NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
-                    var newValue = prompt('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + '\nValue:', val);
+                    var newValue = prompt('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + options + '\nValue:', val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
                 } else {
-                    alert('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + '\nValue:' + val);
+                    alert('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + options + '\nValue:' + val);
                 }
             } else if (event.target.classList.contains('container-fluid') || event.target.classList.contains('navbar_ui_actions')) {
                 location.reload();
@@ -2479,6 +2484,8 @@ function unhideFields() {
 }
 
 function snuShowScratchpad() {
+
+    document.querySelector('.outputmsg_container').style.maxHeight = "none"; //allow full height
     g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {}, 2, 2) + "</pre>");
 }
 
@@ -2536,8 +2543,10 @@ function snuAddTechnicalNames() {
                 // jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
                 var elm;
+                var elmDisp;
                 try {
                     elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                    elmDisp = elm;
                 } catch (e) {
                     return true; //issue #42
                 }
@@ -2577,20 +2586,20 @@ function snuAddTechnicalNames() {
                         onclick: 'snuViewTranslationsMeta(\'' + elm + '\');',
                         title: `View translations of ${fieldType} field`
                     };
-                    elm = '⚑ ' + elm;
+                    elmDisp = '⚑ ' + elm;
                 }
                 else if (['translated_text', 'translated_html'].includes(fieldType)) {
                     linkAttrs = {
                         onclick: 'snuViewTranslations(\'' + elm + '\');',
                         title: `View translations of ${fieldType} field`
                     };
-                    elm = '⚑ ' + elm;
+                    elmDisp = '⚑ ' + elm;
                 }
                 if (linkAttrs) {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
-                        linkAttrs.title + '" target="_blank">' + elm + '</a>';
+                        linkAttrs.title + '" target="_blank">' + elmDisp + '</a>';
                 }
-                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"><span class="dict" title="Open dictionary entry">&nbsp;! </span><span class="pillar">&nbsp;| </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elmDisp + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"><span class="dict" title="Open dictionary entry">&nbsp;! </span><span class="pillar">&nbsp;| </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
                 jQuery(this).closest('a').replaceWith(function () {
                     var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
@@ -2648,7 +2657,7 @@ function snuAddTechnicalNames() {
     if (viewName && !jQuery('i.viewName').length)
         jQuery('.section-content').first().prepend(DOMPurify.sanitize('<i class="viewName snuwrap">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> '));
 
-    showSelectFieldValues();
+    snuShowSelectFieldValues(hasRun);
     snuSearchLargeSelects();
     snuCreateHyperLinkForGlideLists();
 
@@ -2662,6 +2671,7 @@ function snuAddTechnicalNames() {
 }
 
 function snuExtendedFieldInfo() {
+    document.querySelector('.outputmsg_container').style.maxHeight = "none"; //allow full height
     var tableFields = {};
     var tableName = g_form.getTableName();
     //get all fields and group them by the table they are on.
@@ -2710,7 +2720,7 @@ function snuExtendedFieldInfo() {
                 for (let jdx = 0; jdx < fields.length; jdx++) {
                     let elm = document.querySelector(`sup[data-element=${fields[jdx]}]`);
                     if (elm){
-                        elm.innerText = idx;
+                        elm.innerText = idx + 1;
                         elm.title = 'Field from table: ' + tables[idx];
                        
                         try {
@@ -2742,10 +2752,9 @@ function snuExtendedFieldInfo() {
         tr.style.verticalAlign = 'top';
         thr.style.padding = '2px';
         tr.style.padding = '2px';
-
-        tables.forEach(tbl => {
+        tables.forEach((tbl, idx) => {
             var hc = thr.insertCell();
-            var hct = document.createTextNode(tbl);
+            var hct = document.createTextNode(idx+1 + ': ' + tbl);
             hc.appendChild(hct);
 
             var tc = tr.insertCell();
@@ -2781,13 +2790,15 @@ function snuOpenReference(refTable, refField, evt) {
     window.open(url, 'refTable');
 }
 
-function showSelectFieldValues() {
+function snuShowSelectFieldValues(hasRun) {
     if (typeof jQuery == 'undefined') return; //not in studio
     if (["/sys_report_template.do", "/$queryBuilder.do"].includes(location.pathname)) return; //not in report or query builder
 
-    jQuery('option').not(":contains('|')").each(function (i, el) {
-        el.innerText = el.text + ' | ' + el.value;  
-        el. title =  el.text + ' | ' + el.value;  
+    jQuery('option').each(function (i, el) {
+        if (!el.dataset.snuoriginal)
+            el.dataset.snuoriginal = el.text;
+        el.innerText = (hasRun) ? el.dataset.snuoriginal : el.text + ' | ' + el.value ;  
+        el.title =  el.innerText;  
     });
 
     jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('|')").each(function (i, el) {
@@ -4967,4 +4978,102 @@ function snuSlashLog(addValue = false) {
         }
     }
     return slashLog;
+}
+
+
+/**
+ * Generates an array of batch requests for a single endpoint.
+ * This is useful for endpoints where only one action can be performed at a time (e.g., delete, remove breakpoints).
+ * It replaces $<variable_id> with the corresponding property from objects in the parameters array.
+ * The 'body' property for is placed into the REST body for POST requests.
+ *
+ * @param {String} method - The HTTP method for all requests.
+ * @param {Object[]} headers - The headers for all requests. Session token goes on batch call.
+ * @param {string} headers[].name - The name of the header.
+ * @param {string} headers[].value - The value of the header.
+ * @param {string} urlTemplate - The URL template for all requests. $variables are replaced with the corresponding value in the parameters array.
+ * @param {Object[]} parameters - The parameters for all requests. Properties are replaced with the replacement keys $<key>.
+ * @param {Boolean} excludeResponseHeaders - Whether to exclude response headers, reducing the size of the response. Defaults to true.
+ * @returns {Object[]} An array of batch requests for the ServiceNow batch endpoint.
+ */
+function snuGenerateBatchRequests(method, headers, urlTemplate, parameters, excludeResponseHeaders = true) {
+
+    //Generate batch requests
+    var restRequests = parameters.map((substitutionObj) => {
+        var id = Math.random().toString(36).substring(7);
+
+        //Replace $variables in the URL template, excluding body
+        let result = urlTemplate;
+        for (let key in substitutionObj) {
+            if (key == 'body') continue;
+            result = result.replace(new RegExp('\\$' + key, 'g'), substitutionObj[key]);
+        }
+
+        //Create the batch request and add body if necessary
+        var restRequest = {
+            id: id,
+            method: method,
+            headers: headers,
+            url: result,
+            exclude_response_headers: excludeResponseHeaders,
+        };
+        if (method == 'POST' && substitutionObj.body) {
+            restRequest.body = substitutionObj.body;
+        }
+        return restRequest;
+    });
+    return restRequests;
+};
+
+/**
+ * Makes an call to the batch api endpoint, dramatically improving performance for multiple requests
+ * @param {String} token Glide session token
+ * @param {Array} requests Array of requests to be made
+ * @param {Function} callback Callback function
+ * @returns {Promise} Promise object representing the response
+ */
+function snuBatchRequest(token, requests, callback) {
+    return new Promise(async (resolve, reject) => {
+        const headers = {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-UserToken': token,
+        };
+
+        try {
+            const response = await fetch('/api/now/v1/batch', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    batch_request_id: 'snu' + Math.random().toString(36).substring(7),
+                    rest_requests: requests,
+                }),
+            });
+            const data = response.ok ? await response.json() : reject("Error in batch request");
+            if (callback) callback(data);
+            resolve(data);
+        } catch (error) {
+            if (callback) callback(error);
+            reject(error);
+        }
+    });
+}
+
+
+function snuTest(){
+
+    var batchHeaders = [
+        { name: 'Accept', value: 'application/json' },
+        { name: 'Content-Type', value: 'application/json' },
+    ];
+    var batchRequests = snuGenerateBatchRequests('POST', batchHeaders, '/api/now/js/debugger/breakpoint/$script_type/$script_id/$script_field/$line', values[0].result);
+    batchRequests = batchRequests.concat(snuGenerateBatchRequests('POST', batchHeaders, '/api/now/js/debugger/logpoint/$script_type/$script_id/$script_field/$line', values[1].result));
+    
+    //If no breakpoints were found, resolve the promise and return false
+    if (batchRequests.length == 0) return false;
+    
+    //Otherwise, execute the batch request
+    return snuBatchRequest(token, batchRequests);
+
+
 }
