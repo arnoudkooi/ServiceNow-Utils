@@ -2657,7 +2657,7 @@ function snuAddTechnicalNames() {
     if (viewName && !jQuery('i.viewName').length)
         jQuery('.section-content').first().prepend(DOMPurify.sanitize('<i class="viewName snuwrap">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> '));
 
-    snuShowSelectFieldValues(hasRun);
+    snuShowSelectFieldValues();
     snuSearchLargeSelects();
     snuCreateHyperLinkForGlideLists();
 
@@ -2790,14 +2790,14 @@ function snuOpenReference(refTable, refField, evt) {
     window.open(url, 'refTable');
 }
 
-function snuShowSelectFieldValues(hasRun) {
+function snuShowSelectFieldValues() {
     if (typeof jQuery == 'undefined') return; //not in studio
     if (["/sys_report_template.do", "/$queryBuilder.do"].includes(location.pathname)) return; //not in report or query builder
 
     jQuery('option').each(function (i, el) {
         if (!el.dataset.snuoriginal)
             el.dataset.snuoriginal = el.text;
-        el.innerText = (hasRun) ? el.dataset.snuoriginal : el.text + ' | ' + el.value ;  
+        el.innerText = (el.innerText.includes(' | ')) ? el.dataset.snuoriginal : el.text + ' | ' + el.value ;  
         el.title =  el.innerText;  
     });
 

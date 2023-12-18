@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 7.2.0.1 (2023-12-18)
+Fixes / changes:
+  - Minor fix choicelist /tn toggle (Issue #289)
+
 ## 7.2.0.0 (2023-12-18)
 Features:
   - Doubleclick on label now shows choices for choice fields
