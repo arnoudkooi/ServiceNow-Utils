@@ -4571,6 +4571,7 @@ function snuSwitchTo(switchType, key, val) {
             if (data?.error)
                 snuSlashCommandInfoText('Error switching:' + data.error.detail, false);
             else {
+                localStorage.setItem("snuPickerUpdated", new Date().getTime()); //this will help sync picker across tabs
                 snuSlashCommandInfoText('Reloading page...', false);
                 setTimeout(() => {
                     window.top.location.reload();

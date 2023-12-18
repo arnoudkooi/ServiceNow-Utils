@@ -30,6 +30,19 @@ class SnuNextManager {
 
         });
 
+        document.addEventListener("NOW_UI_EVENT", (e)=> { //watch for picker events, set a timestamp to localstorage
+            if(e?.detail?.action?.type == "CONCOURSE_PICKER#ITEM_SELECTED") {
+                localStorage.setItem("snuPickerUpdated", new Date().getTime());
+                setTimeout(() => { this.addClassToPickerDivs() }, 2000);
+            }
+        });
+        
+        window.addEventListener('storage', function(e) {  //watch for localstorage changes, if it's our timestamp, update pickers
+            if (e.key === "snuPickerUpdated") {
+                snuNextManager.updateNextPickers();
+            }
+        });
+
         //specfic for UI builder, enable save button on mouseenter, as it sometimes doesnt get enabled after a propertie change
         setTimeout(() => {
             querySelectorShadowDom = window.querySelectorShadowDom;
@@ -40,8 +53,6 @@ class SnuNextManager {
                 })
             }
         }, 2500);
-
-
     }
 
     addTechnicalNames() {
@@ -214,7 +225,16 @@ class SnuNextManager {
         })
         return namesAdded;
     }
-
+    
+    updateNextPickers() {
+        setTimeout(() => {
+            let snuHeader = querySelectorShadowDom.querySelectorDeep("sn-polaris-header");
+            if (snuHeader)
+                snuHeader.dispatch('CONCOURSE_FETCHER#CURRENT_DATA_REQUESTED', { "options": {} });
+            setTimeout(() => { this.addClassToPickerDivs() }, 2500);
+        }, 1500);
+    }
+    
 
     playbookContextRemoveHelper(){
 
@@ -418,27 +438,12 @@ grSPC.deleteMultiple();`;
         snuInsertAfter(snuSpacer,
             querySelectorShadowDom.querySelectorDeep('div.polaris-search'));
 
-        var pickerDivs;
+        
 
-        function addClassToPickerDivs() {
-            pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
-            pickerDivs.forEach((div, idx) => {
-                div.className = 'snupicker';
-                div.dataset.index = ++idx;
-
-                if (window?.snusettings?.highlightdefaultupdateset && div.innerText.includes('Default [')){
-                    div.className = 'snupicker snudefault';
-                    div.title = '[SN Utils] You may be working in the default Update set! (Disable this warning in settings)'
-                }
-
-
-            });
-        }
-
-        addClassToPickerDivs();
+        setTimeout(() => { this.addClassToPickerDivs(snuSpacer) }, 4000);
 
         snuSpacer.addEventListener('mouseover', () => {
-            addClassToPickerDivs();
+            this.addClassToPickerDivs();
         })
 
         var wrpr = querySelectorShadowDom.querySelectorDeep('sn-search-input-wrapper');
@@ -456,6 +461,24 @@ grSPC.deleteMultiple();`;
 
         });
 
+    }
+
+    addClassToPickerDivs(snuSpacer) {
+
+        let defUpd = querySelectorShadowDom.querySelectorDeep('.snudefault');
+        if (defUpd) defUpd.classList.remove('snudefault')
+
+        snuSpacer = snuSpacer || querySelectorShadowDom.querySelectorDeep('#snuSpacer');
+        let pickerDivs = snuSpacer.querySelector('div').querySelectorAll('div');
+        pickerDivs.forEach((div, idx) => {
+            div.className = 'snupicker';
+            div.dataset.index = ++idx;
+
+            if (window?.snusettings?.highlightdefaultupdateset && div.innerText.includes('Default [')){
+                div.className = 'snupicker snudefault';
+                div.title = '[SN Utils] You may be working in the default Update set! (Disable this warning in settings)'
+            }
+        });
     }
 
     showPicker(pickerindex, evt, elm) {

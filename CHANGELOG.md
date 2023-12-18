@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.2.1.0 (2023-12-18)
+Features:
+  - Sync Pickers across tabs
+
+  
 ## 7.2.0.1 (2023-12-18)
 Fixes / changes:
   - Minor fix choicelist /tn toggle (Issue #289)
