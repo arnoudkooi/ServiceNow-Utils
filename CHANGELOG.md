@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 7.2.1.2 (2024-01-09)
+Features:
+  - Improvements to /copycells command (Issue #318)
+
 ## 7.2.1.0 (2023-12-18)
 Features:
   - Sync Pickers across tabs

@@ -3724,9 +3724,11 @@ function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
                 var oTitle = cElem.getAttribute("data-original-title");
                 if (oTitle !== null){
                     if (oTitle.length == 1000)
-                        str +=  '"' + cElem.innerText.replace(/"/g, '""') + ' [TRUNCATED]"\n';
-                    else
+                        str +=  cElem.innerText.replace(/"/g, '""') + ' [TRUNCATED]\n';
+                    else if (/\r|\n/.exec(oTitle)) //do not enclose in quotes if multiline #318
                         str += '"' + oTitle.replace(/"/g, '""') + '"\n';
+                    else 
+                        str += oTitle.replace(/"/g, '""') + '\n';
                 }
                 else
                     str += cElem.innerText.replace(' ➚','') + '\n';
