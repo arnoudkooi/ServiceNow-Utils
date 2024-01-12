@@ -1,8 +1,12 @@
 # CHANGELOG.md
 
+## 7.2.1.3 (2024-01-12)
+Features:
+  - Add .do to document_id btn-ref doubleclick target (Issue #459)
+
 ## 7.2.1.2 (2024-01-09)
 Features:
-  - Improvements to /copycells command (Issue #318)
+  - Improvements to /copycells command (Issue #458)
 
 ## 7.2.1.0 (2023-12-18)
 Features:

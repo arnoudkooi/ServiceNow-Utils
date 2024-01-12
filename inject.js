@@ -1824,7 +1824,7 @@ function snuDoubleClickToShowFieldOrReload() {
                 else { //maybe a document ID
                     var data = event?.target?.parentElement.dataset;
                     if (data?.sysid && data?.table)
-                        window.open(`${data?.table}?sys_id=${data?.sysid}`);
+                        window.open(`${data?.table}.do?sys_id=${data?.sysid}`);
                 }
             }
             else if (['div', 'li', 'body'].includes(event.target.localName) && !event.target.parentElement.className.includes('monaco')) {
@@ -3725,7 +3725,7 @@ function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
                 if (oTitle !== null){
                     if (oTitle.length == 1000)
                         str +=  cElem.innerText.replace(/"/g, '""') + ' [TRUNCATED]\n';
-                    else if (/\r|\n/.exec(oTitle)) //do not enclose in quotes if multiline #318
+                    else if (/\r|\n/.exec(oTitle)) //do not enclose in quotes if multiline #458
                         str += '"' + oTitle.replace(/"/g, '""') + '"\n';
                     else 
                         str += oTitle.replace(/"/g, '""') + '\n';
