@@ -2,7 +2,9 @@
 
 ## 7.2.2.0 (2024-01-18)
 Fixes / changes:
-  - Add .do to document_id btn-ref doubleclick target (Issue #459)
+  - Resolve tablename and sys_id in VA Designer to support /va command from there
+  - Add "Who the heck edited this info" on top of View Data window
+
 
 ## 7.2.1.3 (2024-01-12)
 Fixes / changes:
