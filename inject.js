@@ -1465,6 +1465,13 @@ function snuResolveVariables(variableString){
         variableString = variableString.replace(/\$table/g,tableName);
         variableString = variableString.replace(/\$sysid/g,sysId);
     }
+    else if (location.pathname == "/$conversation-builder.do"){ //flowdesigner
+        tableName = "sys_cb_topic";
+        var hashParts = location.hash.split("/");
+        sysId = hashParts.length > 2 ? hashParts[2] : null;
+        variableString = variableString.replace(/\$table/g,tableName);
+        variableString = variableString.replace(/\$sysid/g,sysId);
+    }
     else { ///get sysid and tablename from portal or workspace
         let searchParams = new URLSearchParams(window.location.search)
         tableName = (searchParams.get('table') || searchParams.get('id') || '').replace(/[^a-z0-9-_]/g, '');
