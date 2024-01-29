@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.2.2.2 (2024-01-29)
+Fixes / changes:
+  - Allow slashcommands with encodedquery to work with spaces, note that they may not work as expected when the encodedquery contains a -  (#issue 460)
+  - Add ALT-/ to trigger slash commands for Washington compatibility. 
+
 ## 7.2.2.0 (2024-01-18)
 Fixes / changes:
   - Resolve tablename and sys_id in VA Designer to support /va command from there

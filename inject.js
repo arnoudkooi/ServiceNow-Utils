@@ -699,7 +699,7 @@ function snuSlashCommandAddListener() {
 
 
         if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
-            let encodedQ = query.split(' ')[0]; //encodedquery should be first
+            let encodedQ = query.split('-')[0]; //encodedquery should be first, switches should work #460
             targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + encodeURIComponent(encodedQ) + (e.key.length == 1 ? e.key : ""));
             switchText = '<br />Encodedquery detected<br /><br /><br /> Switches:<br />';
         }
@@ -3024,7 +3024,7 @@ function snuSetShortCuts() {
             if (snusettings.slashoption == 'off') return;
             let eventPath = event.path || (event.composedPath && event.composedPath());
             if (eventPath[0]?.className?.includes('CodeMirror-code')) return; //allow commenting wit ctrl-/
-            var isActive = ((location.host.includes("service-now.com") || g_ck) && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
+            var isActive = ((location.host.includes("service-now.com") || g_ck) && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey || event.altKey; //add altkey for Washington compatability
             if (isActive) {
                 var path = event.path || (event.composedPath && event.composedPath());
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
