@@ -326,6 +326,10 @@ var snuslashcommands = {
         "url": "/workflow_ide.do?sysparm_nostack=true",
         "hint": "Workflow Editor"
     },
+    "ws": {
+        "url": "/now/workflow-studio/home/flow",
+        "hint": "Workflow Studio"
+    },
     "imp": {
         "url": "*",
         "hint": "Impersonate User"
@@ -2966,6 +2970,8 @@ function snuSetShortCuts() {
         div#snudirectlinks a {color:#22885c; text-decoration: none; }
         div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#1f1cd2;}
+        div.snufadein { animation: snuFadeIn 0.5s; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
     else if (snusettings.slashtheme == 'stealth') {
@@ -2980,6 +2986,7 @@ function snuSetShortCuts() {
         a.cmdlink { display:none }
         span.semihidden { display:none }
         div#snudirectlinks {display:none;}
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
     else {
@@ -2999,6 +3006,8 @@ function snuSetShortCuts() {
         div#snudirectlinks a {color:#1cad6e; text-decoration: none; }
         div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#0cffdd;}
+        div.snufadein { animation: snuFadeIn 0.5s; }
+        @keyframes snuFadeIn { 0% { opacity: 0; } 30% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
 
@@ -3532,6 +3541,8 @@ function snuSlashCommandHide(navFocus = false, evt) {
     window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
+        window.top.document.querySelector('div.snutils').classList.remove("snufadein");
+
         if (navFocus === true) {
             if (window.top.document.getElementById('filter') != null) {
                 try {
@@ -3563,6 +3574,7 @@ function snuSlashCommandShow(initialCommand, autoRun) {
     window.top.document.snuSelection = snuGetSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
+        window.top.document.querySelector('div.snutils').classList.add("snufadein");
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
         snuSlashCommandShowHints((initialCommand || "").substring(1), false, "", "", false);

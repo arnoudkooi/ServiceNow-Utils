@@ -30,10 +30,34 @@ class SnuNextManager {
 
         });
 
-        document.addEventListener("NOW_UI_EVENT", (e)=> { //watch for picker events, set a timestamp to localstorage
-            if(e?.detail?.action?.type == "CONCOURSE_PICKER#ITEM_SELECTED") {
+        document.addEventListener("NOW_UI_EVENT", (e)=> { 
+            if(e?.detail?.action?.type == "CONCOURSE_PICKER#ITEM_SELECTED") { //watch for picker events, set a timestamp to localstorage
                 localStorage.setItem("snuPickerUpdated", new Date().getTime());
                 setTimeout(() => { this.addClassToPickerDivs() }, 2000);
+            }
+            else if (e?.detail?.action?.type == "KEYBOARD_SHORTCUTS_BEHAVIOR#MODAL_OPENED"){ //In Washington prevent showing Slashcommands when Shortcuts Popup wants to show.           
+                setTimeout(() => {
+                    let gridDiv = querySelectorShadowDom.querySelectorDeep('div.shortcut-container');
+                    if (gridDiv && !gridDiv.querySelector('.snuified')) {
+                        let key = navigator.userAgent.includes('Mac') ? 'ctrl' : 'alt';
+                        let shrtcutDiv = document.createElement('div');
+                        shrtcutDiv.className = 'shortcut snuified';
+                        shrtcutDiv.innerHTML =`
+                            <span>
+                             <span class="label">[SN Utils] Slash commands popup</span>
+                             <span class="hint">Open the SN Utils Slash commands popup</span>
+                            </span>
+                            <span>
+                             <div>
+                              <span class="shortcut-btn small">${key}</span>
+                              <span class="small">+</span>
+                              <span class="shortcut-btn small">/</span>
+                             </div>
+                            </span>`
+                        gridDiv.appendChild(shrtcutDiv);
+                    }             
+                }, 200);
+                snuSlashCommandHide();                
             }
         });
         
@@ -59,7 +83,7 @@ class SnuNextManager {
         this.snuAddFilterToTrees(); //add filter to now-content-tree components
 
         let namesAdded = 0;
-        let frms = querySelectorShadowDom.querySelectorAllDeep('sn-form-data-connected, sn-form-data-connected');
+        let frms = querySelectorShadowDom.querySelectorAllDeep('sn-form-data-connected');
         frms.forEach(frm => {
             if (!querySelectorShadowDom.querySelectorAllDeep('.snufrm', frm).length) { //only add once
                 let uiab = querySelectorShadowDom.querySelectorAllDeep('.uiaction-bar-wrapper', frm);
@@ -345,7 +369,9 @@ grSPC.deleteMultiple();`;
         if (eventPath[0].localName != 'span') return false; //labels are a span, stop if not a span
 
         let dict, form;
+        let isgrid = false;
         for (let elm of eventPath) {
+            if (elm.localName == 'now-grid') notgrid = true; //not when in a grid (aka list)
             if (elm.className?.includes('snuwrapper')) break; //not in a SN Utils added elemet
             if (elm['dictionary'] && !dict)
                 dict = elm.dictionary
@@ -355,7 +381,9 @@ grSPC.deleteMultiple();`;
                 break;
         }
 
-        if (dict && form) {
+        if (isgrid) return true; //not when in a grid (aka list) #463
+
+        if (dict && form && notgrid) {
             let val = form.gForm.getValue(dict.name);
             let newValue = prompt('[SN Utils]\nField Type: ' + dict.type + '\nField: ' + dict.name + '\nValue:', val);
             if (newValue !== null)

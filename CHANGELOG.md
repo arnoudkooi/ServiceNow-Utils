@@ -1,4 +1,13 @@
 # CHANGELOG.md
+## 7.2.3.0 (2024-02-02)
+Fixes / changes:
+  - Added /ws command top open the new Workflows Studio.
+  - Exclude Next experience Lists from doubleclick to /tn (Issue #463)
+  - Exclude Slash command popup when the Washington Shortcut popup shows
+  - To support above, added a fade in animation for the slash command popup
+  - Add div to the shortcut popup showing what the slash command shortcut is.
+  
+
 
 ## 7.2.2.2 (2024-01-29)
 Fixes / changes:
