@@ -29,6 +29,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (isServiceNow) {
             addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
             addScript('inject.js', true);
+            //addScript('admin/snu-draggable-marker.js');
             if (document.getElementById("filter") != null || location.pathname.startsWith("/now/")) {
                 addScript('inject_parent.js');
             }

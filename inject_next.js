@@ -49,9 +49,7 @@ class SnuNextManager {
                             </span>
                             <span>
                              <div>
-                              <span class="shortcut-btn small">${key}</span>
-                              <span class="small">+</span>
-                              <span class="shortcut-btn small">/</span>
+                              <span class="shortcut-btn small">${key}</span><span class="small">+</span><span class="shortcut-btn small">/</span>
                              </div>
                             </span>`
                         gridDiv.appendChild(shrtcutDiv);
