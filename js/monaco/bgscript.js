@@ -281,75 +281,77 @@ function startStopWatch() {
 	}, 100);
 }
 
-class CodeHistory {
-
-	constructor() {
-		this.history = new Map();
-		this.selectedEntry = null;
-	}
-
-	addEntry(sysId, additionalData) {
-		if(additionalData.code !== "") {
-			this.history.set(sysId, additionalData);
-		}
-	}
-
-	generateSelect() {
-		const scrpt = document.getElementsByTagName('pre')[0];
-		const options = this.generateOptions();
-		if(this.history.size > 0) {
-			const template = `
-				<div>
-					<select id="bgscripthistory">${options}</select>
-					<button id="load-script">Load Script</button>
-					<pre id="codepreview"></pre>
-				</div>`;
-			scrpt.insertAdjacentHTML("beforebegin", template);
-			
-			var loadScriptButton = document.getElementById('load-script');
-
-			if(loadScriptButton) {
-				loadScriptButton.addEventListener('click', () => {
-					this.loadScriptInEditor();
-				});
-			}				
-		}
-
-		document.addEventListener("change", (event) => {
-			var value = event.target.value;
-			if(this.history.has(value)) {
-				this.selectedEntry = this.history.get(value);
-				var preview = document.querySelector("#codepreview");
-				preview.innerHTML = this.selectedEntry.code.toString();
-			}
-		});
-	}
-
-	loadScriptInEditor() {
-		editor.getModels()[0].setValue(this.selectedEntry.code.toString());
-	}
-
-	generateOptions() {
-		let options = "<option>- Select executed Script - </option>";
-		this.history.forEach((value, key) => {
-			options += `<option value="${key}">${value.startedAt}</option>`;
-		});
-		return options;
-	}
-}
-
 function getBackgroundHistoryEntriesForUser() {
+
+	// private class start
+	class CodeHistory {
+
+		constructor() {
+			this.history = new Map();
+			this.selectedEntry = null;
+		}
+	
+		addEntry(sysId, additionalData) {
+			if(additionalData.code !== "") {
+				this.history.set(sysId, additionalData);
+			}
+		}
+	
+		generateSelect() {
+			const scrpt = document.getElementsByTagName('pre')[0];
+			const options = this.generateOptions();
+			if(this.history.size > 0) {
+				const template = `
+					<div>
+						<select id="bgscripthistory">${options}</select>
+						<button id="load-script">Load Script</button>
+						<pre id="codepreview"></pre>
+					</div>`;
+				scrpt.insertAdjacentHTML("beforebegin", template);
+				
+				var loadScriptButton = document.getElementById('load-script');
+	
+				if(loadScriptButton) {
+					loadScriptButton.addEventListener('click', () => {
+						this.loadScriptInEditor();
+					});
+				}				
+			}
+	
+			document.addEventListener("change", (event) => {
+				var value = event.target.value;
+				if(this.history.has(value)) {
+					this.selectedEntry = this.history.get(value);
+					var preview = document.querySelector("#codepreview");
+					preview.innerHTML = this.selectedEntry.code.toString();
+				}
+			});
+		}
+	
+		loadScriptInEditor() {
+			editor.getModel().setValue(this.selectedEntry.code.toString());
+		}
+	
+		generateOptions() {
+			let options = "<option>- Select executed Script - </option>";
+			this.history.forEach((value, key) => {
+				options += `<option value="${key}">${value.startedAt}</option>`;
+			});
+			return options;
+		}
+	}
+	// private class end
 
 	const codeHistory = new CodeHistory();
 	const table = "sys_script_execution_history"
 	const fields = "sys_id,script,result,transaction.transaction_processing_time,started";
-	const filter = "sys_created_by=javascript:gs.getUserName()";
+	const query = "sys_created_by=javascript:gs.getUserName()^ORDERBYDESCstarted";
 	const instance = window.location.origin;
 	const g_ck = document.getElementsByName('sysparm_ck')[0]?.value;
 
 	var client = new XMLHttpRequest();
     client.open("get", instance + '/api/now/table/' +
-        table + '?sysparm_fields=' + fields + '&sysparm_query=' + filter);
+        table + '?sysparm_fields=' + fields + '&sysparm_query=' + query);
 
     client.setRequestHeader('Accept', 'application/json');
     client.setRequestHeader('Content-Type', 'application/json');
