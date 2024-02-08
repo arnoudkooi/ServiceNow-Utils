@@ -1,7 +1,12 @@
 # CHANGELOG.md
+## 7.2.3.1 (2024-02-0)
+Fixes / changes:
+  - Fix for not applying switches with numbers (Issue #465)
+
+
 ## 7.2.3.0 (2024-02-02)
 Fixes / changes:
-  - Added /ws command top open the new Workflows Studio.
+  - Added /ws command to open the new Workflow Studio.
   - Exclude Next experience Lists from doubleclick to /tn (Issue #463)
   - Exclude Slash command popup when the Washington Shortcut popup shows
   - To support above, added a fade in animation for the slash command popup

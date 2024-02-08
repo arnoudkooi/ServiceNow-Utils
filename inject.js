@@ -713,7 +713,7 @@ function snuSlashCommandAddListener() {
             if (originalShortcut.startsWith("-")) query = shortcut;
             var extraParams = "";
             var unusedSwitches = Object.assign({}, snuslashswitches);
-            var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
+            var switches = (query + thisKey).match(/\-([a-z0-9]*)(\s|$)/g);
             var linkSwitch = false; //determine if this is a switch that converts the entire hyperlink
             if (switches) {
                 Object.entries(switches).forEach(([key, val]) => {
