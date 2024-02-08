@@ -239,6 +239,10 @@ var snuslashcommands = {
         "url": "//sa",
         "hint": "Special slashcommand, accessible via extension keyboard shortcut"
     },
+    "sfc": {
+        "url": "*",
+        "hint": "Shows the full content of cells which are truncated with '...' in lists"
+    },
     "start": {
         "url": "/nav_to.do",
         "hint": "New tab"
@@ -893,6 +897,11 @@ function snuSlashCommandAddListener() {
             }
             else if (shortcut == "copycells" || shortcut == "copycolumn") {
                 snuCopySelectedCellValues(query, shortcut);
+                snuSlashCommandHide();
+                return;
+            }
+            else if (shortcut == "sfc") {
+                snuShowFullCellValues(query, shortcut);
                 snuSlashCommandHide();
                 return;
             }
@@ -3760,6 +3769,41 @@ function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
         return;
     }
 };
+
+function snuShowFullCellValues() {
+    var iframe = window.top.document.querySelector("iframe#gsft_main");
+    var globalNavConfigElement = document.querySelector("[global-navigation-config]");
+    var iframePolaris = globalNavConfigElement ? globalNavConfigElement.shadowRoot.querySelector("iframe#gsft_main") : null;
+    
+    var target;
+    if (iframe) {
+        target = iframe.contentDocument;
+    } else if (iframePolaris) {
+        target = iframePolaris.contentDocument;
+    } else {
+        target = document;
+    }
+    target.querySelectorAll('td').forEach(function(cell) {
+        // Check if the cell text itself ends with '....'
+        if (cell.textContent.trim().endsWith('...')) {
+            var fullText = cell.getAttribute('title') || cell.getAttribute('data-original-title');
+            if (fullText) {
+                cell.textContent = fullText;
+            }
+        }
+    
+        // Also, check for any links within the cell that have an aria-label ending with '....'
+        var links = cell.querySelectorAll('a');
+        links.forEach(function(link) {
+            if (link.getAttribute('aria-label') && link.getAttribute('aria-label').endsWith('....')) {
+                var linkFullText = link.getAttribute('title') || link.getAttribute('data-original-title');
+                if (linkFullText) {
+                    link.textContent = linkFullText;
+                }
+            }
+        });
+    });
+}
 
 async function snuPostRequestToScriptSync(requestType) {
 
