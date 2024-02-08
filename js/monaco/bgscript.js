@@ -19,7 +19,7 @@ const urlparams = new Proxy(new URLSearchParams(window.location.search), {
 
 if (snusettings.applybgseditor && scrpt) {
 
-	devidePage();
+	dividePage();
 	
 	let monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
 	// if (navigator.userAgent.toLowerCase().includes('firefox')) { //fix to allow autocomplete issue FF #134, didnt work :(
@@ -99,7 +99,7 @@ document.addEventListener('snuEvent', function (e) {
 
 
 
-function devidePage() {
+function dividePage() {
 
 	//make post async
 	document.addEventListener('submit', (e) => {
@@ -187,6 +187,8 @@ function devidePage() {
 
 	// Attach the handler
 	resizer.addEventListener('mousedown', mouseDownHandler);
+
+	getBackgroundHistoryEntriesForUser();
 
 }
 
@@ -277,4 +279,131 @@ function startStopWatch() {
 		let timer = result.querySelector('#timer');
 		if (timer) timer.innerHTML = (elapsedTime / 1000).toFixed(3);
 	}, 100);
+}
+
+function getBackgroundHistoryEntriesForUser() {
+
+	class CodeHistory {
+
+		constructor() {
+			this.history = new Map();
+			this.selectedEntry = null;
+		}
+	
+		addEntry(sysId, additionalData) {
+			if(additionalData.code !== "") {
+				this.history.set(sysId, additionalData);
+			}
+		}
+
+		generateSelect() {
+			const scrpt = document.getElementsByTagName('pre')[0];
+			const options = this.generateOptions();
+			if(this.history.size > 0) {
+				const template = `
+					<div>
+						<select id="bgscripthistory">${options}</select>
+						<pre id="codepreview"></pre>
+						<button id="load-script">Load Script</button>
+						<button>Load Script With Result</button>
+
+					</div>`;
+				//div.inner.HTML(template);
+				scrpt.insertAdjacentHTML("beforebegin", template);
+				
+				var loadScriptButton = document.getElementById('load-script');
+
+				if(loadScriptButton) {
+					loadScriptButton.addEventListener('click', function() {
+						loadScriptInEditor();
+					});
+				}				
+			}
+
+			
+
+			document.addEventListener("change", (event) => {
+				var value = event.target.value;
+				if(this.history.has(value)) {
+					this.selectedEntry = this.history.get(value);
+					//loadBackgroundScript(value);
+					/*
+					var result = document.querySelector(".result");
+					result.innerHTML = 'SN Utils - Background script result pane.<hr />' + historyEntry.result; 
+					window.monaco.editor.getModels()[0].setValue(historyEntry.code)
+					*/
+					var preview = document.querySelector("#codepreview");
+					preview.innerHTML = this.selectedEntry.code.toString();
+				}
+			});
+		}
+
+		loadScriptInEditor() {
+			editor.getModels()[0].setValue(this.selectedEntry.code.toString());
+		}
+
+		generateOptions() {
+			let options = "<option>- Select executed Script - </option>";
+			console.log(this.history);
+			this.history.forEach((value, key) => {
+				options += `<option value="${key}">${value.startedAt}</option>`;
+			});
+			return options;
+		}
+	}
+
+	const codeHistory = new CodeHistory();
+	const table = "sys_script_execution_history"
+	const fields = "sys_id,script,result,transaction.transaction_processing_time,started";
+	const filter = "sys_created_by=javascript:gs.getUserName()";
+	const instance = window.location.origin;
+	const g_ck = document.getElementsByName('sysparm_ck')[0]?.value;
+
+	
+	// https://dev90744.service-now.com/sys_script_execution_history_list.do?sysparm_query=sys_created_by%3Ddeveloper.program%40snc&sysparm_view=
+	var client = new XMLHttpRequest();
+    client.open("get", instance + '/api/now/table/' +
+        table + '?sysparm_fields=' + fields + '&sysparm_query=' + filter);
+
+	/*
+	var postData = {};
+    postData[data.field] = editor.getModel().getValue();
+	*/
+
+    client.setRequestHeader('Accept', 'application/json');
+    client.setRequestHeader('Content-Type', 'application/json');
+    client.setRequestHeader('X-UserToken', g_ck);
+
+    client.onreadystatechange = function () {
+        if (this.readyState == this.DONE) {
+            var resp = JSON.parse(this.response);
+            if (resp.hasOwnProperty('result')) {
+				const results = resp.result;
+                //document.querySelector('#response').innerHTML = 'Saved: ' + new Date().toLocaleTimeString();
+                //versionid = editor.getModel().getAlternativeVersionId();
+				console.log("results received:" + JSON.stringify(results));
+				for(const result of results) {
+					const sysId = result.sys_id;
+					const code = result.script;
+					const scriptResult = result.result;
+					const executionTime = result['transaction.transaction_processing_time'];
+					const startedAt = result.started;
+					codeHistory.addEntry(sysId, {
+						"code": code,
+						"result": scriptResult,
+						"executionTime": executionTime,
+						"startedAt": startedAt
+					});
+				}
+				codeHistory.generateSelect();
+            } else {
+                var resp = JSON.parse(this.response);
+                if (resp.hasOwnProperty('error')) {
+                    document.querySelector('#response').innerHTML = 'Error: ' + new Date().toLocaleTimeString() + '<br />' +
+                        JSON.stringify(resp.error);
+                }
+            }
+        }
+    };
+    client.send();
 }

@@ -56,3 +56,7 @@ pre {
 label{
     font-size:9pt;
 }
+
+pre#codepreview {
+    border: 2px solid green;
+}
