@@ -68,8 +68,12 @@ var snuslashcommands = {
         "hint": "Background Script with var current"
     },
     "bgl": {
-        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%22$table%22%29%3B%0Alist.addEncodedQuery%28%22$encodedquery%22%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D%3B",
+        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%22$table%22%29%3B%0Alist.addEncodedQuery%28%22$encodedquery%22%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D",
         "hint": "Background Script with list gr"
+    },
+    "bgm": {
+        "url": "sys.scripts.modern.do",
+        "hint": "Background Script Modern (Washington and up)"
     },
     "cls": {
         "url": "*",
@@ -463,7 +467,7 @@ function snuGetTables(shortcut) {
                     };
                 }
             });
-            snuExpandHints(shortcut)
+            if (results?.length) snuExpandHints(shortcut)
         } else {
             snuSlashCommandInfoText(`<b>Log</b><br />- Tables can not be retrieved.<br />`, true);
         }
@@ -655,6 +659,10 @@ function snuSlashCommandAddListener() {
             e.currentTarget.value = (e.currentTarget.value + window.top.document.snuSelection).trim();
             thisKey = "";
             e.preventDefault();
+            setTimeout(()=> {
+                window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Shift' }));
+            },150)
+
         }
         if (noSpace) idx = snufilter.length;
         var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : ""))).toLowerCase();
@@ -777,10 +785,10 @@ function snuSlashCommandAddListener() {
             idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
             query = snufilter.slice(idx + 1);
 
-            if (['nav', 'fav', 'hist'].includes(shortcut)) {
-                e.preventDefault();
-                return;
-            }
+            // if (['nav', 'fav', 'hist'].includes(shortcut)) { //I think this can/should be removed.
+            //     e.preventDefault();
+            //     return;
+            // }
             if (shortcut.replace(/['" ]+/g, '').match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid") {//is a sys_id
                 var sysid = (shortcut.replace(/['" ]+/g, '').length == 32) ? shortcut.replace(/['" ]+/g, '') : query;
                 if (sysid.length != 32) return;
@@ -788,7 +796,7 @@ function snuSlashCommandAddListener() {
                 //snuSlashCommandHide();
                 return;
             }
-            if (/.*_([0-9a-fA-F]{32})$/.test(shortcut)) {//table_name_sysid pattern
+            else if (/.*_([0-9a-fA-F]{32})$/.test(shortcut)) {//table_name_sysid pattern
                 const result = shortcut.split(/_(?=[0-9a-fA-F]{32}$)/);
                 window.open(result[0] + ".do?sys_id=" + result[1], '_blank');
                 return;
@@ -894,6 +902,9 @@ function snuSlashCommandAddListener() {
             else if (shortcut == "copycells" || shortcut == "copycolumn") {
                 snuCopySelectedCellValues(query, shortcut);
                 snuSlashCommandHide();
+                if (shortcut == "copycells" && !query) {
+                    snuSlashCommandInfoText("You can now try CTRL-C / CMD-C instead of the slashcommand", false);
+                }
                 return;
             }
             else if (shortcut == "s2") {
@@ -1081,7 +1092,7 @@ function snuSlashCommandAddListener() {
             }              
             else if (!snuslashcommands.hasOwnProperty(shortcut)) {
 
-                var inIFrame = (shortcut == snufilter.slice(0, idx) && sameWindow)
+                var inIFrame = (shortcut == snufilter.toLowerCase().slice(0, idx) && sameWindow)
                 if (e.target.className == "snutils") inIFrame = false;
 
                 if (shortcut.includes('.do')) {
@@ -1100,8 +1111,11 @@ function snuSlashCommandAddListener() {
                     snuSlashCommandHide();
                     return;
                 }
-                else if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
-                    var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=" + query;
+                else if (shortcut.length > 4 ) { //try to open table list if shortcut nnot defined and 5+ charaters
+                    
+                    var url = 'text_search_exact_match.do?sysparm_search=' + snufilter;
+                    if (shortcut.includes('_'))
+                        url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=" + query;
 
                     if (inIFrame) {
                         (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = url;
@@ -1238,6 +1252,11 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
     if ((e.ctrlKey || e.metaKey) && e.key == 'v' && shortcut == 'v') {
         //asume a sys_id when pasting for correct 'autocomplete'
         shortcut = "00000000000000000000000000000000";
+
+        setTimeout(()=> { //this forces a refresh of the hints
+            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Shift' }));
+        },150)
+
     }
 
     var startswith = true;
@@ -1308,7 +1327,13 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
         // html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
         //     "<span class='cmdlabel'>Table search &lt;encodedquery&gt; (hit ► to search tables)</span></li>"
     }
+    if (snuPropertyNames.length == 0 && snufilter.length > 3) {
+        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/search</span> " +
+                "<span class='cmdlabel'>Search for: " + snufilter + "</span></li>";
+    }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
+    if (!html)
+    console.log(html)
     window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
@@ -1322,6 +1347,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
 
     if (snusettings.slashnavigatorsearch && snuPropertyNames.length <= 3 && switchText.length <=25)
         snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter, arrDigits);
+
 }
 
 function setSnuFilter(ev) {
@@ -2612,10 +2638,13 @@ function snuAddTechnicalNames() {
                 }
                 jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elmDisp + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"><span class="dict" title="Open dictionary entry">&nbsp;! </span><span class="pillar">&nbsp;| </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
-                jQuery(this).closest('a').replaceWith(function () {
-                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
-                    return DOMPurify.sanitize(hl.outerHTML + " " + cnt, { ADD_ATTR: ['target'] });
-                });
+                if (this.closest('a')){
+                    elem.closest('label').style.pointerEvents = 'all';
+                    jQuery(this).closest('a').replaceWith(function () {
+                        var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
+                        return DOMPurify.sanitize(hl.outerHTML + " " + cnt, { ADD_ATTR: ['target'] });
+                    });
+                }
             });
 
         } catch (error) {
@@ -3182,6 +3211,14 @@ function snuOpenWorkflowLink(){
 
 function snuBindPaste(showIcon) {
 
+   //this is test to be able to use default copy event to copy cell values, without the need use /copycells
+    document.querySelector('body').addEventListener("copy", (event) => {
+        if (typeof g_list_edit_grid != 'undefined') { //list or form
+            if (!snuGetSelectionText())
+                snuCopySelectedCellValues();
+        }
+    });
+
     if (typeof g_form != 'undefined') {
 
         document.querySelector('body').addEventListener('paste', (e) => {
@@ -3708,8 +3745,8 @@ function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
         hasCopied = true;
     } else {
         var iframes = window.top.document.querySelectorAll("iframe");
-        if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
-            iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+        if (!iframes.length && window.top.document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+            iframes = window.top.document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
         Array.from(iframes).forEach(function (frm) {
             selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
@@ -3756,7 +3793,12 @@ function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
         });
         if (str.endsWith(',')) str = str.substring(0, str.length - 1);
 
-        wdw.copyToClipboard(str);
+        setTimeout(() => {
+            if (typeof snuLastCopied == 'undefined' || new Date().getTime() - snuLastCopied > 500) {
+                snuLastCopied = new Date().getTime();
+                wdw.copyToClipboard(str);
+            }
+        },1);
         return;
     }
 };
@@ -5097,5 +5139,22 @@ function snuTest(){
     //Otherwise, execute the batch request
     return snuBatchRequest(token, batchRequests);
 
+}
 
+async function snuCheckFamily(){
+	let family = '';
+	try{
+        let storedfamily = JSON.parse(localStorage.getItem('snufamily')) || {}; //once a day check version (use /cls to clear cache)
+        if (storedfamily?.checked == new Date().toISOString().substring(0,10)) 
+            return storedfamily?.family;
+
+		let fetchd = await snuFetchData(g_ck, '/api/now/table/sys_properties?sysparm_limit=1&sysparm_fields=value&sysparm_query=name=com.glide.embedded_help.version');
+		family = fetchd?.result[0]?.value;
+        storedfamily = { family: family, checked: new Date().toISOString().substring(0,10) };
+        localStorage.setItem('snufamily', JSON.stringify(storedfamily));
+	}
+	catch(e){
+		family = 'unknown';
+	}
+	return family;
 }

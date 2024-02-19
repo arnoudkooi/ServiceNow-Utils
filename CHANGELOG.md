@@ -1,5 +1,17 @@
 # CHANGELOG.md
-## 7.2.3.1 (2024-02-0)
+
+## 7.3.0.0 (2024-02-19)
+Features:
+  - Slash command now triggers a global search when now match is found, ie: /INC3940740 opens that incident. This is a shortcut for the /search command. If the command contains a _ it tries to open a table list like it used to.
+  - /copycells can now be triggered via the OS copy shortcut (ctrl-c or cmd-c), when no other selection is made 
+  - The Modern Background scripts now get split and execute inline and other enhancements, like the classic background scripts. 
+  - Pages on old background script get redirected to the modern background script page, when it detects the instance runs on washington release.
+Fixes / changes:
+  - Mousevents now work on form labels with a hyperlink, after /tn moves the link to the ↗ symbol
+  - Added function snuCheckFamily to inject.js, this helps to determine the family release of the instance
+
+
+## 7.2.3.1 (2024-02-07)
 Fixes / changes:
   - Fix for not applying switches with numbers (Issue #465)
 

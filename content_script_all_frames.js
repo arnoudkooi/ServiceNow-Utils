@@ -47,6 +47,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                     addScript('js/monaco/bgscript.js', false);
                 }, 600)
             }
+            else if (location.pathname == "/sys.scripts.modern.do") {
+                setTimeout(function () {
+                    addScript('js/bgscriptmodern.js', false);
+                }, 400)            
+            }
             else if (location.pathname.startsWith("/merge_form_")) {
                 addScript('js/monaco/compare.js', false);
             }
