@@ -903,7 +903,7 @@ function snuSlashCommandAddListener() {
                 snuCopySelectedCellValues(query, shortcut);
                 snuSlashCommandHide();
                 if (shortcut == "copycells" && !query) {
-                    snuSlashCommandInfoText("You can now try CTRL-C / CMD-C instead of the slashcommand", false);
+                    //snuSlashCommandInfoText("You can now try CTRL-C / CMD-C instead of the slashcommand", false);
                 }
                 return;
             }
@@ -3211,13 +3211,14 @@ function snuOpenWorkflowLink(){
 
 function snuBindPaste(showIcon) {
 
-   //this is test to be able to use default copy event to copy cell values, without the need use /copycells
-    document.querySelector('body').addEventListener("copy", (event) => {
-        if (typeof g_list_edit_grid != 'undefined') { //list or form
-            if (!snuGetSelectionText())
-                snuCopySelectedCellValues();
-        }
-    });
+// disable #474
+//    //this is test to be able to use default copy event to copy cell values, without the need use /copycells
+//     document.querySelector('body').addEventListener("copy", (event) => {
+//         if (typeof g_list_edit_grid != 'undefined') { //list or form
+//             if (!snuGetSelectionText())
+//                 snuCopySelectedCellValues();
+//         }
+//     });
 
     if (typeof g_form != 'undefined') {
 
