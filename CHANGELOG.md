@@ -1,4 +1,14 @@
 # CHANGELOG.md
+## 7.3.1.0 (2024-02-19)
+Features:
+  - Node switching is improved and now supports ADCV2 loadbalancing instances. 
+  - Pa
+Fixes / changes:
+  - Added md5.js script to support node switching
+  - Added an extra way to suppress slash commands popup, in case event capturing does not work
+  - Adding a check to sys.script.modern.do to prevent page modification when the Monaco editor is not found. Reason issue #475
+  - Adding a check in publish.sh script to prevent submitting when version in manifest.json is not updating since last publish
+
 ## 7.3.0.1 (2024-02-19)
 Fixes / changes:
   - Reverting CTRL-C to copy cells, will dive in later (Issue #474)

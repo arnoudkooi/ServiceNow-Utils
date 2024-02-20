@@ -1,7 +1,7 @@
 #!/bin/bash
 rm -f publish/*.zip
 rm -f publish/*.xpi
-var=$(sed '6!d' manifest.json) #get version from main
+var=$(sed '6!d' manifest.json) #get version from main manifest.json (content of line 6)
 sed -i '' "6s/.*/$var/" publish/manifest-firefox.json #sync version to other
 sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
@@ -43,4 +43,15 @@ sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-edge.json
 
-node publish/publish.mjs
+#publishing same version# to Chrome is a pain, adding a check..
+currentversion=$(sed '6!d' manifest.json) #get version from main manifest.json (content of line 6)
+lastpublishedversion=`cat publish/lastpublishedversion.txt` 
+if [ "$lastpublishedversion" = "$currentversion" ]; then
+    echo "Can not publish, version not updated in manifest.json: $currentversion"
+else
+    #node publish/publish.mjs
+    echo "Publishing: $currentversion"
+    echo "$currentversion" > publish/lastpublishedversion.txt #write version to file
+fi
+
+

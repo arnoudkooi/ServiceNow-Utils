@@ -3072,6 +3072,16 @@ function snuSetShortCuts() {
 
                     if (path.length > 8 && path[2]?.className.includes('CodeMirror')) return //not in codemirror
                     event.preventDefault();
+                    //in some browsers the event KEYBOARD_SHORTCUTS_BEHAVIOR#MODAL_OPENED event can't be captured. this is a temporary fallback
+                    var showingPopup = window.top.querySelectorShadowDom.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
+                    if (showingPopup) event.preventDefault(); //don show when already visible
+                    setTimeout(() => {
+                        var showingPopup = window.top.querySelectorShadowDom.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
+                        if (showingPopup) {
+                            snuSlashCommandHide(); //hide when shown by keyboard combo
+                        }
+                    },200)
+                    //end fallback
                     snuSlashCommandShow('', false);
                 }
             }

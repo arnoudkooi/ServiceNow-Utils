@@ -1,33 +1,33 @@
 //WIP do some magic on sys.script.modern.do to add split screen
-let editor;
-let div = document.createElement('div');
-let divInfo = document.createElement('div');
+let snuEditor;
+let snuDiv = document.createElement('div');
+let snuDivInfo = document.createElement('div');
 top.document.title = "⚪ BG script not started"
-divInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils';
-divInfo.style.fontSize = '9pt';
-divInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
-let scrpt = document.querySelector('div.script-container');
+snuDivInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils';
+snuDivInfo.style.fontSize = '9pt';
+snuDivInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
+let snuScript = document.querySelector('div.script-container');
 document.querySelector('form').setAttribute('onsubmit', '');
 
-let leftSide, resizer, rightSide, result, resultWrapper, timerInterval;
+let snuLeftSide, snuResizer, snuRightSide, snuResult, snuResultWrapper, snuTimerInterval;
 
 const snuUrlparams = new Proxy(new URLSearchParams(window.location.search), {
 	get: (searchParams, prop) => searchParams.get(prop),
 });
 
-if (snusettings.applybgseditor && scrpt) {
+if (snusettings.applybgseditor && snuScript) {
 
 
-	editor = window.monaco.editor.getEditors()[0];
-	snuDividePage();
-	snuMakePostAsync();
-	snuEnhanceMonaco();
-
-	div.setAttribute("id", "container");
-
-	scrpt.parentNode.insertBefore(divInfo, scrpt);
-	//scrpt.parentNode.insertBefore(div, scrpt);
-	//scrpt.style.display = "none";
+	let glideEditor = GlideEditorMonaco.get('script');
+	if (glideEditor) {
+		snuEditor = glideEditor.editor;
+		snuDividePage();
+		snuMakePostAsync();
+		snuEnhanceMonaco();
+	
+		snuDiv.setAttribute("id", "container");
+		snuScript.parentNode.insertBefore(snuDivInfo, snuScript);;
+	}
 
 }
 
@@ -38,14 +38,14 @@ function snuMakePostAsync() {
 		e.preventDefault();
 
 		//document.querySelector('button[type="submit"]').disabled = true;
-		result = document.querySelector('#result');
-		result.innerHTML = '<span id="timer"></span> - Background script running... <a href="/cancel_my_transactions.do" target="_blank" title="Cancel running this backgroundscript">cancel</a><hr />';
+		snuResult = document.querySelector('#result');
+		snuResult.innerHTML = '<span id="timer"></span> - Background script running... <a href="/cancel_my_transactions.do" target="_blank" title="Cancel running this backgroundscript">cancel</a><hr />';
 		snuStartStopWatch();
 		top.document.title = "🔴 BG script running.."
 
 		const form = e.target;
 		let postData = new URLSearchParams(new FormData(form));
-		postData.append('script', editor.getValue());
+		postData.append('script', snuEditor.getValue());
 
 
 		fetch(form.action, {
@@ -56,10 +56,10 @@ function snuMakePostAsync() {
 			body: postData.toString()
 		}).then(response => response.text())
 			.then((response) => {
-				clearInterval(timerInterval);
+				clearInterval(snuTimerInterval);
 				top.document.title = "🟢 BG script finished.."
-				result.innerHTML = response.replace('<HTML><BODY>', '').replace('</BODY></HTML>', '');
-				resizer.style.height = document.body.scrollHeight + 'px';
+				snuResult.innerHTML = response.replace('<HTML><BODY>', '').replace('</BODY></HTML>', '');
+				snuResizer.style.height = document.body.scrollHeight + 'px';
 				document.querySelector('button[type="submit"]').disabled = false;
 
 				//add downloadlink
@@ -97,28 +97,28 @@ function snuDividePage() {
 	let container = document.createElement('div');
 	container.className = 'container';
 
-	leftSide = document.createElement('div');
-	leftSide.className = 'container__left';
-	container.appendChild(leftSide)
+	snuLeftSide = document.createElement('div');
+	snuLeftSide.className = 'container__left';
+	container.appendChild(snuLeftSide)
 	while (content.length > 0) {
-		leftSide.appendChild(content[0]);
+		snuLeftSide.appendChild(content[0]);
 	}
 
-	resizer = document.createElement('div');
-	resizer.className = 'resizer';
-	resizer.id = 'dragMe';
-	container.appendChild(resizer)
+	snuResizer = document.createElement('div');
+	snuResizer.className = 'resizer';
+	snuResizer.id = 'dragMe';
+	container.appendChild(snuResizer)
 
-	rightSide = document.createElement('div');
-	rightSide.className = 'container__right';
-	resultWrapper = document.createElement('div');
-	resultWrapper.className = 'result_wrapper';
-	resultWrapper.id = 'result_wrapper';
-	rightSide.appendChild(resultWrapper)
-	container.appendChild(rightSide)
+	snuRightSide = document.createElement('div');
+	snuRightSide.className = 'container__right';
+	snuResultWrapper = document.createElement('div');
+	snuResultWrapper.className = 'result_wrapper';
+	snuResultWrapper.id = 'result_wrapper';
+	snuRightSide.appendChild(snuResultWrapper)
+	container.appendChild(snuRightSide)
 
 	document.querySelector('body').append(container);
-	resultWrapper.innerHTML = `
+	snuResultWrapper.innerHTML = `
 	<div class="result_header">
 		SN Utils - Background script result pane.&nbsp;
 		<a href="/sys_script_execution_history_list.do?sysparm_query=^ORDERBYDESCstarted" target="_blank" >history</a>
@@ -133,13 +133,13 @@ function snuDividePage() {
 		el.style.setProperty('min-height', '29px');
 
 	});
-	resizer.addEventListener('mousedown', mouseDownHandler);
+	snuResizer.addEventListener('mousedown', mouseDownHandler);
 }
 
 function snuEnhanceMonaco() {
 
 	const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
-	editor.addAction({
+	snuEditor.addAction({
 		id: "runScript",
 		label: "Run script",
 		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
@@ -150,8 +150,8 @@ function snuEnhanceMonaco() {
 		},
 	});
 
-	editor.setValue(snuUrlparams.content || '');
-	editor.focus();
+	snuEditor.setValue(snuUrlparams.content || '');
+	snuEditor.focus();
 }
 
 
@@ -192,7 +192,7 @@ function mouseDownHandler(e) {
 	// Get the current mouse position
 	x = e.clientX;
 	y = e.clientY;
-	leftWidth = leftSide.getBoundingClientRect().width;
+	leftWidth = snuLeftSide.getBoundingClientRect().width;
 
 
 	// Attach the listeners to `document`
@@ -205,29 +205,29 @@ function mouseMoveHandler(e) {
 	const dx = e.clientX - x;
 	const dy = e.clientY - y;
 
-	const newLeftWidth = ((leftWidth + dx) * 100) / resizer.parentNode.getBoundingClientRect().width;
-	leftSide.style.width = `${newLeftWidth}%`;
-	rightSide.style.width = `${100 - newLeftWidth}%`;
+	const newLeftWidth = ((leftWidth + dx) * 100) / snuResizer.parentNode.getBoundingClientRect().width;
+	snuLeftSide.style.width = `${newLeftWidth}%`;
+	snuRightSide.style.width = `${100 - newLeftWidth}%`;
 
-	resizer.style.cursor = 'col-resize';
+	snuResizer.style.cursor = 'col-resize';
 	document.body.style.cursor = 'col-resize';
 
-	leftSide.style.userSelect = 'none';
-	leftSide.style.pointerEvents = 'none';
+	snuLeftSide.style.userSelect = 'none';
+	snuLeftSide.style.pointerEvents = 'none';
 
-	rightSide.style.userSelect = 'none';
-	rightSide.style.pointerEvents = 'none';
+	snuRightSide.style.userSelect = 'none';
+	snuRightSide.style.pointerEvents = 'none';
 };
 
 function mouseUpHandler() {
-	resizer.style.removeProperty('cursor');
+	snuResizer.style.removeProperty('cursor');
 	document.body.style.removeProperty('cursor');
 
-	leftSide.style.removeProperty('user-select');
-	leftSide.style.removeProperty('pointer-events');
+	snuLeftSide.style.removeProperty('user-select');
+	snuLeftSide.style.removeProperty('pointer-events');
 
-	rightSide.style.removeProperty('user-select');
-	rightSide.style.removeProperty('pointer-events');
+	snuRightSide.style.removeProperty('user-select');
+	snuRightSide.style.removeProperty('pointer-events');
 
 	// Remove the handlers of `mousemove` and `mouseup`
 	document.removeEventListener('mousemove', mouseMoveHandler);
@@ -236,9 +236,9 @@ function mouseUpHandler() {
 
 function snuStartStopWatch() {
 	let startTime = Date.now();
-	timerInterval = setInterval(function () {
+	snuTimerInterval = setInterval(function () {
 		let elapsedTime = Date.now() - startTime;
-		let timer = result.querySelector('#timer');
+		let timer = snuResult.querySelector('#timer');
 		if (timer) timer.innerHTML = (elapsedTime / 1000).toFixed(3);
 	}, 100);
 }

@@ -167,33 +167,39 @@ function getNodes() {
     });
 }
 
-function setActiveNode(node) {
+async function setActiveNode(node) {
+    
 
-        fetch(url + '/stats.do')
-        .then(response => response.text())
-        .then(statsDo => { 
-            statsDo = statsDo.replaceAll('<br />', '<br/>');
-            ipArr = statsDo
-                .match(/IP address: ([\s\S]*?)\<br\/>/g)[0]
-                .replace('IP address: ', '')
-                .replace('<br/>', '')
-                .replace('<br />', '')
-                .split('.');
+    let response = await fetch(url + '/stats.do');
+    let statsDo = await response.text();
 
-            let nodeId = statsDo
-            .match(/Node ID: ([\s\S]*?)\<br\/>/g)[0]
-            .replace('Node ID: ', '')
-            .replace('<br/>', '');
+    if (!statsDo.includes('Servlet statistics')) { //after a node switch, sometimes the first call fails. Try again
+        response = await fetch(url + '/stats.do');
+        statsDo = await response.text();
+        console.log('retrying stats.do');
+    }
 
-            let nodeName = statsDo
-            .match(/Connected to cluster node: ([\s\S]*?)\<br\/>/g)[0]
-            .replace('Connected to cluster node: ', '')
-            .replace('<br/>', '');
+    statsDo = statsDo.replaceAll('<br />', '<br/>'); //fix for some instances
+    ipArr = statsDo
+        .match(/IP address: ([\s\S]*?)\<br\/>/g)[0]
+        .replace('IP address: ', '')
+        .replace('<br/>', '')
+        .replace('<br />', '')
+        .split('.');
 
-            let realNode = {"nodeId" : nodeId, "nodeName" : nodeName };
-            
-            setActiveNodeInner(realNode);
-        });
+    let nodeId = statsDo
+    .match(/Node ID: ([\s\S]*?)\<br\/>/g)[0]
+    .replace('Node ID: ', '')
+    .replace('<br/>', '');
+
+    let nodeName = statsDo
+    .match(/Connected to cluster node: ([\s\S]*?)\<br\/>/g)[0]
+    .replace('Connected to cluster node: ', '')
+    .replace('<br/>', '');
+
+    //let realNode = {"nodeId" : nodeId, "nodeName" : nodeName };
+    
+    setActiveNodeInner(node);
 
     function setActiveNodeInner(node) {
         var nodeArr = node.nodeName.split(".");
@@ -222,16 +228,18 @@ function setActiveNode(node) {
                 if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){ 
                     //this is a test to allow node switching on ADCv2 migrated instances
 
-                    // chrome.cookies.remove({
-                    //     "name": BIGipServerpoolCookie.name,
-                    //     "url": new URL(url).origin
+                    let ip = ipArr.join('.');
+                    let ipPort = ip + ':' + port;
+                    let md5IpPort = md5(ipPort);
+
+                    console.log(md5IpPort, node);
 
                     chrome.cookies.set({
                         "name": BIGipServerpoolCookie.name,
                         "url": new URL(url).origin,
                         "secure": true,
                         "httpOnly": true,
-                        "value": encodeBIGIP
+                        "value": md5IpPort
                     }, s => {
                         chrome.cookies.set({
                             "name": "glide_user_route",
@@ -244,8 +252,8 @@ function setActiveNode(node) {
                         });
                     });
 
-                    document.querySelector('#nodemessage').innerText = `This instance uses ADCv2 loadbalancing, node switching may not work or switch to a random node. Try a few times... `;
-                    document.querySelector('#nodemessage').classList.remove('hidden');
+                    // document.querySelector('#nodemessage').innerText = `This instance uses ADCv2 loadbalancing, node switching may not work or switch to a random node. Try a few times... `;
+                    // document.querySelector('#nodemessage').classList.remove('hidden');
                 }
                 else {
 
