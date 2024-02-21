@@ -1,8 +1,13 @@
 # CHANGELOG.md
-## 7.3.1.0 (2024-02-19)
+
+## 7.3.1.1 (2024-02-21)
+Fixes / changes:
+  - Fix slash command not showing when not in Next Experience
+
+## 7.3.1.0 (2024-02-21)
 Features:
   - Node switching is improved and now supports ADCV2 loadbalancing instances. 
-  - Pa
+
 Fixes / changes:
   - Added md5.js script to support node switching
   - Added an extra way to suppress slash commands popup, in case event capturing does not work
