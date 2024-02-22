@@ -16,6 +16,10 @@ input {
     accent-color: #5274FF;
 }
 
+a {
+    text-decoration: none;
+}
+
 div.info{
     border:1pt solid #ff8234;
     width:50%;
@@ -300,7 +304,7 @@ div.snucmdurl {
 
 i.fas, i.far{
     font-size:9pt;
-    padding-right: 3px;
+    margin-right: 3px;
     text-align: center;
 }
 

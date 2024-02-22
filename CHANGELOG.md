@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.3.2.2 (2024-02-22)
+Fixes / changes:
+  - Improve cookie switching (Issue #477)
+  - Minor CSS adjustments for the popup window
+
 ## 7.3.2.0 (2024-02-22)
 Features:
   - Detect links in activity (Classic UI) and convert to hyperlinks. Works on page load, and on mouse over of activity label.

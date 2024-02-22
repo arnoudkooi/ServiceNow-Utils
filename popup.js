@@ -161,6 +161,12 @@ function prepareJsonTable() {
 
 //Query ServiceNow for nodes
 function getNodes() {
+
+    let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+        document.querySelector('#nodemessage').innerText = "Node switching may not work in Safari";
+    }
+
     var myurl = url + '/api/now/table/sys_cluster_state?sysparm_query=ORDERBYsystem_id&sysparm_fields=system_id,node_id,status,node_type&sysparm_display_value=true&sysparm_exclude_reference_link=true';
     snuFetch(g_ck, myurl, null, function (jsn) {
         setNodes(jsn.result);
@@ -170,9 +176,10 @@ function getNodes() {
 async function setActiveNode(node) {
     
 
+    await fetch(url + '/example_add_two_numbers.do'); // call a random leightweight page that returns not found, to make browser aware of new node
+    
     let response = await fetch(url + '/stats.do');
     let statsDo = await response.text();
-
     if (!statsDo.includes('Servlet statistics')) { //after a node switch, sometimes the first call fails. Try again
         response = await fetch(url + '/stats.do');
         statsDo = await response.text();
@@ -987,9 +994,16 @@ function setDataTableNodes(nme, node) {
         dtNodes.search($(this).val(),true).draw();
     }).focus().trigger('keyup');
 
-    $('a.setnode').click(function () {
+    $('a.setnode').click(function (ev) {
+
+        ev.currentTarget.innerHTML = "<i class='fas fa-spinner fa-spin' style='color:blue !important;'></i> Switching..."; 
+        ev.currentTarget.style.color = "blue";
+        console.log(ev);
         var node = {"nodeId" : this.id, "nodeName" : $(this).attr('data-node') };
         setActiveNode(node)
+
+
+
     });
 
     $('#waitingnodes').hide();
