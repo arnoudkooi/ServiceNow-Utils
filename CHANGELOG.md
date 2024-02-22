@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 7.3.2.0 (2024-02-22)
+Features:
+  - Detect links in activity (Classic UI) and convert to hyperlinks. Works on page load, and on mouse over of activity label.
+  
+Fixes / changes:
+  - Update dompurify to 3.0.9
+
 ## 7.3.1.1 (2024-02-21)
 Fixes / changes:
   - Fix slash command not showing when not in Next Experience

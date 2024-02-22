@@ -1626,6 +1626,7 @@ function snuSettingsAdded() {
         snuAddSwitchToApplication();
         snuOpenWorkflowLink();
         snuEnterToFilterSlushBucket();
+        snuHyperlinkifyWorkNotes();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -2708,6 +2709,8 @@ function snuAddTechnicalNames() {
             cls.style.display = display;
         });
     }
+
+    snuHyperlinkifyWorkNotes();
 }
 
 function snuExtendedFieldInfo() {
@@ -5132,6 +5135,25 @@ function snuBatchRequest(token, requests, callback) {
             reject(error);
         }
     });
+}
+
+
+function snuHyperlinkifyWorkNotes() {
+    let activityLabel = document.querySelector('.activity-stream-label:not(.snuified)')
+    if (activityLabel) {
+        activityLabel.classList.add('snuified');
+        activityLabel.title = "[SN Utils] Mouseover adds hyperlinks in activity stream";
+        activityLabel.addEventListener("mouseover", snuHyperlinkifyWorkNotes);
+    }
+
+    let urlRegex = /(?<!href=")(https?:\/\/[^\s]+)/g;
+    document.querySelectorAll('div.sn-card-component .sn-widget-textblock-body:not(.snuified)').forEach(crd => {
+        let newContent =  crd.innerHTML.replace(urlRegex, function (url) {
+            return '<a href="' + url + '" target="_blank" title="[SN Utils] Converted to hyperlink">' + url + '</a>';
+        });
+        crd.innerHTML = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] });
+        crd.classList.add('snuified');
+    })
 }
 
 
