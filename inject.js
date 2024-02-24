@@ -1627,6 +1627,7 @@ function snuSettingsAdded() {
         snuOpenWorkflowLink();
         snuEnterToFilterSlushBucket();
         snuHyperlinkifyWorkNotes();
+        snuEasifyAdvancedFilter();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -3079,7 +3080,7 @@ function snuSetShortCuts() {
                     var showingPopup = window.top?.querySelectorShadowDom?.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
                     if (showingPopup) event.preventDefault(); //don show when already visible
                     setTimeout(() => {
-                        var showingPopup = window.top.querySelectorShadowDom.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
+                        var showingPopup = window.top?.querySelectorShadowDom?.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
                         if (showingPopup) {
                             snuSlashCommandHide(); //hide when shown by keyboard combo
                         }
@@ -4822,6 +4823,23 @@ function snuAddPersonaliseListHandler() {
 
 }
 
+
+function snuListFilterHelper() {
+
+    if (typeof GlideList2 == 'undefined') return;
+
+    let relatedListsButtons = document.querySelectorAll('[data-type="list_mechanic2_open"]:not(.snuified)');
+
+    if (!relatedListsButtons) return;
+    relatedListsButtons.forEach(rlb => {
+        let tableName = rlb?.dataset?.table;
+        if (!tableName) return;
+         g_list = GlideList2.get(rlb?.dataset?.list_id);
+    })
+
+}
+snuListFilterHelper()
+
 function snuPersonaliseList(btn, autoclose, addsysid) {
     if (btn) btn.click();
     else return true;
@@ -5173,6 +5191,50 @@ function snuTest(){
     return snuBatchRequest(token, batchRequests);
 
 }
+
+//can be a pain to add condition when the searchbar is hidden, this tries to relief that by adding a stub condition on click of icon behind the fieldname
+function snuEasifyAdvancedFilter(){
+    if (!location.pathname.endsWith("_list.do")) return; //for now only in lists
+    if (typeof GlideList2 == 'undefined') return;
+    
+    let listName = document.querySelector('[tab_list_name_raw]')?.getAttribute('tab_list_name_raw');
+    if (!listName) return;
+    if (document.querySelectorAll('th[name="search"] div.disabled').length !== 1) return; //Only when 1 searchrow disabled
+    
+    document.querySelectorAll('th.list_hdr, th.table-column-header, th.list_hdrembedded').forEach(elm => {
+
+        let field = elm.getAttribute('name') || elm.getAttribute('data-column-name');
+        let lblA = elm.querySelector('a.list_hdrcell');
+        let displayField = document.querySelector('tr.list_header_search_row td[name="' + field + '"]')?.dataset?.glideReferenceName || '';
+        let searchField = field + ((displayField) ? "." + displayField : '');
+        let addA = document.createElement('a');
+        let title = '[SN Utils] Click to add condition for field: ' + searchField + ' and pin filter. ';
+        if (displayField) title += 'Hold SHIFT for reference field. (' + field + ')';
+        addA.innerText = "⨮";
+        addA.title = title;
+        addA.href = '#';
+        addA.addEventListener('click', ev => {
+            ev.preventDefault();
+            if (document.querySelector('.list_filter').style.visibility == 'hidden') GlideListWidget.get(listName).toggleFilter(); //show when hidden         
+            let searchFieldSelected = (ev.shiftKey) ? field : searchField;
+            
+            const intervalId = setInterval(function() {
+                const element = document.querySelector('tbody[id*=QUERYPART]');
+                if (element) {
+                    clearInterval(intervalId);
+                    document.querySelectorAll('tbody[id*=QUERYPART]').forEach(qp =>{
+                        addConditionSpec(listName,qp.id,searchFieldSelected,'','',''); 
+                    })
+                    if (!GlideListWidget.get(listName)?.pinned) GlideListWidget.get(listName).togglePin(); //pin if not pinned
+                }
+            }, 250);
+        });
+        lblA.parentNode.insertBefore(addA, lblA.nextSibling);
+
+    });
+    
+}
+
 
 async function snuCheckFamily(){
 	let family = '';

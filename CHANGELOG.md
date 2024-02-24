@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 7.3.3.0 (2024-02-24)
+Features:
+  - When searchbar of a classic list is disabled, an icon (⨮) is added behind every fieldname. Clicking it adds a AND condition to the filter. Goal is to simplify building the filter when the searchbar is disabled. For reference fields, the default is to text search the display value. Holding SHIFT seraches a specific reference.
+
 ## 7.3.2.2 (2024-02-22)
 Fixes / changes:
   - Improve cookie switching (Issue #477)
