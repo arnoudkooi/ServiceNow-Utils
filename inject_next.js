@@ -419,7 +419,9 @@ grSPC.deleteMultiple();`;
                 setTimeout(() => { this.linkPickers(++cnt) }, 600);
             return;
         }
-        searchContainer.style.width = '80px'
+        var searchContainerParent = querySelectorShadowDom.querySelectorDeep('.search-container');
+        if (searchContainerParent) searchContainerParent.style.alignItems = 'center';
+
         var snuStyle = document.createElement('style');
         snuStyle.innerHTML = `
         div.snupicker {
@@ -444,10 +446,12 @@ grSPC.deleteMultiple();`;
             querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'none';
         }, true);
         searchInput.addEventListener('blur', (event) => {
-            setTimeout(() => {
-                querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, .search-combobox--header').style.width = '80px';
-                querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'inline';
-            }, 100);
+            if (searchInput.value == '') {
+                setTimeout(() => {
+                    querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, .search-combobox--header').style.width = '32px';
+                    querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'inline';
+                }, 100);
+            }
         }, true);
         var snuSpacer = document.createElement('div');
         snuSpacer.id = 'snuSpacer'
@@ -505,6 +509,17 @@ grSPC.deleteMultiple();`;
                 div.title = '[SN Utils] You may be working in the default Update set! (Disable this warning in settings)'
             }
         });
+
+        const element = querySelectorShadowDom.querySelectorDeep('div.header-avatar-button'); 
+        if (element) { //if avatar is outside viewport, make the pickerdivs smaller
+            const rect = element.getBoundingClientRect();
+            const overflowRight = rect.right - (window.innerWidth || document.documentElement.clientWidth);
+            if (overflowRight > -12) {
+                snuSpacer.style.maxWidth = (snuSpacer.offsetWidth - overflowRight - 12) + 'px';
+            }
+        }
+
+        
     }
 
     showPicker(pickerindex, evt, elm) {

@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 7.3.4.0 (2024-02-22)
+Features:
+  - Slash commands direct navigation can now be toggled via the shift key. Disabled state is indicated by low opacity of the numbers. Setting is stored per instance. This way unintended link navigation can be prevented. #philgoesdeep
+
+Fixes / changes:
+  - Adjustments in the spacing of the pickers in the Next experience header.
+
 ## 7.3.3.0 (2024-02-24)
 Features:
   - When searchbar of a classic list is disabled, an icon (⨮) is added behind every fieldname. Clicking it adds a AND condition to the filter. Goal is to simplify building the filter when the searchbar is disabled. For reference fields, the default is to text search the display value. Holding SHIFT seraches a specific reference.

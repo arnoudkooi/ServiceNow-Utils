@@ -14,6 +14,7 @@ var snuNav = {
     'loadedLastTime': 0
 };
 var snuSettingsParsed = false;
+var snunumbernav = snuSlashCommandNumberNav();
 
 var snuslashcommands = {
     "acl": {
@@ -504,7 +505,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
                 var results = jsn.result;
-                if (table == 'domain') directlinks = `0 <a id="snulnk0" href="#snu:switchto,domain,value,global">global</a><br />`;
+                if (table == 'domain') directlinks = `<span class="dispidx">0</span> <a id="snulnk0" href="#snu:switchto,domain,value,global">global</a><br />`;
                 if (results.length == 0) directlinks = `No results found`;
                 var idx = 0;
                 var dispIdx = 0;
@@ -535,10 +536,10 @@ function snuGetDirectLinks(targeturl, shortcut) {
                         dispIdx = '>';
                         idattr = '';
                     }
-                    directlinks += dispIdx + ' <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
+                    directlinks += '<span class="dispidx">' + dispIdx + '</span> <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
                 });
                 if (directlinks.length > 50) 
-                    directlinks += `<span style="opacity:0.4; font:smaller">Results: ${jsn.resultcount}</br><br />`;
+                    directlinks += `<span style="opacity:0.4; font:smaller">Tip: Hit SHIFT to toggle keyboard navigation<br />Results: ${jsn.resultcount}</br><br />`;
                 
             }
             else {
@@ -602,6 +603,15 @@ function snuSlashCommandAddListener() {
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
+        if (e.key == 'Shift') {
+            snunumbernav = snuSlashCommandNumberNav(true);
+            let dlinks = window.top.document.getElementById('snudirectlinks');
+            if (dlinks) {
+                if (snunumbernav) dlinks.classList.remove('snudirectlinksdisabled');
+                else dlinks.classList.add('snudirectlinksdisabled');
+            }
+            return;
+        }
         if (e.key == 'ArrowUp') {
             e.preventDefault();
             if (snuIndex == 0) { 
@@ -629,7 +639,7 @@ function snuSlashCommandAddListener() {
                 }
             }
         };
-        if (isFinite(e.key)) {
+        if (isFinite(e.key) && snunumbernav) {
             if (window.top.document.getElementById('snulnk' + e.key)) {
                 e.preventDefault();
                 window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent('click', { cancelable: true, metaKey : e.metaKey, shiftKey : e.shiftKey, ctrlKey : e.ctrlKey}));
@@ -3001,6 +3011,7 @@ function snuSetShortCuts() {
         ul#snuhelper li.active span.cmdlabel { color: black}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#22885c; text-decoration: none; }
+        div#snudirectlinks.snudirectlinksdisabled .dispidx { opacity: 0.3; }
         div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#1f1cd2;}
         div.snufadein { animation: snuFadeIn 0.5s; }
@@ -3037,6 +3048,7 @@ function snuSetShortCuts() {
         ul#snuhelper li.active span.cmdlabel { color: yellow}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#1cad6e; text-decoration: none; }
+        div#snudirectlinks.snudirectlinksdisabled .dispidx { opacity: 0.3; }
         div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#0cffdd;}
         div.snufadein { animation: snuFadeIn 0.5s; }
@@ -3045,12 +3057,13 @@ function snuSetShortCuts() {
     }
 
     var htmlFilter = document.createElement('div');
+    var snudirectlinks = (snunumbernav) ? '' : 'snudirectlinksdisabled';
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.linkedin.com/posts/arnoudkooi_sn-utils-slash-commands-table-form-navigation-activity-7099348581974712321-gh9u?utm_source=share&utm_medium=member_desktop" target="_blank">🌟 Table navigation</a>&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;">&nbsp;</span></div>
     <input id="snufilter" name="snufilter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="both" aria-haspopup="false" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
-    <div id="snudirectlinks"></div>
+    <div id="snudirectlinks" class="${snudirectlinks}"></div>
     <div id="snuswitches"></div>
     </div>`, { FORCE_BODY: true, ADD_ATTR: ['target'] });
     htmlFilter.innerHTML = cleanHTML
@@ -4494,7 +4507,7 @@ function snuGetUsersForImpersonate(query) {
             var impDirectLinks = '';
 
             if (impersonating)
-                impDirectLinks += `Currently Impersonating<br />1 <a id="snulnk1" class="snuimp" href="#${impersonating}">Stop Impersonating</a> <span class="semihidden">${impersonating}</span><br />\n`;
+                impDirectLinks += `Currently Impersonating<br /><span class="dispidx">1</span> <a id="snulnk1" class="snuimp" href="#${impersonating}">Stop Impersonating</a> <span class="semihidden">${impersonating}</span><br />\n`;
 
             if (query)
                 impDirectLinks += 'Found users (remove filter for recent impersonations)<br />';
@@ -4516,7 +4529,7 @@ function snuGetUsersForImpersonate(query) {
                     dispIdx = '>';
                     idattr = '';
                 }
-                impDirectLinks += dispIdx + ` <a  ${idattr} class="snuimp" href="#${imp.user_name}">${imp.user_display_value || imp.name}</a> <span class="semihidden">${imp.user_name}</span><br />\n`;
+                impDirectLinks += `<span class="dispidx">${dispIdx}</span> <a  ${idattr} class="snuimp" href="#${imp.user_name}">${imp.user_display_value || imp.name}</a> <span class="semihidden">${imp.user_name}</span><br />\n`;
             }
             );
 
@@ -4608,7 +4621,7 @@ function snuGetLastScopes(query) {
                         dispIdx = '>';
                         idattr = '';
                     }
-                    scopeDirectLinks += dispIdx + ' <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
+                    scopeDirectLinks += '<span class="dispidx">' + dispIdx + '</span> <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
                 }
             })
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(scopeDirectLinks);
@@ -4990,7 +5003,7 @@ function snuDoSlashNavigatorSearch(search, arrDigits = []) {
     let words = [...new Set(search.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
         (unique, item) => ( unique.filter(e => item.includes(item)).length > 5 ? unique : [...unique, item]),[],); //todo check undouble
 
-    let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">🔍 Navigator search</div>';
+    let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">🔍 Navigator search</div>Tip: Hit SHIFT to toggle keyboard navigation<br />';
     let idx = 1;
     let dispIdx = 0;
     let lastgroup = '';
@@ -5021,7 +5034,7 @@ function snuDoSlashNavigatorSearch(search, arrDigits = []) {
 
             if (displaygroup) displaygroup = `<div style="margin-top:7px;">${displaygroup}</div>`;
 
-            directlinks +=  `<div>${displaygroup}${dispIdx} <a ${idattr} data-idx="${idx}" target="${target}" title="${label}" href="${link}">${label}</a></div>`;
+            directlinks +=  `<div>${displaygroup}<span class="dispidx">${dispIdx}</span> <a ${idattr} data-idx="${idx}" target="${target}" title="${label}" href="${link}">${label}</a></div>`;
             lastgroup = res.displaygroup;
         }
         idx++;
@@ -5252,4 +5265,15 @@ async function snuCheckFamily(){
 		family = 'unknown';
 	}
 	return family;
+}
+
+function snuSlashCommandNumberNav(toggle){
+    let snunumbernav = localStorage.getItem('snunumbernav');
+    snunumbernav = snunumbernav ? JSON.parse(snunumbernav) : true;
+    
+    if (toggle) {
+        snunumbernav = !snunumbernav;
+        localStorage.setItem('snunumbernav', snunumbernav);
+    }
+    return snunumbernav;
 }
