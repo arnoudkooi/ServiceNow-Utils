@@ -88,6 +88,26 @@ function initializeContextMenus(){
         }
     });
 }
+// todo, will be used for sidepanel in upcoming release
+// chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
+//     console.log('onUpdated', tabId, info, tab);
+//     if (!tab.url) return;
+//     const url = new URL(tab.url);
+//     // Enables the side panel on google.com
+//     if (url.origin.includes('service-now.com')) {
+//       await chrome.sidePanel.setOptions({
+//         tabId,
+//         path: 'sidepanel.html',
+//         enabled: true
+//       });
+//     } else {
+//       // Disables the side panel on all other sites
+//       await chrome.sidePanel.setOptions({
+//         tabId,
+//         enabled: false
+//       });
+//     }
+//   });
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
@@ -124,6 +144,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     else if (message.event == "scriptsync") {
         createScriptSyncTab(cookieStoreId);
     }
+    // else if (message.event == "showsidepanel") {
+    //     instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
+    //     setToChromeSyncStorage("instancebutton", message );
+    //     chrome.sidePanel.open({ windowId: sender.tab.windowId, tabId: sender.tab.id });
+    //     console.log('showsidepanel', message, sender);
+    // }
     else if (message.event == "pop") {
         pop();
     }

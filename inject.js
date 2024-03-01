@@ -4289,6 +4289,20 @@ function snuScriptSync() {
     sncWait();
 }
 
+// function snuShowSidePanel() {
+//     var event = new CustomEvent(
+//         "snutils-event",
+//         {
+//             detail: {
+//                 event: "showsidepanel",
+//                 command: JSON.parse(localStorage.getItem("snuButtonPosition")) || {}
+//             }
+//         }
+//     );
+//     window.top.document.dispatchEvent(event);
+//     sncWait();
+// }
+
 function snuScriptSyncPostData(data) {
     var event = new CustomEvent(
         "snutils-event",
@@ -5182,7 +5196,8 @@ function snuHyperlinkifyWorkNotes() {
         let newContent =  crd.innerHTML.replace(urlRegex, function (url) {
             return '<a href="' + url + '" target="_blank" title="[SN Utils] Converted to hyperlink">' + url + '</a>';
         });
-        crd.innerHTML = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] });
+        if (newContent) //dont apply when empty after regex, can happen when work note uses [code] tag
+            crd.innerHTML = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] });
         crd.classList.add('snuified');
     })
 }

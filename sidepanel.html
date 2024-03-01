@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 5 Page with Theme Toggle and Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body.dark-mode {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+        
+        body.dark-mode .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .form-control, .form-control-color, .form-range {
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        
+        .dark-mode .form-control, .dark-mode .form-control-color, .dark-mode .form-range {
+            background-color: #495057;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <div class="d-flex align-items-center">
+            <div class="text-end me-2">Light</div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="themeSwitch">
+                <label class="form-check-label" for="themeSwitch">Dark</label>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- Form -->
+            <form id="customForm">
+                <div class="mb-3">
+                    <label for="textInput" class="form-label">Text Input</label>
+                    <input type="text" class="form-control" id="textInput" placeholder="Enter text">
+                </div>
+                <div class="mb-3">
+                    <label for="fontSizeSlider" class="form-label">Font Size</label>
+                    <input type="range" class="form-range" min="8" max="48" id="fontSizeSlider">
+                </div>
+                <div class="mb-3">
+                    <label for="colorPicker" class="form-label">Pick a Color</label>
+                    <input type="color" class="form-control form-control-color" id="colorPicker">
+                </div>
+            </form>
+            <pre id="instanceButton"></pre>
+            <input title="Background color" type="color" id="iconcolorbg" name="iconcolorbg" class="snu-instance-setting" value="#ff3333" list="colorslist" />
+            <input title="Text" type="text" id="icontext" name="icontext" maxlength="4" class="width30 snu-instance-setting" />
+            <input title="Text color" type="color" id="iconcolortext" name="iconcolortext" class="snu-instance-setting" value="#ffffff" list="colorslist" >
+
+            <datalist id="colorslist">
+                <option value="#ff3333">
+                <option value="#ffff33">
+                <option value="#86ED78">
+                <option value="#0066cc">
+                <option value="#ff8000">
+                <option value="#62D84E">
+                <option value="#009156">
+                <option value="#a0a0a0">
+                <option value="#ffffff">
+                <option value="#000000">
+            </datalist>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/sidepanel.js"></script>
+
+
+
+</body>
+</html>

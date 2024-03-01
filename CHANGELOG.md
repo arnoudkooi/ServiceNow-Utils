@@ -1,6 +1,11 @@
 # CHANGELOG.md
 
-## 7.3.4.0 (2024-02-22)
+## 7.3.4.2 (2024-03-01)
+Fixes / changes:
+  - Adjusted snuHyperlinkifyWorkNotes function to prevent issues when [code] tags are used in worknotes
+  - Preparations for Instance Button feature, that will be added in an upcoming release
+
+## 7.3.4.0 (2024-02-25)
 Features:
   - Slash commands direct navigation can now be toggled via the shift key. Disabled state is indicated by low opacity of the numbers. Setting is stored per instance. This way unintended link navigation can be prevented. #philgoesdeep
 
