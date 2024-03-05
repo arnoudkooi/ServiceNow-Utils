@@ -1,8 +1,9 @@
 # CHANGELOG.md
 
-## 7.4.0.0 (2024-03-05)
+## 7.4.0.0/1 (2024-03-05)
 Features:
   - Beta release of InstanceTag. More details to follow. Early adopters can enable it in the settings tab of the popup.
+  - 7.4.0.1 adds a fix for checkbox setting in the settings tab
 
 ## 7.3.4.4 (2024-03-01)
 Fixes / changes:
