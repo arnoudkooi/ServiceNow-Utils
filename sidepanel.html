@@ -6,32 +6,14 @@
     <title>Bootstrap 5 Page with Theme Toggle and Form</title>
     <!-- Bootstrap CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body.dark-mode {
-            background-color: #343a40;
-            color: #ffffff;
-        }
-        
-        body.dark-mode .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-        
-        .form-control, .form-control-color, .form-range {
-            transition: background-color 0.5s ease, color 0.5s ease;
-        }
-        
-        .dark-mode .form-control, .dark-mode .form-control-color, .dark-mode .form-range {
-            background-color: #495057;
-            color: #ffffff;
-        }
-    </style>
+    <link rel="stylesheet" href="css/sidepanel.css">
+
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">InstanceTag Settings</a>
         <div class="d-flex align-items-center">
             <div class="text-end me-2">Light</div>
             <div class="form-check form-switch">
@@ -42,41 +24,121 @@
     </div>
 </nav>
 
-<div class="container py-5">
+<div class="container">
     <div class="row">
         <div class="col-md-8 mx-auto">
             <!-- Form -->
-            <form id="customForm">
-                <div class="mb-3">
-                    <label for="textInput" class="form-label">Text Input</label>
-                    <input type="text" class="form-control" id="textInput" placeholder="Enter text">
+            <form id="tagForm">
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label class="form-label form-check-label" for="tagEnabled">Enable Tag</label>
+
+                    </div>
+                    <div class="col">
+                        <div class="form-check form-switch">
+                            <input class="form-control form-check-input" type="checkbox" id="tagEnabled">
+                            <span style="font-size: 7pt;">
+                                Slash command <kbd>/itt</kbd> to swich on/off 
+                            </span>
+                        </div>
+
+
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="fontSizeSlider" class="form-label">Font Size</label>
-                    <input type="range" class="form-range" min="8" max="48" id="fontSizeSlider">
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label for="tagText" class="form-label">Tag text:</label>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" id="tagText" placeholder="Enter text">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="colorPicker" class="form-label">Pick a Color</label>
-                    <input type="color" class="form-control form-control-color" id="colorPicker">
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label for="tagFontSize" class="form-label">Font size:</label>
+                    </div>
+                    <div class="col">
+                        <input type="range"title="Slide to adjust font size" class="form-range" min="8" max="18" id="tagFontSize">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label for="tagOpacity" class="form-label">Opacity:</label>
+                    </div>
+                    <div class="col">
+                        <input type="range"title="Slide to adjust opacity of tag button" class="form-range" min="0.75" max="1" step="0.05" id="tagOpacity">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="tagTagColor" class="form-label">Tag color:</label>
+                        <input type="color" class="form-control form-control-color" id="tagTagColor" list="colorslist">
+                    </div>
+                    <div class="col">
+                        <label for="tagFontColor" class="form-label">Font color:</label>
+                        <input type="color" class="form-control form-control-color" id="tagFontColor" list="colorslist">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label for="tagTextDoubleclick" class="form-label">Text dbl-click:</label>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" id="tagTextDoubleclick" placeholder="Slash command on text double-click">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label for="tagCommand" class="form-label">&#9656; click:</label>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" id="tagCommand" placeholder="Slash command on click">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-3" style="font-size: smaller;">
+                        <label for="tagCommandShift" class="form-label">&#9656; shift-click:</label>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" id="tagCommandShift" placeholder="Slash command on shift-click">
+                    </div>
                 </div>
             </form>
-            <pre id="instanceButton"></pre>
-            <input title="Background color" type="color" id="iconcolorbg" name="iconcolorbg" class="snu-instance-setting" value="#ff3333" list="colorslist" />
-            <input title="Text" type="text" id="icontext" name="icontext" maxlength="4" class="width30 snu-instance-setting" />
-            <input title="Text color" type="color" id="iconcolortext" name="iconcolortext" class="snu-instance-setting" value="#ffffff" list="colorslist" >
+            <pre id="instanceTag"></pre>
 
             <datalist id="colorslist">
-                <option value="#ff3333">
-                <option value="#ffff33">
-                <option value="#86ED78">
-                <option value="#0066cc">
-                <option value="#ff8000">
-                <option value="#62D84E">
-                <option value="#009156">
-                <option value="#a0a0a0">
-                <option value="#ffffff">
-                <option value="#000000">
+                <option value="#ffffff"> <!-- White -->
+                <option value="#000000"> <!-- Black -->
+                <option value="#FF5733"> <!-- Vivid Orange -->
+                <option value="#C70039"> <!-- Crimson Red -->
+                <option value="#900C3F"> <!-- Ruby Red -->
+                <option value="#FFC300"> <!-- Bright Yellow -->
+                <option value="#DAF7A6"> <!-- Pastel Green -->
+                <option value="#581845"> <!-- Deep Purple -->
+                <option value="#4CBB17"> <!-- Kelly Green -->
+                <option value="#0E6EB8"> <!-- Ocean Blue -->
+                <option value="#FFD700"> <!-- Gold -->
+                <option value="#B413EC"> <!-- Vivid Violet -->
+                <option value="#FF8C00"> <!-- Dark Orange -->
+                <option value="#FF6347"> <!-- Tomato Red -->
+                <option value="#40E0D0"> <!-- Turquoise -->
+                <option value="#6495ED"> <!-- Cornflower Blue -->
+                <option value="#008080"> <!-- Teal -->
+                <option value="#FF69B4"> <!-- Hot Pink -->
+                <option value="#A0522D"> <!-- Sienna -->
+                <option value="#6A5ACD"> <!-- Slate Blue -->
+                <option value="#20B2AA"> <!-- Light Sea Green -->
+                <option value="#7FFF00"> <!-- Chartreuse -->
+                <option value="#ff3333"> <!-- Light Red -->
+                <option value="#ffff33"> <!-- Light Yellow -->
+                <option value="#86ED78"> <!-- Light Green -->
+                <option value="#0066cc"> <!-- Light Blue -->
+                <option value="#ff8000"> <!-- Light Orange -->
+                <option value="#62D84E"> <!-- Light Lime -->
+                <option value="#009156"> <!-- Light Teal -->
+                <option value="#a0a0a0"> <!-- Light Grey -->
             </datalist>
+            
         </div>
     </div>
 </div>

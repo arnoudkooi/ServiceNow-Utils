@@ -1,0 +1,22 @@
+body.dark-mode {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+body.dark-mode .btn-secondary {
+    background-color: #333333;
+    border-color: #333333;
+}
+
+/* .form-control, .form-control-color, .form-range {
+    transition: background-color 0.5s ease, color 0.5s ease;
+} */
+
+.dark-mode .form-control, .dark-mode .form-control-color, .dark-mode .form-range {
+    background-color: #222222;
+    color: #ffffff;
+}
+
+label.form-label{
+    font-size: 9pt;
+}

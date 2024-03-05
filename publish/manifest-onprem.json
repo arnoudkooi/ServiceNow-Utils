@@ -10,7 +10,8 @@
       "declarativeContent",
       "storage",
       "contextMenus",
-      "cookies"
+      "cookies",
+      "sidePanel"
     ],
     "icons": {
       "16": "images/op16.png",

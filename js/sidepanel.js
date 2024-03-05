@@ -1,4 +1,6 @@
 let instance;
+let tabId;
+let snuInstanceTagConfig;
 
 document.addEventListener('DOMContentLoaded', function () {
     const themeSwitch = document.getElementById('themeSwitch');
@@ -8,28 +10,71 @@ document.addEventListener('DOMContentLoaded', function () {
         body.classList.toggle('dark-mode');
     });
 
-    const textInput = document.getElementById('textInput');
-    const fontSizeSlider = document.getElementById('fontSizeSlider');
-    const colorPicker = document.getElementById('colorPicker');
-
-    fontSizeSlider.addEventListener('input', function() {
-        textInput.style.fontSize = fontSizeSlider.value + 'px';
-    });
-
-    colorPicker.addEventListener('input', function() {
-        textInput.style.color = colorPicker.value;
-    });
+    const tagEnabled = document.getElementById('tagEnabled');
+    const tagText = document.getElementById('tagText');
+    const tagFontSize = document.getElementById('tagFontSize');
+    const tagTagColor = document.getElementById('tagTagColor');
+    const tagFontColor = document.getElementById('tagFontColor');
+    const tagOpacity = document.getElementById('tagOpacity');
+    const tagTextDoubleclick = document.getElementById('tagTextDoubleclick');
+    const tagCommand = document.getElementById('tagCommand');
+    const tagCommandShift = document.getElementById('tagCommandShift');
 
     /* Set for initial active tab when open the sidepanel */
-    (async () => {
-        const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+
+
+    chrome.tabs.query({active: true, currentWindow: true}, async tabs =>{
+        const tab = tabs[0];
+        tabId = tab.id;
         instance = (new URL(tab.url)).host.replace(".service-now.com", "");
-        document.querySelector('#instanceButton').innerHTML = JSON.stringify(await getFromSyncStorage("instancebutton"));
-    })();
+        snuInstanceTagConfig = await getFromSyncStorage("instancetag");
+        snuInstanceTagConfig = snuInstanceTagConfig;
+
+        if (snuInstanceTagConfig) {
+            tagEnabled.checked = snuInstanceTagConfig.tagEnabled;
+            tagText.value = snuInstanceTagConfig.tagText;
+            tagFontSize.value = parseInt(snuInstanceTagConfig.tagFontSize, 10);
+            tagTagColor.value = snuInstanceTagConfig.tagTagColor;
+            tagFontColor.value = snuInstanceTagConfig.tagFontColor;
+            tagOpacity.value = parseFloat(snuInstanceTagConfig.tagOpacity);
+            tagTextDoubleclick.value = snuInstanceTagConfig.tagTextDoubleclick;
+            tagCommand.value = snuInstanceTagConfig.tagCommand;
+            tagCommandShift.value = snuInstanceTagConfig.tagCommandShift;
+        }        
+    });
+
+    document.querySelectorAll('input').forEach(inp => { 
+        ['change','keyup'].forEach( async evtname => {  
+
+            inp.addEventListener(evtname, async ev => {
+
+                let snuInstanceTagConfigPosition = await getFromSyncStorage("instancetag"); 
+                snuInstanceTagConfig.tagBottom = snuInstanceTagConfigPosition.tagBottom;
+                snuInstanceTagConfig.tagLeft = snuInstanceTagConfigPosition.tagLeft;
+
+                snuInstanceTagConfig.tagEnabled = tagEnabled.checked;
+                snuInstanceTagConfig.tagText = tagText.value;
+                snuInstanceTagConfig.tagFontSize = tagFontSize.value + 'pt';    
+                snuInstanceTagConfig.tagTagColor = tagTagColor.value;
+                snuInstanceTagConfig.tagFontColor = tagFontColor.value;
+                snuInstanceTagConfig.tagOpacity = parseFloat(tagOpacity.value);
+                snuInstanceTagConfig.tagTextDoubleclick = tagTextDoubleclick.value;
+                snuInstanceTagConfig.tagCommand = tagCommand.value;
+                snuInstanceTagConfig.tagCommandShift = tagCommandShift.value;
+                setToChromeSyncStorage("instancetag", snuInstanceTagConfig);
+
+                var details = {
+                    "action": "updateInstaceTagConfig",
+                    "instaceTagConfig": snuInstanceTagConfig,
+                };
+                chrome.tabs.sendMessage(tabId, {
+                    "method": "snuUpdateSettingsEvent",
+                    "detail": details
+                })
+            });
+        });
+    });
   
-
-    
-
 });
 
 

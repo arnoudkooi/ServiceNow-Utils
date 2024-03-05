@@ -149,6 +149,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Open SN Utils info page"
     },
+    "itt": {
+        "url": "*",
+        "hint": "InstanceTag Toggle"
+    },
     "lang": {
         "url": "*",
         "hint": "Switch language <lng>"
@@ -396,13 +400,19 @@ var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", 
 if (typeof g_ck == 'undefined') g_ck = null;  //prevent not defined errors when not provided in older instances , also see #453
 
 
-document.addEventListener('snuUpdateSettingsEvent', function (e) {
+document.addEventListener('snuUpdateSettingsEvent', e => {
     if (e.type == "snuUpdateSettingsEvent") {
         if (e?.detail?.action == "updateSlashCommand") {
             snuslashcommands[e.detail.cmdname] = e.detail.cmd;
             snuSlashCommandShow('/' + e.detail.cmdname + ' ', 0);
         }
+        else if (e?.detail?.action == "updateInstaceTagConfig") { //update instance tag settings hanlded in instancetag.js
+            if (typeof snuReceiveInstanceTagEvent == 'function')
+                    snuReceiveInstanceTagEvent(e);
+        }
+
     }
+
 });
 
 if (typeof jQuery != "undefined") {
@@ -841,6 +851,12 @@ function snuSlashCommandAddListener() {
             else if (shortcut == "imp") {
                 e.preventDefault();
                 snuGetUsersForImpersonate(query);
+                return;
+            }
+            else if (shortcut == "itt") {
+                e.preventDefault();
+                snuInstanceTagToggle();
+                snuSlashCommandHide();
                 return;
             }
             else if (shortcut == "ppt") {
@@ -1585,6 +1601,7 @@ function snuSettingsAdded() {
     snusettings.listfields ??= 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
     snusettings.slashsswitches ??= '{}';
     snusettings.monacooptions ??= `{ "wordWrap" : "on", "contextmenu" : true }`;
+    snusettings.instancetag ??= false;
     
     try { //ignore if not valid json
         let addedslashsswitches = JSON.parse(snusettings.slashsswitches);
@@ -1755,6 +1772,14 @@ function snuSettingsAdded() {
                 })
             }
         }catch(ex){};
+    }
+    if (snusettings.instancetag){ 
+        if (window.self === window.top){ //ony parent window
+            let script = document.createElement('script');
+            script.src = snusettings.extensionUrl + 'js/instancetag.js';
+            script.async = false; // This is optional: set to true for asynchronous loading
+            document.head.appendChild(script);
+        }
     }
 }
 
@@ -4289,20 +4314,6 @@ function snuScriptSync() {
     sncWait();
 }
 
-// function snuShowSidePanel() {
-//     var event = new CustomEvent(
-//         "snutils-event",
-//         {
-//             detail: {
-//                 event: "showsidepanel",
-//                 command: JSON.parse(localStorage.getItem("snuButtonPosition")) || {}
-//             }
-//         }
-//     );
-//     window.top.document.dispatchEvent(event);
-//     sncWait();
-// }
-
 function snuScriptSyncPostData(data) {
     var event = new CustomEvent(
         "snutils-event",
@@ -5017,7 +5028,7 @@ function snuDoSlashNavigatorSearch(search, arrDigits = []) {
     let words = [...new Set(search.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
         (unique, item) => ( unique.filter(e => item.includes(item)).length > 5 ? unique : [...unique, item]),[],); //todo check undouble
 
-    let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">🔍 Navigator search</div>Tip: Hit SHIFT to toggle keyboard navigation<br />';
+    let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">&#128269; Navigator search</div>Tip: Hit SHIFT to toggle keyboard navigation<br />';
     let idx = 1;
     let dispIdx = 0;
     let lastgroup = '';
@@ -5196,8 +5207,9 @@ function snuHyperlinkifyWorkNotes() {
         let newContent =  crd.innerHTML.replace(urlRegex, function (url) {
             return '<a href="' + url + '" target="_blank" title="[SN Utils] Converted to hyperlink">' + url + '</a>';
         });
-        if (newContent) //dont apply when empty after regex, can happen when work note uses [code] tag
-            crd.innerHTML = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] });
+        let purifyContent = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] }); 
+        if (newContent && (purifyContent.length == newContent.length)) //dont apply when empty after regex or purify changed it, can happen when work note uses [code] tag
+            crd.innerHTML = newContent;
         crd.classList.add('snuified');
     })
 }
@@ -5291,4 +5303,14 @@ function snuSlashCommandNumberNav(toggle){
         localStorage.setItem('snunumbernav', snunumbernav);
     }
     return snunumbernav;
+}
+
+function snuInstanceTagToggle(){
+    if (typeof snuInstanceTag == 'undefined') 
+        snuSlashCommandInfoText('Please enable InstanceTag in the settings first', false);
+    else {
+        snuInstanceTagConfig.tagEnabled = !snuInstanceTagConfig.tagEnabled;
+        document.documentElement.style.setProperty("--snu-instancetag-tag-display", snuInstanceTagConfig.tagEnabled ? "" : "none");
+        snuDispatchBackgroundEvent("updateinstancetagconfig", snuInstanceTagConfig);
+    }
 }

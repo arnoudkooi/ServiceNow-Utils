@@ -3,14 +3,15 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "7.3.4.2",
+    "version": "7.4.0.0",
     "manifest_version": 3,
     "permissions": [
       "activeTab",
       "declarativeContent",
       "storage",
       "contextMenus",
-      "cookies"
+      "cookies",
+      "sidePanel"
     ],
     "icons": {
       "16": "images/icon16.png",

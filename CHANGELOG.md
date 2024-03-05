@@ -1,6 +1,10 @@
 # CHANGELOG.md
 
-## 7.3.4.2 (2024-03-01)
+## 7.4.0.0 (2024-03-05)
+Features:
+  - Beta release of InstanceTag. More details to follow. Early adopters can enable it in the settings tab of the popup.
+
+## 7.3.4.4 (2024-03-01)
 Fixes / changes:
   - Adjusted snuHyperlinkifyWorkNotes function to prevent issues when [code] tags are used in worknotes
   - Preparations for Instance Button feature, that will be added in an upcoming release
