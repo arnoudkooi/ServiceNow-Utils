@@ -1242,7 +1242,11 @@ function snuSlashCommandAddListener() {
                             snuLastOpened = (new Date()).getTime();
                             if (window.location.pathname.startsWith("/images") && !targeturl.startsWith("/")) 
                                 targeturl = "/" + targeturl;//ui15 adds /images to url
-                            window.open(targeturl, '_blank');
+                            
+                            setTimeout(() => { //this prevents opening in a new window. (we wnt a new tab)
+                                window.open(targeturl, '_blank');
+                            }, 1);
+                                
                         }
                         snuLastOpened = (new Date()).getTime();
 

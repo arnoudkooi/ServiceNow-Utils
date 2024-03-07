@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.4.0.3 (2024-03-05)
+Features:
+  - Set inital InitalTag to opacity 0.01 so only shows after settings applied
+  - Prevent open InitialTag shift-click opening in new window
+
 ## 7.4.0.0/1 (2024-03-05)
 Features:
   - Beta release of InstanceTag. More details to follow. Early adopters can enable it in the settings tab of the popup.

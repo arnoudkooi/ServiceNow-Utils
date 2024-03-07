@@ -25,7 +25,7 @@ snuStyle.textContent = `
   --snu-instancetag-font-size: 12pt;
   --snu-instancetag-font-color: #FFFFFF;
   --snu-instancetag-tag-color: #4CAF50;
-  --snu-instancetag-tag-opacity: 0.9;
+  --snu-instancetag-tag-opacity: 0.01; /* Initial hidden */
   --snu-instancetag-tag-display: block;
 }
 
@@ -94,6 +94,9 @@ snuStyle.textContent = `
 .snuVertical {
   transform: rotate(90deg); /* Rotate the button for snuVertical orientation */
 }
+
+
+
 `;
 
 document.head.append(snuStyle);
