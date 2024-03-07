@@ -63,23 +63,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 snuInstanceTagConfig.tagCommandShift = tagCommandShift.value;
                 setToChromeSyncStorage("instancetag", snuInstanceTagConfig);
 
-                var details = {
-                    "action": "updateInstaceTagConfig",
-                    "instaceTagConfig": snuInstanceTagConfig,
-                };
                 chrome.tabs.sendMessage(tabId, {
                     "method": "snuUpdateSettingsEvent",
-                    "detail": details
+                    "detail": {
+                        "action": "updateInstaceTagConfig",
+                        "instaceTagConfig": snuInstanceTagConfig,
+                    }
                 })
             });
         });
     });
+
+
+    //run after pageload, to trigger repositioning after the sidepanel showed.
+    chrome.tabs.sendMessage(tabId, {
+        "method": "snuUpdateSettingsEvent",
+        "detail": {
+            "action": "updateInstaceTagConfig",
+            "instaceTagConfig": snuInstanceTagConfig,
+        }
+    })
+
+    
   
 });
 
 
 function setToChromeSyncStorage(theName, theValue) {
-    var myobj = {};
+    let myobj = {};
     myobj[instance + "-" + theName] = theValue;
     chrome.storage.sync.set(myobj, function () {
     });

@@ -207,6 +207,8 @@ $(document).ready(function () {
                     setBannerMessage(wsObj);
                 } else if (wsObj.action == 'updateVar') {
                     updateVar(wsObj);
+                } else if (wsObj.action == 'executeBackgroundScript') {
+                    snuStartBackgroundScript(wsObj.content, wsObj.instance, wsObj.action);
                 } else if ('instance' in wsObj) {
                     if (wsObj.tableName == 'flow_action_scripts') {
                         updateActionScript(wsObj);
@@ -679,8 +681,8 @@ function changeFavicon(src) {
 /**
  * @function snuStartBackgroundScript
  * @param  {String} script   {the script that should be executed}
- * @param  {String} g_ck   {token required for authentication}
- * @param  {Function} callback {the function that's called after successful execution (function takes 1 argument: response)}
+ * @param  {String} instance   {instance info required for communication}
+ * @param  {String} action {name of the action)}
  * @return {undefined}
  */
 function snuStartBackgroundScript(script, instance, callback) {
@@ -697,14 +699,24 @@ function snuStartBackgroundScript(script, instance, callback) {
                 script: script,
                 runscript: "Run script",
                 sysparm_ck: instance.g_ck,
-                sys_scope: "e24e9692d7702100738dc0da9e6103dd",
+                sys_scope: instance?.scope || "e24e9692d7702100738dc0da9e6103dd",
                 quota_managed_transaction: "on"
             }).toString()
         }).then(response => response.text())
             .then((data) => {
-                console.log(data);
+                let data = data.replace("<HTML><BODY>", "").replace("</BODY><HTML>", "");
+                if (action == "executeBackgroundScript"){ 
+                    let response = {
+                        action : "responseFromBackgroundScript",
+                        instance,
+                        data
+                    }
+                    ws.send(JSON.stringify(response));
+                    data = "View response in VS Code";
+                };
+                increaseTitlecounter();
                 t.row.add([
-                    new Date(), 'VS Code', 'Background Script Executed: <br />' + data.replace("<HTML><BODY>", "").replace("</BODY><HTML>", "")
+                    new Date(), 'VS Code', 'Background Script Executed: <br />' + data
                 ]).draw(false);
             })
             .catch((error) => {
