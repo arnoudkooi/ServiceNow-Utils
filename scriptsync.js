@@ -685,7 +685,7 @@ function changeFavicon(src) {
  * @param  {String} action {name of the action)}
  * @return {undefined}
  */
-function snuStartBackgroundScript(script, instance, callback) {
+function snuStartBackgroundScript(script, instance, action) {
     document.querySelector('base').setAttribute('href', instance.url + '/');
 
     try {
@@ -704,7 +704,7 @@ function snuStartBackgroundScript(script, instance, callback) {
             }).toString()
         }).then(response => response.text())
             .then((data) => {
-                let data = data.replace("<HTML><BODY>", "").replace("</BODY><HTML>", "");
+                data = data.replace("<HTML><BODY>", "").replace("</BODY><HTML>", "");
                 if (action == "executeBackgroundScript"){ 
                     let response = {
                         action : "responseFromBackgroundScript",
