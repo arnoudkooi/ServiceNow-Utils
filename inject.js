@@ -1649,7 +1649,7 @@ function snuSettingsAdded() {
         snuCreateHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
         snuAddGroupSortIcon();
-        snuAddListLinks();
+        snuAddListLinks(false);
         snuAddFormDesignScopeChange();
         snuAddPersonaliseListHandler();
         snuAddLinkToCachDo();
@@ -1973,8 +1973,8 @@ function snuAddGroupSortIcon() {
     }
 }
 
-function snuAddListLinks() {
-    if (["/syslog_list.do","/sys_update_set.do","/sys_update_xml_list.do","/sys_upgrade_history_log_list.do"].includes(location.pathname)) {
+function snuAddListLinks(forceLink) {
+    if (["/syslog_list.do","/sys_update_set.do","/sys_update_xml_list.do","/sys_upgrade_history_log_list.do"].includes(location.pathname) || forceLink) {
         // Supports for 3 different patterns of script ids being present in logs:
         // table_name:sys_id table_name.sys_id table_name_sys_id
         
@@ -2024,7 +2024,7 @@ function snuAddListLinks() {
             tableCell.classList.add('snuified');
         });
 
-        setTimeout(snuAddListLinks, 3000); // "recursive" call this incase we navigate to next page.
+        setTimeout(() => { snuAddListLinks(forceLink) }, 3000); // "recursive" call this incase we navigate to next page.
     }
 }
 

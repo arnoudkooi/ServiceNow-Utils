@@ -1,7 +1,14 @@
 # CHANGELOG.md
 
-## 7.4.0.3 (2024-03-05)
-Features:
+## 7.4.0.7 (2024-03-09)
+Fixes / changes:
+  - Updates in scriptsyn.js to support running background scripts inside VS Code
+  - Addidng cookieStorId for Firefox Multi Account Container comatibility (Issue #473)
+  - Adding parameter to function snuAddListLinks(forceLink) to allow for force link in list (Related to Issue #442)
+  - Minor InstanceTag fix
+
+## 7.4.0.3 (2024-03-07)
+Fixes / changes:
   - Set inital InitalTag to opacity 0.01 so only shows after settings applied
   - Prevent open InitialTag shift-click opening in new window
 

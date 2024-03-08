@@ -3,7 +3,7 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "7.4.0.3",
+    "version": "7.4.0.7",
     "manifest_version": 3,
     "permissions": [
       "activeTab",

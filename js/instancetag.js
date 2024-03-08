@@ -352,4 +352,6 @@ function snuRotateText(degrees) {
   snuTagText.style.transform = `rotate(${degrees}deg)`;
 }
 
-//snuParsePosition();
+// Load position and handle window resize
+window.onresize = snuParsePosition;
+
