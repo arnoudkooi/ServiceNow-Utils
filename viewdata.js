@@ -54,6 +54,13 @@ function getViewData() {
                 rows = { "Error": { "display_value": e.message, "value": "Record data not retrieved." } };
             }
 
+            let whotheheck = `Table: <a href="${url}/${tableName}.do?sys_id=${sysId}" target="_blank">${tableName}</a> 
+            | Created: <a href="${url}/sys_user.do?sys_id=${rows?.sys_created_by.value}&sysparm_refkey=user_name" target="_blank">${rows?.sys_created_by.display_value}</a> 
+              - ${rows?.sys_created_on.display_value} 
+            | Updated: <a href="${url}/sys_user.do?sys_id=${rows?.sys_updated_by.value}&sysparm_refkey=user_name" target="_blank">${rows?.sys_updated_by.display_value}</a> 
+              - ${rows?.sys_updated_on.display_value}`;
+            document.querySelector('#whotheheck').innerHTML = whotheheck;
+
             for (let key in rows) {
                 let propObj = {};
                 if (!rows.hasOwnProperty(key)) continue;

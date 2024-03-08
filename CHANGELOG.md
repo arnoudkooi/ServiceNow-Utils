@@ -1,5 +1,133 @@
 # CHANGELOG.md
 
+## 7.4.0.3 (2024-03-05)
+Features:
+  - Set inital InitalTag to opacity 0.01 so only shows after settings applied
+  - Prevent open InitialTag shift-click opening in new window
+
+## 7.4.0.0/1 (2024-03-05)
+Features:
+  - Beta release of InstanceTag. More details to follow. Early adopters can enable it in the settings tab of the popup.
+  - 7.4.0.1 adds a fix for checkbox setting in the settings tab
+
+## 7.3.4.4 (2024-03-01)
+Fixes / changes:
+  - Adjusted snuHyperlinkifyWorkNotes function to prevent issues when [code] tags are used in worknotes
+  - Preparations for Instance Button feature, that will be added in an upcoming release
+
+## 7.3.4.0 (2024-02-25)
+Features:
+  - Slash commands direct navigation can now be toggled via the shift key. Disabled state is indicated by low opacity of the numbers. Setting is stored per instance. This way unintended link navigation can be prevented. #philgoesdeep
+
+Fixes / changes:
+  - Adjustments in the spacing of the pickers in the Next experience header.
+
+## 7.3.3.0 (2024-02-24)
+Features:
+  - When searchbar of a classic list is disabled, an icon (⨮) is added behind every fieldname. Clicking it adds a AND condition to the filter. Goal is to simplify building the filter when the searchbar is disabled. For reference fields, the default is to text search the display value. Holding SHIFT seraches a specific reference.
+
+## 7.3.2.2 (2024-02-22)
+Fixes / changes:
+  - Improve cookie switching (Issue #477)
+  - Minor CSS adjustments for the popup window
+
+## 7.3.2.0 (2024-02-22)
+Features:
+  - Detect links in activity (Classic UI) and convert to hyperlinks. Works on page load, and on mouse over of activity label.
+  
+Fixes / changes:
+  - Update dompurify to 3.0.9
+
+## 7.3.1.1 (2024-02-21)
+Fixes / changes:
+  - Fix slash command not showing when not in Next Experience
+
+## 7.3.1.0 (2024-02-21)
+Features:
+  - Node switching is improved and now supports ADCV2 loadbalancing instances. 
+
+Fixes / changes:
+  - Added md5.js script to support node switching
+  - Added an extra way to suppress slash commands popup, in case event capturing does not work
+  - Adding a check to sys.script.modern.do to prevent page modification when the Monaco editor is not found. Reason issue #475
+  - Adding a check in publish.sh script to prevent submitting when version in manifest.json is not updating since last publish
+
+## 7.3.0.1 (2024-02-19)
+Fixes / changes:
+  - Reverting CTRL-C to copy cells, will dive in later (Issue #474)
+
+## 7.3.0.0 (2024-02-19)
+Features:
+  - Slash command no triggers a global search when now match is found, ie: /INC3940740 opens that incident. This is a shortcut for the /search command. If the command contains a _ it tries to open a table list like it used to.
+  - /copycells can now be triggered via the OS copy shortcut (ctrl-c or cmd-c), when no other selection is made 
+  - The Modern Background scripts now get split and execute inline and other enhancements, like the classic background scripts. 
+  - Pages on old background script get redirected to the modern background script page, when it detects the instance runs on washington release.
+  
+Fixes / changes:
+  - Mousevents now work on form labels with a hyperlink, after /tn moves the link to the ↗ symbol
+  - Added function snuCheckFamily to inject.js, this helps to determine the family release of the instance
+
+
+## 7.2.3.1 (2024-02-07)
+Fixes / changes:
+  - Fix for not applying switches with numbers (Issue #465)
+
+
+## 7.2.3.0 (2024-02-02)
+Fixes / changes:
+  - Added /ws command to open the new Workflow Studio.
+  - Exclude Next experience Lists from doubleclick to /tn (Issue #463)
+  - Exclude Slash command popup when the Washington Shortcut popup shows
+  - To support above, added a fade in animation for the slash command popup
+  - Add div to the shortcut popup showing what the slash command shortcut is.
+  
+
+
+## 7.2.2.2 (2024-01-29)
+Fixes / changes:
+  - Allow slashcommands with encodedquery to work with spaces, note that they may not work as expected when the encodedquery contains a -  (#issue 460)
+  - Add ALT-/ to trigger slash commands for Washington compatibility. 
+
+## 7.2.2.0 (2024-01-18)
+Fixes / changes:
+  - Resolve tablename and sys_id in VA Designer to support /va command from there
+  - Add "Who the heck edited this info" on top of View Data window
+
+
+## 7.2.1.3 (2024-01-12)
+Fixes / changes:
+  - Add .do to document_id btn-ref doubleclick target (Issue #459)
+
+## 7.2.1.2 (2024-01-09)
+Fixes / changes:
+  - Improvements to /copycells command (Issue #458)
+
+## 7.2.1.0 (2023-12-18)
+Features:
+  - Sync Pickers across tabs
+
+  
+## 7.2.0.1 (2023-12-18)
+Fixes / changes:
+  - Minor fix choicelist /tn toggle (Issue #289)
+
+## 7.2.0.0 (2023-12-18)
+Features:
+  - Doubleclick on label now shows choices for choice fields
+Fixes / changes:
+  - Choicelist values now toggle with toggle of technical names (Issue #289)
+  - Rename showSelectFieldValues to snuShowSelectFieldValues in inject.js
+  - Remove maxheight of addInfoMessage for Show Fields or show Scratchpad when link is clicked
+  - Change table index for Show Fields from 0 to 1, fix related bugs
+
+## 7.1.9.0 (2023-12-08)
+Features:
+  - Added /copycolumn command, in addition to /copycells It will copy all non empty values of the column where a cell is selected.
+Fixes / changes:
+  - Adjust manifest file for Edge to allow servicenowservices.com domain
+  - Expand the doubleclick area in the headerbar to trigger page reload
+  - Fix to support the /um unmnadatory command inside Next Experience
+
 ## 7.1.8.0 (2023-12-04)
 Fixes / changes:
   - Show the quick add button on related lists (Discussion #451)

@@ -16,6 +16,7 @@
     <script src="js/moment.js"></script>
     <script src="js/datatables.min.js"></script>
     <script src="js/datetime-moment.js"></script>
+    <script src="js/md5.js"></script>
     <script src="inject.js"></script>
 
     <script src="popup.js"></script>
@@ -149,7 +150,7 @@
                             </tr>
                         </thead>
                     </table>
-                    <div id="nodemessage" class="alert alert-warning hidden" role="alert"></div>
+                    <div id="nodemessage" class="alert alert-info" role="alert">Node switching is improved, let me know if you face problems</div>
                 </div>
                 <div class="tab-pane" id="tabtables">
 
@@ -297,6 +298,13 @@
                     <div class="row">
                         <div class="col-6" id='settingsdiv'>
                             <form>
+                                <div class="form-check">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="instancetag"
+                                        name="instancetag">
+                                    <label class="form-check-label" for="instancetag">
+                                        BETA/NEW! Enable InstanceTag (Show a draggable button)
+                                    </label>
+                                </div>
                                 <div class="form-check">
                                     <input class="form-check-input snu-setting" type="checkbox" checked="checked" id="vsscriptsync"
                                         name="vsscriptsync">

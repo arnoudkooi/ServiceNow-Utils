@@ -14,6 +14,7 @@ var snuNav = {
     'loadedLastTime': 0
 };
 var snuSettingsParsed = false;
+var snunumbernav = snuSlashCommandNumberNav();
 
 var snuslashcommands = {
     "acl": {
@@ -51,6 +52,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "Copy Selected Cell Values from List [-s for SysIDs]"
     },
+    "copycolumn": {
+        "url": "*",
+        "hint": "Copy All Values from Selected Column [-s for SysIDs]"
+    },
     "debug": {
         "url": "*",
         "hint": "Open Script Debugger"
@@ -68,8 +73,12 @@ var snuslashcommands = {
         "hint": "Background Script with var current"
     },
     "bgl": {
-        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%22$table%22%29%3B%0Alist.addEncodedQuery%28%22$encodedquery%22%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D%3B",
+        "url": "/sys.scripts.do?content=var%20list%20%3D%20new%20GlideRecord%28%22$table%22%29%3B%0Alist.addEncodedQuery%28%22$encodedquery%22%29%3B%0Alist.setLimit%2810%29%3B%0Alist.query%28%29%3B%0Awhile%20%28list.next%28%29%29%7B%0A%20%20%20%20gs.info%28list.getDisplayValue%28%29%29%3B%0A%7D",
         "hint": "Background Script with list gr"
+    },
+    "bgm": {
+        "url": "sys.scripts.modern.do",
+        "hint": "Background Script Modern (Washington and up)"
     },
     "cls": {
         "url": "*",
@@ -143,6 +152,10 @@ var snuslashcommands = {
     "help": {
         "url": "*",
         "hint": "Open SN Utils info page"
+    },
+    "itt": {
+        "url": "*",
+        "hint": "InstanceTag Toggle"
     },
     "lang": {
         "url": "*",
@@ -326,6 +339,10 @@ var snuslashcommands = {
         "url": "/workflow_ide.do?sysparm_nostack=true",
         "hint": "Workflow Editor"
     },
+    "ws": {
+        "url": "/now/workflow-studio/home/flow",
+        "hint": "Workflow Studio"
+    },
     "imp": {
         "url": "*",
         "hint": "Impersonate User"
@@ -387,13 +404,19 @@ var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", 
 if (typeof g_ck == 'undefined') g_ck = null;  //prevent not defined errors when not provided in older instances , also see #453
 
 
-document.addEventListener('snuUpdateSettingsEvent', function (e) {
+document.addEventListener('snuUpdateSettingsEvent', e => {
     if (e.type == "snuUpdateSettingsEvent") {
         if (e?.detail?.action == "updateSlashCommand") {
             snuslashcommands[e.detail.cmdname] = e.detail.cmd;
             snuSlashCommandShow('/' + e.detail.cmdname + ' ', 0);
         }
+        else if (e?.detail?.action == "updateInstaceTagConfig") { //update instance tag settings hanlded in instancetag.js
+            if (typeof snuReceiveInstanceTagEvent == 'function')
+                    snuReceiveInstanceTagEvent(e);
+        }
+
     }
+
 });
 
 if (typeof jQuery != "undefined") {
@@ -459,7 +482,7 @@ function snuGetTables(shortcut) {
                     };
                 }
             });
-            snuExpandHints(shortcut)
+            if (results?.length) snuExpandHints(shortcut)
         } else {
             snuSlashCommandInfoText(`<b>Log</b><br />- Tables can not be retrieved.<br />`, true);
         }
@@ -496,7 +519,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
                 var results = jsn.result;
-                if (table == 'domain') directlinks = `0 <a id="snulnk0" href="#snu:switchto,domain,value,global">global</a><br />`;
+                if (table == 'domain') directlinks = `<span class="dispidx">0</span> <a id="snulnk0" href="#snu:switchto,domain,value,global">global</a><br />`;
                 if (results.length == 0) directlinks = `No results found`;
                 var idx = 0;
                 var dispIdx = 0;
@@ -527,10 +550,10 @@ function snuGetDirectLinks(targeturl, shortcut) {
                         dispIdx = '>';
                         idattr = '';
                     }
-                    directlinks += dispIdx + ' <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
+                    directlinks += '<span class="dispidx">' + dispIdx + '</span> <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
                 });
                 if (directlinks.length > 50) 
-                    directlinks += `<span style="opacity:0.4; font:smaller">Results: ${jsn.resultcount}</br><br />`;
+                    directlinks += `<span style="opacity:0.4; font:smaller">Tip: Hit SHIFT to toggle keyboard navigation<br />Results: ${jsn.resultcount}</br><br />`;
                 
             }
             else {
@@ -594,6 +617,15 @@ function snuSlashCommandAddListener() {
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
+        if (e.key == 'Shift') {
+            snunumbernav = snuSlashCommandNumberNav(true);
+            let dlinks = window.top.document.getElementById('snudirectlinks');
+            if (dlinks) {
+                if (snunumbernav) dlinks.classList.remove('snudirectlinksdisabled');
+                else dlinks.classList.add('snudirectlinksdisabled');
+            }
+            return;
+        }
         if (e.key == 'ArrowUp') {
             e.preventDefault();
             if (snuIndex == 0) { 
@@ -621,7 +653,7 @@ function snuSlashCommandAddListener() {
                 }
             }
         };
-        if (isFinite(e.key)) {
+        if (isFinite(e.key) && snunumbernav) {
             if (window.top.document.getElementById('snulnk' + e.key)) {
                 e.preventDefault();
                 window.top.document.getElementById('snulnk' + e.key).dispatchEvent(new MouseEvent('click', { cancelable: true, metaKey : e.metaKey, shiftKey : e.shiftKey, ctrlKey : e.ctrlKey}));
@@ -651,6 +683,10 @@ function snuSlashCommandAddListener() {
             e.currentTarget.value = (e.currentTarget.value + window.top.document.snuSelection).trim();
             thisKey = "";
             e.preventDefault();
+            setTimeout(()=> {
+                window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Shift' }));
+            },150)
+
         }
         if (noSpace) idx = snufilter.length;
         var originalShortcut = ((snufilter.slice(0, idx) + ((noSpace) ? thisKey : ""))).toLowerCase();
@@ -699,7 +735,7 @@ function snuSlashCommandAddListener() {
 
 
         if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
-            let encodedQ = query.split(' ')[0]; //encodedquery should be first
+            let encodedQ = query.split('-')[0]; //encodedquery should be first, switches should work #460
             targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + encodeURIComponent(encodedQ) + (e.key.length == 1 ? e.key : ""));
             switchText = '<br />Encodedquery detected<br /><br /><br /> Switches:<br />';
         }
@@ -709,7 +745,7 @@ function snuSlashCommandAddListener() {
             if (originalShortcut.startsWith("-")) query = shortcut;
             var extraParams = "";
             var unusedSwitches = Object.assign({}, snuslashswitches);
-            var switches = (query + thisKey).match(/\-([a-z]*)(\s|$)/g);
+            var switches = (query + thisKey).match(/\-([a-z0-9]*)(\s|$)/g);
             var linkSwitch = false; //determine if this is a switch that converts the entire hyperlink
             if (switches) {
                 Object.entries(switches).forEach(([key, val]) => {
@@ -773,10 +809,10 @@ function snuSlashCommandAddListener() {
             idx = (snufilter.indexOf(' ') == -1) ? snufilter.length : snufilter.indexOf(' ');
             query = snufilter.slice(idx + 1);
 
-            if (['nav', 'fav', 'hist'].includes(shortcut)) {
-                e.preventDefault();
-                return;
-            }
+            // if (['nav', 'fav', 'hist'].includes(shortcut)) { //I think this can/should be removed.
+            //     e.preventDefault();
+            //     return;
+            // }
             if (shortcut.replace(/['" ]+/g, '').match(/^[0-9a-f]{32}$/) != null || shortcut == "sysid") {//is a sys_id
                 var sysid = (shortcut.replace(/['" ]+/g, '').length == 32) ? shortcut.replace(/['" ]+/g, '') : query;
                 if (sysid.length != 32) return;
@@ -784,7 +820,7 @@ function snuSlashCommandAddListener() {
                 //snuSlashCommandHide();
                 return;
             }
-            if (/.*_([0-9a-fA-F]{32})$/.test(shortcut)) {//table_name_sysid pattern
+            else if (/.*_([0-9a-fA-F]{32})$/.test(shortcut)) {//table_name_sysid pattern
                 const result = shortcut.split(/_(?=[0-9a-fA-F]{32}$)/);
                 window.open(result[0] + ".do?sys_id=" + result[1], '_blank');
                 return;
@@ -819,6 +855,12 @@ function snuSlashCommandAddListener() {
             else if (shortcut == "imp") {
                 e.preventDefault();
                 snuGetUsersForImpersonate(query);
+                return;
+            }
+            else if (shortcut == "itt") {
+                e.preventDefault();
+                snuInstanceTagToggle();
+                snuSlashCommandHide();
                 return;
             }
             else if (shortcut == "ppt") {
@@ -891,9 +933,12 @@ function snuSlashCommandAddListener() {
                 }
                 return;
             }
-            else if (shortcut == "copycells") {
-                snuCopySelectedCellValues(query);
+            else if (shortcut == "copycells" || shortcut == "copycolumn") {
+                snuCopySelectedCellValues(query, shortcut);
                 snuSlashCommandHide();
+                if (shortcut == "copycells" && !query) {
+                    //snuSlashCommandInfoText("You can now try CTRL-C / CMD-C instead of the slashcommand", false);
+                }
                 return;
             }
             else if (shortcut == "s2") {
@@ -1081,7 +1126,7 @@ function snuSlashCommandAddListener() {
             }              
             else if (!snuslashcommands.hasOwnProperty(shortcut)) {
 
-                var inIFrame = (shortcut == snufilter.slice(0, idx) && sameWindow)
+                var inIFrame = (shortcut == snufilter.toLowerCase().slice(0, idx) && sameWindow)
                 if (e.target.className == "snutils") inIFrame = false;
 
                 if (shortcut.includes('.do')) {
@@ -1100,8 +1145,11 @@ function snuSlashCommandAddListener() {
                     snuSlashCommandHide();
                     return;
                 }
-                else if (shortcut.length > 4) { //try to open table list if shortcut nnot defined and 5+ charaters
-                    var url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=" + query;
+                else if (shortcut.length > 4 ) { //try to open table list if shortcut nnot defined and 5+ charaters
+                    
+                    var url = 'text_search_exact_match.do?sysparm_search=' + snufilter;
+                    if (shortcut.includes('_'))
+                        url = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query=" + query;
 
                     if (inIFrame) {
                         (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = url;
@@ -1202,7 +1250,11 @@ function snuSlashCommandAddListener() {
                             snuLastOpened = (new Date()).getTime();
                             if (window.location.pathname.startsWith("/images") && !targeturl.startsWith("/")) 
                                 targeturl = "/" + targeturl;//ui15 adds /images to url
-                            window.open(targeturl, '_blank');
+                            
+                            setTimeout(() => { //this prevents opening in a new window. (we wnt a new tab)
+                                window.open(targeturl, '_blank');
+                            }, 1);
+                                
                         }
                         snuLastOpened = (new Date()).getTime();
 
@@ -1238,6 +1290,11 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
     if ((e.ctrlKey || e.metaKey) && e.key == 'v' && shortcut == 'v') {
         //asume a sys_id when pasting for correct 'autocomplete'
         shortcut = "00000000000000000000000000000000";
+
+        setTimeout(()=> { //this forces a refresh of the hints
+            window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Shift' }));
+        },150)
+
     }
 
     var startswith = true;
@@ -1308,7 +1365,13 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
         // html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
         //     "<span class='cmdlabel'>Table search &lt;encodedquery&gt; (hit ► to search tables)</span></li>"
     }
+    if (snuPropertyNames.length == 0 && snufilter.length > 3) {
+        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/search</span> " +
+                "<span class='cmdlabel'>Search for: " + snufilter + "</span></li>";
+    }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
+    if (!html)
+    console.log(html)
     window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
@@ -1322,6 +1385,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
 
     if (snusettings.slashnavigatorsearch && snuPropertyNames.length <= 3 && switchText.length <=25)
         snuDoSlashNavigatorSearch(shortcut + ' ' + snufilter, arrDigits);
+
 }
 
 function setSnuFilter(ev) {
@@ -1469,6 +1533,13 @@ function snuResolveVariables(variableString){
         variableString = variableString.replace(/\$table/g,tableName);
         variableString = variableString.replace(/\$sysid/g,sysId);
     }
+    else if (location.pathname == "/$conversation-builder.do"){ //flowdesigner
+        tableName = "sys_cb_topic";
+        var hashParts = location.hash.split("/");
+        sysId = hashParts.length > 2 ? hashParts[2] : null;
+        variableString = variableString.replace(/\$table/g,tableName);
+        variableString = variableString.replace(/\$sysid/g,sysId);
+    }
     else { ///get sysid and tablename from portal or workspace
         let searchParams = new URLSearchParams(window.location.search)
         tableName = (searchParams.get('table') || searchParams.get('id') || '').replace(/[^a-z0-9-_]/g, '');
@@ -1542,6 +1613,7 @@ function snuSettingsAdded() {
     snusettings.listfields ??= 'sys_updated_on,sys_updated_by,sys_scope,sys_created_on';
     snusettings.slashsswitches ??= '{}';
     snusettings.monacooptions ??= `{ "wordWrap" : "on", "contextmenu" : true }`;
+    snusettings.instancetag ??= false;
     
     try { //ignore if not valid json
         let addedslashsswitches = JSON.parse(snusettings.slashsswitches);
@@ -1593,6 +1665,8 @@ function snuSettingsAdded() {
         snuAddSwitchToApplication();
         snuOpenWorkflowLink();
         snuEnterToFilterSlushBucket();
+        snuHyperlinkifyWorkNotes();
+        snuEasifyAdvancedFilter();
     }
 
     if (snusettings.hasOwnProperty("slashcommands")) {
@@ -1711,6 +1785,14 @@ function snuSettingsAdded() {
             }
         }catch(ex){};
     }
+    if (snusettings.instancetag){ 
+        if (window.self === window.top){ //ony parent window
+            let script = document.createElement('script');
+            script.src = snusettings.extensionUrl + 'js/instancetag.js';
+            script.async = false; // This is optional: set to true for asynchronous loading
+            document.head.appendChild(script);
+        }
+    }
 }
 
 function snuCreateHyperLinkForGlideLists() {
@@ -1803,14 +1885,19 @@ function snuDoubleClickToShowFieldOrReload() {
                 }
 
                 var val = g_form.getValue(elm);
+                var options = "";
+                g_form.getOptionControl(elm)?.querySelectorAll('option').forEach(opt =>{
+                    options += "\n" + opt.value + ": " + (opt.dataset.snuoriginal || opt.innerText) ;
+                });
+                if (options) options = "\nOptions:" + options;
                 if (NOW.user.roles.split(',').includes('admin') || snuImpersonater(document)) { //only allow admin to change fields
-                    var newValue = prompt('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + '\nValue:', val);
+                    var newValue = prompt('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + options + '\nValue:', val);
                     if (newValue !== null)
                         g_form.setValue(elm, newValue);
                 } else {
-                    alert('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + '\nValue:' + val);
+                    alert('[SN Utils]\nField Type: ' + glideUIElement.type + '\nField: ' + elm + options + '\nValue:' + val);
                 }
-            } else if (event.target.classList.contains('container-fluid')) {
+            } else if (event.target.classList.contains('container-fluid') || event.target.classList.contains('navbar_ui_actions')) {
                 location.reload();
             } else if (event.target.classList.contains('breadcrumb_container')) {
                 //placeholder maybe move breadcrumb doubleclick here
@@ -1823,7 +1910,7 @@ function snuDoubleClickToShowFieldOrReload() {
                 else { //maybe a document ID
                     var data = event?.target?.parentElement.dataset;
                     if (data?.sysid && data?.table)
-                        window.open(`${data?.table}?sys_id=${data?.sysid}`);
+                        window.open(`${data?.table}.do?sys_id=${data?.sysid}`);
                 }
             }
             else if (['div', 'li', 'body'].includes(event.target.localName) && !event.target.parentElement.className.includes('monaco')) {
@@ -2483,6 +2570,8 @@ function unhideFields() {
 }
 
 function snuShowScratchpad() {
+
+    document.querySelector('.outputmsg_container').style.maxHeight = "none"; //allow full height
     g_form.addInfoMessage("Scratchpad: <br/><pre style='white-space: pre-wrap;'>" + JSON.stringify(g_scratchpad || {}, 2, 2) + "</pre>");
 }
 
@@ -2540,8 +2629,10 @@ function snuAddTechnicalNames() {
                 // jQuery(elem.parentElement).removeAttr('for'); //remove to easier select text
                 jQuery('label:not(.checkbox-label)').removeAttr('onclick')
                 var elm;
+                var elmDisp;
                 try {
                     elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
+                    elmDisp = elm;
                 } catch (e) {
                     return true; //issue #42
                 }
@@ -2581,25 +2672,28 @@ function snuAddTechnicalNames() {
                         onclick: 'snuViewTranslationsMeta(\'' + elm + '\');',
                         title: `View translations of ${fieldType} field`
                     };
-                    elm = '⚑ ' + elm;
+                    elmDisp = '⚑ ' + elm;
                 }
                 else if (['translated_text', 'translated_html'].includes(fieldType)) {
                     linkAttrs = {
                         onclick: 'snuViewTranslations(\'' + elm + '\');',
                         title: `View translations of ${fieldType} field`
                     };
-                    elm = '⚑ ' + elm;
+                    elmDisp = '⚑ ' + elm;
                 }
                 if (linkAttrs) {
                     linkBtn = '<a class="" style="margin-left:2px; " onclick="' + linkAttrs.onclick + '" title="' +
-                        linkAttrs.title + '" target="_blank">' + elm + '</a>';
+                        linkAttrs.title + '" target="_blank">' + elmDisp + '</a>';
                 }
-                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elm + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"><span class="dict" title="Open dictionary entry">&nbsp;! </span><span class="pillar">&nbsp;| </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
+                jQuery(this).html('<span style="font-family:monospace; display:none" class="label-tech">' + elmDisp + '</span><span class="label-orig">' + this.innerHTML + '</span><span class="snuwrap"><span class="dict" title="Open dictionary entry">&nbsp;! </span><span class="pillar">&nbsp;| </span><span class="label-snu" style="font-family:monospace; ">' + (linkBtn || elm) + '</span><sup data-element="'+ elm +'"></sup></span>');
                 //jQuery(this).closest('a').replaceWith(function () { return jQuery(this).contents(); });
-                jQuery(this).closest('a').replaceWith(function () {
-                    var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
-                    return DOMPurify.sanitize(hl.outerHTML + " " + cnt, { ADD_ATTR: ['target'] });
-                });
+                if (this.closest('a')){
+                    elem.closest('label').style.pointerEvents = 'all';
+                    jQuery(this).closest('a').replaceWith(function () {
+                        var cnt = this.innerHTML; var hl = this; hl.innerHTML = DOMPurify.sanitize("↗"); hl.title = "-SN Utils Original hyperlink-\n" + hl.title; hl.target = "_blank";
+                        return DOMPurify.sanitize(hl.outerHTML + " " + cnt, { ADD_ATTR: ['target'] });
+                    });
+                }
             });
 
         } catch (error) {
@@ -2652,7 +2746,7 @@ function snuAddTechnicalNames() {
     if (viewName && !jQuery('i.viewName').length)
         jQuery('.section-content').first().prepend(DOMPurify.sanitize('<i class="viewName snuwrap">Viewname: ' + viewName.replace(/<\/?[^>]+(>|$)/g, "") + '</i><br /> '));
 
-    showSelectFieldValues();
+    snuShowSelectFieldValues();
     snuSearchLargeSelects();
     snuCreateHyperLinkForGlideLists();
 
@@ -2663,9 +2757,12 @@ function snuAddTechnicalNames() {
             cls.style.display = display;
         });
     }
+
+    snuHyperlinkifyWorkNotes();
 }
 
 function snuExtendedFieldInfo() {
+    document.querySelector('.outputmsg_container').style.maxHeight = "none"; //allow full height
     var tableFields = {};
     var tableName = g_form.getTableName();
     //get all fields and group them by the table they are on.
@@ -2714,7 +2811,7 @@ function snuExtendedFieldInfo() {
                 for (let jdx = 0; jdx < fields.length; jdx++) {
                     let elm = document.querySelector(`sup[data-element=${fields[jdx]}]`);
                     if (elm){
-                        elm.innerText = idx;
+                        elm.innerText = idx + 1;
                         elm.title = 'Field from table: ' + tables[idx];
                        
                         try {
@@ -2746,10 +2843,9 @@ function snuExtendedFieldInfo() {
         tr.style.verticalAlign = 'top';
         thr.style.padding = '2px';
         tr.style.padding = '2px';
-
-        tables.forEach(tbl => {
+        tables.forEach((tbl, idx) => {
             var hc = thr.insertCell();
-            var hct = document.createTextNode(tbl);
+            var hct = document.createTextNode(idx+1 + ': ' + tbl);
             hc.appendChild(hct);
 
             var tc = tr.insertCell();
@@ -2785,13 +2881,15 @@ function snuOpenReference(refTable, refField, evt) {
     window.open(url, 'refTable');
 }
 
-function showSelectFieldValues() {
+function snuShowSelectFieldValues() {
     if (typeof jQuery == 'undefined') return; //not in studio
     if (["/sys_report_template.do", "/$queryBuilder.do"].includes(location.pathname)) return; //not in report or query builder
 
-    jQuery('option').not(":contains('|')").each(function (i, el) {
-        el.innerText = el.text + ' | ' + el.value;  
-        el. title =  el.text + ' | ' + el.value;  
+    jQuery('option').each(function (i, el) {
+        if (!el.dataset.snuoriginal)
+            el.dataset.snuoriginal = el.text;
+        el.innerText = (el.innerText.includes(' | ')) ? el.dataset.snuoriginal : el.text + ' | ' + el.value ;  
+        el.title =  el.innerText;  
     });
 
     jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('|')").each(function (i, el) {
@@ -2950,8 +3048,11 @@ function snuSetShortCuts() {
         ul#snuhelper li.active span.cmdlabel { color: black}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#22885c; text-decoration: none; }
+        div#snudirectlinks.snudirectlinksdisabled .dispidx { opacity: 0.3; }
         div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#1f1cd2;}
+        div.snufadein { animation: snuFadeIn 0.5s; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
     else if (snusettings.slashtheme == 'stealth') {
@@ -2966,6 +3067,7 @@ function snuSetShortCuts() {
         a.cmdlink { display:none }
         span.semihidden { display:none }
         div#snudirectlinks {display:none;}
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
     else {
@@ -2983,18 +3085,22 @@ function snuSetShortCuts() {
         ul#snuhelper li.active span.cmdlabel { color: yellow}
         div#snudirectlinks {margin: -5px 10px; padding-bottom:10px;}
         div#snudirectlinks a {color:#1cad6e; text-decoration: none; }
+        div#snudirectlinks.snudirectlinksdisabled .dispidx { opacity: 0.3; }
         div#snudirectlinks div { max-width:500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         div.snutils a.patreon {color:#0cffdd;}
+        div.snufadein { animation: snuFadeIn 0.5s; }
+        @keyframes snuFadeIn { 0% { opacity: 0; } 30% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
 
     var htmlFilter = document.createElement('div');
+    var snudirectlinks = (snunumbernav) ? '' : 'snudirectlinksdisabled';
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;"><a class="patreon" href="https://www.linkedin.com/posts/arnoudkooi_sn-utils-slash-commands-table-form-navigation-activity-7099348581974712321-gh9u?utm_source=share&utm_medium=member_desktop" target="_blank">🌟 Table navigation</a>&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;">&nbsp;</span></div>
     <input id="snufilter" name="snufilter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="both" aria-haspopup="false" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
-    <div id="snudirectlinks"></div>
+    <div id="snudirectlinks" class="${snudirectlinks}"></div>
     <div id="snuswitches"></div>
     </div>`, { FORCE_BODY: true, ADD_ATTR: ['target'] });
     htmlFilter.innerHTML = cleanHTML
@@ -3010,7 +3116,7 @@ function snuSetShortCuts() {
             if (snusettings.slashoption == 'off') return;
             let eventPath = event.path || (event.composedPath && event.composedPath());
             if (eventPath[0]?.className?.includes('CodeMirror-code')) return; //allow commenting wit ctrl-/
-            var isActive = ((location.host.includes("service-now.com") || g_ck) && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey;
+            var isActive = ((location.host.includes("service-now.com") || g_ck) && snusettings.slashoption == 'on') || event.ctrlKey || event.metaKey || event.altKey; //add altkey for Washington compatability
             if (isActive) {
                 var path = event.path || (event.composedPath && event.composedPath());
                 if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !event.target.hasAttribute('contenteditable') && !event.target.tagName.includes("-") ||
@@ -3020,6 +3126,16 @@ function snuSetShortCuts() {
 
                     if (path.length > 8 && path[2]?.className.includes('CodeMirror')) return //not in codemirror
                     event.preventDefault();
+                    //in some browsers the event KEYBOARD_SHORTCUTS_BEHAVIOR#MODAL_OPENED event can't be captured. this is a temporary fallback
+                    var showingPopup = window.top?.querySelectorShadowDom?.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
+                    if (showingPopup) event.preventDefault(); //don show when already visible
+                    setTimeout(() => {
+                        var showingPopup = window.top?.querySelectorShadowDom?.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
+                        if (showingPopup) {
+                            snuSlashCommandHide(); //hide when shown by keyboard combo
+                        }
+                    },200)
+                    //end fallback
                     snuSlashCommandShow('', false);
                 }
             }
@@ -3158,6 +3274,15 @@ function snuOpenWorkflowLink(){
 }
 
 function snuBindPaste(showIcon) {
+
+// disable #474
+//    //this is test to be able to use default copy event to copy cell values, without the need use /copycells
+//     document.querySelector('body').addEventListener("copy", (event) => {
+//         if (typeof g_list_edit_grid != 'undefined') { //list or form
+//             if (!snuGetSelectionText())
+//                 snuCopySelectedCellValues();
+//         }
+//     });
 
     if (typeof g_form != 'undefined') {
 
@@ -3737,6 +3862,8 @@ function snuSlashCommandHide(navFocus = false, evt) {
     window.top.document.snuSelection = '';
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = 'none';
+        window.top.document.querySelector('div.snutils').classList.remove("snufadein");
+
         if (navFocus === true) {
             if (window.top.document.getElementById('filter') != null) {
                 try {
@@ -3768,6 +3895,7 @@ function snuSlashCommandShow(initialCommand, autoRun) {
     window.top.document.snuSelection = snuGetSelectionText();
     if (window.top.document.querySelector('div.snutils') != null) {
         window.top.document.querySelector('div.snutils').style.display = '';
+        window.top.document.querySelector('div.snutils').classList.add("snufadein");
         window.top.document.getElementById('snufilter').value = initialCommand || '/';
         window.top.document.getElementById('snufilter').focus();
         snuSlashCommandShowHints((initialCommand || "").substring(1), false, "", "", false);
@@ -3957,19 +4085,19 @@ function snuFillFields(query) {
     }
 };
 
-function snuCopySelectedCellValues(copySysIDs) {
+function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
     var hasCopied = false;
-    var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell');
+    var selCells = window.top.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
     if (selCells.length > 0) {
         doCopy(selCells);
         hasCopied = true;
     } else {
         var iframes = window.top.document.querySelectorAll("iframe");
-        if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
-            iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+        if (!iframes.length && window.top.document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+            iframes = window.top.document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
         Array.from(iframes).forEach(function (frm) {
-            selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell');
+            selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
             if (selCells.length > 0) {
                 doCopy(selCells, frm);
                 hasCopied = true;
@@ -3980,6 +4108,14 @@ function snuCopySelectedCellValues(copySysIDs) {
     function doCopy(selCells, frm) {
         var str = '';
         var wdw = (frm) ? frm.contentWindow : window;
+
+        if (shortcut == "copycolumn") {
+            let firstCell = selCells[0]; 
+            let columnIndex = Array.from(firstCell.parentElement.children).indexOf(firstCell);
+            let rows = firstCell.closest('table').querySelectorAll('tr');
+            selCells = Array.from(rows).map(row => row.cells[columnIndex]).filter(td => td !== undefined && td.classList.contains('vt') && td.innerText);
+        }
+
         selCells.forEach(function (cElem) {
             if (copySysIDs) {
                 if (cElem.querySelector('a')) {
@@ -3992,9 +4128,11 @@ function snuCopySelectedCellValues(copySysIDs) {
                 var oTitle = cElem.getAttribute("data-original-title");
                 if (oTitle !== null){
                     if (oTitle.length == 1000)
-                        str +=  '"' + cElem.innerText.replace(/"/g, '""') + ' [TRUNCATED]"\n';
-                    else
+                        str +=  cElem.innerText.replace(/"/g, '""') + ' [TRUNCATED]\n';
+                    else if (/\r|\n/.exec(oTitle)) //do not enclose in quotes if multiline #458
                         str += '"' + oTitle.replace(/"/g, '""') + '"\n';
+                    else 
+                        str += oTitle.replace(/"/g, '""') + '\n';
                 }
                 else
                     str += cElem.innerText.replace(' ➚','') + '\n';
@@ -4003,7 +4141,12 @@ function snuCopySelectedCellValues(copySysIDs) {
         });
         if (str.endsWith(',')) str = str.substring(0, str.length - 1);
 
-        wdw.copyToClipboard(str);
+        setTimeout(() => {
+            if (typeof snuLastCopied == 'undefined' || new Date().getTime() - snuLastCopied > 500) {
+                snuLastCopied = new Date().getTime();
+                wdw.copyToClipboard(str);
+            }
+        },1);
         return;
     }
 };
@@ -4232,6 +4375,16 @@ function snuAddBGScriptButton() {
 }
 
 function snuSetAllMandatoryFieldsToFalse() {
+
+    var iframes = window.top.document.querySelectorAll("iframe");
+    if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
+        iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+
+    iframes.forEach((iframe) => { 
+        if (typeof iframe.contentWindow.unhideFields != 'undefined')
+            iframe.contentWindow.snuSetAllMandatoryFieldsToFalse(); 
+    });
+
     if (typeof g_form != 'undefined' && typeof g_user != 'undefined') {
         if (g_user.hasRole('admin')) {
             var fields = g_form.getEditableFields();
@@ -4674,7 +4827,7 @@ function snuGetUsersForImpersonate(query) {
             var impDirectLinks = '';
 
             if (impersonating)
-                impDirectLinks += `Currently Impersonating<br />1 <a id="snulnk1" class="snuimp" href="#${impersonating}">Stop Impersonating</a> <span class="semihidden">${impersonating}</span><br />\n`;
+                impDirectLinks += `Currently Impersonating<br /><span class="dispidx">1</span> <a id="snulnk1" class="snuimp" href="#${impersonating}">Stop Impersonating</a> <span class="semihidden">${impersonating}</span><br />\n`;
 
             if (query)
                 impDirectLinks += 'Found users (remove filter for recent impersonations)<br />';
@@ -4696,7 +4849,7 @@ function snuGetUsersForImpersonate(query) {
                     dispIdx = '>';
                     idattr = '';
                 }
-                impDirectLinks += dispIdx + ` <a  ${idattr} class="snuimp" href="#${imp.user_name}">${imp.user_display_value || imp.name}</a> <span class="semihidden">${imp.user_name}</span><br />\n`;
+                impDirectLinks += `<span class="dispidx">${dispIdx}</span> <a  ${idattr} class="snuimp" href="#${imp.user_name}">${imp.user_display_value || imp.name}</a> <span class="semihidden">${imp.user_name}</span><br />\n`;
             }
             );
 
@@ -4788,7 +4941,7 @@ function snuGetLastScopes(query) {
                         dispIdx = '>';
                         idattr = '';
                     }
-                    scopeDirectLinks += dispIdx + ' <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
+                    scopeDirectLinks += '<span class="dispidx">' + dispIdx + '</span> <a ' + idattr + ' class="snuscopeswitch" href="#' + scp + '">' + returnScopes[scp].name + '</a> <span class="semihidden">' + returnScopes[scp].date + '</span><br />\n';
                 }
             })
             window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(scopeDirectLinks);
@@ -4829,6 +4982,7 @@ function snuSwitchTo(switchType, key, val) {
             if (data?.error)
                 snuSlashCommandInfoText('Error switching:' + data.error.detail, false);
             else {
+                localStorage.setItem("snuPickerUpdated", new Date().getTime()); //this will help sync picker across tabs
                 snuSlashCommandInfoText('Reloading page...', false);
                 setTimeout(() => {
                     window.top.location.reload();
@@ -5002,6 +5156,23 @@ function snuAddPersonaliseListHandler() {
 
 }
 
+
+function snuListFilterHelper() {
+
+    if (typeof GlideList2 == 'undefined') return;
+
+    let relatedListsButtons = document.querySelectorAll('[data-type="list_mechanic2_open"]:not(.snuified)');
+
+    if (!relatedListsButtons) return;
+    relatedListsButtons.forEach(rlb => {
+        let tableName = rlb?.dataset?.table;
+        if (!tableName) return;
+         g_list = GlideList2.get(rlb?.dataset?.list_id);
+    })
+
+}
+snuListFilterHelper()
+
 function snuPersonaliseList(btn, autoclose, addsysid) {
     if (btn) btn.click();
     else return true;
@@ -5152,7 +5323,7 @@ function snuDoSlashNavigatorSearch(search, arrDigits = []) {
     let words = [...new Set(search.toLowerCase().split(' '))].filter((n) => n.length > 1).reduce(
         (unique, item) => ( unique.filter(e => item.includes(item)).length > 5 ? unique : [...unique, item]),[],); //todo check undouble
 
-    let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">🔍 Navigator search</div>';
+    let directlinks = '<div style="font-weight:bold; margin-bottom:5px; padding-top:5px;">&#128269; Navigator search</div>Tip: Hit SHIFT to toggle keyboard navigation<br />';
     let idx = 1;
     let dispIdx = 0;
     let lastgroup = '';
@@ -5183,7 +5354,7 @@ function snuDoSlashNavigatorSearch(search, arrDigits = []) {
 
             if (displaygroup) displaygroup = `<div style="margin-top:7px;">${displaygroup}</div>`;
 
-            directlinks +=  `<div>${displaygroup}${dispIdx} <a ${idattr} data-idx="${idx}" target="${target}" title="${label}" href="${link}">${label}</a></div>`;
+            directlinks +=  `<div>${displaygroup}<span class="dispidx">${dispIdx}</span> <a ${idattr} data-idx="${idx}" target="${target}" title="${label}" href="${link}">${label}</a></div>`;
             lastgroup = res.displaygroup;
         }
         idx++;
@@ -5236,4 +5407,205 @@ function snuSlashLog(addValue = false) {
         }
     }
     return slashLog;
+}
+
+
+/**
+ * Generates an array of batch requests for a single endpoint.
+ * This is useful for endpoints where only one action can be performed at a time (e.g., delete, remove breakpoints).
+ * It replaces $<variable_id> with the corresponding property from objects in the parameters array.
+ * The 'body' property for is placed into the REST body for POST requests.
+ *
+ * @param {String} method - The HTTP method for all requests.
+ * @param {Object[]} headers - The headers for all requests. Session token goes on batch call.
+ * @param {string} headers[].name - The name of the header.
+ * @param {string} headers[].value - The value of the header.
+ * @param {string} urlTemplate - The URL template for all requests. $variables are replaced with the corresponding value in the parameters array.
+ * @param {Object[]} parameters - The parameters for all requests. Properties are replaced with the replacement keys $<key>.
+ * @param {Boolean} excludeResponseHeaders - Whether to exclude response headers, reducing the size of the response. Defaults to true.
+ * @returns {Object[]} An array of batch requests for the ServiceNow batch endpoint.
+ */
+function snuGenerateBatchRequests(method, headers, urlTemplate, parameters, excludeResponseHeaders = true) {
+
+    //Generate batch requests
+    var restRequests = parameters.map((substitutionObj) => {
+        var id = Math.random().toString(36).substring(7);
+
+        //Replace $variables in the URL template, excluding body
+        let result = urlTemplate;
+        for (let key in substitutionObj) {
+            if (key == 'body') continue;
+            result = result.replace(new RegExp('\\$' + key, 'g'), substitutionObj[key]);
+        }
+
+        //Create the batch request and add body if necessary
+        var restRequest = {
+            id: id,
+            method: method,
+            headers: headers,
+            url: result,
+            exclude_response_headers: excludeResponseHeaders,
+        };
+        if (method == 'POST' && substitutionObj.body) {
+            restRequest.body = substitutionObj.body;
+        }
+        return restRequest;
+    });
+    return restRequests;
+};
+
+/**
+ * Makes an call to the batch api endpoint, dramatically improving performance for multiple requests
+ * @param {String} token Glide session token
+ * @param {Array} requests Array of requests to be made
+ * @param {Function} callback Callback function
+ * @returns {Promise} Promise object representing the response
+ */
+function snuBatchRequest(token, requests, callback) {
+    return new Promise(async (resolve, reject) => {
+        const headers = {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-UserToken': token,
+        };
+
+        try {
+            const response = await fetch('/api/now/v1/batch', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    batch_request_id: 'snu' + Math.random().toString(36).substring(7),
+                    rest_requests: requests,
+                }),
+            });
+            const data = response.ok ? await response.json() : reject("Error in batch request");
+            if (callback) callback(data);
+            resolve(data);
+        } catch (error) {
+            if (callback) callback(error);
+            reject(error);
+        }
+    });
+}
+
+
+function snuHyperlinkifyWorkNotes() {
+    let activityLabel = document.querySelector('.activity-stream-label:not(.snuified)')
+    if (activityLabel) {
+        activityLabel.classList.add('snuified');
+        activityLabel.title = "[SN Utils] Mouseover adds hyperlinks in activity stream";
+        activityLabel.addEventListener("mouseover", snuHyperlinkifyWorkNotes);
+    }
+
+    let urlRegex = /(?<!href=")(https?:\/\/[^\s]+)/g;
+    document.querySelectorAll('div.sn-card-component .sn-widget-textblock-body:not(.snuified)').forEach(crd => {
+        let newContent =  crd.innerHTML.replace(urlRegex, function (url) {
+            return '<a href="' + url + '" target="_blank" title="[SN Utils] Converted to hyperlink">' + url + '</a>';
+        });
+        let purifyContent = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] }); 
+        if (newContent && (purifyContent.length == newContent.length)) //dont apply when empty after regex or purify changed it, can happen when work note uses [code] tag
+            crd.innerHTML = newContent;
+        crd.classList.add('snuified');
+    })
+}
+
+
+function snuTest(){
+
+    var batchHeaders = [
+        { name: 'Accept', value: 'application/json' },
+        { name: 'Content-Type', value: 'application/json' },
+    ];
+    var batchRequests = snuGenerateBatchRequests('POST', batchHeaders, '/api/now/js/debugger/breakpoint/$script_type/$script_id/$script_field/$line', values[0].result);
+    batchRequests = batchRequests.concat(snuGenerateBatchRequests('POST', batchHeaders, '/api/now/js/debugger/logpoint/$script_type/$script_id/$script_field/$line', values[1].result));
+    
+    //If no breakpoints were found, resolve the promise and return false
+    if (batchRequests.length == 0) return false;
+    
+    //Otherwise, execute the batch request
+    return snuBatchRequest(token, batchRequests);
+
+}
+
+//can be a pain to add condition when the searchbar is hidden, this tries to relief that by adding a stub condition on click of icon behind the fieldname
+function snuEasifyAdvancedFilter(){
+    if (!location.pathname.endsWith("_list.do")) return; //for now only in lists
+    if (typeof GlideList2 == 'undefined') return;
+    
+    let listName = document.querySelector('[tab_list_name_raw]')?.getAttribute('tab_list_name_raw');
+    if (!listName) return;
+    if (document.querySelectorAll('th[name="search"] div.disabled').length !== 1) return; //Only when 1 searchrow disabled
+    
+    document.querySelectorAll('th.list_hdr, th.table-column-header, th.list_hdrembedded').forEach(elm => {
+
+        let field = elm.getAttribute('name') || elm.getAttribute('data-column-name');
+        let lblA = elm.querySelector('a.list_hdrcell');
+        let displayField = document.querySelector('tr.list_header_search_row td[name="' + field + '"]')?.dataset?.glideReferenceName || '';
+        let searchField = field + ((displayField) ? "." + displayField : '');
+        let addA = document.createElement('a');
+        let title = '[SN Utils] Click to add condition for field: ' + searchField + ' and pin filter. ';
+        if (displayField) title += 'Hold SHIFT for reference field. (' + field + ')';
+        addA.innerText = "⨮";
+        addA.title = title;
+        addA.href = '#';
+        addA.addEventListener('click', ev => {
+            ev.preventDefault();
+            if (document.querySelector('.list_filter').style.visibility == 'hidden') GlideListWidget.get(listName).toggleFilter(); //show when hidden         
+            let searchFieldSelected = (ev.shiftKey) ? field : searchField;
+            
+            const intervalId = setInterval(function() {
+                const element = document.querySelector('tbody[id*=QUERYPART]');
+                if (element) {
+                    clearInterval(intervalId);
+                    document.querySelectorAll('tbody[id*=QUERYPART]').forEach(qp =>{
+                        addConditionSpec(listName,qp.id,searchFieldSelected,'','',''); 
+                    })
+                    if (!GlideListWidget.get(listName)?.pinned) GlideListWidget.get(listName).togglePin(); //pin if not pinned
+                }
+            }, 250);
+        });
+        lblA.parentNode.insertBefore(addA, lblA.nextSibling);
+
+    });
+    
+}
+
+
+async function snuCheckFamily(){
+	let family = '';
+	try{
+        let storedfamily = JSON.parse(localStorage.getItem('snufamily')) || {}; //once a day check version (use /cls to clear cache)
+        if (storedfamily?.checked == new Date().toISOString().substring(0,10)) 
+            return storedfamily?.family;
+
+		let fetchd = await snuFetchData(g_ck, '/api/now/table/sys_properties?sysparm_limit=1&sysparm_fields=value&sysparm_query=name=com.glide.embedded_help.version');
+		family = fetchd?.result[0]?.value;
+        storedfamily = { family: family, checked: new Date().toISOString().substring(0,10) };
+        localStorage.setItem('snufamily', JSON.stringify(storedfamily));
+	}
+	catch(e){
+		family = 'unknown';
+	}
+	return family;
+}
+
+function snuSlashCommandNumberNav(toggle){
+    let snunumbernav = localStorage.getItem('snunumbernav');
+    snunumbernav = snunumbernav ? JSON.parse(snunumbernav) : true;
+    
+    if (toggle) {
+        snunumbernav = !snunumbernav;
+        localStorage.setItem('snunumbernav', snunumbernav);
+    }
+    return snunumbernav;
+}
+
+function snuInstanceTagToggle(){
+    if (typeof snuInstanceTag == 'undefined') 
+        snuSlashCommandInfoText('Please enable InstanceTag in the settings first', false);
+    else {
+        snuInstanceTagConfig.tagEnabled = !snuInstanceTagConfig.tagEnabled;
+        document.documentElement.style.setProperty("--snu-instancetag-tag-display", snuInstanceTagConfig.tagEnabled ? "" : "none");
+        snuDispatchBackgroundEvent("updateinstancetagconfig", snuInstanceTagConfig);
+    }
 }

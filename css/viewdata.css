@@ -11,6 +11,17 @@ body {
     position: sticky; top: 0;
 }
 
+#title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#whotheheck {
+    font-size: 10pt;
+    font-weight: normal;
+}
+
 a.anchor {
     display: block;
     position: relative;

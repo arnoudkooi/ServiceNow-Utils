@@ -10,7 +10,8 @@
     "declarativeContent",
     "storage",
     "contextMenus",
-    "cookies"
+    "cookies",
+    "sidePanel"
   ],
   "icons": {
     "16": "images/icon16.png",
@@ -102,7 +103,8 @@
         "js/*"
       ],
       "matches": [
-        "https://*.service-now.com/*"
+        "https://*.service-now.com/*",
+        "https://*.servicenowservices.com/*"
       ]
     }
   ],

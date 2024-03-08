@@ -1,7 +1,7 @@
 #!/bin/bash
 rm -f publish/*.zip
 rm -f publish/*.xpi
-var=$(sed '6!d' manifest.json) #get version from main
+var=$(sed '6!d' manifest.json) #get version from main manifest.json (content of line 6)
 sed -i '' "6s/.*/$var/" publish/manifest-firefox.json #sync version to other
 sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
@@ -43,9 +43,8 @@ sed -i '' "6s/.*/$var/" publish/manifest-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-firefox-onprem.json
 sed -i '' "6s/.*/$var/" publish/manifest-edge.json
 
+
 #Remove the chrome extension and reunpack it
 rm -rf publish/chrome-snutils
 unzip publish/chrome-snutils.zip -d publish/chrome-snutils
 open "http://reload.extensions/"
-
-# node publish/publish.mjs

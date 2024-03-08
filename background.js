@@ -88,6 +88,18 @@ function initializeContextMenus(){
         }
     });
 }
+// todo, will be used for sidepanel in upcoming release
+chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
+    if (chrome?.sidePanel){
+        await chrome.sidePanel.setOptions({tabId, path: 'sidepanel.html',enabled: true });
+    }
+    else if (browser?.sidebarAction){ //Firefox uses sidebarAction API
+        await browser.sidebarAction.setPanel(tabId, {panel: "sidepanel.html"});
+    }
+});
+
+
+
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
@@ -98,7 +110,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     } 
 
     if (message.event == "checkisservicenowinstance") {
-
         if (!cookieStoreId && typeof chrome.contextualIdentities != 'undefined' ){
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                 cookieStoreId = tabs[0].cookieStoreId || '';
@@ -123,6 +134,44 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
     else if (message.event == "scriptsync") {
         createScriptSyncTab(cookieStoreId);
+    }
+    else if (message.event == "showsidepanel") {
+        instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
+        setToChromeSyncStorage("instancetag", message.command );
+        if (chrome?.sidePanel)
+            chrome.sidePanel.open({ windowId: sender.tab.windowId, tabId: sender.tab.id });
+        else if (browser?.sidebarAction) {
+            //Firefox uses sidebarAction API this is must be open via conetxtmenu
+            // browser.sidebarAction.open(); doesnt work here.
+        }
+            
+    }
+    else if (message.event == "updateinstancetagconfig") {
+        instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
+        setToChromeSyncStorage("instancetag", message.command );
+    }
+    else if (message.event == "getinstancetagconfig") {
+        instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
+        //using promise to make sure we get the instance tag config before we send the response
+        getFromSyncStorage("instancetag").then( instaceTagConfig => {
+            if (!instaceTagConfig) instaceTagConfig = getInitialInstaceTagConfig(instance);
+            var details = {
+                "action": "updateInstaceTagConfig",
+                "instaceTagConfig": instaceTagConfig,
+            };
+            chrome.tabs.sendMessage(sender.tab.id, {
+                "method": "snuUpdateSettingsEvent",
+                "detail": details,
+            }).then(response => {
+                console.log("Response from content script:", response);
+                sendResponse(response);
+            }).catch(error => {
+                sendResponse({error: error});
+            });;
+
+        }).catch(error => {
+            sendResponse({error: error});
+        });
     }
     else if (message.event == "pop") {
         pop();
@@ -315,6 +364,11 @@ var menuItems = [{
     "title": "Worknote Snippets"
 },
 {
+    "id": "showsidepanel",
+    "title": "Configure InstanceTag in Sidepanel",
+    "contexts": ["all"]
+},
+{
     "id": "opentabscriptsync",
     "title": "Open sn-scriptsync Helper Tab",
     "contexts": ["all"]
@@ -423,6 +477,12 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
         openVersions(clickData, tab);
     else if (clickData.menuItemId == "stats")
         openUrl(clickData, tab, '/stats.do');
+    else if (clickData.menuItemId == "showsidepanel"){
+        if (chrome?.sidePanel)
+            chrome.sidePanel.open({ windowId: tab.windowId, tabId: tab.id });
+        else if (browser?.sidebarAction) 
+            browser.sidebarAction.toggle();
+    }
     else if (clickData.menuItemId == "opentabscriptsync")
         createScriptSyncTab();
     else if (clickData.menuItemId == "copyselectedcellvalues")
@@ -441,6 +501,64 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
     }
 
 });
+
+
+
+function getInitialInstaceTagConfig(instance) {
+    //most efficient to do here I guess
+    let snuInstanceTagConfig = {
+        tagEnabled: true,
+        tagLeft: "1000px",
+        tagBottom: "0px",
+        tagText: instance,
+        tagFontSize: "11pt",
+        tagTagColor: "#4CAF50",
+        tagFontColor: "#FFFFFF",
+        tagOpacity: "0.8",
+        tagCommand: "/tn",
+        tagCommandShift: "/vd",
+        tagTextDoubleclick: "/pop"
+      };
+
+      if (/^dev\d{5,6}$/.test(instance)) { //matching dev12345 so a PDI
+        snuInstanceTagConfig.tagText = "PDI " + instance ;
+        snuInstanceTagConfig.tagTagColor = pickRandom(["#FFC107", "#9C27B0", "#03A9F4", "#E91E63", "#00BCD4"]);
+      }
+      else if (instance == "signon") { 
+        snuInstanceTagConfig.tagTagColor = "#DEDEDE";
+        snuInstanceTagConfig.tagOpacity = "0.5";
+      }
+      else if (instance.includes("dev")) {
+        snuInstanceTagConfig.tagTagColor = pickRandom(["#FBC02D", "#FFEB3B", "#F57F17", "#FF9800", "#FFC107"]);
+        snuInstanceTagConfig.tagFontColor = "#000000";
+      }
+      else if (instance.includes("test")) {
+        snuInstanceTagConfig.tagText = "Test";
+        snuInstanceTagConfig.tagTagColor = pickRandom(["#388E3C", "#4CAF50", "#1B5E20", "#689F38", "#8BC34A"]);
+        snuInstanceTagConfig.tagFontColor = "#000000";
+      }
+      else if (instance.includes("sandbox")) {
+        snuInstanceTagConfig.tagTagColor = pickRandom(["#607D8B", "#78909C", "#546E7A", "#455A64", "#CFD8DC"]);
+        snuInstanceTagConfig.tagFontColor = "#000000";
+      }
+      else if (instance.includes("demo")) {
+        snuInstanceTagConfig.tagTagColor = pickRandom(["#7B1FA2", "#9C27B0", "#4A148C", "#6A1B9A", "#8E24AA"]);
+      }
+      else { //prod or other
+        snuInstanceTagConfig.tagTagColor = pickRandom(["#D32F2F", "#F44336", "#B71C1C", "#0D47A1", "#1976D2"]);
+      }
+    
+      function pickRandom(arr){
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      if (instance.includes(".")) snuInstanceTagConfig.tagText = instance.split(".")[0];
+
+     setToChromeSyncStorage("instancetag", snuInstanceTagConfig );
+
+    return snuInstanceTagConfig;
+
+}
 
 
 
@@ -929,10 +1047,30 @@ function setToChromeSyncStorage(theName, theValue) {
 }
 
 //get an instance sync parameter
-function getFromSyncStorage(theName, callback) {
-    chrome.storage.sync.get(instance + "-" + theName, function (result) {
-        callback(result[instance + "-" + theName]);
-    });
+async function getFromSyncStorage(theName, callback) {
+    // Define the instance variable if it's not already defined
+    // Assuming 'instance' is a global variable or has been defined elsewhere
+    const instanceName = instance + "-" + theName;
+    
+    // If a callback is provided, use the traditional callback approach
+    if (callback) {
+        chrome.storage.sync.get(instanceName, function (result) {
+            callback(result[instanceName]);
+        });
+    } else {
+        // If no callback is provided, return a promise
+        return new Promise((resolve, reject) => {
+            chrome.storage.sync.get(instanceName, function (result) {
+                if (chrome.runtime.lastError) {
+                    // Reject the promise if there's an error
+                    reject(chrome.runtime.lastError);
+                } else {
+                    // Resolve the promise with the result
+                    resolve(result[instanceName]);
+                }
+            });
+        });
+    }
 }
 
 //set an instance independent sync parameter

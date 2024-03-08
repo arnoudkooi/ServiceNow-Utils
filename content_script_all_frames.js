@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (isServiceNow) {
             addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
             addScript('inject.js', true);
-            if (document.getElementById("filter") != null || location.pathname.startsWith("/now/nav/ui/")) {
+            if (document.getElementById("filter") != null || location.pathname.startsWith("/now/")) {
                 addScript('inject_parent.js');
             }
         
@@ -45,6 +45,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                     addScript('js/monaco/libsource.js', false);
                     addScript('js/monaco/bgscript.js', false);
                 }, 600)
+            }
+            else if (location.pathname == "/sys.scripts.modern.do") {
+                setTimeout(function () {
+                    addScript('js/bgscriptmodern.js', false);
+                }, 400)            
             }
             else if (location.pathname.startsWith("/merge_form_")) {
                 addScript('js/monaco/compare.js', false);
