@@ -152,8 +152,6 @@ $(document).ready(function () {
             let wsObj = JSON.parse(evt.data);
             let instanceurl = wsObj?.instance?.url;
 
-            console.log(wsObj);
-
             if (instanceurl && scriptsyncinstances?.allowed?.includes(instanceurl)) {
                 // cleared!
             }
@@ -179,11 +177,11 @@ $(document).ready(function () {
                 return false;
             }
 
-            if (wsObj.hasOwnProperty('mirrorbgscript')) {
-                mirrorBgScript(wsObj);
-            }
             if (wsObj.hasOwnProperty('liveupdate')) {
                 updateRealtimeBrowser(wsObj);
+            }
+            else if (wsObj.hasOwnProperty('mirrorbgscript')) {
+                mirrorBgScript(wsObj);
             }
             else if (wsObj.hasOwnProperty('refreshedtoken')) {
                 refreshedToken(wsObj);
