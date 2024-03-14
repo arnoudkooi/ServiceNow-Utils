@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.4.0.9 (2024-03-14)
+Fixes / changes:
+  - Only toggle number navigation if numbers are visible (Issue #478)
+  - Adding some code to explore if OnPrem and normal version can be merged
+
 ## 7.4.0.7 (2024-03-09)
 Fixes / changes:
   - Updates in scriptsyn.js to support running background scripts inside VS Code

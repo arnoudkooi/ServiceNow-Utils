@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     clearInvalidatedLocalStorageCache();
 
+    //document.querySelector('#reqPermission').addEventListener("click", requestPermissionsForCurrentSite);
 });
 
 //clear all invalidated cached items like tablenames and nodes
@@ -1738,3 +1739,29 @@ function escape(htmlStr) {
           .replace(/'/g, "&#39;");        
  
  }
+
+
+function requestPermissionsForCurrentSite() {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        var currentTab = tabs[0];
+        if (currentTab && currentTab.url) {
+            var url = new URL(currentTab.url);
+            var host = url.hostname;
+
+            // Build the permissions object for host permissions
+            var permissions = {
+                origins: [`*://${host}/*`]
+            };
+
+            // Request permissions
+            chrome.permissions.request(permissions, function(granted) {
+                if (granted) {
+                    console.log(`Permissions granted for ${host}`);
+                    // Extension can now interact with the granted site
+                } else {
+                    console.log('Permissions not granted.');
+                }
+            });
+        }
+    });
+}

@@ -29,10 +29,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (isServiceNow) {
             addScript('/js/purify.min.js', false); //needed for safe html insertion required by FF
             addScript('inject.js', true);
-            if (document.getElementById("filter") != null || location.pathname.startsWith("/now/")) {
+            if (window.self === window.top) {
                 addScript('inject_parent.js');
             }
-        
             if (location.pathname.startsWith("/now/") || location.pathname.startsWith("/x/"))
                 addScript('inject_next.js', false);
             if (location.pathname.startsWith("/$flow-designer.do"))

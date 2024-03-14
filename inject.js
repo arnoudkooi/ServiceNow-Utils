@@ -613,7 +613,7 @@ function snuSlashCommandAddListener() {
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
     window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
-        if (e.key == 'Shift') {
+        if (e.key == 'Shift' && window.top.document.querySelectorAll('div.snutils span.dispidx').length) { //only toggle when there are direct links
             snunumbernav = snuSlashCommandNumberNav(true);
             let dlinks = window.top.document.getElementById('snudirectlinks');
             if (dlinks) {
