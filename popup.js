@@ -233,14 +233,25 @@ async function setActiveNode(node) {
                     // matches BIGipServerpool_<alphanumeric instance name>
                     return cookie.name.match(/^(BIGipServer[\w\d]+)$/);
                 });
-                if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){ 
+                if (!BIGipServerpoolCookie) { //onprem or no cookie found
+                    chrome.cookies.set({
+                        "name": "glide_user_route",
+                        "url": new URL(url).origin,
+                        "secure": true,
+                        "httpOnly": true,
+                        "value": 'glide.' + node.nodeId
+                    }, s => {
+                        getActiveNode(jsnNodes);
+                    });
+                }
+                else if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){ 
                     //this is a test to allow node switching on ADCv2 migrated instances
 
                     let ip = ipArr.join('.');
                     let ipPort = ip + ':' + port;
                     let md5IpPort = md5(ipPort);
 
-                    console.log(md5IpPort, node);
+                    //console.log(md5IpPort, node);
 
                     chrome.cookies.set({
                         "name": BIGipServerpoolCookie.name,
@@ -263,7 +274,7 @@ async function setActiveNode(node) {
                     // document.querySelector('#nodemessage').innerText = `This instance uses ADCv2 loadbalancing, node switching may not work or switch to a random node. Try a few times... `;
                     // document.querySelector('#nodemessage').classList.remove('hidden');
                 }
-                else {
+                else { //classic node switching
 
                     chrome.cookies.set({
                         "name": BIGipServerpoolCookie.name,

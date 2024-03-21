@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 7.4.1.0 (2024-03-21)
+Fixes / changes:
+  - Update to node switching to support OnPrem (without BIGipServerpool cookie)
+
+
 ## 7.4.0.9 (2024-03-14)
 Fixes / changes:
   - Only toggle number navigation if numbers are visible (Issue #478)
