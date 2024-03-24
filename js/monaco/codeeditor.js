@@ -278,12 +278,12 @@ async function updateRecord() {
             versionid = editor.getModel().getAlternativeVersionId();
         } else {
             if (resp.hasOwnProperty('error')) {
-                document.querySelector('#response').innerHTML = `Error: ${new Date().toLocaleTimeString()}<br />${JSON.stringify(resp.error)}`;
+                document.querySelector('#response').innerHTML = `<span style="font-size:8pt; color:red" >Error: ${new Date().toLocaleTimeString()} | ${JSON.stringify(resp.error)}</span>`;
             }
         }
     } catch (error) {
         // Handle error
-        document.querySelector('#response').innerHTML = `Error: ${new Date().toLocaleTimeString()}<br />${error.message}`;
+        document.querySelector('#response').innerHTML = `<span style="font-size:8pt; color:red" >Error: ${new Date().toLocaleTimeString()} | ${error.message}</span>`;
     }
 }
 

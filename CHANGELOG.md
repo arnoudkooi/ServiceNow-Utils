@@ -1,9 +1,17 @@
 # CHANGELOG.md
 
+## 7.4.1.5 (2024-03-25)
+Fixes / changes:
+  - Update to slashcommand search gsft_main frame when native next experience active.
+  - Adding "Open in VS Code" link to modern script editor. Also passing scope value in both classic and modern BG script.
+  - Increase height of popup a bit, that hopefully fixes flickering in Firefox (Issue #483)
+  - Fix for cookieStoreId for Firefox Multi Account Container comatibility (Issue #473)
+  - Change how error is presented in codeeditor.html Monaco editor
+
+
 ## 7.4.1.0 (2024-03-21)
 Fixes / changes:
   - Update to node switching to support OnPrem (without BIGipServerpool cookie)
-
 
 ## 7.4.0.9 (2024-03-14)
 Fixes / changes:

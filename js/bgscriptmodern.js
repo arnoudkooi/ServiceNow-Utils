@@ -3,7 +3,7 @@ let snuEditor;
 let snuDiv = document.createElement('div');
 let snuDivInfo = document.createElement('div');
 top.document.title = "⚪ BG script not started"
-snuDivInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils';
+snuDivInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils | ';
 snuDivInfo.style.fontSize = '9pt';
 snuDivInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
 let snuScript = document.querySelector('div.script-container');
@@ -26,7 +26,21 @@ if (snusettings.applybgseditor && snuScript) {
 		snuEnhanceMonaco();
 	
 		snuDiv.setAttribute("id", "container");
-		snuScript.parentNode.insertBefore(snuDivInfo, snuScript);;
+		snuScript.parentNode.insertBefore(snuDivInfo, snuScript);
+
+		if (snusettings.vsscriptsync){
+			let a = document.createElement('a');
+			a.innerText = 'Open in VS Code';
+			a.title = '[SN Utils] Open in VS Code via sn-scriptsync';
+			a.addEventListener('click', (ev) =>{
+				ev.preventDefault();
+				snuPostToScriptSync();
+			});
+			snuDivInfo.appendChild(a);
+		}
+
+
+
 	}
 
 }

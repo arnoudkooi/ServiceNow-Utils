@@ -1,7 +1,7 @@
 var onprem = false;
 //set onprem true if publishing on prem version, KEEP the onprem var on line 1!!
 var tabid;
-var cookieStoreId;
+var cookieStoreId = '';
 var g_ck;
 var sysId;
 var url;
@@ -103,7 +103,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
-    var cookieStoreId = '';
     if (sender){ //In Firefox the sender object can be empty #420 this construct is around that
        if (sender.tab.hasOwnProperty('cookieStoreId')) 
             cookieStoreId = sender.tab.cookieStoreId 

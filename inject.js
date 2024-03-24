@@ -1119,11 +1119,13 @@ function snuSlashCommandAddListener() {
             else if (!snuslashcommands.hasOwnProperty(shortcut)) {
 
                 var inIFrame = (shortcut == snufilter.toLowerCase().slice(0, idx) && sameWindow)
+                var doc = (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main"));
+                if (!doc) inIFrame = false;
                 if (e.target.className == "snutils") inIFrame = false;
 
                 if (shortcut.includes('.do')) {
                     if (inIFrame) {
-                        (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main")).src = shortcut;
+                        doc.src = shortcut;
                     }
                     else {
                         if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
@@ -3968,14 +3970,18 @@ function snuPostToScriptSync(field, fieldType) {
     }
     else { //bgscript
 
+        let scriptVal = document.querySelector('#runscript')?.value ||  snuEditor?.getValue();
+        let scope = document.querySelector('select[name=sys_scope]')?.value || 'global';
+
 
         let date = new Date();
         let my_id = (date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2(date.getDate()) + '-' + pad2(date.getHours()) + pad2(date.getMinutes()) + pad2(date.getSeconds()));
         function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
         data.field = 'bg';
         data.table = 'background'
+        data.scope = scope;
         data.sys_id = my_id;
-        data.content = '// sn-scriptsync - Received from background script tab via SN Utils. (delete file after usage.)\n\n' + document.getElementById('runscript').value;
+        data.content = '// sn-scriptsync - Received from background script tab via SN Utils.\n\n' + scriptVal;
         data.fieldType = 'script';
         data.name = 'script'; //(new Date()).toISOString().slice(0,10).replace(/-/g,"");
     }
@@ -4079,7 +4085,7 @@ function snuAddBGScriptButton() {
     g_ck = document.getElementsByName('sysparm_ck')[0]?.value;
     window.top.window.g_ck = g_ck;
     if (g_ck) {
-        document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();'>[Mirror in sn-scriptsync]</a>");
+        document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();' title='[SN Utils] Open in VS Code via sn-scriptsync'>[Open in VS Code]</a>");
     }
 }
 
