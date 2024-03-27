@@ -883,7 +883,7 @@ function snuSlashCommandAddListener() {
                 var data = {};
                 data.instance = window.location.host.split('.')[0];
                 data.url = window.location.origin;
-                data.g_ck = g_ck;
+                data.g_ck = g_ck || window.top.g_ck;
                 data.query = query;
                 var event = new CustomEvent(
                     "snutils-event",
@@ -907,7 +907,7 @@ function snuSlashCommandAddListener() {
                     data.sysId = vars.sysId;
                     data.instance = window.location.host.split('.')[0];
                     data.url = window.location.origin;
-                    data.g_ck = g_ck;
+                    data.g_ck = g_ck || window.top.g_ck;
                     let event = new CustomEvent(
                         "snutils-event",
                         {
@@ -1480,7 +1480,7 @@ function snuResolveVariables(variableString){
     let tableName = '';
     let sysId = '';
     let encodedQuery = '';
-    let doc = gsft ? gsft.contentWindow : window;
+    let doc = gsft ? gsft.contentWindow : window.top;
     if (typeof doc.g_form !== 'undefined') { //get sysid and tablename from classic form
         tableName = doc.g_form.getTableName();
         sysId = doc.g_form.getUniqueValue();
@@ -1555,7 +1555,7 @@ function snuResolveVariables(variableString){
             variableString = variableString.replace(/\$sysid/g, sysId);
         }
     }
-    rtrn = {
+    let rtrn = {
         "variableString" : variableString,
         "tableName" : tableName,
         "sysId" : sysId,
@@ -1661,7 +1661,10 @@ function snuSettingsAdded() {
         snuEnterToFilterSlushBucket();
         snuHyperlinkifyWorkNotes();
         snuEasifyAdvancedFilter();
+        snuAddGckToken("stats.do");
+
     }
+
 
     if (snusettings.hasOwnProperty("slashcommands")) {
         try {
@@ -2064,6 +2067,23 @@ function snuS2Ify() {
 }
 
 
+async function snuAddGckToken(pathName = ""){
+    if (!(location.pathname.includes(pathName) && !g_ck)) return; 
+
+    const response = await fetch(`/sn_devstudio_/v1/get_publish_info.do`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'BasicCustom'
+        }
+    });
+    if (response.ok) {
+        const resp = await response.json();
+        g_ck = resp?.ck; //set the global g_ck
+    }
+}
+
 
 function snuAddFormDesignScopeChange() {
     if (location.pathname == "/$ng_fd.do") {
@@ -2279,7 +2299,7 @@ function snuCaptureFormClick() {
                 }
             }
 
-            if (event.target.className.includes('scriptSync icon-save')) {
+            if (event.target.className.length && event.target.className.includes('scriptSync icon-save')) { //for svg className is an object
                 if (g_form.isNewRecord()) {
                     snuSlashCommandInfoText('This is a new record, try again after saving',false);
                     return true;
@@ -2287,7 +2307,7 @@ function snuCaptureFormClick() {
                 snuPostToScriptSync(event.target.dataset.field, event.target.dataset.fieldtype);
                 event.target.style.opacity = 0.3;
             }
-            if (event.target.className.includes('scriptSync icon-code')) {
+            else if (event.target.className.length && event.target.className.includes('scriptSync icon-code')) {
                 if (g_form.isNewRecord()) {
                     snuSlashCommandInfoText('This is a new record, try again after saving',false);
                     return true;
@@ -3970,7 +3990,7 @@ function snuPostToScriptSync(field, fieldType) {
     }
     else { //bgscript
 
-        let scriptVal = document.querySelector('#runscript')?.value ||  snuEditor?.getValue();
+        let scriptVal = (typeof snuEditor !== 'undefined') ? snuEditor.getValue() : document.querySelector('#runscript')?.value; //modern or classic...
         let scope = document.querySelector('select[name=sys_scope]')?.value || 'global';
 
 
@@ -3996,7 +4016,7 @@ function snuPostLinkRequestToScriptSync(field) {
     var instance = {};
     instance.name = window.location.host.split('.')[0];
     instance.url = window.location.origin;
-    instance.g_ck = g_ck;
+    instance.g_ck = g_ck || window.top.g_ck;
 
     var ngScope = angular.element(document.getElementById('explorer-editor-wrapper')).scope()
     var data = {};
@@ -4874,8 +4894,7 @@ function snuAddPersonaliseListHandler() {
 
 function snuListFilterHelper() {
 
-    if (typeof GlideList2 == 'undefined') return;
-
+    if (typeof GlideList2 == 'undefined' || typeof g_form !== 'undefined') return true; //prevent global g_list on forms
     let relatedListsButtons = document.querySelectorAll('[data-type="list_mechanic2_open"]:not(.snuified)');
 
     if (!relatedListsButtons) return;

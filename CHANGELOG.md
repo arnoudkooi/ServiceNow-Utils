@@ -1,4 +1,12 @@
 # CHANGELOG.md
+## 7.4.2.0 (2024-03-27)
+Fixes / changes:
+  - Minor updates for /vd not always working in Firefox (Issue #484)
+  - Prevent global g_list object on forms (may interfeer with OOB scripts)
+  - Added snuAddGckToken function to inject.js run when on stats.do page. This adds the g_ck token so that Node switching and othe popup functions works when on that page.
+  - Fix for scriptsync button not working on classic BG script page (Issue #486)
+  - Note: 7.4.1.7 and 7.4.1.9 only published for troubleshooting purposes
+
 
 ## 7.4.1.5 (2024-03-25)
 Fixes / changes:
