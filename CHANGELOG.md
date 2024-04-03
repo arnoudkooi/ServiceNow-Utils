@@ -1,4 +1,13 @@
 # CHANGELOG.md
+
+## 7.4.3.0 (2024-04-03)
+Features:
+  - Add a setting "Prioritize CTRL-/ and CMD-/ above OOB shortcut." that allows override of the slashcommand shortcut, so that slash commands popup shows when CTRL-/ or CMD-/ is pressed, instead of the platform shortcuts overview. A second press of the shortcut will show the platform shortcuts overview. 
+Fixes / changes:
+  - Change so version is shown in the popup info tab, even when not on a ServiceNow instance.
+  - Show warning in info tab when SN Utils does not run on current page.
+  - Disable tabs in popup when SN Utils does not run on current page.
+
 ## 7.4.2.0 (2024-03-27)
 Fixes / changes:
   - Minor updates for /vd not always working in Firefox (Issue #484)

@@ -1599,6 +1599,7 @@ function snuSettingsAdded() {
     snusettings.codeeditor ??= true;
     snusettings.s2ify ??= true;
     snusettings.highlightdefaultupdateset ??= true;
+    snusettings.slashpopuppriority ??= false;
     snusettings.slashnavigatorsearch ??= true;
     snusettings.slashhistory ??= 50;
     snusettings.addtechnicalnames ??= false;
@@ -3127,6 +3128,14 @@ function snuSetShortCuts() {
 
     document.addEventListener("keydown", function (event) {
         if (event.key == '/') {
+            if (snusettings.slashpopuppriority && (event?.target?.id !== 'snufilter' || 
+                (event?.target?.id == 'snufilter' && event?.target?.value.length > 1))) {
+                    if (!window.top?.querySelectorShadowDom?.querySelectorDeep('now-modal.keyboard-shortcuts-modal')){ //allow hidding when visible
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+            };
+
             if (snusettings.slashoption == 'off') return;
             let eventPath = event.path || (event.composedPath && event.composedPath());
             if (eventPath[0]?.className?.includes('CodeMirror-code')) return; //allow commenting wit ctrl-/
@@ -5309,7 +5318,7 @@ async function snuCheckFamily(){
 	let family = '';
 	try{
         let storedfamily = JSON.parse(localStorage.getItem('snufamily')) || {}; //once a day check version (use /cls to clear cache)
-        if (storedfamily?.checked == new Date().toISOString().substring(0,10)) 
+        if (storedfamily?.checked == new Date().toISOString().substring(0,10) || storedfamily?.override) 
             return storedfamily?.family;
 
 		let fetchd = await snuFetchData(g_ck, '/api/now/table/sys_properties?sysparm_limit=1&sysparm_fields=value&sysparm_query=name=com.glide.embedded_help.version');

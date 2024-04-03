@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
         cookieStoreId = tabs[0].cookieStoreId || '';
         urlFull = tabs[0].url;
         getBrowserVariables(tabid,cookieStoreId);
+        document.querySelector("#snuVersion").innerText = chrome.runtime.getManifest().version;
+        document.querySelector('#leavereview').style.display = 'none';
 
     });
 
@@ -346,8 +348,14 @@ function getParameterByName(name, url) {
 //Also attach event handlers.
 function setBrowserVariables(obj) {
 
-    $("#snuVersion").text(chrome.runtime.getManifest().version);
+    document.querySelector('#notactive').style.display = 'none';
+    document.querySelector('#leavereview').style.display = '';
 
+    let elms = document.querySelectorAll('[data-bs-toggle="disabledtab"]');
+    elms.forEach(function(el) {
+        el.setAttribute('data-bs-toggle', 'tab');
+    });
+    
     g_ck = obj.myVars.g_ck || '';
     url = obj.url;
     instance = (new URL(url)).host.replace(".service-now.com", "");
@@ -442,6 +450,7 @@ function setBrowserVariables(obj) {
     $.fn.dataTable.moment(datetimeformat);
 
     $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        
         var target = $(e.target).data("bsTarget"); // activated tab
 
         $('#tbxactivetab').val(target);

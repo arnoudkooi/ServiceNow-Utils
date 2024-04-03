@@ -30,61 +30,61 @@
             <input id='tbxactivetab' name='tbxactivetab' value="tababout" class="sync" type="hidden" />
             <ul class="nav nav-tabs compact" id="myTab">
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-bs-target="#tabupdatesets" data-bs-toggle="tab">Update Set
+                    <a class="nav-link" data-bs-target="#tabupdatesets" data-bs-toggle="disabledtab">Update Set
                         <span id="waitingupdatesets" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-bs-target="#tabupdates" data-bs-toggle="tab">Updates
+                    <a class="nav-link" data-bs-target="#tabupdates" data-bs-toggle="disabledtab">Updates
                         <span id="waitingupdates" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-bs-target="#tabnodes" data-bs-toggle="tab">Nodes
+                    <a class="nav-link" data-bs-target="#tabnodes" data-bs-toggle="disabledtab">Nodes
                         <span id="waitingnodes" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabtables" data-bs-toggle="tab">Tables
+                    <a class="nav-link" data-bs-target="#tabtables" data-bs-toggle="disabledtab">Tables
                         <span id="waitingtables" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabdataexplore" data-bs-toggle="tab">View Data
+                    <a class="nav-link" data-bs-target="#tabdataexplore" data-bs-toggle="disabledtab">View Data
                         <span id="waitingdataexplore" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabuser" data-bs-toggle="tab">User
+                    <a class="nav-link" data-bs-target="#tabuser" data-bs-toggle="disabledtab">User
                         <span id="waitinguser" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabgr" data-bs-toggle="tab">GlideRecord</a>
+                    <a class="nav-link" data-bs-target="#tabgr" data-bs-toggle="disabledtab">GlideRecord</a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabslashcommands" data-bs-toggle="tab" id='navslashcommands'>Slashcommands</a>
+                    <a class="nav-link" data-bs-target="#tabslashcommands" data-bs-toggle="disabledtab" id='navslashcommands'>Slashcommands</a>
                 </li>               
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabsettings" data-bs-toggle="tab">Settings</a>
+                    <a class="nav-link" data-bs-target="#tabsettings" data-bs-toggle="disabledtab">Settings</a>
                 </li>
                 <!-- <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabwhitelist" data-bs-toggle="tab">Whitelist</a>
+                    <a class="nav-link" data-bs-target="#tabwhitelist" data-bs-toggle="disabledtab">Whitelist</a>
                 </li> -->
                 <li class='nav-item'>
-                    <a class="nav-link active" data-bs-target="#tababout" data-bs-toggle="tab">About</a>
+                    <a class="nav-link active" data-bs-target="#tababout" data-bs-toggle="disabledtab">About</a>
                 </li>
 
             </ul>
@@ -383,6 +383,13 @@
                                     <label class="form-check-label" for="slashoption">
                                         Slashcommands:
                                     </label>
+                                    <div class="form-check" title="">
+                                        <input class="form-check-input snu-setting" type="checkbox" id="slashpopuppriority" 
+                                            name="slashpopuppriority" >
+                                        <label class="form-check-label" for="slashpopuppriority" title="Prioritize the slashcommand popup above shortcuts, hit shortcut again to show shortcuts">
+                                            Prioritize CTRL-/ and CMD-/ above OOB shortcut.
+                                        </label>
+                                    </div> 
                                     <select class="snu-setting form-select form-select-sm" name="slashoption"
                                         id="slashoption">
                                         <option value="on">On - Activate on / or CTRL-/</option>
@@ -558,7 +565,9 @@
 
                 <div class="tab-pane active" id="tababout">
                     <h4>SN Utils <span id='snuVersion'></span></h4>
-                    <div class="wasabi">
+                    <div id="notactive" class="alert alert-danger" role="alert">SN Utils does not run on the current page!</div>
+
+                    <div class="wasabi" id="leavereview">
                         Do you ❤️ SN Utils? A review is appreciated! 
                         <br />
                         <a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/sn-utils-tools-for-servic/jgaodbdddndbaijmcljdbglhpdhnjobg/reviews" target="_blank">Chrome</a> / 
