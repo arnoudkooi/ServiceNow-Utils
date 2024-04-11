@@ -110,7 +110,7 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/vancouver/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/washingtondc/All/$0",
         "hint": "Search developer portal <search>"
     },
     "diff1": {
@@ -126,7 +126,7 @@ var snuslashcommands = {
         "hint": "Compare current record XML with XML of <instance>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=vancouver",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=washingtondc",
         "hint": "Search Docs <search>"
     },
     "elev": {
@@ -1119,7 +1119,7 @@ function snuSlashCommandAddListener() {
             else if (!snuslashcommands.hasOwnProperty(shortcut)) {
 
                 var inIFrame = (shortcut == snufilter.toLowerCase().slice(0, idx) && sameWindow)
-                var doc = (document.querySelector("#gsft_main") || document.querySelector("[component-id]").shadowRoot.querySelector("#gsft_main"));
+                var doc = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot?.querySelector("#gsft_main"));
                 if (!doc) inIFrame = false;
                 if (e.target.className == "snutils") inIFrame = false;
 
@@ -3131,8 +3131,10 @@ function snuSetShortCuts() {
             if (snusettings.slashpopuppriority && (event?.target?.id !== 'snufilter' || 
                 (event?.target?.id == 'snufilter' && event?.target?.value.length > 1))) {
                     if (!window.top?.querySelectorShadowDom?.querySelectorDeep('now-modal.keyboard-shortcuts-modal')){ //allow hidding when visible
-                        event.preventDefault();
-                        event.stopPropagation();
+                        if (event.metaKey || event.ctrlKey) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
                     }
             };
 

@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 7.4.3.3 (2024-04-11)
+Fixes / changes:
+  - Update docs and dev commands to washingtondc
+  - Fix cancelling / (forward slash) key
+  - Remove BETA/NEW! from InstanceTag setting
+
+
 ## 7.4.3.0 (2024-04-03)
 Features:
   - Add a setting "Prioritize CTRL-/ and CMD-/ above OOB shortcut." that allows override of the slashcommand shortcut, so that slash commands popup shows when CTRL-/ or CMD-/ is pressed, instead of the platform shortcuts overview. A second press of the shortcut will show the platform shortcuts overview. 

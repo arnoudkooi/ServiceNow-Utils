@@ -104,7 +104,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     if (sender){ //In Firefox the sender object can be empty #420 this construct is around that
-       if (sender.tab.hasOwnProperty('cookieStoreId')) 
+       if (sender?.tab?.cookieStoreId) 
             cookieStoreId = sender.tab.cookieStoreId 
     } 
 
