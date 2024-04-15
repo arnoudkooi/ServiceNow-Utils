@@ -735,7 +735,6 @@ function snuStartBackgroundScript(script, instance, action) {
 
 function updateActionScript(wsObj) {
 
-    var field = 'script';
     var val = wsObj.content || "";
     val = JSON.stringify(val).slice(1, -1);
 
@@ -750,7 +749,7 @@ function updateActionScript(wsObj) {
     }
     //update the variable
     var grVar = new GlideRecord('sys_variable_value');
-    grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.element=${field}");
+    grVar.addEncodedQuery("document_key=${wsObj.sys_id}^variable.labelINscript,command");
     grVar.setLimit(1);
     grVar.query();
     while (grVar.next()) {

@@ -1534,10 +1534,10 @@ function snuResolveVariables(variableString){
         variableString = variableString.replace(/\$table/g,tableName);
         variableString = variableString.replace(/\$sysid/g,sysId);
     }
-    else { ///get sysid and tablename from portal or workspace
+    else { ///get sysid and tablename from portal or workspace or workflow studio
         let searchParams = new URLSearchParams(window.location.search)
-        tableName = (searchParams.get('table') || searchParams.get('id') || '').replace(/[^a-z0-9-_]/g, '');
-        sysId = (searchParams.get('sys_id') || '').replace(/[^a-f0-9-_]/g, '');
+        tableName = (searchParams.get('table') || searchParams.get('tableName') || searchParams.get('id') || '').replace(/[^a-z0-9-_]/g, '');
+        sysId = (searchParams.get('sys_id') || searchParams.get('sysId') || '').replace(/[^a-f0-9-_]/g, '');
         if (tableName && sysId) { //portal
             variableString = variableString.replace(/\$table/g, tableName);
             variableString = variableString.replace(/\$sysid/g, sysId);
@@ -3574,9 +3574,9 @@ async function snuFetchData(token, url, post, callback) {
       };
       try {
         const response = await fetch(url, {
-          method: post ? 'PUT' : 'GET',
+          method: post ? post?.method : 'GET',
           headers,
-          body: post ? JSON.stringify(post) : null
+          body: post ? JSON.stringify(post?.body) : null
         });
         let data = response.ok ? await response.json() : response;
         data.resultcount = response.headers.get("X-Total-Count");

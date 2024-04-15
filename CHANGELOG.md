@@ -1,11 +1,17 @@
 # CHANGELOG.md
 
+## 7.4.4.0 (2024-04-15)
+Fixes / changes:
+  - Support in Workflow Studio for /vd command (resolving tablename and sys_id)
+  - Modify snuFetchData so it can supports method via object propery method
+  - Simplify label of function to show pickers: Show (Application and Updateset) Pickers in Next UI Header
+  - Support for Inline PowerShell script from Flow Designer Actions (Discussion #492)
+
 ## 7.4.3.3 (2024-04-11)
 Fixes / changes:
   - Update docs and dev commands to washingtondc
   - Fix cancelling / (forward slash) key
   - Remove BETA/NEW! from InstanceTag setting
-
 
 ## 7.4.3.0 (2024-04-03)
 Features:
