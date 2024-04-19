@@ -88,10 +88,6 @@ var snuslashcommands = {
         "url": "*",
         "hint": "All menu search (Next Experience only) <search>"
     },
-    "aw": {
-        "url": "/now/workspace/agent/",
-        "hint": "Agent Workspace"
-    },
     "cheat": {
         "url": "https://www.arnoudkooi.com/cheatsheet/",
         "hint": "Download the latest SN Utils cheatsheet"
@@ -229,6 +225,10 @@ var snuslashcommands = {
         "hint": "Switch Domain <name>",
         "fields": "name",
         "overwriteurl": "#snu:switchto,domain,value,$sysid",
+    },
+    "sow": {
+        "url": "/now/sow/home",
+        "hint": "Service Operations Workspace"
     },
     "su": {
         "url": "sys_update_set_list.do?sysparm_query=state=in progress^application=javascript:gs.getCurrentApplicationId()^nameLIKE$0^ORDERBYDESCsys_updated_on",
@@ -3173,11 +3173,17 @@ function snuSetShortCuts() {
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() == "s") { //cmd-s
 
                 event.preventDefault();
+
+                if (document.querySelectorAll('#sysverb_post_update').length) { //not when on update multiple form #495
+                    g_form.addWarningMessage("[SN Utils] Save shortcut disabled for Update multiple records, please use the UI Action");
+                    return false;
+                }
+
                 var doInsertStay = false;
                 if (event.shiftKey) {
                     doInsertStay = document.querySelectorAll('#sysverb_insert_and_stay').length;
                     if (!doInsertStay) {
-                        g_form.addWarningMessage("Insert and Stay not available for this record (SN Utils Extension)");
+                        g_form.addWarningMessage("[SN Utils] Insert and Stay not available for this record");
                         return false;
                     }
                 }
@@ -4116,7 +4122,9 @@ function snuAddBGScriptButton() {
     g_ck = document.getElementsByName('sysparm_ck')[0]?.value;
     window.top.window.g_ck = g_ck;
     if (g_ck) {
-        document.getElementsByTagName('label')[0].insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();' title='[SN Utils] Open in VS Code via sn-scriptsync'>[Open in VS Code]</a>");
+        let lbl = document.querySelector('label');
+        if (lbl)
+            lbl.insertAdjacentHTML('afterend', " <a href='javascript:snuPostToScriptSync();' title='[SN Utils] Open in VS Code via sn-scriptsync'>[Open in VS Code]</a>");
     }
 }
 

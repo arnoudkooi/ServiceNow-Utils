@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 7.4.4.3 (2024-04-19)
+Fixes / changes:
+  - Replaced slash command /aw with /sow to open Service Operations Workspace
+  - Prevent adding element on/sys.scripts.do when parent element not on page
+  - Prevent CTRL-S when on Update selected, Update all form (Issue #495)
+
 ## 7.4.4.0 (2024-04-15)
 Fixes / changes:
   - Support in Workflow Studio for /vd command (resolving tablename and sys_id)
