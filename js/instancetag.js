@@ -10,8 +10,8 @@ snuContainer.innerHTML = `
   <div class="snuWrapper">
     <div id="snuDragHandle" title="Click an hold to drag">&#8942;&NonBreakingSpace;</div>
     <span id="snuInstanceTagSettings" title="Click to configure InstanceTag, SHIFT Click to disable">&#9881;&NonBreakingSpace;</span>
-    <span id="snuCommand" title="Click to execute command /tn, hold SHIFT for /vd">&#9656;&NonBreakingSpace;</span>
-    <span id="snuTagText" title="Doubleclick to run command /pop "> InstanceName</span>
+    <span id="snuCommand">&#9656;&NonBreakingSpace;</span>
+    <span id="snuTagText"> InstanceName</span>
   </div>
 </div>
 `;
@@ -116,6 +116,11 @@ function snuSetInstanceTagProperties() {
     document.documentElement.style.setProperty("--snu-instancetag-tag-color", snuInstanceTagConfig.tagTagColor);
   if (snuInstanceTagConfig?.tagOpacity)
     document.documentElement.style.setProperty("--snu-instancetag-tag-opacity", snuInstanceTagConfig.tagOpacity);
+
+   document.querySelector("#snuCommand").title = `Click to execute command ${snuInstanceTagConfig.tagCommand}, hold SHIFT for ${snuInstanceTagConfig.tagCommandShift}`
+   document.querySelector("#snuTagText").title = `Doubleclick to run command ${snuInstanceTagConfig.tagTextDoubleclick} `
+
+
 }
 
 // Initialize and handle dragging

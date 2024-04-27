@@ -20,12 +20,17 @@ details.snupopover>summary::-webkit-details-marker {
 details.snupopover>summary {
     list-style: none;
     display: inline;
+    cursor: pointer;
+}
+
+details.snupopover>div{
+    z-index: 100000000 ;
+
 }
 
 details.snupopover>summary+* {
     position: absolute;
     display: block;
-    z-index: 1;
     min-width: 250px;
     border: solid 1px #000000;
     padding: 10px;
@@ -40,7 +45,7 @@ details.snupopover>*+* {
 details.snupopover>summary+* {
     top: calc(0.5rem + 100%);
     right: 20%;
-    transform: translateX(50%);
+    transform: translateX(75%);
 }
 
 

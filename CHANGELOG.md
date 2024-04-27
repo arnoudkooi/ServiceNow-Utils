@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## 8.0.0.0 (2024-04-27)
+  - SN Utils is 8 years old! 🎉 => Version 8.0.0.0
+ Fixes / changes:
+  - Restore and improve /tn on workspaces.
+  - Restore doubleclick label to edit on workspaces.
+  - Admin check for doubleclick to edit in workspace.
+  - Tooltip (title) of IntsanceTag now shows customized commands.
+  - Change extension shortcuts for Safari from CMD to CTRL in manifest.json
+  - Removed improved message on node switch tab in popup
+
 ## 7.4.4.3 (2024-04-19)
 Fixes / changes:
   - Replaced slash command /aw with /sow to open Service Operations Workspace

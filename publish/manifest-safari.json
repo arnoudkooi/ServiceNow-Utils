@@ -78,28 +78,28 @@
         "_execute_page_action": {
             "suggested_key": {
                 "default": "Ctrl+1",
-                "mac": "Command+1"
+                "mac": "Ctrl+1"
             },
             "description": "Activate Extension"
         },
         "pop": {
             "suggested_key": {
                 "default": "Ctrl+2",
-                "mac": "Command+2"
+                "mac": "Ctrl+2"
             },
             "description": "Pop-In / Pop-Out"
         },
         "show-technical-names": {
             "suggested_key": {
                 "default": "Ctrl+3",
-                "mac": "Command+3"
+                "mac": "Ctrl+3"
             },
             "description": "Show Technical Names"
         },
         "slashcommand-shortcut": {
             "suggested_key": {
                 "default": "Ctrl+4",
-                "mac": "Command+4"
+                "mac": "Ctrl+4"
             },
             "description": "Run /shortcut slashcommand"
         },

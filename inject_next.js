@@ -77,7 +77,7 @@ class SnuNextManager {
         }, 2500);
     }
 
-    addTechnicalNames() {
+    async addTechnicalNames() {
         this.snuAddFilterToTrees(); //add filter to now-content-tree components
 
         let namesAdded = 0;
@@ -108,38 +108,6 @@ class SnuNextManager {
                     console.dir(g_form);
                 })
             }
-            let elms = querySelectorShadowDom.collectAllElementsDeep('*', frm);
-            elms.forEach(elm => {
-                if (elm['dictionary']) {
-
-                    //console.dir(elm);
-                    let lbl = querySelectorShadowDom.querySelectorDeep('label:not(.snutnwrap)', elm);
-                    if (lbl) {
-                        let tmplt =
-                            `<style> @import "${snusettings.extensionUrl}css/inject.css"; </style>
-                    <details class="snupopover snuelm">
-                      <summary>⚙ </summary>
-                      <div>
-                        <div>
-                        [SN Utils] Field Info: <br />
-                          <a class='snuelm' target='dictionary' href="/sys_dictionary.do?sysparm_query=nameINjavascript:new PAUtils().getTableAncestors('${elm.referringTable}')^element=${elm.dictionary.name}">Dictionary</a> 
-                        </div>
-                        <div>
-                          Fieldtype: ${elm.dictionary?.type} 
-                        </div>
-                      </div>
-                    </details>`
-                        let spn = document.createElement("span");
-                        spn.style = 'display:none';
-                        spn.className = 'snutn snuelm'
-                        spn.innerHTML = `<span class='snuwrapper snuelm'>&nbsp;| ${tmplt} </span><span class='snuelement snuelm'>
-                        <a class='snuelm' href='javascript:snuNextManager.labelClick("${frm.componentId}","${elm.name}")'>${elm.name}</a></span>`;
-                        lbl.append(spn)
-                        lbl.classList.add("snutnwrap");
-                        namesAdded++;
-                    }
-                }
-            })
 
             if (frm?.nowRecordFormBlob?.fieldElements.forEach(elm => {
                 if (elm.choices) {
@@ -158,8 +126,50 @@ class SnuNextManager {
                 }
             }));
 
-
         })
+
+        //there is async loading with document fragments going on
+        // looping over the fieldElements seem to render this, but we need to wait a bit before we can access
+        // the dictionary property of the elements
+        await this.wait(200); 
+
+        // with the usage of slots, cannot iterate over the frms anymore
+        let elms = querySelectorShadowDom.querySelectorAllDeep(`sn-record-choice-connected,sn-record-currency-connected,sn-record-email,
+        sn-record-input-connected,sn-record-phone-connected,sn-record-reference-connected,sn-record-url,sn-record-annotation,
+        sn-record-choice-search,sn-record-choice-search-dropdown,now-record-date-picker,
+        sn-record-dropdown-internal,sn-record-duration,sn-record-input,sn-record-input-group,sn-record-link,sn-record-pill,
+        now-record-typeahead-multiple,sn-record-time`);
+
+        elms.forEach(elm => {
+            let lbl = querySelectorShadowDom.querySelectorDeep('span.will-truncate:not(.snutnwrap)', elm);
+            if (lbl && elm?.fieldType) {
+                let tmplt =
+                `   <style> @import "${snusettings.extensionUrl}css/inject.css"; </style>
+                    <details class="snupopover snuelm">
+                        <summary>⚙ </summary>
+                        <div>
+                            <div>
+                            [SN Utils] Field Info: <br />
+                                <a class='snuelm' target='dictionary' href="/sys_dictionary.do?sysparm_query=nameINjavascript:new PAUtils().getTableAncestors('${elm.referringTable}')^element=${elm.dictionary.name}">Dictionary</a> 
+                            </div>
+                            <div>
+                                Fieldtype: ${elm.fieldType} 
+                            </div>
+                        </div>
+                    </details>
+                `
+                let spn = document.createElement("span");
+                spn.style = 'display:none';
+                spn.className = 'snutn snuelm'
+                spn.innerHTML = `<span class='snuwrapper snuelm'>&nbsp;| ${tmplt} </span><span class='snuelement snuelm'>
+                <a class='snuelm' href='javascript:snuNextManager.labelClick("","${elm.name}")'>${elm.name}</a></span>`;
+                lbl.insertAdjacentElement('afterend', spn); 
+                spn.querySelector('details').addEventListener('toggle', ev => this.toggleDetails(ev) );
+                lbl.style.display = 'inline';
+                lbl.classList.add("snutnwrap");
+                namesAdded++;
+            } 
+        });
 
         namesAdded += this.addTechnicalNamesLists();
         namesAdded += this.playbookContextRemoveHelper();
@@ -170,6 +180,25 @@ class SnuNextManager {
         });
 
         return (frms.length == 0);
+    }
+
+    async wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+      
+    toggleDetails(event) {
+        const popoverContent = event.target.querySelector('summary + *');
+        setTimeout(() => { // Delay to allow the browser to render changes
+            const rect = popoverContent.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                popoverContent.style.right = 'auto';
+                popoverContent.style.left = '100';
+            }
+            if (rect.left < 0) {
+                popoverContent.style.left = 'auto';
+                popoverContent.style.right = '0';
+            }
+        }, 1);
     }
 
     addTechnicalNamesLists() {
@@ -369,7 +398,7 @@ grSPC.deleteMultiple();`;
         let dict, form;
         let isgrid = false;
         for (let elm of eventPath) {
-            if (elm.localName == 'now-grid') notgrid = true; //not when in a grid (aka list)
+            if (elm.localName == 'now-grid') isgrid = true; //not when in a grid (aka list)
             if (elm.className?.includes('snuwrapper')) break; //not in a SN Utils added elemet
             if (elm['dictionary'] && !dict)
                 dict = elm.dictionary
@@ -381,12 +410,24 @@ grSPC.deleteMultiple();`;
 
         if (isgrid) return true; //not when in a grid (aka list) #463
 
-        if (dict && form && notgrid) {
+        if (dict && form) {
+
+            let roles = form?.currentUser?.user?.roles || [];
+            
             let val = form.gForm.getValue(dict.name);
-            let newValue = prompt('[SN Utils]\nField Type: ' + dict.type + '\nField: ' + dict.name + '\nValue:', val);
-            if (newValue !== null)
-                form.gForm.setValue(dict.name, newValue);
-            return true;
+
+            if (roles.includes('admin')){
+                let newValue = prompt('[SN Utils]\nField Type: ' + dict.type + '\nField: ' + dict.name + '\nValue:', val);
+                if (newValue !== null)
+                    form.gForm.setValue(dict.name, newValue);
+                return true;
+            }
+            else {
+                alert('[SN Utils]\nField Type: ' + dict.type + '\nField: ' + dict.name + '\nValue:' + val);
+                return true;
+            }
+
+
         }
         return false;
     }
