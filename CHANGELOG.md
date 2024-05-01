@@ -1,7 +1,17 @@
 # CHANGELOG.md
 
+## 8.0.1.0 (2024-05-02)
+Features:
+  - Add slash command /uibo Using this when in a Next Experience page, it will open UI Builder and try to open the matching Experience and UIB Page/Variant (Created by Thomas Walker - Veracity)
+  - Add slash command /crn Copy Record to New tab. This will open a unsaved new record with the values from the current record. This is for cases where Insert and Stay is disabled. (Created by Thomas Walker - Veracity)
+  - CTRL Click the operator in a list filter adds the Contains (LIKE) filter as an option when it does not exist. In particular handy for some script fields that dont show the Contains operator. 
+
+Fixes / changes:
+  - Added a direct link to the CTRL-SHIFT-S shortcut in case Insert and Stay is not available, it adds a direct link to the new /crn command
+
 ## 8.0.0.0 (2024-04-27)
   - SN Utils is 8 years old! 🎉 => Version 8.0.0.0
+
  Fixes / changes:
   - Restore and improve /tn on workspaces.
   - Restore doubleclick label to edit on workspaces.

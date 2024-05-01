@@ -96,6 +96,13 @@ var snuslashcommands = {
         "url": "https://www.servicenow.com/community/forums/searchpage/tab/message?advanced=false&allow_punctuation=false&q=$0",
         "hint": "Search Community <search>"
     },
+    "crn": {
+        "url": "javascript: (function () {\n\tif (!g_form) return;\n\tlet blacklistedFields = ['number','sys_scope'];\n\tlet newRecordURL = `/${g_form.getTableName()}.do?sys_id=-1`;\n\t " + 
+               "let queryParts = g_form.elements.reduce((acc, el) => {\n\t\tif (\n\t\t\tel.fieldName.startsWith('sys') ||\n\t\t\tblacklistedFields.includes(el.fieldName) ||\n\t\t\tel.fieldName.indexOf('.') !== -1\n\t\t)\n\t\t\treturn acc; " + 
+               "\n\t\tif (g_form.isFieldVisible(el.fieldName) && g_form.getValue(el.fieldName) !== '') {\n\t\t\tacc.push(`${el.fieldName}=${encodeURIComponent(g_form.getValue(el.fieldName))} `);\n\t\t}\n\t\treturn acc;\n\t}, []);" + 
+               "\n\tlet queryString = 'sysparm_query=' + queryParts.join('^');\n\tlet viewString = `sysparm_view = ${encodeURIComponent(g_form.getViewName())} `;\n\twindow.open([newRecordURL, queryString, viewString].join('&'), '_blank');\n})();",
+        "hint": "Copy Record to New tab"
+    },
     "cs": {
         "url": "sys_script_client_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
         "hint": "Filter Client Scripts <name>",
@@ -304,6 +311,13 @@ var snuslashcommands = {
         "hint": "UIB Experience <search>",
         "fields": "title,path,admin_panel.sys_id",
         "overwriteurl": "/now/build/ui/apps/$admin_panel.sys_id"
+    },
+    "uibo": {
+        "url": "javascript: !function(){let e=(e,a,n)=>{if(parseInt(ux_globals?.libuxf?.version.split(\".\")[0])>22){var t=`/now/builder/ui/redirect/experience/params/base-id/${e}/page-sys-id/${a}/`;n&&(t+=`screen-id/${n}/`)}else{var t=`/now/build/ui/apps/${e}/pages/${a}/`;" +
+               "n&&(t+=`variants/${n}/`)}window.open(t,\"_blank\"),event&&event.stopPropagation()};(()=>{let a=ux_globals?.pageSettings?.sys_id?.value;if(!a){snuSlashCommandInfoText(\"Unable to locate app config, are you on a UX Page?\");return} " + 
+               " let n=ux_globals?.snCanvasScreen?.screenData;if(!n||!n.screenType){snuSlashCommandInfoText(\"Unable to locate screen collection, are you on a UX Page?\");return}let t=window.location.pathname,r=ux_globals?.siteName,s=RegExp(\"^/\"+r),i=r&&s.test(t); " + 
+               " if(!i){snuSlashCommandInfoText(\"UX Globals are stale, please refresh the page.\");return}let o=ux_globals?.snCanvasScreen?.screenData?.viewportConfigurationId;e(a,n?.screenType,o)})()}();",
+        "hint": "Open page in UIB"
     },
     "uis": {
         "url": "sys_ui_script_list.do?sysparm_query=nameLIKE$0^ORDERBYDESCsys_updated_on",
@@ -3149,7 +3163,7 @@ function snuSetShortCuts() {
                     path[0].id == 'filter' && path[0].value == ''
                 ) { //not when form element active, except filter
 
-                    if (path.length > 8 && path[2]?.className.includes('CodeMirror')) return //not in codemirror
+                    if (path.length > 8 && path[2]?.className && path[2].className.includes('CodeMirror')) return //not in codemirror
                     event.preventDefault();
                     //in some browsers the event KEYBOARD_SHORTCUTS_BEHAVIOR#MODAL_OPENED event can't be captured. this is a temporary fallback
                     var showingPopup = window.top?.querySelectorShadowDom?.querySelectorDeep('.keyboard-shortcuts-modal'); //washington shortcuts popup 
@@ -3183,7 +3197,8 @@ function snuSetShortCuts() {
                 if (event.shiftKey) {
                     doInsertStay = document.querySelectorAll('#sysverb_insert_and_stay').length;
                     if (!doInsertStay) {
-                        g_form.addWarningMessage("[SN Utils] Insert and Stay not available for this record");
+                        g_form.addWarningMessage(`[SN Utils] Insert and Stay not available for this record.<br />
+                        Try slash command <a href="javascript:snuSlashCommandShow('/crn',1)" >/crn Copy Record to New tab</a>`);
                         return false;
                     }
                 }
@@ -4907,6 +4922,26 @@ function snuAddPersonaliseListHandler() {
         rlb.classList.add('snuified');
 
     })
+
+    //this adds the option CONTAINS to the list filter operator if it is not present on CTRL/CMD click
+     if (typeof g_list != 'undefined') {
+        document.addEventListener('click', function (event) {
+            if (event.ctrlKey || event.metaKey) {
+                if (event.target.tagName == 'SELECT' && event.target.classList.contains('filerTableSelect')){
+                    const options = event.target.options;
+                    let exists = false;
+                    for (let i = 0; i < options.length; i++) { // Check for option existence
+                      if (options[i].value === "LIKE") {
+                        exists = true;
+                        break;
+                      }
+                    }
+                    // Add the option if it does not exist
+                    if (!exists) event.target.add(new Option("[SN Utils] contains", "LIKE"));
+                }
+            }
+        });
+    }
 
 }
 
