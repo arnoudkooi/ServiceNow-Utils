@@ -1,4 +1,8 @@
 # CHANGELOG.md
+## 8.0.1 (2024-05-)
+Fixes / changes:
+  - Fix for /vd does not work on tables without sys_updated.. fields (Issue #499)
+
 
 ## 8.0.1.0 (2024-05-02)
 Features:
