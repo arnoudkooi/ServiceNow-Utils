@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
         cookieStoreId = tabs[0].cookieStoreId || '';
         urlFull = tabs[0].url;
         getBrowserVariables(tabid,cookieStoreId);
+        document.querySelector("#snuVersion").innerText = chrome.runtime.getManifest().version;
+        document.querySelector('#leavereview').style.display = 'none';
 
     });
 
@@ -45,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     clearInvalidatedLocalStorageCache();
 
+    //document.querySelector('#reqPermission').addEventListener("click", requestPermissionsForCurrentSite);
 });
 
 //clear all invalidated cached items like tablenames and nodes
@@ -161,39 +164,52 @@ function prepareJsonTable() {
 
 //Query ServiceNow for nodes
 function getNodes() {
+
+    let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+        document.querySelector('#nodemessage').innerText = "Node switching may not work in Safari";
+    }
+
     var myurl = url + '/api/now/table/sys_cluster_state?sysparm_query=ORDERBYsystem_id&sysparm_fields=system_id,node_id,status,node_type&sysparm_display_value=true&sysparm_exclude_reference_link=true';
     snuFetch(g_ck, myurl, null, function (jsn) {
         setNodes(jsn.result);
     });
 }
 
-function setActiveNode(node) {
+async function setActiveNode(node) {
+    
 
-        fetch(url + '/stats.do')
-        .then(response => response.text())
-        .then(statsDo => { 
-            statsDo = statsDo.replaceAll('<br />', '<br/>');
-            ipArr = statsDo
-                .match(/IP address: ([\s\S]*?)\<br\/>/g)[0]
-                .replace('IP address: ', '')
-                .replace('<br/>', '')
-                .replace('<br />', '')
-                .split('.');
+    await fetch(url + '/example_add_two_numbers.do'); // call a random leightweight page that returns not found, to make browser aware of new node
+    
+    let response = await fetch(url + '/stats.do');
+    let statsDo = await response.text();
+    if (!statsDo.includes('Servlet statistics')) { //after a node switch, sometimes the first call fails. Try again
+        response = await fetch(url + '/stats.do');
+        statsDo = await response.text();
+        console.log('retrying stats.do');
+    }
 
-            let nodeId = statsDo
-            .match(/Node ID: ([\s\S]*?)\<br\/>/g)[0]
-            .replace('Node ID: ', '')
-            .replace('<br/>', '');
+    statsDo = statsDo.replaceAll('<br />', '<br/>'); //fix for some instances
+    ipArr = statsDo
+        .match(/IP address: ([\s\S]*?)\<br\/>/g)[0]
+        .replace('IP address: ', '')
+        .replace('<br/>', '')
+        .replace('<br />', '')
+        .split('.');
 
-            let nodeName = statsDo
-            .match(/Connected to cluster node: ([\s\S]*?)\<br\/>/g)[0]
-            .replace('Connected to cluster node: ', '')
-            .replace('<br/>', '');
+    let nodeId = statsDo
+    .match(/Node ID: ([\s\S]*?)\<br\/>/g)[0]
+    .replace('Node ID: ', '')
+    .replace('<br/>', '');
 
-            let realNode = {"nodeId" : nodeId, "nodeName" : nodeName };
-            
-            setActiveNodeInner(realNode);
-        });
+    let nodeName = statsDo
+    .match(/Connected to cluster node: ([\s\S]*?)\<br\/>/g)[0]
+    .replace('Connected to cluster node: ', '')
+    .replace('<br/>', '');
+
+    //let realNode = {"nodeId" : nodeId, "nodeName" : nodeName };
+    
+    setActiveNodeInner(node);
 
     function setActiveNodeInner(node) {
         var nodeArr = node.nodeName.split(".");
@@ -219,19 +235,32 @@ function setActiveNode(node) {
                     // matches BIGipServerpool_<alphanumeric instance name>
                     return cookie.name.match(/^(BIGipServer[\w\d]+)$/);
                 });
-                if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){ 
+                if (!BIGipServerpoolCookie) { //onprem or no cookie found
+                    chrome.cookies.set({
+                        "name": "glide_user_route",
+                        "url": new URL(url).origin,
+                        "secure": true,
+                        "httpOnly": true,
+                        "value": 'glide.' + node.nodeId
+                    }, s => {
+                        getActiveNode(jsnNodes);
+                    });
+                }
+                else if (!BIGipServerpoolCookie?.value?.endsWith('.0000')){ 
                     //this is a test to allow node switching on ADCv2 migrated instances
 
-                    // chrome.cookies.remove({
-                    //     "name": BIGipServerpoolCookie.name,
-                    //     "url": new URL(url).origin
+                    let ip = ipArr.join('.');
+                    let ipPort = ip + ':' + port;
+                    let md5IpPort = md5(ipPort);
+
+                    //console.log(md5IpPort, node);
 
                     chrome.cookies.set({
                         "name": BIGipServerpoolCookie.name,
                         "url": new URL(url).origin,
                         "secure": true,
                         "httpOnly": true,
-                        "value": encodeBIGIP
+                        "value": md5IpPort
                     }, s => {
                         chrome.cookies.set({
                             "name": "glide_user_route",
@@ -244,10 +273,10 @@ function setActiveNode(node) {
                         });
                     });
 
-                    document.querySelector('#nodemessage').innerText = `This instance uses ADCv2 loadbalancing, node switching may not work or switch to a random node. Try a few times... `;
-                    document.querySelector('#nodemessage').classList.remove('hidden');
+                    // document.querySelector('#nodemessage').innerText = `This instance uses ADCv2 loadbalancing, node switching may not work or switch to a random node. Try a few times... `;
+                    // document.querySelector('#nodemessage').classList.remove('hidden');
                 }
-                else {
+                else { //classic node switching
 
                     chrome.cookies.set({
                         "name": BIGipServerpoolCookie.name,
@@ -319,8 +348,14 @@ function getParameterByName(name, url) {
 //Also attach event handlers.
 function setBrowserVariables(obj) {
 
-    $("#snuVersion").text(chrome.runtime.getManifest().version);
+    document.querySelector('#notactive').style.display = 'none';
+    document.querySelector('#leavereview').style.display = '';
 
+    let elms = document.querySelectorAll('[data-bs-toggle="disabledtab"]');
+    elms.forEach(function(el) {
+        el.setAttribute('data-bs-toggle', 'tab');
+    });
+    
     g_ck = obj.myVars.g_ck || '';
     url = obj.url;
     instance = (new URL(url)).host.replace(".service-now.com", "");
@@ -415,6 +450,7 @@ function setBrowserVariables(obj) {
     $.fn.dataTable.moment(datetimeformat);
 
     $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        
         var target = $(e.target).data("bsTarget"); // activated tab
 
         $('#tbxactivetab').val(target);
@@ -979,9 +1015,16 @@ function setDataTableNodes(nme, node) {
         dtNodes.search($(this).val(),true).draw();
     }).focus().trigger('keyup');
 
-    $('a.setnode').click(function () {
+    $('a.setnode').click(function (ev) {
+
+        ev.currentTarget.innerHTML = "<i class='fas fa-spinner fa-spin' style='color:blue !important;'></i> Switching..."; 
+        ev.currentTarget.style.color = "blue";
+        console.log(ev);
         var node = {"nodeId" : this.id, "nodeName" : $(this).attr('data-node') };
         setActiveNode(node)
+
+
+
     });
 
     $('#waitingnodes').hide();
@@ -1716,3 +1759,29 @@ function escape(htmlStr) {
           .replace(/'/g, "&#39;");        
  
  }
+
+
+function requestPermissionsForCurrentSite() {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        var currentTab = tabs[0];
+        if (currentTab && currentTab.url) {
+            var url = new URL(currentTab.url);
+            var host = url.hostname;
+
+            // Build the permissions object for host permissions
+            var permissions = {
+                origins: [`*://${host}/*`]
+            };
+
+            // Request permissions
+            chrome.permissions.request(permissions, function(granted) {
+                if (granted) {
+                    console.log(`Permissions granted for ${host}`);
+                    // Extension can now interact with the granted site
+                } else {
+                    console.log('Permissions not granted.');
+                }
+            });
+        }
+    });
+}

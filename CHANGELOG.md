@@ -1,4 +1,172 @@
 # CHANGELOG.md
+## 8.0.1 (2024-05-)
+Fixes / changes:
+  - Fix for /vd does not work on tables without sys_updated.. fields (Issue #499)
+
+
+## 8.0.1.0 (2024-05-02)
+Features:
+  - Add slash command /uibo Using this when in a Next Experience page, it will open UI Builder and try to open the matching Experience and UIB Page/Variant (Created by Thomas Walker - Veracity)
+  - Add slash command /crn Copy Record to New tab. This will open a unsaved new record with the values from the current record. This is for cases where Insert and Stay is disabled. (Created by Thomas Walker - Veracity)
+  - CTRL Click the operator in a list filter adds the Contains (LIKE) filter as an option when it does not exist. In particular handy for some script fields that dont show the Contains operator. 
+
+Fixes / changes:
+  - Added a direct link to the CTRL-SHIFT-S shortcut in case Insert and Stay is not available, it adds a direct link to the new /crn command
+
+## 8.0.0.0 (2024-04-27)
+  - SN Utils is 8 years old! 🎉 => Version 8.0.0.0
+
+ Fixes / changes:
+  - Restore and improve /tn on workspaces.
+  - Restore doubleclick label to edit on workspaces.
+  - Admin check for doubleclick to edit in workspace.
+  - Tooltip (title) of IntsanceTag now shows customized commands.
+  - Change extension shortcuts for Safari from CMD to CTRL in manifest.json
+  - Removed improved message on node switch tab in popup
+
+## 7.4.4.3 (2024-04-19)
+Fixes / changes:
+  - Replaced slash command /aw with /sow to open Service Operations Workspace
+  - Prevent adding element on/sys.scripts.do when parent element not on page
+  - Prevent CTRL-S when on Update selected, Update all form (Issue #495)
+
+## 7.4.4.0 (2024-04-15)
+Fixes / changes:
+  - Support in Workflow Studio for /vd command (resolving tablename and sys_id)
+  - Modify snuFetchData so it can supports method via object propery method
+  - Simplify label of function to show pickers: Show (Application and Updateset) Pickers in Next UI Header
+  - Support for Inline PowerShell script from Flow Designer Actions (Discussion #492)
+
+## 7.4.3.3 (2024-04-11)
+Fixes / changes:
+  - Update docs and dev commands to washingtondc
+  - Fix cancelling / (forward slash) key
+  - Remove BETA/NEW! from InstanceTag setting
+
+## 7.4.3.0 (2024-04-03)
+Features:
+  - Add a setting "Prioritize CTRL-/ and CMD-/ above OOB shortcut." that allows override of the slashcommand shortcut, so that slash commands popup shows when CTRL-/ or CMD-/ is pressed, instead of the platform shortcuts overview. A second press of the shortcut will show the platform shortcuts overview. 
+Fixes / changes:
+  - Change so version is shown in the popup info tab, even when not on a ServiceNow instance.
+  - Show warning in info tab when SN Utils does not run on current page.
+  - Disable tabs in popup when SN Utils does not run on current page.
+
+## 7.4.2.0 (2024-03-27)
+Fixes / changes:
+  - Minor updates for /vd not always working in Firefox (Issue #484)
+  - Prevent global g_list object on forms (may interfeer with OOB scripts)
+  - Added snuAddGckToken function to inject.js run when on stats.do page. This adds the g_ck token so that Node switching and othe popup functions works when on that page.
+  - Fix for scriptsync button not working on classic BG script page (Issue #486)
+  - Note: 7.4.1.7 and 7.4.1.9 only published for troubleshooting purposes
+
+
+## 7.4.1.5 (2024-03-25)
+Fixes / changes:
+  - Update to slashcommand search gsft_main frame when native next experience active.
+  - Adding "Open in VS Code" link to modern script editor. Also passing scope value in both classic and modern BG script.
+  - Increase height of popup a bit, that hopefully fixes flickering in Firefox (Issue #483)
+  - Fix for cookieStoreId for Firefox Multi Account Container comatibility (Issue #473)
+  - Change how error is presented in codeeditor.html Monaco editor
+
+
+## 7.4.1.0 (2024-03-21)
+Fixes / changes:
+  - Update to node switching to support OnPrem (without BIGipServerpool cookie)
+
+## 7.4.0.9 (2024-03-14)
+Fixes / changes:
+  - Only toggle number navigation if numbers are visible (Issue #478)
+  - Adding some code to explore if OnPrem and normal version can be merged
+
+## 7.4.0.7 (2024-03-09)
+Fixes / changes:
+  - Updates in scriptsyn.js to support running background scripts inside VS Code
+  - Addidng cookieStorId for Firefox Multi Account Container comatibility (Issue #473)
+  - Adding parameter to function snuAddListLinks(forceLink) to allow for force link in list (Related to Issue #442)
+  - Minor InstanceTag fix
+
+## 7.4.0.3 (2024-03-07)
+Fixes / changes:
+  - Set inital InitalTag to opacity 0.01 so only shows after settings applied
+  - Prevent open InitialTag shift-click opening in new window
+
+## 7.4.0.0/1 (2024-03-05)
+Features:
+  - Beta release of InstanceTag. More details to follow. Early adopters can enable it in the settings tab of the popup.
+  - 7.4.0.1 adds a fix for checkbox setting in the settings tab
+
+## 7.3.4.4 (2024-03-01)
+Fixes / changes:
+  - Adjusted snuHyperlinkifyWorkNotes function to prevent issues when [code] tags are used in worknotes
+  - Preparations for Instance Button feature, that will be added in an upcoming release
+
+## 7.3.4.0 (2024-02-25)
+Features:
+  - Slash commands direct navigation can now be toggled via the shift key. Disabled state is indicated by low opacity of the numbers. Setting is stored per instance. This way unintended link navigation can be prevented. #philgoesdeep
+
+Fixes / changes:
+  - Adjustments in the spacing of the pickers in the Next experience header.
+
+## 7.3.3.0 (2024-02-24)
+Features:
+  - When searchbar of a classic list is disabled, an icon (⨮) is added behind every fieldname. Clicking it adds a AND condition to the filter. Goal is to simplify building the filter when the searchbar is disabled. For reference fields, the default is to text search the display value. Holding SHIFT seraches a specific reference.
+
+## 7.3.2.2 (2024-02-22)
+Fixes / changes:
+  - Improve cookie switching (Issue #477)
+  - Minor CSS adjustments for the popup window
+
+## 7.3.2.0 (2024-02-22)
+Features:
+  - Detect links in activity (Classic UI) and convert to hyperlinks. Works on page load, and on mouse over of activity label.
+  
+Fixes / changes:
+  - Update dompurify to 3.0.9
+
+## 7.3.1.1 (2024-02-21)
+Fixes / changes:
+  - Fix slash command not showing when not in Next Experience
+
+## 7.3.1.0 (2024-02-21)
+Features:
+  - Node switching is improved and now supports ADCV2 loadbalancing instances. 
+
+Fixes / changes:
+  - Added md5.js script to support node switching
+  - Added an extra way to suppress slash commands popup, in case event capturing does not work
+  - Adding a check to sys.script.modern.do to prevent page modification when the Monaco editor is not found. Reason issue #475
+  - Adding a check in publish.sh script to prevent submitting when version in manifest.json is not updating since last publish
+
+## 7.3.0.1 (2024-02-19)
+Fixes / changes:
+  - Reverting CTRL-C to copy cells, will dive in later (Issue #474)
+
+## 7.3.0.0 (2024-02-19)
+Features:
+  - Slash command no triggers a global search when now match is found, ie: /INC3940740 opens that incident. This is a shortcut for the /search command. If the command contains a _ it tries to open a table list like it used to.
+  - /copycells can now be triggered via the OS copy shortcut (ctrl-c or cmd-c), when no other selection is made 
+  - The Modern Background scripts now get split and execute inline and other enhancements, like the classic background scripts. 
+  - Pages on old background script get redirected to the modern background script page, when it detects the instance runs on washington release.
+  
+Fixes / changes:
+  - Mousevents now work on form labels with a hyperlink, after /tn moves the link to the ↗ symbol
+  - Added function snuCheckFamily to inject.js, this helps to determine the family release of the instance
+
+
+## 7.2.3.1 (2024-02-07)
+Fixes / changes:
+  - Fix for not applying switches with numbers (Issue #465)
+
+
+## 7.2.3.0 (2024-02-02)
+Fixes / changes:
+  - Added /ws command to open the new Workflow Studio.
+  - Exclude Next experience Lists from doubleclick to /tn (Issue #463)
+  - Exclude Slash command popup when the Washington Shortcut popup shows
+  - To support above, added a fade in animation for the slash command popup
+  - Add div to the shortcut popup showing what the slash command shortcut is.
+  
+
 
 ## 7.2.2.2 (2024-01-29)
 Fixes / changes:

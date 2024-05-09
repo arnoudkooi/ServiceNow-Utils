@@ -122,6 +122,10 @@
         },
         "show_matches": ["https://*.service-now.com/*", "https://*.servicenowservices.com/*"]
     },
+    "sidebar_action": {
+        "default_panel": "sidepanel.html",
+        "open_at_install": false
+    },
     "web_accessible_resources": [
         "js/purify.min.js",
         "inject.js",

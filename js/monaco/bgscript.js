@@ -17,6 +17,15 @@ const urlparams = new Proxy(new URLSearchParams(window.location.search), {
 	get: (searchParams, prop) => searchParams.get(prop),
 });
 
+//If washington instance redirect to the modern page.
+(async function () {
+	let snuFamily = await snuCheckFamily();
+	if (snuFamily == 'washingtondc'){
+		location.href = location.href.replace('sys.scripts.do','sys.scripts.modern.do');
+	}
+})();
+
+
 if (snusettings.applybgseditor && scrpt) {
 
 	devidePage();

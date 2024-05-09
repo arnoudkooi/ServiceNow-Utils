@@ -16,6 +16,7 @@
     <script src="js/moment.js"></script>
     <script src="js/datatables.min.js"></script>
     <script src="js/datetime-moment.js"></script>
+    <script src="js/md5.js"></script>
     <script src="inject.js"></script>
 
     <script src="popup.js"></script>
@@ -29,61 +30,61 @@
             <input id='tbxactivetab' name='tbxactivetab' value="tababout" class="sync" type="hidden" />
             <ul class="nav nav-tabs compact" id="myTab">
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-bs-target="#tabupdatesets" data-bs-toggle="tab">Update Set
+                    <a class="nav-link" data-bs-target="#tabupdatesets" data-bs-toggle="disabledtab">Update Set
                         <span id="waitingupdatesets" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-bs-target="#tabupdates" data-bs-toggle="tab">Updates
+                    <a class="nav-link" data-bs-target="#tabupdates" data-bs-toggle="disabledtab">Updates
                         <span id="waitingupdates" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item onlyadmin'>
-                    <a class="nav-link" data-bs-target="#tabnodes" data-bs-toggle="tab">Nodes
+                    <a class="nav-link" data-bs-target="#tabnodes" data-bs-toggle="disabledtab">Nodes
                         <span id="waitingnodes" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabtables" data-bs-toggle="tab">Tables
+                    <a class="nav-link" data-bs-target="#tabtables" data-bs-toggle="disabledtab">Tables
                         <span id="waitingtables" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabdataexplore" data-bs-toggle="tab">View Data
+                    <a class="nav-link" data-bs-target="#tabdataexplore" data-bs-toggle="disabledtab">View Data
                         <span id="waitingdataexplore" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabuser" data-bs-toggle="tab">User
+                    <a class="nav-link" data-bs-target="#tabuser" data-bs-toggle="disabledtab">User
                         <span id="waitinguser" class="waiting">
                             <i class='fas fa-spinner fa-spin' aria-hidden='true'></i>
                         </span>
                     </a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabgr" data-bs-toggle="tab">GlideRecord</a>
+                    <a class="nav-link" data-bs-target="#tabgr" data-bs-toggle="disabledtab">GlideRecord</a>
                 </li>
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabslashcommands" data-bs-toggle="tab" id='navslashcommands'>Slashcommands</a>
+                    <a class="nav-link" data-bs-target="#tabslashcommands" data-bs-toggle="disabledtab" id='navslashcommands'>Slashcommands</a>
                 </li>               
                 <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabsettings" data-bs-toggle="tab">Settings</a>
+                    <a class="nav-link" data-bs-target="#tabsettings" data-bs-toggle="disabledtab">Settings</a>
                 </li>
                 <!-- <li class='nav-item'>
-                    <a class="nav-link" data-bs-target="#tabwhitelist" data-bs-toggle="tab">Whitelist</a>
+                    <a class="nav-link" data-bs-target="#tabwhitelist" data-bs-toggle="disabledtab">Whitelist</a>
                 </li> -->
                 <li class='nav-item'>
-                    <a class="nav-link active" data-bs-target="#tababout" data-bs-toggle="tab">About</a>
+                    <a class="nav-link active" data-bs-target="#tababout" data-bs-toggle="disabledtab">About</a>
                 </li>
 
             </ul>
@@ -149,7 +150,6 @@
                             </tr>
                         </thead>
                     </table>
-                    <div id="nodemessage" class="alert alert-warning hidden" role="alert"></div>
                 </div>
                 <div class="tab-pane" id="tabtables">
 
@@ -298,6 +298,13 @@
                         <div class="col-6" id='settingsdiv'>
                             <form>
                                 <div class="form-check">
+                                    <input class="form-check-input snu-setting" type="checkbox" id="instancetag"
+                                        name="instancetag">
+                                    <label class="form-check-label" for="instancetag">
+                                        Enable InstanceTag (Show a draggable button)
+                                    </label>
+                                </div>
+                                <div class="form-check">
                                     <input class="form-check-input snu-setting" type="checkbox" checked="checked" id="vsscriptsync"
                                         name="vsscriptsync">
                                     <label class="form-check-label" for="vsscriptsync">
@@ -335,7 +342,7 @@
                                     <input class="form-check-input snu-setting" checked="checked" type="checkbox" id="applybgseditor"
                                         name="applybgseditor">
                                     <label class="form-check-label" for="applybgseditor">
-                                        Apply VS Code style editor to Background Scripts
+                                        Enhance Background Script Editor
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -349,7 +356,7 @@
                                     <input class="form-check-input snu-setting" type="checkbox" id="s2ify" checked="checked"
                                         name="s2ify">
                                     <label class="form-check-label" for="s2ify">
-                                        Show (Next UI) or Enhance (UI16) Application and Updateset picker at page load.
+                                        Show (Application and Updateset) Pickers in Next UI Header
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -375,6 +382,13 @@
                                     <label class="form-check-label" for="slashoption">
                                         Slashcommands:
                                     </label>
+                                    <div class="form-check" title="">
+                                        <input class="form-check-input snu-setting" type="checkbox" id="slashpopuppriority" 
+                                            name="slashpopuppriority" >
+                                        <label class="form-check-label" for="slashpopuppriority" title="Prioritize the slashcommand popup above shortcuts, hit shortcut again to show shortcuts">
+                                            Prioritize CTRL-/ and CMD-/ above OOB shortcut.
+                                        </label>
+                                    </div> 
                                     <select class="snu-setting form-select form-select-sm" name="slashoption"
                                         id="slashoption">
                                         <option value="on">On - Activate on / or CTRL-/</option>
@@ -396,7 +410,7 @@
                                 </div>
                                 <div class="form-check">
                                     <label class="form-check-label" for="slashhistory">
-                                        Locally store slashcommands per instance:
+                                        Locally store last used slash commands per instance:
                                     </label>
                                     <select class="snu-setting form-select form-select-sm" name="slashhistory"
                                         id="slashhistory">
@@ -550,7 +564,9 @@
 
                 <div class="tab-pane active" id="tababout">
                     <h4>SN Utils <span id='snuVersion'></span></h4>
-                    <div class="wasabi">
+                    <div id="notactive" class="alert alert-danger" role="alert">SN Utils does not run on the current page!</div>
+
+                    <div class="wasabi" id="leavereview">
                         Do you ❤️ SN Utils? A review is appreciated! 
                         <br />
                         <a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/sn-utils-tools-for-servic/jgaodbdddndbaijmcljdbglhpdhnjobg/reviews" target="_blank">Chrome</a> / 
@@ -558,6 +574,8 @@
                         <a rel="noreferrer noopener" href="https://addons.mozilla.org/firefox/addon/servicenow-utils2/reviews/" target="_blank">Firefox</a> / 
                         <a rel="noreferrer noopener" href="https://apps.apple.com/app/sn-utils/id1542209967" target="_blank" rel="noreferrer noopener">Safari</a>
                     </div>
+
+                    <!-- <button id="reqPermission" class="btn btn-primary btn-sm" title="Request permission" type="button">Request permission</button> -->
 
                     <br />
                     Developed by

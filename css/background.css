@@ -45,8 +45,10 @@ body {
 hr {
     border: 0;
     height: 1px;
-    background: #333;
-    background-image: linear-gradient(to right, #ccc, #333, #ccc);
+    background: #e5e5e5;
+    margin-block-start: 4px;
+    margin-block-end: 4px;
+    background-image: linear-gradient(to right, #e5e5e5, #ccc, #e5e5e5);
 }
 
 pre {
@@ -55,4 +57,11 @@ pre {
 
 label{
     font-size:9pt;
+}
+
+/* modern additions */
+h4, .result_header{
+    height: 20px;
+    margin-block-start: 0;
+    margin-block-end: 0;
 }

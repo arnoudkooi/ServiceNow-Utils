@@ -31,7 +31,6 @@ function snuActionSendScriptsToScriptSync(){
 
 
     let sidePanelReact = snuFindReact(document.querySelector(".actionOutline.pn-content"));
-    let actionName = document.querySelector('#header-title-input')?.value;
     let scope = sidePanelReact?.props?.editorState?.actProps.scope;
     let actSteps = sidePanelReact?.props?.editorState?.actSteps;
     let allSteps = sidePanelReact?.props?.allSteps; //the sys_id of the sys_hub_step_instance record only found here
@@ -40,7 +39,7 @@ function snuActionSendScriptsToScriptSync(){
         snuSlashCommandInfoText('No action steps found'); 
         return 
     };
-    if (!allSteps.filter(f => f.DB_TYPE == 'SCRIPT').length){
+    if (!allSteps.filter(f => ['SCRIPT', 'POWERSHELL'].includes(f.DB_TYPE)).length){
         snuSlashCommandInfoText('No script steps found'); 
         return 
     }
@@ -50,14 +49,14 @@ function snuActionSendScriptsToScriptSync(){
     }; 
     var pushed = 0;
     for (let step = 0; step < allSteps.length; step++) {
-        if (allSteps[step].DB_TYPE == "SCRIPT"){
+        if (['SCRIPT', 'POWERSHELL'].includes(allSteps[step].DB_TYPE)){
             if (allSteps[step]?.cid !== actSteps[step]?.cid) continue; //extra check for same step id
             if (allSteps[step]?.readonly) continue; 
             let data = {
                 "sysId" : actSteps[step].step_id,
                 "scope" : scope,
-                "script" : allSteps[step].data.script,
-                "actionName" : actionName.replace(/[^a-z0-9_\-+]+/gi, '-'),
+                "script" : allSteps[step].data?.script || allSteps[step].data?.command,
+                "actionName" : allSteps[step].type_name.replace(/[^a-z0-9_\-+]+/gi, '-'),
                 "scriptName" : allSteps[step].step_name.replace(/[^a-z0-9_\-+]+/gi, '-')
             }
             snuPostToScriptSync(data, 'flowaction')

@@ -3,7 +3,7 @@ body {
     font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
     font-size: 10pt;
     width: 800px;
-    height: 500px;
+    height: 550px;
     overflow-x: hidden;
 }
 
@@ -14,6 +14,10 @@ table {
 
 input {
     accent-color: #5274FF;
+}
+
+a {
+    text-decoration: none;
 }
 
 div.info{
@@ -35,7 +39,11 @@ a.iscurrent {
     text-decoration-line: none;
     color: red;
 }
- 
+a.iscurrent:hover {
+    text-decoration-line:underline;
+
+} 
+
 #content ul.nav {
     background-color: #032D42;
     border-bottom: #86ED78 5px solid;
@@ -114,9 +122,7 @@ span.waiting {
 a {
     color: #009156;
 }
-a:hover {
-    color: #009156;
-}
+
 
 
 .btn-primary {
@@ -298,7 +304,7 @@ div.snucmdurl {
 
 i.fas, i.far{
     font-size:9pt;
-    padding-right: 3px;
+    margin-right: 3px;
     text-align: center;
 }
 
