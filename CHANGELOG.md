@@ -1,7 +1,12 @@
 # CHANGELOG.md
-## 8.0.1 (2024-05-)
+## 8.0.2.0 (2024-05-16)
 Fixes / changes:
-  - Fix for /vd does not work on tables without sys_updated.. fields (Issue #499)
+  - Fix for /vd does not work on tables without sys_updated.. fields (Issue #499) 
+  - Separator line adjust when height changen in BG Script page (Issue #502)
+  - Add copy button to BG Script result as well as restructure to use icons instead of text links
+  - Also add a button to BG script to toggle *** Script: prefix in result output
+  - moved bgscript.js to /js folder
+  - added par_ prefix so to snuAddFieldSyncButtons function
 
 
 ## 8.0.1.0 (2024-05-02)

@@ -8,6 +8,7 @@ snuDivInfo.style.fontSize = '9pt';
 snuDivInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
 let snuScript = document.querySelector('div.script-container');
 document.querySelector('form').setAttribute('onsubmit', '');
+let snuLoadedResult = '';
 
 let snuLeftSide, snuResizer, snuRightSide, snuResult, snuResultWrapper, snuTimerInterval;
 
@@ -24,15 +25,15 @@ if (snusettings.applybgseditor && snuScript) {
 		snuDividePage();
 		snuMakePostAsync();
 		snuEnhanceMonaco();
-	
+
 		snuDiv.setAttribute("id", "container");
 		snuScript.parentNode.insertBefore(snuDivInfo, snuScript);
 
-		if (snusettings.vsscriptsync){
+		if (snusettings.vsscriptsync) {
 			let a = document.createElement('a');
 			a.innerText = 'Open in VS Code';
 			a.title = '[SN Utils] Open in VS Code via sn-scriptsync';
-			a.addEventListener('click', (ev) =>{
+			a.addEventListener('click', (ev) => {
 				ev.preventDefault();
 				snuPostToScriptSync();
 			});
@@ -73,23 +74,37 @@ function snuMakePostAsync() {
 				clearInterval(snuTimerInterval);
 				top.document.title = "🟢 BG script finished.."
 				snuResult.innerHTML = response.replace('<HTML><BODY>', '').replace('</BODY></HTML>', '');
-				snuResizer.style.height = document.body.scrollHeight + 'px';
+				snuResizer.style.height = Math.max(snuLeftSide.scrollHeight, snuRightSide.scrollHeight) + 'px';
 				document.querySelector('button[type="submit"]').disabled = false;
 
-				//add downloadlink
+				//add download and copy link
 				let text = document.querySelector('.result pre').innerText;
+				snuLoadedResult = text;
 				if (text.length > 10) {
-					let oldLink = document.querySelector('.result a');
-					let lnk = document.createElement('a');
-					let linkText = document.createTextNode("download result");
-					lnk.appendChild(linkText);
-					lnk.href = "#";
-					lnk.style.display = "block";
-					lnk.title = 'Added via SN Utils'
-					lnk.addEventListener('click', evt => {
-						snuDownloadResult();
-					});
-					oldLink.append(lnk);
+					let divBar = document.createElement('div');
+					divBar.id = 'resultbar';
+					divBar.innerHTML = `
+					<a href="#" title="[SN Utils] Toggle prefix" onclick="snuTogglePrefix()">
+						<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"/>
+						</svg>
+				  	</a>
+					<a href="#" title="[SN Utils] Download result" onclick="snuDownloadResult()" >
+						<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2m-1-5-4 5-4-5m9 8h.01"/>
+						</svg>
+					</a>
+					<a href="#" title="[SN Utils] Copy result to clipboard" onclick="snuCopyResult()" >
+						<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/>
+						</svg>
+					</a>
+					<span id="actionResult">Click icon to toggle prefix or download / copy result</span>
+					`;
+					let preElement = document.querySelector('.result pre');
+					preElement.parentNode.insertBefore(divBar, preElement);
+
+
 				}
 
 			})
@@ -191,6 +206,8 @@ function snuDownloadResult() {
 	document.body.appendChild(element);
 	element.click();
 	document.body.removeChild(element);
+
+	document.querySelector('#actionResult').innerText = 'Downloaded ' + text.length + ' characters';
 }
 
 
@@ -255,4 +272,46 @@ function snuStartStopWatch() {
 		let timer = snuResult.querySelector('#timer');
 		if (timer) timer.innerHTML = (elapsedTime / 1000).toFixed(3);
 	}, 100);
+}
+
+
+async function snuCopyResult() {
+	try {
+		// Get the <pre> element
+		const pre = document.querySelector('.result pre');
+
+		// Use the navigator clipboard API to copy text
+		await navigator.clipboard.writeText(pre.innerText);
+		console.log('Text copied successfully!');
+		document.querySelector('#actionResult').innerText = 'Copied ' + pre.innerText.length + ' characters to clipboard';
+
+	} catch (err) {
+		document.querySelector('#actionResult').innerText = 'Failed to copy text: ' + err.message;
+	}
+}
+
+function snuTogglePrefix() {
+    const pre = document.querySelector('.result pre');
+
+    if (pre.innerText.length < snuLoadedResult.length) {
+        pre.innerText = snuLoadedResult;
+        return;
+    }
+
+    let prefix = '*** Script';
+    let scopeName = document.querySelector('#sys_scope').selectedOptions[0].text;
+    if (scopeName !== 'global') {
+        prefix = scopeName;
+    }
+
+    // Escape the prefix to safely use it in the regular expression
+    let escapedPrefix = escapeRegExp(prefix);
+    let regex = new RegExp(`^${escapedPrefix}:\\s*`, 'gm');
+
+    pre.innerText = pre.innerText.replace(regex, '');
+
+	function escapeRegExp(string) {
+		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+	}
+	
 }

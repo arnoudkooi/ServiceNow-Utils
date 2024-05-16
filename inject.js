@@ -4069,7 +4069,7 @@ function snuAddFieldSyncButtons() {
     if (typeof g_form != 'undefined') {
         //if (g_form.isNewRecord()) return;
         var tableName = g_form.getTableName();
-        var isSysTable = tableName.startsWith('sys_');
+        var isSysTable = tableName.startsWith('sys_') ||  tableName.startsWith('par_');
         jQuery(".label-text").each(function (index, value) {
             try {
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
