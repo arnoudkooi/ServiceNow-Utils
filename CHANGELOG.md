@@ -1,4 +1,10 @@
 # CHANGELOG.md
+
+## 8.0.3.0 (2024-05-18)
+Features:
+  - Records that are most likely metadata get a link added to the Related links section. Clicking this link opens a modal with the Update Versions (name=tablename_sys_id). The link only shows on existing records and when the form does not have the versions related list. function: snuAddSysUpdateVersionLink()
+
+
 ## 8.0.2.0 (2024-05-16)
 Fixes / changes:
   - Fix for /vd does not work on tables without sys_updated.. fields (Issue #499) 

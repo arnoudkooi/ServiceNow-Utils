@@ -1661,7 +1661,8 @@ function snuSettingsAdded() {
         snuEnhanceNotFound();
         snuPaFormulaLinks();
         snuRemoveLinkLess();
-        snuTableCollectionLink();
+        snuAddTableCollectionLink();
+        snuAddSysUpdateVersionLink();
         snuNewFromPopupToTab();
         snuCreateHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
@@ -2961,12 +2962,57 @@ function snuRemoveLinkLess() {
         newUrl + "' title='Link added by SN Utils (This is NOT a UI Action!)' >Show Related links</a></span>"));
 }
 
-function snuTableCollectionLink() {
+function snuAddTableCollectionLink() {
     if (location.pathname != "/sys_db_object.do") return;
     if (typeof jQuery == 'undefined') return;
     var tbl = g_form.getValue('name');
-    jQuery('.related_links_container').append("<li style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='sys_dictionary.do?sysparm_query=name=" +
-        tbl + "^internal_type=collection&sysparm_view=advanced' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
+    jQuery('.related_links_container').append("<li style='margin-top:5px;' ><a href='sys_dictionary.do?sysparm_query=name=" +
+        tbl + "^internal_type=collection&sysparm_view=advanced' class='navigation_link action_context default-focus-outline' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
+}
+
+async function snuAddSysUpdateVersionLink() {
+    if (typeof g_form === 'undefined') return;
+    if (g_form.isNewRecord()) return;
+
+    let tbl = g_form.getTableName();
+    let isProbableUpdateSync = g_form.hasField('sys_scope') || tbl.startsWith('sys_') || g_form.getScope() != 'global';
+    if (!isProbableUpdateSync) return;
+    if (g_form.getRelatedListNames().join(',').includes('67bdac52374010008687ddb1967334ee')) return; //already there
+    
+
+    let relatedLinksContainer = document.querySelector('.related_links_container');
+    if (!relatedLinksContainer) return;
+
+    let query = `name=${tbl}_${g_form.getUniqueValue()}`;
+
+    //sys_update_version_list.do?sysparm_query=name=$table_$sysid
+    let result = await snuFetchData(g_ck, 
+        `/api/now/table/sys_update_version?sysparm_query=${query}&sysparm_fields=sys_id&sysparm_limit=1`);
+
+    let versionRecords = result.resultcount || 0;
+    
+    var listItem = document.createElement('li');
+    listItem.style.marginTop = '5px';
+
+    var anchor = document.createElement('a');
+    anchor.href = '#';
+    anchor.className = 'navigation_link action_context default-focus-outline';
+    anchor.title = 'Version link added by SN Utils, Versions related list not found (This is NOT a UI Action)';
+    anchor.textContent = `[SN Utils] Versions (${versionRecords})`;
+    anchor.addEventListener('click', () => openVersionList(query));
+    listItem.appendChild(anchor);
+    relatedLinksContainer.appendChild(listItem);
+
+
+    function openVersionList(query) {
+        var gm = new GlideModal("sys_update_version_list");
+        gm.setTitle('[SN Utils] Update Versions');
+        gm.setPreference('sysparm_fixed_query', query);      	
+        gm.setPreference('sysparm_query', '^ORDERBYDESCsys_updated_on');      	
+        gm.setWidth(900);
+        gm.render();
+    }
+
 }
 
 function snuEnterToFilterSlushBucket() {
@@ -3600,7 +3646,7 @@ async function snuFetchData(token, url, post, callback) {
           body: post ? JSON.stringify(post?.body) : null
         });
         let data = response.ok ? await response.json() : response;
-        data.resultcount = response.headers.get("X-Total-Count");
+        data.resultcount = Number(response.headers.get("X-Total-Count"));
         if (callback) callback(data);
         resolve(data);
       } catch (error) {
