@@ -6,7 +6,7 @@ let snuLoadedResult = '';
 let div = document.createElement('div');
 let divInfo = document.createElement('div');
 top.document.title ="⚪ BG script not started"
-divInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bg to open this page | Editor and shortcut added by SN Utils';
+divInfo.innerText = 'CTRL/CMD SHIFT Enter to Execute | Slashcommand /bg to open this page | Editor and shortcut added by SN Utils';
 divInfo.style.fontSize = '9pt';
 divInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
 let scrpt = document.getElementById('runscript');
@@ -81,7 +81,7 @@ if (snusettings.applybgseditor && scrpt) {
 		editor.addAction({
 			id: "runScript",
 			label: "Run script",
-			keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+			keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
 			contextMenuGroupId: "2_execution",
 			precondition: blockContext,
 			run: () => {

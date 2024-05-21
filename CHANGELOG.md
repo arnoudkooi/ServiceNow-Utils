@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 8.1.0.1 (2024-05-20)
+Fixes / changes:
+  - Change background script execute shortcut to CMD-SHIFT-Enter to prevent conflict with Now Assist
+  
 ## 8.1.0.0 (2024-05-20)
 Features:
   - On clasic forms with attatchments, you can now click [⌕] This opens a modal with a list of the attachments, and it tries to show the preview of the attachment. 

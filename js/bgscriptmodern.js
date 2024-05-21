@@ -3,7 +3,7 @@ let snuEditor;
 let snuDiv = document.createElement('div');
 let snuDivInfo = document.createElement('div');
 top.document.title = "⚪ BG script not started"
-snuDivInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils | ';
+snuDivInfo.innerText = 'CTRL/CMD SHIFT Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils | ';
 snuDivInfo.style.fontSize = '9pt';
 snuDivInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
 let snuScript = document.querySelector('div.script-container');
@@ -171,7 +171,7 @@ function snuEnhanceMonaco() {
 	snuEditor.addAction({
 		id: "runScript",
 		label: "Run script",
-		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
 		contextMenuGroupId: "2_info",
 		precondition: blockContext,
 		run: () => {
