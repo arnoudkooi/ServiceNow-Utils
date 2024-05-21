@@ -4,7 +4,7 @@
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
     "version": "8.1.0.0",
-    "manifest_version": 3,
+    "manifest_version": 3, 
     "permissions": [
       "activeTab",
       "declarativeContent",
