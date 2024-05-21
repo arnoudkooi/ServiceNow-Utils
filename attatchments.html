@@ -1,0 +1,47 @@
+<html data-bs-theme="dark">
+
+<head>
+  <title>View data - SN Utils</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/datatables.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/viewdata.css">
+
+
+  <script src="js/purify.min.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="js/moment.js"></script>
+  <script src="js/datatables.min.js"></script>
+  <script src="js/datatables-datetime.js"></script>
+  <script src="viewdata.js"></script>
+
+  <base href="/#">
+</head>
+
+<body>
+  <div id="fixheader">
+    <div id="title"><img class="wdth40" src="/images/icon128.png" alt="SN Utils logo" /> View Data details &nbsp;&nbsp;
+      <span id="whotheheck">Table | Created  | Updated</span>
+    </div>
+    <div class="input-group">
+      <input type="search" id="tbxdataexplore" name="tbxdataexplore" class="form-control form-control-sm sync"
+        placeholder="Search data...">
+      <div id="divhideempty">
+        <input class="form-check-input sync" type="checkbox" id="cbxhideempty" name="cbxhideempty">
+        <label class="form-check-label" for="cbxhideempty" title="Hide rows where the field is empty">
+          Hide empty rows.
+        </label></input>
+      </div>
+      <button id='btnrefreshdataexplore' class="btn btn-outline-secondary btn-sm" title="Refresh data"
+        type="button">Refresh</button>
+    </div>
+  </div>
+<div>
+  <iframe id="iframedatadetails" src="https://snutils.service-now.com/$viewer.do?sysparm_stack=no&sysparm_sys_id=f608dfd3478ac2109f91e889116d4373" style="width:100%;height:100%;border:none;"></iframe>
+</div>
+
+</body>
+
+</html>

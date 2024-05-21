@@ -1251,7 +1251,7 @@ function snuSlashCommandAddListener() {
                 else {
 
                     if (targeturl.startsWith("javascript:")) {
-                        window.location = DOMPurify.sanitize(targeturl);
+                        window.location = targeturl;
                     }
                     else if (!targeturl.startsWith("//")) {
                         if ((new Date()).getTime() - snuLastOpened > 500) {
@@ -1678,6 +1678,7 @@ function snuSettingsAdded() {
         snuHyperlinkifyWorkNotes();
         snuEasifyAdvancedFilter();
         snuAddGckToken("stats.do");
+        snuAddPreviewAttachmentLinks();
 
     }
 
@@ -1856,6 +1857,7 @@ function snuRemoveFromList() {
 function snuDoubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined' || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
         document.addEventListener('dblclick', event => {
+            console.log(event.target);
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') ||
                 event?.target?.parentElement?.classList.contains('sc_editor_label')) {
                event.preventDefault();
@@ -1927,7 +1929,7 @@ function snuDoubleClickToShowFieldOrReload() {
                 }
             }
             else if (['div', 'li', 'body'].includes(event.target.localName) && !event.target.parentElement.className.includes('monaco')) {
-                if (!window?.snusettings?.nouielements) //disable the doubleclick when SN Utils UI elements off
+                if (!window?.snusettings?.nouielements  && event.target.className !== 'snuwrap') //disable the doubleclick when SN Utils UI elements off
                     snuAddTechnicalNames();
             }
         }, true);
@@ -3005,6 +3007,13 @@ async function snuAddSysUpdateVersionLink() {
 
 
     function openVersionList(query) {
+
+        if (typeof GlideList2 == 'undefined') { //fallback #504
+            console.log('GlideList2 not on form, opening new tab, see GitHub Isse #504 for more info');
+            window.open(`/sys_update_version_list.do?sysparm_fixed_query=${query}`, 'versions');
+            return;
+        }
+
         var gm = new GlideModal("sys_update_version_list");
         gm.setTitle('[SN Utils] Update Versions');
         gm.setPreference('sysparm_fixed_query', query);      	
@@ -3172,7 +3181,14 @@ function snuSetShortCuts() {
     var snudirectlinks = (snunumbernav) ? '' : 'snudirectlinksdisabled';
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;">&nbsp;</span></div>
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slash commands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 0pt;">
+    <a style="color:inherit; font-family:Helvetica,Ariel;text-decoration:none; display:flex; align-items:center;" href="https://www.linkedin.com/company/sn-utils" target="_blank"> Follow #snutils on  
+    <?xml version="1.0" ?><svg style="margin:3px;" height="14" viewBox="0 0 72 72" width="14" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd"><path d="M8,72 L64,72 C68.418278,72 72,68.418278 72,64 L72,8 C72,3.581722 68.418278,-8.11624501e-16 64,0 L8,0 C3.581722,8.11624501e-16 -5.41083001e-16,3.581722 0,8 L0,64 C5.41083001e-16,68.418278 3.581722,72 8,72 Z" fill="#007EBB"/>
+    <path d="M62,62 L51.315625,62 L51.315625,43.8021149 C51.315625,38.8127542 49.4197917,36.0245323 45.4707031,36.0245323 C41.1746094,36.0245323 38.9300781,38.9261103 38.9300781,43.8021149 L38.9300781,62 L28.6333333,62 L28.6333333,27.3333333 L38.9300781,27.3333333 
+    L38.9300781,32.0029283 C38.9300781,32.0029283 42.0260417,26.2742151 49.3825521,26.2742151 C56.7356771,26.2742151 62,30.7644705 62,40.051212 L62,62 Z M16.349349,22.7940133 C12.8420573,22.7940133 10,19.9296567 10,16.3970067 C10,12.8643566 12.8420573,10 16.349349,10 
+    C19.8566406,10 22.6970052,12.8643566 22.6970052,16.3970067 C22.6970052,19.9296567 19.8566406,22.7940133 16.349349,22.7940133 Z M11.0325521,62 L21.769401,62 L21.769401,27.3333333 L11.0325521,27.3333333 L11.0325521,62 Z" fill="#FFF"/></g>
+    </svg></a> &nbsp;</span></div>
     <input id="snufilter" name="snufilter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="both" aria-haspopup="false" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks" class="${snudirectlinks}"></div>
@@ -5442,4 +5458,360 @@ function snuInstanceTagToggle(){
         document.documentElement.style.setProperty("--snu-instancetag-tag-display", snuInstanceTagConfig.tagEnabled ? "" : "none");
         snuDispatchBackgroundEvent("updateinstancetagconfig", snuInstanceTagConfig);
     }
+}
+
+
+async function snuPreviewAttachmentsModal(attSysId){
+    let data = await snuFetchData(g_ck,`/api/now/attachment?sysparm_query=table_name=${g_form.getTableName()}^table_sys_id=${g_form.getUniqueValue()}&syssysparm_limit=100`);
+    data = data?.result;
+    if (!data.length) return;
+
+    const container = document.createElement('div');
+    container.id = 'snuAttachmentPreview';
+    container.innerHTML = `
+    <style>
+
+    #snuAttachmentPreview {
+        display: flex;
+        width: 100%;
+        height: 80vh;
+    }
+
+    #snuAttatchmentNav {
+        width: 20%;
+        overflow-y: auto;
+    }
+
+    #snuAttatchmentContent {
+        width: 80%;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        padding: 5px;
+    }
+
+    #snuAttatchmentNav ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    #snuAttatchmentNav ul li {
+        position: relative;
+        padding-left: 16px; 
+        margin-bottom: 3px;
+        background-image: url('/images/icons/attach_text.gifx'); 
+        background-size: 12px 12px;
+        background-repeat: no-repeat; 
+        background-position: left top;
+        cursor: pointer;
+    }
+
+    #snuAttatchmentNav ul li a {
+        text-decoration: none;
+        color: #000;
+        display: block;
+    }
+
+    #snuAttachmentPreview:has(.modal-dialog) {
+        width:95%;
+    }
+
+    #snuFilterAttachmentsInput{ 
+        width: 98%;
+        padding: 2px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+     }
+
+    #snuFilterAttachmentsInput:focus {
+        outline: none;
+    }
+
+    .emailtable, .emailtable td {
+        padding-bottom:4px;
+        padding-right:10px;
+        vertical-align:top;
+    }
+
+    </style>
+    <div id="snuAttatchmentNav">
+    <input type="text" id="snuFilterAttachmentsInput" placeholder="Filter attachments...">
+        <ul>
+            
+        </ul>
+    </div>
+    <div id="snuAttatchmentContent">
+        <p>Select an attachment to preview it.</p>
+        <p>New feature, view ony, rename, delete and download via the classic way.<br />
+        respond via the new <a href="https://www.linkedin.com/company/sn-utils/" target="_blank">LinkedIn page</a></p>
+    </div>
+    `
+
+
+    let attachmentList = container.querySelector("ul");
+    let storedAtt;
+    data.forEach(att => {
+        const parts = att.file_name.split('.');
+        att.extension = parts.length > 1 ? parts.pop() : '';
+
+        const listItem = document.createElement('li');
+        listItem.style.fontSize = '9pt';
+        listItem.id = 'att_' + att.sys_id;
+        listItem.onclick = () => snuSetAttachmentPreview(att);
+        const fileSize = formatFileSize(parseInt(att.size_bytes, 10));
+        listItem.textContent = `${att.file_name} (${fileSize})`;
+        listItem.title = att.content_type;
+        listItem.dataset.type = att.content_type;
+
+        if (att.content_type.includes('image')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_image.gifx)';
+        else if (att.content_type.includes('video')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_video.gifx)';
+        else if (att.content_type.includes('audio')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_audio.gifx)';
+        else if (att.content_type.includes('zip')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_zip.gifx)';
+        else if (att.extension.startsWith('xls')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_excel.gifx)';
+        else if (att.extension.startsWith('doc')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_word.gifx)';
+        else if (att.extension.startsWith('ppt')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_project.gifx)';
+        else if (att.extension.startsWith('xml')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_xml.gifx)';
+        else if (['msg','eml'].includes(att.extension)) 
+            listItem.style.backgroundImage = 'url(/images/icons/email.gifx)';
+        else if (['ics'].includes(att.extension)) 
+            listItem.style.backgroundImage = 'url(/images/icons/time.gifx)';
+        else if (att.extension == 'pdf') 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_pdf.gifx)';
+
+
+        attachmentList.appendChild(listItem);
+
+        if (att.sys_id == attSysId) {
+            listItem.style.fontWeight = 'bold';
+            storedAtt = att;
+        }
+
+
+    });
+
+    function formatFileSize(bytes) {
+        const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes === 0) return '0 b';
+        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
+        return `${(bytes / (1024 ** i)).toFixed(0)} ${sizes[i]}`;
+    }
+
+    const modal = new GlideModal('snuPreviewAttachments');
+    modal.setTitle('[SN Utils] Preview Attachments (beta)');
+    modal.setBody(container);
+
+    if (storedAtt) snuSetAttachmentPreview(storedAtt);
+
+    document.querySelector('#snuPreviewAttachments .modal-dialog').style.width = '95%';
+    document.querySelector('#snuFilterAttachmentsInput').addEventListener('keyup', function() {
+        const filterValue = this.value.toLowerCase();
+        const filterWords = filterValue.split(' ');
+        const listItems = document.querySelectorAll('#snuAttatchmentNav ul li');
+
+        listItems.forEach(function(item) {
+            const text = item.textContent.toLowerCase() + ' ' + item?.dataset?.type.toLowerCase();
+            const matches = filterWords.every(word => text.includes(word));
+            if (matches) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+    document.querySelector('#snuFilterAttachmentsInput').focus();
+}
+
+async function snuSetAttachmentPreview(att){
+    document.querySelectorAll('#snuAttatchmentNav ul li').forEach(li => {
+        li.style.fontWeight = 'normal'
+        if (li.id == 'att_' + att.sys_id) li.style.fontWeight = 'bold';
+    });
+
+    if (att.content_type.includes('image')) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = `${att.sys_id}.iix`;
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+        content.appendChild(img);
+    }
+    else if (att.content_type.includes('video')) {  
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const video = document.createElement('video');
+        video.src = `/sys_attachment.do?sys_id=${att.sys_id}`;
+        video.controls = true;
+        video.style.maxWidth = '100%';
+        video.style.maxHeight = '100%';
+        content.appendChild(video);
+    }   
+    else if (att.content_type.includes('audio')) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const audio = document.createElement('audio');
+        audio.src = `/sys_attachment.do?sys_id=${att.sys_id}`;
+        audio.controls = true;
+        audio.style.width = '100%';
+        content.appendChild(audio);
+    }
+    else if (['pdf'].includes(att.extension)) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = 'PDF being loaded, please wait...';
+        try {
+            const response = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const iframe = document.createElement('iframe');
+            content.innerHTML = '';
+            iframe.src = `/$viewer.do?sysparm_stack=no&sysparm_sys_id=${att.sys_id}`;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            content.appendChild(iframe);
+        } catch (error) {
+            const content = document.querySelector('#snuAttatchmentContent');
+            content.innerHTML = 'Error loading PDF:' + error.message;
+        }
+    }
+    else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(att.extension)) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.src = `/$viewer.do?sysparm_stack=no&sysparm_sys_id=${att.sys_id}`;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        content.appendChild(iframe);
+    }
+    else if (['txt', 'log', 'xml', 'json', 'html', 'css', 'js', 'sql', 'md', 'eml', 'ics'].includes(att.extension)) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        
+    
+        var fileContent = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`).then(response => response.text());
+        
+        var span = document.createElement('span');
+        span.innerHTML = `
+        Download: <a href="/sys_attachment.do?sys_id=${att.sys_id}">${att.file_name}</a> | 
+        <a href="#" title="[SN Utils] Copy result to clipboard" onclick="snuCopyAttatchmentContent()" >
+        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/>
+        </svg>
+        </a><span id="actionResult"></span>`;
+        content.appendChild(span);
+        
+        const pre = document.createElement('pre');
+        pre.textContent = fileContent;
+        pre.id = 'snuAttatchmentContentPre';
+        pre.style.overflow = 'auto';
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.style.maxHeight = '100%';
+        content.appendChild(pre);
+
+    }
+    else if (['msg'].includes(att.extension)) {
+
+        let scriptRead = document.createElement('script');
+        scriptRead.async = false; 
+        scriptRead.src = snusettings.extensionUrl + 'js/msg.reader.js';
+        document.head.appendChild(scriptRead);
+        let scriptStream = document.createElement('script');
+        scriptStream.async = false; 
+        scriptStream.src = snusettings.extensionUrl + 'js/DataStream.js';
+        document.head.appendChild(scriptStream);
+
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        let fileContent = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`).then(response => response.blob());
+        let fileArrayBuffer = await new Response(fileContent).arrayBuffer();
+        
+        var msgReader = new MSGReader(fileArrayBuffer);
+        var fileData = msgReader.getFileData();
+        
+        const div = document.createElement('div');
+        div.innerHTML = jsonToHtmlTable(fileData);
+        div.style.overflow = 'auto';
+        div.style.maxHeight = '100%';
+        content.appendChild(div);
+
+        function jsonToHtmlTable(jsonData) {
+
+            let table = '<table class="emailtable" border="0">';
+        
+            table += '<tr>';
+            table += `<td>Subject:</td><td>${jsonData.subject}</td>`;
+            table += '</tr>';
+
+            table += '<tr>';
+            table += `<td>Sender:</td><td>${jsonData.senderName} (${jsonData.senderEmail})</td>`;
+            table += '</tr>';
+
+            table += '<tr><td>Recipient:</td><td>';
+            jsonData.recipients.forEach(recipient => table += `${recipient.name}(${recipient.email});`);
+            table += '</td></tr>';
+        
+            table += '<tr>';
+            table += `<td>Body:</td><td><pre style="max-width:100%; white-space: pre-wrap;">${jsonData.body}</pre></td>`;
+            table += '</tr>';
+        
+            table += '</table>';
+        
+            return table;
+        }
+        
+        
+
+    }
+    else{
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const a = document.createElement('a');
+        a.href = `/sys_attachment.do?sys_id=${att.sys_id}`;
+        a.textContent = `${att.file_name} Filetype not supportes, download attachment`;
+        a.style.display = 'block';
+        content.appendChild(a);
+    }
+}
+
+async function snuCopyAttatchmentContent() {
+	try {
+		// Get the <pre> element
+		const pre = document.querySelector('#snuAttatchmentContentPre');
+
+		// Use the navigator clipboard API to copy text
+		await navigator.clipboard.writeText(pre.innerText);
+		console.log('Text copied successfully!');
+		document.querySelector('#actionResult').innerText = 'Copied ' + pre.innerText.length + ' characters to clipboard';
+
+	} catch (err) {
+		document.querySelector('#actionResult').innerText = 'Failed to copy text: ' + err.message;
+	}
+}
+
+function snuAddPreviewAttachmentLinks(){
+    if (typeof g_form == 'undefined') return;
+    
+    let attachments = document.querySelectorAll('li.attachment_list_items, li.manage_list');
+    attachments.forEach(attachment => {
+        let attSysId= attachment?.firstChild?.id?.replace('attachment_', '') || '';
+        let pvw = document.createElement('a');
+        pvw.innerHTML = "[⌕]&nbsp;";
+        pvw.title = "[SN Utils] Open Preview attachments modal (beta)";
+        pvw.onclick = () => snuPreviewAttachmentsModal(attSysId);
+        if (attachment.classList.contains('attachment_list_items')) 
+            attachment.querySelector('span').appendChild(pvw);
+        if (attachments.length > 1 && attachment.classList.contains('manage_list')) 
+            attachment.insertBefore(pvw, attachment.firstChild);
+    });
 }

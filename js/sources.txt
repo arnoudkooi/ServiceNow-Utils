@@ -8,4 +8,6 @@ jquery.deserialize.js https://raw.githubusercontent.com/kflorence/jquery-deseria
 purify.min.js https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js
 Tinycon.js https://github.com/tommoor/tinycon/blob/master/tinycon.js
 md5.js https://github.com/blueimp/JavaScript-MD5/blob/master/js/md5.js
+msg.reader.js https://github.com/ykarpovich/msg.reader/blob/master/msg.reader.js
+DataStream.js https://github.com/ykarpovich/msg.reader/blob/master/DataStream.js
 Monaco Editor: Files Copied from node_modules installation version 0.43.0

@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 8.1.0.0 (2024-05-20)
+Features:
+  - On clasic forms with attatchments, you can now click [⌕] This opens a modal with a list of the attachments, and it tries to show the preview of the attachment. 
+
+Fixes / changes:
+  - Excluding javascript: slash commands from purifieing (Issue #503)
+  - Adding fallback for the new versions link, to open a new tab instead of popup, when GlideList2 is not available (Issue #504)
+  - Excluding field names in list from Technical Names toggle via double click (Discussion #505)
+  - Added promotion links to follow the new LinkedIn Page https://www.linkedin.com/company/sn-utils
+  - Added msg.reader.js and DataStrea.js library to support preview .msg files in the attachment modal
+
 ## 8.0.3.0 (2024-05-18)
 Features:
   - Records that are most likely metadata get a link added to the Related links section. Clicking this link opens a modal with the Update Versions (name=tablename_sys_id). The link only shows on existing records and when the form does not have the versions related list. function: snuAddSysUpdateVersionLink()
