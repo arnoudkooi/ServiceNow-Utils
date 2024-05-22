@@ -3,13 +3,21 @@ body {
     font-size: 11pt;
     height: 100%;
     margin-top: 0;
+    color: rgb(var(--now-color_text--primary, 0, 0, 0)); /* Fallback to black */
+    background-color: rgb(var(--now-color_background--secondary, 255, 255, 255)); /* Fallback to white */
+
+    a:link {
+        color: rgb(var(--now-button--bare_primary--color, 0, 0, 238)); /* Fallback to standard link blue */
+    }
+    a:visited{
+        color: rgb(var(--now-button--bare_primary--color, 85, 26, 139)); /* Fallback to standard visited link purple */
+    }
 }
 
 #container {
-    min-height:70vh; 
-    border:1pt solid #cccccc;
+    min-height: 70vh; 
+    border: 1pt solid rgb(var(--now-form-field--border-color, 192, 192, 192)); /* Fallback to light gray */
 }
-
 
 .container {
     display: flex;
@@ -22,11 +30,11 @@ body {
 .container__left {
     padding: 10px;
     min-height: 100vh;
-    width: 65%
+    width: 65%;
 }
 
 .resizer {
-    background-color: #cbd5e0;
+    background-color: rgb(var(--now-form-field--border-color, 192, 192, 192)); /* Fallback to light gray */
     cursor: ew-resize;
     height: 100vh;
     width: 2px;
@@ -35,7 +43,7 @@ body {
 .container__right {
     padding: 10px;
     height: 100vh;
-    width: 35%
+    width: 35%;
 }
 
 .result {
@@ -45,7 +53,7 @@ body {
 hr {
     border: 0;
     height: 1px;
-    background: #e5e5e5;
+    background: rgb(var(--now-form-field--border-color, 192, 192, 192)); /* Fallback to light gray */
     margin-block-start: 4px;
     margin-block-end: 4px;
     background-image: linear-gradient(to right, #e5e5e5, #ccc, #e5e5e5);
@@ -55,30 +63,35 @@ pre {
     white-space: pre-wrap;
 }
 
-label{
-    font-size:9pt;
+label {
+    font-size: 9pt;
 }
 
 /* modern additions */
-h4, .result_header{
+h4, .result_header {
     height: 20px;
     margin-block-start: 0;
     margin-block-end: 0;
 }
 
-#actionResult{
+#actionResult {
     font-size: 8pt;
 }
 
-#resultbar{
-    background-color: #f5f5f5;
-    border: 1px solid #ccc;
+#resultbar {
+    background-color: rgb(var(--now-color_background--primary, 240, 240, 240)); /* Fallback to light gray */
+    border: 1px solid rgb(var(--now-form-field--border-color, 192, 192, 192)); /* Fallback to light gray */
     padding: 5px;
     margin: 5px 0;
     border-radius: 5px;
     font-size: 8pt;
+    display: flex;
+    align-items: center;
+    > * {
+        padding: 0 5px;
+    }
 }
 
-#resultbar a{
+#resultbar a {
     text-decoration: none;
 }

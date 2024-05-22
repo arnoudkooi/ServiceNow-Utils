@@ -1477,6 +1477,64 @@ function snuDiffXml(shortcut, instance = '') {
     return;
 }
 
+function snuLoadThemeVariables() {
+    let themeVariablePromise = new Promise((resolve, reject) => {
+        //If already loaded or in Polaris, we don't need to load.
+        if (document.getElementById("polarisberg_theme_variables"))
+            return resolve("Polaris already loaded");
+
+        //Otherwise we fetch the theme variable url which comes with a cache id
+        //This ensures we retrieve the stylesheet from cache if it hasn't changed
+        fetch(
+            "AJAXJellyRunner.do?template=polarisberg_theme_variables&sysparm_path_only=true",
+            {
+                method: 'POST',
+                headers: {
+                    'ContentType': 'application/json',
+                    'X-UserToken': g_ck
+                }
+            }).then(function (response) {
+                return response.text();
+            }).then(function (data) {
+                var head = document.getElementsByTagName('head')[0];
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = data;
+                link.id = 'polarisberg_theme_variables';
+                head.appendChild(link);
+                //Await for the stylesheet to load
+                link.addEventListener('load', function () {
+                    //Add -polaris class to body if on background script page only.
+                    //The slashcommand dialog has the same class added in the css
+                    if (location.pathname == "/sys.scripts.do") {
+                        var body = document.querySelector('body');
+                        body.classList.add('-polaris');
+                    }
+                    return resolve("Polaris loaded");
+                })
+
+            });
+    });
+    return themeVariablePromise;
+}
+
+function snuIsPolarisEnabled() {
+    //We need to check for the existence of the polaris theme variables and its length
+    let polarisStylesheet;
+    for (let i = 0; i < document.styleSheets.length; i++) {
+        const stylesheet = document.styleSheets[i];
+        if (stylesheet.ownerNode && stylesheet.ownerNode.id === 'polarisberg_theme_variables') {
+            polarisStylesheet = stylesheet;
+            break;
+        }
+    }
+
+    if (polarisStylesheet?.cssRules?.[0]?.style?.length > 1) {
+        return true;
+    }
+    return false;
+}
 
 function snuResolve$(targeturl, query, e) {
     targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
@@ -1631,8 +1689,9 @@ function snuSettingsAdded() {
         snuslashswitches = {...snuslashswitches, ...addedslashsswitches};
     } catch (ex) { } 
 
-
-    snuSetShortCuts();
+    snuLoadThemeVariables().finally(() => {
+        snuSetShortCuts();
+    });
 
     if (!snusettings.nopasteimage) {
         snuBindPaste(snusettings.nouielements == false);
@@ -1650,6 +1709,7 @@ function snuSettingsAdded() {
     if (snusettings.slashoption != "off") {
         snuAddFilterListener();
         snuSlashCommandAddListener();
+
     }
     if (snusettings.s2ify) {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
@@ -3153,7 +3213,7 @@ function snuSetShortCuts() {
     var divstyle;
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; color: black;}
         div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
         ul#snuhelper li {margin-top:2px}
@@ -3188,6 +3248,32 @@ function snuSetShortCuts() {
         @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
+    //Check if the most basic theme css is defined
+    //Query for the id of polaris_theme_variables link element, if it has more than 0 elements, then the theme is polaris
+
+    else if (snusettings.slashtheme == 'theme' && snuIsPolarisEnabled()) {
+        divstyle = `<style>
+        div.snutils { font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; color: rgb(var(--now-color_text--primary)); z-index: 1000000000000; font-size: 8pt; position: fixed; top: 10px; left: 10px; min-height: 50px; padding: 5px; border: 1px solid rgb(var(--now-color_background--secondary)); background-color: rgb(var(--now-color_background--primary)); border-radius: 2px; min-width: 320px; border-radius: 10px; }
+        div.snuheader { font-weight: bold; margin: -4px; background-color: rgb(var(--now-color_surface--neutral-3)); border-radius: 10px 10px 0px 0px; }
+        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; }
+        ul#snuhelper li { margin-top: 2px; }
+        span.cmdkey { font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: 1pt solid rgb(var(--now-button--secondary--border-color)); background-color: rgb(var(--now-color_background--secondary)); color: rgb(var(--now-button--secondary--color)); min-width: 40px; cursor: pointer; display: inline-block; }
+        input.snutils { font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; outline: none; font-size: 10pt; color: rgb(var(--now-text-link--primary--color)); font-weight: bold; width: 99%; border: 1px solid rgb(var(--now-form-field--border-color)); margin: 8px 2px 4px 2px; background-color: rgb(var(--now-color_background--secondary)); }
+        span.cmdlabel { color: rgb(var(--now-color_text--primary)); font-size: 7pt; }
+        a.cmdlink { font-size: 10pt; color: rgb(var(--now-button--bare_primary--color)); }
+        span.semihidden { font-size: 6pt; color: rgb(var(--now-color_text--tertiary)); }
+        ul#snuhelper li:hover span.cmdkey,
+        ul#snuhelper li.active span.cmdkey { border-color: rgb(var(--now-text-link--primary--color)); }
+        ul#snuhelper li.active span.cmdlabel { color: rgb(var(--now-text-link--primary--color)); }
+        div#snudirectlinks { margin: -5px 10px; padding-bottom: 10px; }
+        div#snudirectlinks a { color: rgb(var(--now-button--bare_primary--color)); text-decoration: none; }
+        div#snudirectlinks.snudirectlinksdisabled .dispidx { opacity: 0.3; }
+        div#snudirectlinks div { max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        div.snutils a.patreon { color: #0cffdd; }
+        div.snufadein { animation: snuFadeIn 0.5s; }
+        @keyframes snuFadeIn { 0% { opacity: 0; } 30% { opacity: 0; } 100% { opacity: 1; } }
+        </style>`;
+    }
     else {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; border: #333333 1pt solid; border-radius:  10px;}
@@ -3214,7 +3300,7 @@ function snuSetShortCuts() {
     var htmlFilter = document.createElement('div');
     var snudirectlinks = (snunumbernav) ? '' : 'snudirectlinksdisabled';
     var cleanHTML = DOMPurify.sanitize(divstyle +
-        `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
+        `<div class="snutils -polaris" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
     <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slash commands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 0pt;">
     <a style="color:inherit; font-family:Helvetica,Ariel;text-decoration:none; display:flex; align-items:center;" href="https://www.linkedin.com/company/sn-utils" target="_blank"> Follow #snutils on  
     <?xml version="1.0" ?><svg style="margin:3px;" height="14" viewBox="0 0 72 72" width="14" xmlns="http://www.w3.org/2000/svg">
