@@ -1278,7 +1278,7 @@ function getSlashcommands() {
                 { "mDataProp": "command" },
                 {
                     mRender: function (data, type, row) {
-                        return "<div>" + row.hint + "</div><div class='snucmdurl'>" + row.url + "</div>";
+                        return "<div>" + row.hint + "</div><div class='snucmdurl'>" + row.url.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[tag] || tag)); + "</div>";
                     }
                 },
                 {

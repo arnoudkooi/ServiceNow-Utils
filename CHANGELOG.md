@@ -1,8 +1,10 @@
 # CHANGELOG.md
 
-## 8.1.0.1 (2024-05-20)
+## 8.1.1.0 (2024-05-22)
 Fixes / changes:
+  - Add keyboard up down navigation to attachment preview modal
   - Change background script execute shortcut to CMD-SHIFT-Enter to prevent conflict with Now Assist
+  - Encode url field in Slashcommands settings tab datatable (Issue #503)
   
 ## 8.1.0.0 (2024-05-20)
 Features:

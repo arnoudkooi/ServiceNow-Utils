@@ -5460,7 +5460,7 @@ function snuInstanceTagToggle(){
     }
 }
 
-
+let snuCurrentAttatchmentIndex = -1;
 async function snuPreviewAttachmentsModal(attSysId){
     let data = await snuFetchData(g_ck,`/api/now/attachment?sysparm_query=table_name=${g_form.getTableName()}^table_sys_id=${g_form.getUniqueValue()}&syssysparm_limit=100`);
     data = data?.result;
@@ -5535,7 +5535,7 @@ async function snuPreviewAttachmentsModal(attSysId){
 
     </style>
     <div id="snuAttatchmentNav">
-    <input type="text" id="snuFilterAttachmentsInput" placeholder="Filter attachments...">
+    <input type="search" autocomplet="off" id="snuFilterAttachmentsInput" placeholder="Filter attachments...">
         <ul>
             
         </ul>
@@ -5557,6 +5557,7 @@ async function snuPreviewAttachmentsModal(attSysId){
         const listItem = document.createElement('li');
         listItem.style.fontSize = '9pt';
         listItem.id = 'att_' + att.sys_id;
+        listItem.tabIndex = 0;
         listItem.onclick = () => snuSetAttachmentPreview(att);
         const fileSize = formatFileSize(parseInt(att.size_bytes, 10));
         listItem.textContent = `${att.file_name} (${fileSize})`;
@@ -5610,29 +5611,73 @@ async function snuPreviewAttachmentsModal(attSysId){
 
     if (storedAtt) snuSetAttachmentPreview(storedAtt);
 
-    document.querySelector('#snuPreviewAttachments .modal-dialog').style.width = '95%';
-    document.querySelector('#snuFilterAttachmentsInput').addEventListener('keyup', function() {
-        const filterValue = this.value.toLowerCase();
-        const filterWords = filterValue.split(' ');
-        const listItems = document.querySelectorAll('#snuAttatchmentNav ul li');
 
+    //allow key up down navigation
+    let filterdItems = Array.from(document.querySelectorAll('#snuAttatchmentNav ul li'));
+  
+    // Function to update the focus and highlight the current item
+    function snuUpdateAttachmentFocus(index) {
+        filterdItems.forEach((item, idx) => {
+        if (idx === index) {
+          item.style.fontWeight = 'bold';
+          item.focus();
+          item.click();
+        } else {
+          item.style.fontWeight = 'normal';
+        }
+      });
+    }
+  
+    attachmentList.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        snuCurrentAttatchmentIndex = (snuCurrentAttatchmentIndex + 1) % filterdItems.length;
+        snuUpdateAttachmentFocus(snuCurrentAttatchmentIndex);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        snuCurrentAttatchmentIndex = (snuCurrentAttatchmentIndex - 1 + filterdItems.length) % filterdItems.length;
+        snuUpdateAttachmentFocus(snuCurrentAttatchmentIndex);
+      }
+    });
+
+    //end allow key up down navigation
+
+
+    document.querySelector('#snuPreviewAttachments .modal-dialog').style.width = '95%';
+    document.querySelector('#snuFilterAttachmentsInput').addEventListener('keyup', (e) => {
+        const filterValue = e.target.value.toLowerCase();
+        const filterWords = filterValue.split(' ');
+        listItems = document.querySelectorAll('#snuAttatchmentNav ul li');
+        filterdItems = [];
         listItems.forEach(function(item) {
             const text = item.textContent.toLowerCase() + ' ' + item?.dataset?.type.toLowerCase();
             const matches = filterWords.every(word => text.includes(word));
             if (matches) {
                 item.style.display = '';
+                filterdItems.push(item);
             } else {
                 item.style.display = 'none';
             }
         });
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            snuUpdateAttachmentFocus(0);
+          }
+        
     });
     document.querySelector('#snuFilterAttachmentsInput').focus();
 }
 
 async function snuSetAttachmentPreview(att){
+    let idx = 0;
     document.querySelectorAll('#snuAttatchmentNav ul li').forEach(li => {
         li.style.fontWeight = 'normal'
-        if (li.id == 'att_' + att.sys_id) li.style.fontWeight = 'bold';
+        if (li.id == 'att_' + att.sys_id) {
+            li.style.fontWeight = 'bold';
+            snuCurrentAttatchmentIndex = idx;
+        }
+        idx++;
     });
 
     if (att.content_type.includes('image')) {
@@ -5698,9 +5743,7 @@ async function snuSetAttachmentPreview(att){
         const content = document.querySelector('#snuAttatchmentContent');
         content.innerHTML = '';
         
-    
         var fileContent = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`).then(response => response.text());
-        
         var span = document.createElement('span');
         span.innerHTML = `
         Download: <a href="/sys_attachment.do?sys_id=${att.sys_id}">${att.file_name}</a> | 
@@ -5769,9 +5812,6 @@ async function snuSetAttachmentPreview(att){
         
             return table;
         }
-        
-        
-
     }
     else{
         const content = document.querySelector('#snuAttatchmentContent');
