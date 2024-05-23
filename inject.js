@@ -100,7 +100,7 @@ var snuslashcommands = {
         "url": "javascript: (function () {\n\tif (!g_form) return;\n\tlet blacklistedFields = ['number','sys_scope'];\n\tlet newRecordURL = `/${g_form.getTableName()}.do?sys_id=-1`;\n\t " + 
                "let queryParts = g_form.elements.reduce((acc, el) => {\n\t\tif (\n\t\t\tel.fieldName.startsWith('sys') ||\n\t\t\tblacklistedFields.includes(el.fieldName) ||\n\t\t\tel.fieldName.indexOf('.') !== -1\n\t\t)\n\t\t\treturn acc; " + 
                "\n\t\tif (g_form.isFieldVisible(el.fieldName) && g_form.getValue(el.fieldName) !== '') {\n\t\t\tacc.push(`${el.fieldName}=${encodeURIComponent(g_form.getValue(el.fieldName))} `);\n\t\t}\n\t\treturn acc;\n\t}, []);" + 
-               "\n\tlet queryString = 'sysparm_query=' + queryParts.join('^');\n\tlet viewString = `sysparm_view = ${encodeURIComponent(g_form.getViewName())} `;\n\twindow.open([newRecordURL, queryString, viewString].join('&'), '_blank');\n})();",
+               "\n\tlet queryString = 'sysparm_query=' + queryParts.join('^');\n\tlet viewString = `sysparm_view=${encodeURIComponent(g_form.getViewName())}`;\n\twindow.open([newRecordURL, queryString, viewString].join('&'), '_blank');\n})();",
         "hint": "Copy Record to New tab"
     },
     "cs": {
