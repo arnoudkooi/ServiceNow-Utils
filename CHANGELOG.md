@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-## 8.1.2.0/1 (2024-05-24)
+## 8.1.2.0/2 (2024-05-24)
 Fixes / changes:
   - Support InstanceTag in Safari, Arc and Opera via fallback to popup instead of sidebar
   - Include viewname in /crn command (Issue #506 / PR #507)

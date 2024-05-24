@@ -139,7 +139,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         if (message?.command?.isArc) isArc = true;
         instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
         setToChromeSyncStorage("instancetag", message.command );
-        showSidepanel(sender.tab);
+        showSidepanel(sender.tab, false);
     }
     else if (message.event == "updateinstancetagconfig") {
         instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
@@ -473,7 +473,7 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
     else if (clickData.menuItemId == "stats")
         openUrl(clickData, tab, '/stats.do');
     else if (clickData.menuItemId == "showsidepanel"){
-        showSidepanel(tab);
+        showSidepanel(tab, true);
     }
     else if (clickData.menuItemId == "opentabscriptsync")
         createScriptSyncTab();
@@ -495,11 +495,14 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
 });
 
 
-function showSidepanel(tab){
+function showSidepanel(tab, viaContextMenu){
     if (chrome?.sidePanel && !isArc) //all that have the api except arc browser
         chrome.sidePanel.open({ windowId: tab.windowId, tabId: tab.id });
-    else if (typeof browser !== "undefined" && browser?.sidebarAction) //Firefox
-        chrome.action.setPopup({popup: "sidepanel.html"});
+    else if (typeof browser !== "undefined" && browser?.sidebarAction && viaContextMenu) { //Firefox
+        //Firefox uses sidebarAction API this is must be open via contetxtmenu
+        //otherwise fall back to popup
+        browser.sidebarAction.open(); 
+    }   
     else { //fallback to a popup
         chrome.windows.create({
             url: chrome.runtime.getURL("sidepanel.html") + "?tabid=" + tab.id,

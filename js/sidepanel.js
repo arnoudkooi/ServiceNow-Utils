@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const params = new URLSearchParams(window.location.search);
     let tabId = parseInt(params.get('tabid') || 0, 10);
-    console.log(tabId);
     if (tabId){
         chrome.tabs.get(tabId, async tab =>{
             tabCallback(tab);
@@ -53,6 +52,15 @@ document.addEventListener('DOMContentLoaded', function () {
             tagCommand.value = snuInstanceTagConfig.tagCommand;
             tagCommandShift.value = snuInstanceTagConfig.tagCommandShift;
         }   
+
+        //run after initialized, to trigger repositioning after the sidepanel showed.
+        chrome.tabs.sendMessage(tabId, {
+            "method": "snuUpdateSettingsEvent",
+            "detail": {
+                "action": "updateInstaceTagConfig",
+                "instaceTagConfig": snuInstanceTagConfig,
+            }
+        });
     }
 
     document.querySelectorAll('input').forEach(inp => { 
@@ -85,17 +93,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-
-
-    //run after pageload, to trigger repositioning after the sidepanel showed.
-    chrome.tabs.sendMessage(tabId, {
-        "method": "snuUpdateSettingsEvent",
-        "detail": {
-            "action": "updateInstaceTagConfig",
-            "instaceTagConfig": snuInstanceTagConfig,
-        }
-    })
-
     
   
 });
