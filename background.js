@@ -94,7 +94,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
     if (chrome?.sidePanel){
         await chrome.sidePanel.setOptions({tabId, path: 'sidepanel.html',enabled: true });
     }
-    else if (browser && browser?.sidebarAction){ //Firefox uses sidebarAction API
+    else if (typeof browser !== "undefined" && browser?.sidebarAction){ //Firefox uses sidebarAction API
         await browser.sidebarAction.setPanel(tabId, {panel: "sidepanel.html"});
     }
 });
@@ -498,7 +498,7 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
 function showSidepanel(tab){
     if (chrome?.sidePanel && !isArc) //all that have the api except arc browser
         chrome.sidePanel.open({ windowId: tab.windowId, tabId: tab.id });
-    else if (browser && browser?.sidebarAction) //Firefox
+    else if (typeof browser !== "undefined" && browser?.sidebarAction) //Firefox
         chrome.action.setPopup({popup: "sidepanel.html"});
     else { //fallback to a popup
         chrome.windows.create({
