@@ -191,6 +191,9 @@ document.querySelector("#snuInstanceTagSettings").addEventListener("click", ev =
       snuSlashCommandInfoText('In Firefox please use context menu to show Side panel', false);
       return;
     }
+
+    let isArc = !!getComputedStyle(document.documentElement).getPropertyValue('--arc-palette-title') //sidepanel not working in Arc
+    if (isArc) snuInstanceTagConfig.isArc = true;
     snuDispatchBackgroundEvent("showsidepanel", snuInstanceTagConfig);
   }
 });

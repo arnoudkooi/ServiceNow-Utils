@@ -12,6 +12,7 @@ var urlFull;
 var updateSetTables = [];
 var lastCommand;
 var cmd = {};
+let isArc = false;
 
 var urlContains = ".service-now.com";
 var urlPattern = "https://*.service-now.com/*"
@@ -88,12 +89,12 @@ function initializeContextMenus(){
         }
     });
 }
-// todo, will be used for sidepanel in upcoming release
+//used for sidepanel maybe can be done different...
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
     if (chrome?.sidePanel){
         await chrome.sidePanel.setOptions({tabId, path: 'sidepanel.html',enabled: true });
     }
-    else if (browser?.sidebarAction){ //Firefox uses sidebarAction API
+    else if (browser && browser?.sidebarAction){ //Firefox uses sidebarAction API
         await browser.sidebarAction.setPanel(tabId, {panel: "sidepanel.html"});
     }
 });
@@ -135,15 +136,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         createScriptSyncTab(cookieStoreId);
     }
     else if (message.event == "showsidepanel") {
+        if (message?.command?.isArc) isArc = true;
         instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
         setToChromeSyncStorage("instancetag", message.command );
-        if (chrome?.sidePanel)
-            chrome.sidePanel.open({ windowId: sender.tab.windowId, tabId: sender.tab.id });
-        else if (browser?.sidebarAction) {
-            //Firefox uses sidebarAction API this is must be open via conetxtmenu
-            // browser.sidebarAction.open(); doesnt work here.
-        }
-            
+        showSidepanel(sender.tab);
     }
     else if (message.event == "updateinstancetagconfig") {
         instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
@@ -477,10 +473,7 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
     else if (clickData.menuItemId == "stats")
         openUrl(clickData, tab, '/stats.do');
     else if (clickData.menuItemId == "showsidepanel"){
-        if (chrome?.sidePanel)
-            chrome.sidePanel.open({ windowId: tab.windowId, tabId: tab.id });
-        else if (browser?.sidebarAction) 
-            browser.sidebarAction.toggle();
+        showSidepanel(tab);
     }
     else if (clickData.menuItemId == "opentabscriptsync")
         createScriptSyncTab();
@@ -501,6 +494,21 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
 
 });
 
+
+function showSidepanel(tab){
+    if (chrome?.sidePanel && !isArc) //all that have the api except arc browser
+        chrome.sidePanel.open({ windowId: tab.windowId, tabId: tab.id });
+    else if (browser && browser?.sidebarAction) //Firefox
+        chrome.action.setPopup({popup: "sidepanel.html"});
+    else { //fallback to a popup
+        chrome.windows.create({
+            url: chrome.runtime.getURL("sidepanel.html") + "?tabid=" + tab.id,
+            type: "popup",
+            width: 400,
+            height: 800
+          });
+    }
+}
 
 
 function getInitialInstaceTagConfig(instance) {

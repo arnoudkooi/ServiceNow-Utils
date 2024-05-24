@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 8.1.2.0 (2024-05-24)
+Fixes / changes:
+  - Support InstanceTag in Safari, Arc and Opera via fallback to popup instead of sidebar
+  - Include viewname in /crn command (Issue #506 / PR #507)
+
 ## 8.1.1.0 (2024-05-22)
 Fixes / changes:
   - Add keyboard up down navigation to attachment preview modal
