@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 8.1.2.3 (2024-05-30)
+Fixes / changes:
+  - Workaround for Chromium bug  https://issues.chromium.org/issues/342316798, this bug causes list selectors not to respond to doubleclick. This fix set the selectedIndex of the parent select of the clicked option when it is -1
+
+
 ## 8.1.2.0/2 (2024-05-24)
 Fixes / changes:
   - Support InstanceTag in Safari, Arc and Opera via fallback to popup instead of sidebar

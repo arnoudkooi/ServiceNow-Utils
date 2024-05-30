@@ -1857,7 +1857,6 @@ function snuRemoveFromList() {
 function snuDoubleClickToShowFieldOrReload() {
     if (typeof g_form != 'undefined' || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
         document.addEventListener('dblclick', event => {
-            console.log(event.target);
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') ||
                 event?.target?.parentElement?.classList.contains('sc_editor_label')) {
                event.preventDefault();
@@ -1931,6 +1930,19 @@ function snuDoubleClickToShowFieldOrReload() {
             else if (['div', 'li', 'body'].includes(event.target.localName) && !event.target.parentElement.className.includes('monaco')) {
                 if (!window?.snusettings?.nouielements  && event.target.className !== 'snuwrap') //disable the doubleclick when SN Utils UI elements off
                     snuAddTechnicalNames();
+            }
+            else if (event.target.tagName == 'OPTION'){ 
+                if (event.target?.parentElement?.selectedIndex == -1){
+                    // Temporary fix for Chrome bug, where selectedIndex is not set when selecting an option via doubleclick
+                    // https://issues.chromium.org/issues/342316798
+                    const slushselect = event.target.parentElement;
+                    slushselect.querySelectorAll('option').forEach((option, index) => {
+                        if (event.target === option) {
+                            event.target.parentElement.selectedIndex = index;
+                            console.log('[SN Utils] setting selectedIndex Chrome bug / PRB1768385');
+                        }
+                    });
+                }
             }
         }, true);
     }
