@@ -1,4 +1,4 @@
-//do some magic on sys.script.do to add monaco editor and autocomplete (beta)
+//do some magic on sys.script.do to add monaco editor and autocomplete 
 
 let s = document.body.firstChild;
 let editor;
@@ -21,75 +21,74 @@ const urlparams = new Proxy(new URLSearchParams(window.location.search), {
 //If washington instance redirect to the modern page.
 (async function () {
 	let snuFamily = await snuCheckFamily();
-	if (snuFamily == 'washingtondc'){
+	if (snuFamily == 'washingtondc')
 		location.href = location.href.replace('sys.scripts.do','sys.scripts.modern.do');
-	}
+	else
+		snuApplyMonaco();
 })();
 
+function snuApplyMonaco() {
+	if (snusettings.applybgseditor && scrpt) {
 
-if (snusettings.applybgseditor && scrpt) {
+		devidePage();
+		
+		let monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
 
-	devidePage();
-	
-	let monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
-	// if (navigator.userAgent.toLowerCase().includes('firefox')) { //fix to allow autocomplete issue FF #134, didnt work :(
-	// 	monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
-	// }
-
-	require.config({
-		paths: {
-			'vs': monacoUrl
-		}
-	});
-
-	div.setAttribute("id", "container");
-	
-	scrpt.parentNode.insertBefore(divInfo, scrpt);
-	scrpt.parentNode.insertBefore(div, scrpt);
-	scrpt.style.display = "none";
-
-	require(['vs/editor/editor.main'], () => {
-
-		monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-			noLib: true,
-			allowNonTsExtensions: true
-		});
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(serverglobal);
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
-
-		let theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
-		scrpt.value = scrpt.value || urlparams.content;
-
-		editor = monaco.editor.create(document.getElementById('container'), {
-			value: scrpt.value,
-			theme: theme,
-			lineNumbers: "on",
-			language: "javascript",
-			wordWrap: "on",
-			automaticLayout: true,
-			"bracketPairColorization.enabled": true,
-			minimap: { enabled: false }
-			
+		require.config({
+			paths: {
+				'vs': monacoUrl
+			}
 		});
 
-		editor.onDidChangeModelContent((e) => {
-			scrpt.value = editor.getModel().getValue();
-		});
+		div.setAttribute("id", "container");
+		
+		scrpt.parentNode.insertBefore(divInfo, scrpt);
+		scrpt.parentNode.insertBefore(div, scrpt);
+		scrpt.style.display = "none";
 
-		const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
+		require(['vs/editor/editor.main'], () => {
 
-		editor.addAction({
-			id: "runScript",
-			label: "Run script",
-			keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
-			contextMenuGroupId: "2_execution",
-			precondition: blockContext,
-			run: () => {
-				document.querySelector('input[name="runscript"]').click();
-			},
+			monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+				noLib: true,
+				allowNonTsExtensions: true
+			});
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(serverglobal);
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
+
+			let theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
+			scrpt.value = scrpt.value || urlparams.content;
+
+			editor = monaco.editor.create(document.getElementById('container'), {
+				value: scrpt.value,
+				theme: theme,
+				lineNumbers: "on",
+				language: "javascript",
+				wordWrap: "on",
+				automaticLayout: true,
+				"bracketPairColorization.enabled": true,
+				minimap: { enabled: false }
+				
+			});
+
+			editor.onDidChangeModelContent((e) => {
+				scrpt.value = editor.getModel().getValue();
+			});
+
+			const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
+
+			editor.addAction({
+				id: "runScript",
+				label: "Run script",
+				keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+				contextMenuGroupId: "2_execution",
+				precondition: blockContext,
+				run: () => {
+					document.querySelector('input[name="runscript"]').click();
+				},
+			});
+			editor.focus();
 		});
-		editor.focus();
-	});
+	}
 }
 
 document.addEventListener('snuEvent', function (e) {

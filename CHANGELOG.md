@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 8.1.2.6 (2024-06-03)
+Fixes / changes:
+  - Adjustment to loading monaco editor in classic background script.
+  - Load PDF previews in attachment preview modal via browser default, so it doenst depend on table propertie.
+  - Add a link to https://www.arnoudkooi.com/sn-utils-does-not-run/ in the popup info tab, for when SN Utils does not run on a page and OnPrem version is needed.
+
 ## 8.1.2.3 (2024-05-30)
 Fixes / changes:
   - Workaround for Chromium bug  https://issues.chromium.org/issues/342316798, this bug causes list selectors not to respond to doubleclick. This fix set the selectedIndex of the parent select of the clicked option when it is -1

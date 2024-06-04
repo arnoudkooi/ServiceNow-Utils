@@ -5732,7 +5732,7 @@ async function snuSetAttachmentPreview(att){
             const url = URL.createObjectURL(blob);
             const iframe = document.createElement('iframe');
             content.innerHTML = '';
-            iframe.src = `/$viewer.do?sysparm_stack=no&sysparm_sys_id=${att.sys_id}`;
+            iframe.src = url;
             iframe.style.width = '100%';
             iframe.style.height = '100%';
             iframe.style.border = 'none';
