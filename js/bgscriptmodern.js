@@ -3,12 +3,17 @@ let snuEditor;
 let snuDiv = document.createElement('div');
 let snuDivInfo = document.createElement('div');
 top.document.title = "⚪ BG script not started"
-snuDivInfo.innerText = 'CTRL/CMD SHIFT Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils | ';
-snuDivInfo.style.fontSize = '9pt';
+snuDivInfo.innerHTML = 'CTRL/CMD SHIFT Enter to Execute | Slashcommand /bgm to open this page | Shortcut and split screen added by SN Utils | <a href="#" id="snuOldBG" title="[SN Utils] Revert to old background script">Old</a> | ';
+snuDivInfo.style.fontSize = '8pt';
 snuDivInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
 let snuScript = document.querySelector('div.script-container');
 document.querySelector('form').setAttribute('onsubmit', '');
 let snuLoadedResult = '';
+snuDivInfo.querySelector('#snuOldBG').addEventListener('click', (ev) => {
+	ev.preventDefault();
+	let parmSymbol = location.href.includes('?') ? '&' : '?';
+	location.href = location.href.replace('sys.scripts.modern.do','sys.scripts.do') + parmSymbol + 'noredirect=true';
+});
 
 let snuLeftSide, snuResizer, snuRightSide, snuResult, snuResultWrapper, snuTimerInterval;
 

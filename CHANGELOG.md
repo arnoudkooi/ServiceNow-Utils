@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 8.1.3.0 (2024-06-06)
+Fixes / changes:
+  - Fix for codesearch where the artifacts have no name (Discussion #511)
+  - Change to snuAddSysUpdateVersionLink so that it shows when there are no other related links on the form
+  - Prevent links to sys.scripts.do with paramater run_module or noredirect redirect to modern BG Script.
+  - Add a link "Old" to modern BG Script page, so you can revert to the old page if needed. This will add the noredirect parameter to the URL.
+
+
 ## 8.1.2.6 (2024-06-03)
 Fixes / changes:
   - Adjustment to loading monaco editor in classic background script.

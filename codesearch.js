@@ -310,7 +310,7 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
       <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_${hit.sysId}" 
       aria-expanded="true" aria-controls="collapse_${hit.sysId}"><i class="fas fa-chevron-circle-right"></i></button>
       <span class="bigger"><a href="${url}/${data.recordType}.do?sys_id=${hit.sysId}" target="_blank">
-      ${hit.name.replace(/<\/?[^>]+(>|$)/g, "")} (${hit.matches.length})</a></span></div>
+      ${(hit.name || '(empty)').replace(/<\/?[^>]+(>|$)/g, "")} (${hit.matches.length})</a></span></div>
       <div id="collapse_${hit.sysId}" class="collapse show" aria-labelledby="${hit.sysId}" 
       idata-bs-parent="#searchCodeTableAccordion_${data.recordType}"><div class="card-body">`;
 

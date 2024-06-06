@@ -2993,9 +2993,19 @@ async function snuAddSysUpdateVersionLink() {
     if (!isProbableUpdateSync) return;
     if (g_form.getRelatedListNames().join(',').includes('67bdac52374010008687ddb1967334ee')) return; //already there
     
+    var listItem = document.createElement('li'); 
+    listItem.style.marginTop = '5px';
 
     let relatedLinksContainer = document.querySelector('.related_links_container');
-    if (!relatedLinksContainer) return;
+    if (!relatedLinksContainer)
+         relatedLinksContainer = document.querySelector('.form_action_button_container');
+    if (relatedLinksContainer) {
+        relatedLinksContainer = relatedLinksContainer.parentElement;
+        listItem.style.listStyle = 'none';
+        //listItem.style.marginLeft = '15px';
+    }
+    else return;
+
 
     let query = `name=${tbl}_${g_form.getUniqueValue()}`;
 
@@ -3005,9 +3015,7 @@ async function snuAddSysUpdateVersionLink() {
 
     let versionRecords = result.resultcount || 0;
     
-    var listItem = document.createElement('li');
-    listItem.style.marginTop = '5px';
-
+    
     var anchor = document.createElement('a');
     anchor.href = '#';
     anchor.className = 'navigation_link action_context default-focus-outline';
