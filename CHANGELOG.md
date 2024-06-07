@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 8.1.3.1 (2024-06-07)
+Fixes / changes:
+   - Prevent links to sys.scripts.do with paramater action or noredirect redirect to modern BG Script (action instead of run_module)
+
 ## 8.1.3.0 (2024-06-06)
 Fixes / changes:
   - Fix for codesearch where the artifacts have no name (Discussion #511)
