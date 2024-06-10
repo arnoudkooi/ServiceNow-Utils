@@ -1031,8 +1031,10 @@ function snuSlashCommandAddListener() {
                     iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
                 iframes.forEach((iframe) => {
-                    if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
-                        iframe.contentWindow.snuAddTechnicalNames();
+                    try {
+                        if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
+                            iframe.contentWindow.snuAddTechnicalNames();
+                    } catch (e) { } //ignore cross-origin frames
                 });
                 snuAddTechnicalNames();
 
@@ -1794,7 +1796,19 @@ function snuSettingsAdded() {
                         }
                     })
 
-
+                    let themes = ["colorFixes,Theme: Default,6.1", "vs,Theme: VS Light,6.2","vs-dark,Theme: VS Dark,6.3"];
+                    themes.forEach(th => {
+                        let [themeName, themeLabel, order] = th.split(",");
+                        editor.editor.addAction({
+                            id: themeName,
+                            label: themeLabel,
+                            contextMenuGroupId: "3_theme",
+                            contextMenuOrder : Number(order),
+                            run: () => {
+                                monaco.editor.setTheme(themeName);
+                            }
+                        })
+                    })
                 })
             }
         }catch(ex){};
@@ -5581,7 +5595,7 @@ async function snuPreviewAttachmentsModal(attSysId){
         listItem.onclick = () => snuSetAttachmentPreview(att);
         const fileSize = formatFileSize(parseInt(att.size_bytes, 10));
         listItem.textContent = `${att.file_name} (${fileSize})`;
-        listItem.title = att.content_type;
+        listItem.title = `${att.content_type} | ${att.sys_updated_by} | ${att.sys_updated_on}`;
         listItem.dataset.type = att.content_type;
 
         if (att.content_type.includes('image')) 
@@ -5761,10 +5775,11 @@ async function snuSetAttachmentPreview(att){
     }
     else if (['txt', 'log', 'xml', 'json', 'html', 'css', 'js', 'sql', 'md', 'eml', 'ics'].includes(att.extension)) {
         const content = document.querySelector('#snuAttatchmentContent');
-        content.innerHTML = '';
+        content.innerHTML = 'File is being loaded, please wait...';
         
-        var fileContent = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`).then(response => response.text());
-        var span = document.createElement('span');
+        let fileContent = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`).then(response => response.text());
+        content.innerHTML = '';
+        let span = document.createElement('span');
         span.innerHTML = `
         Download: <a href="/sys_attachment.do?sys_id=${att.sys_id}">${att.file_name}</a> | 
         <a href="#" title="[SN Utils] Copy result to clipboard" onclick="snuCopyAttatchmentContent()" >
@@ -5779,7 +5794,7 @@ async function snuSetAttachmentPreview(att){
         pre.id = 'snuAttatchmentContentPre';
         pre.style.overflow = 'auto';
         pre.style.whiteSpace = 'pre-wrap';
-        pre.style.maxHeight = '100%';
+        pre.style.maxHeight = '94%';
         content.appendChild(pre);
 
     }

@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 8.1.4.0 (2024-06-11)
+Fixes / changes:
+   - Ignore cross site frames when applieing /tn command (Issue #512)
+   - Monaco context menu adds options to switch theme (will make this persistent in a later release)
+   - Update to scriptsync.js to better handle errors, and send back to VS Code. After the move to the Fetch api this was lost.
+   - Minor improvements to attachment preview, to show loading state for text files.
+
 ## 8.1.3.1 (2024-06-07)
 Fixes / changes:
    - Prevent links to sys.scripts.do with paramater action or noredirect redirect to modern BG Script (action instead of run_module)
