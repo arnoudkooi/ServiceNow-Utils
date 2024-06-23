@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 8.1.5.0 (2024-06-24)
+Features:
+  - The monaco editor now shows a hover menu when hovering over gs.property('prop') value and does a lookup of the value.
+  - Make Monaco theme persistant per  instance via localstorage setting snuMonacoTheme
+  - Double click label to edit catalog item variables in portal (Admin only)
+
+
 ## 8.1.4.0 (2024-06-11)
 Fixes / changes:
    - Ignore cross site frames when applieing /tn command (Issue #512)

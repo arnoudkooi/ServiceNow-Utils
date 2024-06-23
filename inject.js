@@ -15,6 +15,8 @@ var snuNav = {
 };
 var snuSettingsParsed = false;
 var snunumbernav = snuSlashCommandNumberNav();
+var snuMonacoPropertyCache = {};
+
 
 var snuslashcommands = {
     "acl": {
@@ -1791,6 +1793,10 @@ function snuSettingsAdded() {
 
                     editor.editor.updateOptions(monacooptions);
 
+                    if(localStorage.getItem('snuMonacoTheme')){
+                        monaco.editor.setTheme(localStorage.getItem('snuMonacoTheme'));
+                    }
+
                     editor.editor.addAction({
                         id: "snutils",
                         label: "Added by SN Utils...",
@@ -1866,10 +1872,81 @@ function snuSettingsAdded() {
                             contextMenuOrder : Number(order),
                             run: () => {
                                 monaco.editor.setTheme(themeName);
+                                if (themeName != "colorFixes")
+                                    localStorage.setItem('snuMonacoTheme', themeName);
+                                else 
+                                    localStorage.removeItem('snuMonacoTheme');
                             }
                         })
                     })
                 })
+
+            // Function to simulate asynchronous fetching of property values with caching
+            async function fetchPropertyValue(key, editor) {
+                if (snuMonacoPropertyCache[key]) {
+                    return snuMonacoPropertyCache[key];
+                }
+
+                const regex = /gs\.getProperty\(['"]([a-zA-Z0-9_.-]+)['"](, *[^)]+)?\)/g; //query for all at once
+                let matches;
+                const properties = [];
+                while ((matches = regex.exec(editor.getValue())) !== null) {
+                    properties.push(matches[1]);
+                    snuMonacoPropertyCache[matches[1]] = {}; //add empty object to prevent multiple fetches
+                }
+
+                let props = await snuFetchData(g_ck, '/api/now/table/sys_properties?sysparm_limit=100&sysparm_fields=sys_id,type,name,value,description&sysparm_query=nameIN' + properties.join(','));
+                if (props?.result){
+                    props.result.forEach(p =>{
+                        snuMonacoPropertyCache[p.name] = p;
+                    })
+                }
+                return snuMonacoPropertyCache[key] || "not found";
+            }
+
+            // Function to extract the full property key from the line content
+            function getFullPropertyKey(lineContent, position) {
+                const regex = /gs\.getProperty\(['"]([a-zA-Z0-9_.-]+)['"](, *[^)]+)?\)/g;
+                const match = regex.exec(lineContent);
+                if (match && match.index <= position.column && match.index + match[0].length >= position.column) {
+                    return match[1];
+                }
+                return null;
+            }
+
+            // Define the hover provider
+            monaco.languages.registerHoverProvider('javascript', {
+                provideHover: async function(model, position) {
+                    const lineContent = model.getLineContent(position.lineNumber);
+                    const propertyKey = getFullPropertyKey(lineContent, position);
+                    
+                    if (propertyKey) {
+                        // Fetch the property value asynchronously with caching
+                        const prop = await fetchPropertyValue(propertyKey, model);
+
+                        let contents = [
+                            { value: `[SN Utils] **${propertyKey}**` },
+                            { value: `Value could not be fetched from sys_properties table.` },
+                            { value: `[Search in sys_properties](${location.origin}/sys_properties_list.do?sysparm_query=nameLIKE${propertyKey})`},
+                        ]
+
+                        if (prop?.sys_id){
+                            contents = [
+                                { value: `[SN Utils] **${propertyKey}** [➚](${location.origin}/sys_properties.do?sys_id=${prop.sys_id})`},
+                                { value: `Description: ${prop.description || '-'} \n Type: ${prop.type}`},
+                                { value: (prop.value || '[empty]'), fontFamily: 'Courier New, Courier, monospace' }
+                            ];
+                        }
+
+                        return {
+                            range: new monaco.Range(position.lineNumber, position.column - propertyKey.length, position.lineNumber, position.column),
+                            contents: contents
+                        };
+                    }
+                    return null;
+                }
+            });
+
             }
         }catch(ex){};
     }
@@ -1929,7 +2006,7 @@ function snuRemoveFromList() {
 }
 
 function snuDoubleClickToShowFieldOrReload() {
-    if (typeof g_form != 'undefined' || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
+    if (typeof g_form != 'undefined' || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined' || typeof angular != 'undefined') {
         document.addEventListener('dblclick', event => {
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') ||
                 event?.target?.parentElement?.classList.contains('sc_editor_label')) {
@@ -2018,6 +2095,21 @@ function snuDoubleClickToShowFieldOrReload() {
                     });
                 }
             }
+
+            else  if (typeof window?.NOW?.sp != 'undefined' && event.target.tagName == 'SPAN') { //basic serviceportal names
+                try {
+                    let fld =  angular.element(event.target).scope();
+                    if (!fld?.$parent?.$root?.user?.can_debug_admin) return;
+                    let fldName = fld.field.name;                    
+                    let gf = fld.$parent.getGlideForm();
+                    let val = gf.getValue(fldName);
+                    let newValue = prompt('[SN Utils]\nField Type: ' +  fld.field.type + '\nField: ' + fldName + '\nValue:', val);
+                    if (newValue !== null)
+                        gf.setValue(fldName, newValue);
+
+                }catch(e){}        
+            }
+
         }, true);
     }
 }
