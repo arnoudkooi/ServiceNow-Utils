@@ -36,7 +36,8 @@
             "*://*/*?XML*",
             "*://*/*&XML*",
             "*://*/*?WSDL*",
-            "*://*/*&WSDL*"
+            "*://*/*&WSDL*",
+            "*://*/*validate_multifactor_auth_code.do*"
           ],
           "js": [
             "js/purify.min.js",
@@ -54,7 +55,8 @@
             "*://*/*?XML*",
             "*://*/*&XML*",
             "*://*/*?WSDL*",
-            "*://*/*&WSDL*"
+            "*://*/*&WSDL*",
+            "*://*/*validate_multifactor_auth_code.do*"
           ],
           "js": [
             "js/Tinycon.js",

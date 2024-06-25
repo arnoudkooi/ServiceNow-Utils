@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 8.1.5.2 (2024-06-25)
+Features:
+  - Exclude page validate_multifactor_auth_code.do in manifest.json as it caused issues logging in with MFA
+  - Update DOMPurify to 3.1.5
+
+
 ## 8.1.5.0 (2024-06-24)
 Features:
   - The monaco editor now shows a hover menu when hovering over gs.property('prop') value and does a lookup of the value.

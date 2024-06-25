@@ -44,7 +44,8 @@
                 "https://*.servicenowservices.com/*&XML*",
                 "https://*.servicenowservices.com/*?WSDL*",
                 "https://*.servicenowservices.com/*&WSDL*",
-                "https://*.servicenowservices.com/api/now*"
+                "https://*.servicenowservices.com/api/now*",
+                "*://*/*validate_multifactor_auth_code.do*"
             ],
             "js": [
                 "js/purify.min.js",
@@ -69,7 +70,8 @@
                 "https://*.servicenowservices.com/*&XML*",
                 "https://*.servicenowservices.com/*?WSDL*",
                 "https://*.servicenowservices.com/*&WSDL*",
-                "https://*.servicenowservices.com/api/now*"
+                "https://*.servicenowservices.com/api/now*",
+                "*://*/*validate_multifactor_auth_code.do*"
             ],
             "js": [
                 "js/Tinycon.js",
