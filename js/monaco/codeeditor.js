@@ -94,94 +94,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 "bracketPairColorization.enabled": true
             });
 
-            const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
-            editor.addAction({
-                id: "updateRecord",
-                label: "Save",
-                keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
-                contextMenuGroupId: "2_execution",
-                precondition: blockContext,
-                run: () => {
-                    updateRecord();
-                },
-            });
-
-            editor.addAction({
-                id: "google",
-                label: "Search Google",
-                contextMenuGroupId: "2_execution",
-                precondition: "editorHasSelection",
-                run: (editor) => {
-                    let selection = editor.getModel().getValueInRange(editor.getSelection());
-                    window.open('https://www.google.com/search?q=' + selection);
-                }
-            })
-
-
-            editor.addAction({
-                id: "1_javascript",
-                label: "Set to Javascript",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "javascript");
-                }
-            })
-            editor.addAction({
-                id: "2_json",
-                label: "Set to JSON",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "json");
-                }
-            })
-            editor.addAction({
-                id: "3_html",
-                label: "Set to HTML",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "html");
-                }
-            })
-            editor.addAction({
-                id: "4_xml",
-                label: "Set to XML",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "xml");
-                }
-            })
-            editor.addAction({
-                id: "5_scss",
-                label: "Set to CSS",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "scss");
-                }
-            })
-            editor.addAction({
-                id: "6_graphql",
-                label: "Set to GraphQL",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "graphql");
-                }
-            })
-            editor.addAction({
-                id: "7_powershell",
-                label: "Set to Powershell",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "powershell");
-                }
-            })
-            editor.addAction({
-                id: "8_plain",
-                label: "Set to Plain text",
-                contextMenuGroupId: "3_lang",
-                run: (editor) => {
-                    monaco.editor.setModelLanguage(editor.getModel(), "plain");
-                }
-            })
+            addActions(editor);
 
             editor.focus();
             versionid = editor.getModel().getAlternativeVersionId();
@@ -207,8 +120,155 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         document.title = data.instance.name + ' ' + data.table + ' ' + data.name;
         changeFavicon(sender.tab.favIconUrl);
 
+        //loadVersionSelect();
+
     }
 });
+
+function addActions(editor) {
+
+    const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
+    editor.addAction({
+        id: "updateRecord",
+        label: "Save",
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+        contextMenuGroupId: "2_execution",
+        precondition: blockContext,
+        run: () => {
+            updateRecord();
+        },
+    });
+
+    editor.addAction({
+        id: "google",
+        label: "Search Google",
+        contextMenuGroupId: "2_execution",
+        precondition: "editorHasSelection",
+        run: (editor) => {
+            let selection = editor.getModel().getValueInRange(editor.getSelection());
+            window.open('https://www.google.com/search?q=' + selection);
+        }
+    })
+
+
+    editor.addAction({
+        id: "1_javascript",
+        label: "Set to Javascript",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "javascript");
+        }
+    })
+    editor.addAction({
+        id: "2_json",
+        label: "Set to JSON",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "json");
+        }
+    })
+    editor.addAction({
+        id: "3_html",
+        label: "Set to HTML",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "html");
+        }
+    })
+    editor.addAction({
+        id: "4_xml",
+        label: "Set to XML",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "xml");
+        }
+    })
+    editor.addAction({
+        id: "5_scss",
+        label: "Set to CSS",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "scss");
+        }
+    })
+    editor.addAction({
+        id: "6_graphql",
+        label: "Set to GraphQL",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "graphql");
+        }
+    })
+    editor.addAction({
+        id: "7_powershell",
+        label: "Set to Powershell",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "powershell");
+        }
+    })
+    editor.addAction({
+        id: "8_plain",
+        label: "Set to Plain text",
+        contextMenuGroupId: "3_lang",
+        run: (editor) => {
+            monaco.editor.setModelLanguage(editor.getModel(), "plain");
+        }
+    })
+
+}
+
+
+async function loadVersionSelect(){
+    let myurl = data.instance.url + '/api/now/table/sys_update_version?sysparm_limit=250&sysparm_display_value=true&sysparm_fields=sys_id,sys_updated_on,sys_updated_by&sysparm_query=name=' +
+    data.table + '_' + data.sys_id +'^ORDERBYDESCsys_updated_on';
+    let res =  await snuFetchData(data.instance.g_ck, myurl);
+
+    let versions = res?.result || {};
+
+    const fragment = document.createDocumentFragment();
+    const selectElement = document.querySelector('select.versions');
+
+    let opt = document.createElement('option');
+    let versionIndex = versions.length;
+    opt.value = '' ;
+    opt.textContent = `Compare: --None-- (${versions.length})` ;
+    fragment.appendChild(opt);  
+
+    versions.forEach(v => {
+    opt = document.createElement('option');
+    opt.value = v.sys_id;
+    opt.textContent = `${versionIndex--}: ${v.sys_updated_on} | ${v.sys_updated_by}` ;
+    fragment.appendChild(opt);
+    });
+
+    selectElement.appendChild(fragment);
+
+    selectElement.addEventListener('change', async e => {
+        let selected = e.target.value;
+        let url = data.instance.url + '/api/now/table/sys_update_version/' + selected + '?sysparm_fields=payload';
+        let res = await snuFetchData(data.instance.g_ck, url);
+        let payload = res.result.payload;
+
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(payload, "text/xml");
+        
+        // Locate the <script> element
+        const fieldValue = xmlDoc.getElementsByTagName(data.field)[0];
+        
+        // Extract the JavaScript content
+        if (fieldValue) {
+            const fieldContent = fieldValue.textContent;
+            changeToDiffEditor(fieldContent);
+            if (!e.target.selectedOptions[0].innerHTML.includes('*'))
+                e.target.selectedOptions[0].innerHTML = e.target.selectedOptions[0].innerHTML + '*';
+
+        } else {
+            console.log(`No ${data.field}  element found`);
+        }
+    });
+
+ }
 
 
 function generateHeader(data, tab) {
@@ -287,7 +347,32 @@ async function updateRecord() {
     }
 }
 
+function changeToDiffEditor(versionText) {
 
+    let currentText = (typeof editor.getValue !== 'undefined' )? 
+        editor.getValue() : editor.getOriginalEditor().getValue();
+    
+    if (editor) editor.dispose();
+
+    const currentModel = monaco.editor.createModel(currentText, 'javascript');
+    const oldVersionModel = monaco.editor.createModel(versionText, 'javascript');
+    
+    const editorContainer = document.getElementById('container'); // Ensure this is the correct ID of your editor's container
+
+    editor = monaco.editor.createDiffEditor(editorContainer, {
+        enableSplitViewResizing: true,
+        renderSideBySide: true,
+        originalEditable: true
+    });
+
+    editor.setModel({
+        original: oldVersionModel,
+        modified: currentModel,
+    });
+
+    addActions(editor.getOriginalEditor());
+    addActions(editor.getModifiedEditor());
+}
 
 
 function rgbToMonaco(groups) {
@@ -299,7 +384,30 @@ function rgbToMonaco(groups) {
     };
 }
 
-
+async function snuFetchData(token, url, post, callback) {
+    return new Promise(async (resolve, reject) => {
+      const headers = {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-UserToken': token || undefined
+      };
+      try {
+        const response = await fetch(url, {
+          method: post ? post?.method : 'GET',
+          headers,
+          body: post ? JSON.stringify(post?.body) : null
+        });
+        let data = response.ok ? await response.json() : response;
+        data.resultcount = Number(response.headers.get("X-Total-Count"));
+        if (callback) callback(data);
+        resolve(data);
+      } catch (error) {
+        if (callback) callback(error);
+        reject(error);
+      }
+    });
+  }
 
 window.onbeforeunload = function (e) {
     if (versionid == editor.getModel().getAlternativeVersionId()) return null

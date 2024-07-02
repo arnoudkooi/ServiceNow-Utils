@@ -1,7 +1,14 @@
 # CHANGELOG.md
 
+## 8.1.5.6 (2024-07-02)
+Fixes / changes:
+   - Fix issue with theme loader in function snuLoadThemeVariables (Issue #523)
+   - Disable app [SN Utils] scope switch on sys_app table (Issue #522)
+   - Prepartions for diff function in codeditor.html
+   - Add kb_knowledge to first search tables for syid search function
+
 ## 8.1.5.2 (2024-06-25)
-Features:
+Fixes / changes:
   - Exclude page validate_multifactor_auth_code.do in manifest.json as it caused issues logging in with MFA
   - Update DOMPurify to 3.1.5
 

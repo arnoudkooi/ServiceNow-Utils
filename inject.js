@@ -1480,8 +1480,10 @@ function snuDiffXml(shortcut, instance = '') {
 }
 
 function snuLoadThemeVariables() {
-    let themeVariablePromise = new Promise((resolve, reject) => {
-        //If already loaded or in Polaris, we don't need to load.
+    return new Promise((resolve, reject) => {
+        //If sn utils theme used or if already loaded / in Polaris, we don't need to load.
+        if (snusettings.slashtheme !== 'theme')
+            return resolve("SNUtils theme used");
         if (document.getElementById("polarisberg_theme_variables"))
             return resolve("Polaris already loaded");
 
@@ -1514,11 +1516,15 @@ function snuLoadThemeVariables() {
                         body.classList.add('-polaris');
                     }
                     return resolve("Polaris loaded");
-                })
+                });
 
+                link.addEventListener('error', function () {
+                    return reject("Failed to load Polaris theme");
+                });
+            }).catch(function (error) {
+                return reject(error);
             });
     });
-    return themeVariablePromise;
 }
 
 function snuIsPolarisEnabled() {
@@ -3552,7 +3558,7 @@ function snuAddSwitchToApplication() {
 
     let msg =  window.querySelectorShadowDom?.querySelectorDeep('now-alert-content');
     
-    if (!location.pathname.includes('.do')) return; 
+    if (!location.pathname.includes('.do') || location.pathname == '/sys_app.do') return; 
     let elm = document.querySelector('.outputmsg_nav_inner, #scope_alert_msg');
     if (!elm) return; 
 
@@ -4678,7 +4684,7 @@ function snuSearchSysIdTables(sysId) {
         snuSlashCommandInfoText("Searching for sys_id. This may take a few seconds...<br />", false);
         var script = `      
             function findSysID(sysId) {
-                var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
+                var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user', 'kb_knowledge'];
                 var rtrn;
                 var i = 0;
                 while (tbls[i]) {
@@ -4692,7 +4698,7 @@ function snuSearchSysIdTables(sysId) {
                 }
 
                 var tblsGr = new GlideRecord("sys_db_object");
-                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^nameNOT INsys_metadata,task,cmdb_ci,sys_user,cmdb_ire_partial_payloads_index^scriptable_table=false^ORscriptable_tableISEMPTY");
+                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^nameNOT INsys_metadata,task,cmdb_ci,sys_user,kb_knowledge,cmdb_ire_partial_payloads_index^scriptable_table=false^ORscriptable_tableISEMPTY");
                 tblsGr.query();
                 while (tblsGr.next()) {
                     var tableName = tblsGr.getValue('name');
