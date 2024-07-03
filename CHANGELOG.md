@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 8.1.5.7 (2024-07-03)
+Fixes / changes:
+   - Update for issue snuLoadThemeVariables (Issue #523)
+
 ## 8.1.5.6 (2024-07-02)
 Fixes / changes:
    - Fix issue with theme loader in function snuLoadThemeVariables (Issue #523)

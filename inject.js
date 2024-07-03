@@ -1528,6 +1528,7 @@ function snuLoadThemeVariables() {
 }
 
 function snuIsPolarisEnabled() {
+    return true; // #523
     //We need to check for the existence of the polaris theme variables and its length
     let polarisStylesheet;
     for (let i = 0; i < document.styleSheets.length; i++) {
@@ -1697,9 +1698,8 @@ function snuSettingsAdded() {
         snuslashswitches = {...snuslashswitches, ...addedslashsswitches};
     } catch (ex) { } 
 
-    snuLoadThemeVariables().finally(() => {
-        snuSetShortCuts();
-    });
+    snuLoadThemeVariables(); //removed finally promise (for now), #523
+    snuSetShortCuts();
 
     if (!snusettings.nopasteimage) {
         snuBindPaste(snusettings.nouielements == false);
