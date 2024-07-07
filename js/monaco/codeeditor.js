@@ -3,8 +3,10 @@ let data;
 let editor;
 let versionid;
 let theme;
+let language = '';
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    console.log(message);
     if (message.event == 'fillcodeeditor') {
 
         if (hasLoaded) return;
@@ -21,7 +23,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         });
 
 
-        let theme = (message.command.snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
+        theme = (message.command.snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
         require(['vs/editor/editor.main'], () => {
             monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
                 noLib: true,
@@ -77,27 +79,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
             //monaco.languages.typescript.typescriptDefaults.setExtraLibs(libs.serverglobal); //doesnt work...
 
-            var lang = '';
-            if (message.command.fieldType.includes('script')) lang = 'javascript';
-            else if (message.command.fieldType.includes('json')) lang = 'json';
-            else if (message.command.fieldType.includes('css')) lang = 'scss';
-            else if (message.command.fieldType.includes('xml')) lang = 'xml';
-            else if (message.command.fieldType.includes('html')) lang = 'html';
-            else if (message.command.name.endsWith('psm1')) lang = 'powershell';
+            
+            if (message.command.fieldType.includes('script')) language = 'javascript';
+            else if (message.command.fieldType.includes('json')) language = 'json';
+            else if (message.command.fieldType.includes('css')) language = 'scss';
+            else if (message.command.fieldType.includes('xml')) language = 'xml';
+            else if (message.command.fieldType.includes('html')) language = 'html';
+            else if (message.command.name.endsWith('psm1')) language = 'powershell';
 
-            editor = monaco.editor.create(document.getElementById('container'), {
-                automaticLayout: true,
-                value: message.command.content,
-                language: lang,
-                theme: theme,
-                colorDecorators: true,
-                "bracketPairColorization.enabled": true
-            });
+            changeToEditor(message.command.content);
 
-            addActions(editor);
-
-            editor.focus();
-            versionid = editor.getModel().getAlternativeVersionId();
         });
 
         document.querySelector('#header').classList.add(theme);
@@ -120,7 +111,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         document.title = data.instance.name + ' ' + data.table + ' ' + data.name;
         changeFavicon(sender.tab.favIconUrl);
 
-        //loadVersionSelect();
+        loadVersionSelect();
 
     }
 });
@@ -145,7 +136,7 @@ function addActions(editor) {
         contextMenuGroupId: "2_execution",
         precondition: "editorHasSelection",
         run: (editor) => {
-            let selection = editor.getModel().getValueInRange(editor.getSelection());
+            let selection = getEditor().getModel().getValueInRange(editor.getSelection());
             window.open('https://www.google.com/search?q=' + selection);
         }
     })
@@ -156,7 +147,7 @@ function addActions(editor) {
         label: "Set to Javascript",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "javascript");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "javascript");
         }
     })
     editor.addAction({
@@ -164,7 +155,7 @@ function addActions(editor) {
         label: "Set to JSON",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "json");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "json");
         }
     })
     editor.addAction({
@@ -172,7 +163,7 @@ function addActions(editor) {
         label: "Set to HTML",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "html");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "html");
         }
     })
     editor.addAction({
@@ -180,7 +171,7 @@ function addActions(editor) {
         label: "Set to XML",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "xml");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "xml");
         }
     })
     editor.addAction({
@@ -188,7 +179,7 @@ function addActions(editor) {
         label: "Set to CSS",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "scss");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "scss");
         }
     })
     editor.addAction({
@@ -196,7 +187,7 @@ function addActions(editor) {
         label: "Set to GraphQL",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "graphql");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "graphql");
         }
     })
     editor.addAction({
@@ -204,7 +195,7 @@ function addActions(editor) {
         label: "Set to Powershell",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "powershell");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "powershell");
         }
     })
     editor.addAction({
@@ -212,12 +203,17 @@ function addActions(editor) {
         label: "Set to Plain text",
         contextMenuGroupId: "3_lang",
         run: (editor) => {
-            monaco.editor.setModelLanguage(editor.getModel(), "plain");
+            monaco.editor.setModelLanguage(getEditor().getModel(), "plain");
         }
     })
 
 }
 
+
+function getEditor() {
+    return (typeof editor.getValue !== 'undefined' )? 
+        editor : editor.getModifiedEditor();
+}
 
 async function loadVersionSelect(){
     let myurl = data.instance.url + '/api/now/table/sys_update_version?sysparm_limit=250&sysparm_display_value=true&sysparm_fields=sys_id,sys_updated_on,sys_updated_by&sysparm_query=name=' +
@@ -246,24 +242,28 @@ async function loadVersionSelect(){
 
     selectElement.addEventListener('change', async e => {
         let selected = e.target.value;
-        let url = data.instance.url + '/api/now/table/sys_update_version/' + selected + '?sysparm_fields=payload';
-        let res = await snuFetchData(data.instance.g_ck, url);
-        let payload = res.result.payload;
+        let fieldValue;
+        if (selected){
+            let url = data.instance.url + '/api/now/table/sys_update_version/' + selected + '?sysparm_fields=payload';
+            let res = await snuFetchData(data.instance.g_ck, url);
+            let payload = res.result.payload;
 
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(payload, "text/xml");
-        
-        // Locate the <script> element
-        const fieldValue = xmlDoc.getElementsByTagName(data.field)[0];
-        
-        // Extract the JavaScript content
-        if (fieldValue) {
-            const fieldContent = fieldValue.textContent;
-            changeToDiffEditor(fieldContent);
-            if (!e.target.selectedOptions[0].innerHTML.includes('*'))
-                e.target.selectedOptions[0].innerHTML = e.target.selectedOptions[0].innerHTML + '*';
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(payload, "text/xml");
+            
+            // Locate the <script> element
+            fieldValue = xmlDoc.getElementsByTagName(data.field)[0];
+            
+            if (fieldValue) {
+                const fieldContent = fieldValue.textContent;
+                changeToDiffEditor(fieldContent);
+                if (!e.target.selectedOptions[0].innerHTML.includes('*'))
+                    e.target.selectedOptions[0].innerHTML = e.target.selectedOptions[0].innerHTML + '*';
 
-        } else {
+            }
+        }
+        else {
+            changeToEditor(getEditor().getValue());
             console.log(`No ${data.field}  element found`);
         }
     });
@@ -316,7 +316,7 @@ async function updateRecord() {
     try {
         const url = `${data.instance.url}/api/now/table/${data.table}/${data.sys_id}?sysparm_fields=sys_id`;
         const postData = {
-            [data.field]: editor.getModel().getValue()
+            [data.field]: getEditor().getModel().getValue()
         };
 
         const response = await fetch(url, {
@@ -335,7 +335,7 @@ async function updateRecord() {
         const resp = await response.json();
         if (resp.hasOwnProperty('result')) {
             document.querySelector('#response').innerHTML = `Saved: ${new Date().toLocaleTimeString()}`;
-            versionid = editor.getModel().getAlternativeVersionId();
+            versionid = getEditor().getModel().getAlternativeVersionId();
         } else {
             if (resp.hasOwnProperty('error')) {
                 document.querySelector('#response').innerHTML = `<span style="font-size:8pt; color:red" >Error: ${new Date().toLocaleTimeString()} | ${JSON.stringify(resp.error)}</span>`;
@@ -347,22 +347,39 @@ async function updateRecord() {
     }
 }
 
+function changeToEditor(editorContent) {
+
+    //let currentText = getEditor().getValue();
+    if (editor) editor.dispose();
+    editor = monaco.editor.create(document.getElementById('container'), {
+        automaticLayout: true,
+        value: editorContent,
+        language: language,
+        theme: theme,
+        colorDecorators: true,
+        "bracketPairColorization.enabled": true
+    });
+
+    addActions(editor);
+
+    editor.focus();
+    versionid = getEditor().getModel().getAlternativeVersionId();
+}
+
 function changeToDiffEditor(versionText) {
 
-    let currentText = (typeof editor.getValue !== 'undefined' )? 
-        editor.getValue() : editor.getOriginalEditor().getValue();
+    let currentText = getEditor().getValue();
     
     if (editor) editor.dispose();
 
-    const currentModel = monaco.editor.createModel(currentText, 'javascript');
-    const oldVersionModel = monaco.editor.createModel(versionText, 'javascript');
+    const currentModel = monaco.editor.createModel(currentText, language);
+    const oldVersionModel = monaco.editor.createModel(versionText, language);
     
     const editorContainer = document.getElementById('container'); // Ensure this is the correct ID of your editor's container
 
     editor = monaco.editor.createDiffEditor(editorContainer, {
         enableSplitViewResizing: true,
-        renderSideBySide: true,
-        originalEditable: true
+        renderSideBySide: true
     });
 
     editor.setModel({
@@ -410,7 +427,7 @@ async function snuFetchData(token, url, post, callback) {
   }
 
 window.onbeforeunload = function (e) {
-    if (versionid == editor.getModel().getAlternativeVersionId()) return null
+    if (versionid == getEditor().getModel().getAlternativeVersionId()) return null
     e = e || window.event;
     return 'Closing tab will loose unsaved work, continue?';
 };

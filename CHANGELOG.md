@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 8.1.7.0 (2024-07-08)
+Features:
+  - The Monaco code editor that opens when clicking the icon next to a script, now shows a select with versions. Selecting a version shows the diff editor with the selected version left and the current version right. 
+
+Fixes / changes:
+   - Improve handling of sysid and search command hint clicks (Issue #524)
+
 ## 8.1.5.7 (2024-07-03)
 Fixes / changes:
    - Update for issue snuLoadThemeVariables (Issue #523)

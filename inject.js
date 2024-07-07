@@ -1361,7 +1361,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
         html += "<li class='cmdexpand' data-shortcut='" + shortcut + "' ><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
     }
     else if (!html && shortcut.replace(/['" ]+/g, '').length == 32) {
-        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/sys_id</span> " +
+        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/sysid</span> " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
     else if (!html && /.*_([0-9a-fA-F]{32})$/.test(shortcut)) {
@@ -1377,7 +1377,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
         // html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
         //     "<span class='cmdlabel'>Table search &lt;encodedquery&gt; (hit ► to search tables)</span></li>"
     }
-    if (snuPropertyNames.length == 0 && snufilter.length > 3) {
+    if (snuPropertyNames.length == 0 && snufilter.length > 3 && !/^\/?["']?([a-f0-9]{32})["']?$/.test(snufilter)) {
         html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/search</span> " +
                 "<span class='cmdlabel'>Search for: " + snufilter + "</span></li>";
     }
@@ -1402,17 +1402,18 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
 
 function setSnuFilter(ev) {
     var slshcmd = this.querySelector('.cmdkey').innerText;
-    if (!window.top.document.getElementById('snufilter').value.startsWith(slshcmd)) {
-        window.top.document.getElementById('snufilter').focus();
-        window.top.document.getElementById('snufilter').value = slshcmd + ' ';
-        snuIndex = parseInt(this.dataset.index || 0);
-    }
-    else {
+    if (snufilter.value.startsWith(slshcmd) || snuPropertyNames.length == 0) {
         obj = { 'key': 'Enter' };
         if (event.ctrlKey || event.metaKey) obj.ctrlKey = true;
         window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', obj));
     }
+    else {
+        snufilter.focus();
+        snufilter.value = slshcmd + ' ';
+        snuIndex = parseInt(this.dataset.index || 0);
+    }
 }
+
 
 function snuDiffXml(shortcut, instance = '') {
     var gsft = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));

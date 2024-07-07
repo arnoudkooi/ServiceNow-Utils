@@ -179,7 +179,7 @@ button:hover {
 
 select.versions {
 
-	display: none;
+	/* display: none; */
 
 	min-width: 200px;
 	padding: 5px;
