@@ -203,3 +203,8 @@ select.versions option {
 	color: #ffffff;
 	font-family: 'Courier New', Courier, monospace;
 }
+
+a.version {
+	text-decoration: none;
+	display: none;
+}	

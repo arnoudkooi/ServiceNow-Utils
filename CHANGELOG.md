@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 8.1.7.0 (2024-07-10)
+Features:
+  - Improvements to the studio artefact filter. In large scopes it could block and make the tab unresposive.
+  - Adding sysparm_transaction_scope parameter when saving from the SN Utils Monaco code editor, so that it works after the instance switched to a different scope.
+  - Adding a icon next to the SN Utils Monaco code editor select list, to open the selected underlying sys_update_version record in a new tab.
+
+
 ## 8.1.7.0 (2024-07-08)
 Features:
   - The Monaco code editor that opens when clicking the icon next to a script, now shows a select with versions. Selecting a version shows the diff editor with the selected version left and the current version right. 

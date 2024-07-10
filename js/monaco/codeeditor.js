@@ -256,6 +256,9 @@ async function loadVersionSelect(){
             
             if (fieldValue) {
                 const fieldContent = fieldValue.textContent;
+                let url = 
+                document.querySelector('a.version').style.display = 'inline';
+                document.querySelector('a.version').href = data.instance.url + '/sys_update_version.do?sys_id=' + selected;
                 changeToDiffEditor(fieldContent);
                 if (!e.target.selectedOptions[0].innerHTML.includes('*'))
                     e.target.selectedOptions[0].innerHTML = e.target.selectedOptions[0].innerHTML + '*';
@@ -264,7 +267,7 @@ async function loadVersionSelect(){
         }
         else {
             changeToEditor(getEditor().getValue());
-            console.log(`No ${data.field}  element found`);
+            document.querySelector('a.version').style.display = 'none';
         }
     });
 
@@ -314,7 +317,8 @@ async function updateRecord() {
         if (!confirm('Your code has errors!\nContinue with save action?')) return;
     }
     try {
-        const url = `${data.instance.url}/api/now/table/${data.table}/${data.sys_id}?sysparm_fields=sys_id`;
+        let url = `${data.instance.url}/api/now/table/${data.table}/${data.sys_id}?sysparm_fields=sys_id`;
+        if (data?.scope) url += `&sysparm_transaction_scope=${data.scope}`;  
         const postData = {
             [data.field]: getEditor().getModel().getValue()
         };

@@ -443,9 +443,14 @@ if (typeof jQuery != "undefined") {
         // We have to call the function twice since we don't know what type of related list loading is selected by a user (with the form or after forms loads).
         snuDoubleClickToSetQueryListV2();
         if (typeof CustomEvent.observe == 'function') {
-            CustomEvent.observe('related_lists.ready', function () {
-                snuDoubleClickToSetQueryListV2();
-            });
+            try{ //sometimes issues with the prototype library 
+                CustomEvent.observe('related_lists.ready', function () {
+                    snuDoubleClickToSetQueryListV2();
+                });
+            } catch (e) {
+                //console.log('SN Utils: CustomEvent.observe error', e);
+            }
+
         }
         snuDoubleClickToShowFieldOrReload();
         snuCaptureFormClick();
@@ -4505,40 +4510,28 @@ function snuAddDblClick() {
 }
 
 function snuSortStudioLists() {
-    snuDoGroupSearch(""); //call to remove var__m_ from flowdesigner 
+    snuDoGroupSearch(""); // Call to remove var__m_ from flowdesigner
 
-    var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
+    // Cache the query selector results
+    const elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
 
-    Array.prototype.forEach.call(elULs, function (ul) {
-
-        var nestedUls = ul.querySelectorAll('ul.file-section');
+    elULs.forEach(ul => {
+        const nestedUls = ul.querySelectorAll('ul.file-section');
         if (nestedUls.length > 0) {
-            Array.prototype.forEach.call(nestedUls, function (nu) {
-                sortList(nu);
-            });
-        }
-        else
+            nestedUls.forEach(nu => sortList(nu));
+        } else {
             sortList(ul);
+        }
     });
 
     function sortList(list) {
-        var i, switching, b, shouldSwitch;
-        switching = true;
-        while (switching) {
-            switching = false;
-            b = list.getElementsByTagName("li");
-            for (i = 0; i < (b.length - 1); i++) {
-                shouldSwitch = false;
-                if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            }
-            if (shouldSwitch) {
-                b[i].parentNode.insertBefore(b[i + 1], b[i]);
-                switching = true;
-            }
-        }
+        const itemsArray = Array.from(list.getElementsByTagName("li"));
+        itemsArray.sort((a, b) => a.innerHTML.toLowerCase().localeCompare(b.innerHTML.toLowerCase()));
+
+        // Remove all items from the list and re-add them in sorted order
+        const fragment = document.createDocumentFragment();
+        itemsArray.forEach(item => fragment.appendChild(item));
+        list.appendChild(fragment);
     }
 }
 
@@ -4571,62 +4564,86 @@ function snuAddStudioScriptSync() {
 
 //Some magic to filter the file tree in studio
 function snuDoGroupSearch(search) {
-    //expand all when searching
-    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
-        el.classList.remove('collapsed');
-    });
+    // Cache the query selector results
+    const collapsedElements = document.querySelectorAll('.app-explorer-tree li.collapsed');
+    const dataViewElements = document.querySelectorAll('[data-view-count]');
+    const treeElements = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
+    // Expand all when searching
+    collapsedElements.forEach(el => el.classList.remove('collapsed'));
+
+    // Reset dataset attributes and display
+    dataViewElements.forEach(el => {
         el.dataset.viewCount = 0;
         el.dataset.searching = false;
         el.parentElement.style.display = "";
     });
 
     search = search.split(',');
-    var srch = search[0].toLowerCase();
+    const srch = search[0].toLowerCase();
 
-    //filter based on item text.
-    var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+    const toHide = [];
+    const toShow = [];
+    const toUpdateViewCount = [];
 
-    Array.prototype.forEach.call(elms, function (el, i) {
+    // Function to get parents and their text content
+    function getParentsText(el) {
+        const parents = [];
+        let parent = el.closest('ul');
+        let text = '';
 
-        var parents = snuGetParents(el, 'ul').reverse();
+        while (parent) {
+            parents.push(parent);
+            const span = parent.parentElement.querySelector('span');
+            if (span) text += span.innerText.toLowerCase() + ' ';
+            parent = parent.parentElement.closest('ul');
+        }
+        return { parents, text: text.trim() };
+    }
+
+    // Filter based on item text
+    treeElements.forEach(el => {
         el.setAttribute("title", el.innerText);
-        var text = (search.length == 1) ? el.innerText.toLowerCase() + ' ' : '';
-        var pars = [];
-        Array.prototype.forEach.call(parents, function (par, i) {
+        const itemText = el.innerText.toLowerCase();
+        const { parents, text } = getParentsText(el);
+
+        const combinedText = (search.length === 1) ? itemText + ' ' + text : text;
+        let match = combinedText.includes(srch) && !combinedText.includes("var__m_");
+
+        parents.forEach(par => {
             par.dataset.searching = true;
-            text += par.parentElement.getElementsByTagName('span')[0].innerText.toLowerCase() + ' ';
-            pars.push(par);
-            for (par of pars) {
-                if (text.includes(srch) && !text.includes("var__m_")) {
-                    par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
-                }
-                else {
-                    par.dataset.viewCount = (Number(par.dataset.viewCount) || 0);
-                    el.style.display = "none";
-                }
+            if (match) {
+                par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
             }
-
-            if (text.includes(srch) && !text.includes("var__m_")) {
-                el.style.display = "";
-            }
-            else
-                el.style.display = "none";
         });
+
+        if (match) {
+            toShow.push(el);
+        } else {
+            toHide.push(el);
+        }
     });
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
-        if (el.dataset.viewCount == "0" && el.dataset.searching == "true")
+    // Batch update display styles
+    toHide.forEach(el => el.style.display = "none");
+    toShow.forEach(el => el.style.display = "");
+
+    // Hide elements with no matching children
+    dataViewElements.forEach(el => {
+        if (el.dataset.viewCount === "0" && el.dataset.searching === "true") {
             el.parentElement.style.display = "none";
+        }
     });
 
-
+    // Additional search if there are multiple search terms
     if (search.length > 1) {
-        srch = search[1];
-        var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
-        Array.prototype.forEach.call(elms, function (el, i) {
-            el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
+        const additionalSearchTerm = search[1].toLowerCase();
+        treeElements.forEach(el => {
+            if (el.innerText.toLowerCase().includes(additionalSearchTerm)) {
+                el.style.display = "";
+            } else {
+                el.style.display = "none";
+            }
         });
     }
 }
