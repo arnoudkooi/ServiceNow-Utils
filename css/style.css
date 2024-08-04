@@ -414,8 +414,12 @@ label {
 .wasabi {
     background-color: #62D74E;
     padding: 12px;
-    font-size: 20px;
+    font-size: 12pt;
     border-radius: 4px;
+}
+
+.wasabi img {
+    width: 20px;
 }
 
 textarea:read-only {

@@ -1,7 +1,17 @@
 # CHANGELOG.md
 
-## 8.1.7.0 (2024-07-10)
+## 8.1.8.0 (2024-08-05)
 Features:
+  - Storing the scroll position in session storage, so that when saving a record, the scroll position of monaco editors is restored after the page reloads.
+
+Fixes / changes:
+  - Improve converting snuCreateHyperLinkForGlideLists to support displayvalues that have a comma
+  - Improve snuHyperlinkifyWorkNotes to exclude a closing bracket from the hyperlink
+  - Disabled View Data from popup and added a message to use /vd command instead
+  - Preparations for additinal shortcuts
+
+## 8.1.7.3 (2024-07-10)
+Fixes / changes:
   - Improvements to the studio artefact filter. In large scopes it could block and make the tab unresposive.
   - Adding sysparm_transaction_scope parameter when saving from the SN Utils Monaco code editor, so that it works after the instance switched to a different scope.
   - Adding a icon next to the SN Utils Monaco code editor select list, to open the selected underlying sys_update_version record in a new tab.

@@ -500,14 +500,14 @@ function setBrowserVariables(obj) {
 
                 break;
             case "#tabdataexplore":
-                if (!dataexploreloaded) {
-                    $('#waitingdataexplore').show();
-                    getExploreData();
-                    dataexploreloaded = true;
-                }
-                $('#tbxdataexplore').focus(function () {
-                    $(this).select();
-                });
+                // if (!dataexploreloaded) {
+                //     $('#waitingdataexplore').show();
+                //     getExploreData();
+                //     dataexploreloaded = true;
+                // }
+                // $('#tbxdataexplore').focus(function () {
+                //     $(this).select();
+                // });
                 break;
             case "#tablink":
                 $('#waitinglink').show();
@@ -1406,6 +1406,33 @@ function getSlashcommands() {
         });
     });
 }
+
+function getShortcuts() {
+    console.log("getShortcuts");
+
+    const jsonData = [
+        { "shortcut": "Ctrl + C", "command": "/copy" },
+        { "shortcut": "Ctrl + V", "command": "/paste" },
+        { "shortcut": "Ctrl + X", "command": "/cut" },
+        { "shortcut": "Ctrl + Z", "command": "/undo" },
+        { "shortcut": "Ctrl + Y", "command": "/redo" }
+    ];
+
+    // Initialize DataTable with JSON data
+    $('#shrtcuts').DataTable({
+        data: jsonData, // Use the JSON data here
+        columns: [
+            { data: 'shortcut', title: 'Shortcut' }, // Define the column data source
+            { data: 'command', title: 'Slash Command' } // Define the column data source
+        ],
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true
+    });
+
+}
+getShortcuts();
 
 
 function getTableSysId(){ //extracted from inject.js snuResolveVariables, todo:merge methods

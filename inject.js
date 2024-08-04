@@ -1387,8 +1387,6 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
                 "<span class='cmdlabel'>Search for: " + snufilter + "</span></li>";
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
-    if (!html)
-    console.log(html)
     window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
@@ -1809,6 +1807,35 @@ function snuSettingsAdded() {
                         monaco.editor.setTheme(localStorage.getItem('snuMonacoTheme'));
                     }
 
+                    // Code to store the scroll position and cursor position in session storage, useful after saving form
+                    const scrollPositionKey = editor?.textareaId + "." + (window?.g_form?.getUniqueValue() || "new");
+
+                    // Restore scroll position if available
+                    const storedScrollPosition = sessionStorage.getItem(scrollPositionKey);
+                    if (storedScrollPosition) {
+                        try {
+                            const { editorTop, formTop } = JSON.parse(storedScrollPosition);
+                            editor.editor.setScrollTop(editorTop);
+                            let formDiv = document.querySelector('.section_header_content_no_scroll')
+                            if (formDiv) formDiv.scrollTop = formTop;
+                            
+                        } catch (e) {
+                            console.error('[SN Utils] Failed to restore scroll position:', e);
+                        }
+                    }
+
+                    // Listen for scroll changes and store them
+                    editor.editor.onDidScrollChange((e) => {
+                        const scrollPosition = {
+                            editorTop: editor.editor.getScrollTop(),
+                            formTop: document.querySelector('.section_header_content_no_scroll')?.scrollTop || 0
+                        };
+                        sessionStorage.setItem(scrollPositionKey, JSON.stringify(scrollPosition));
+                    });
+
+                    // End code to store the scroll position
+
+
                     editor.editor.addAction({
                         id: "snutils",
                         label: "Added by SN Utils...",
@@ -1982,7 +2009,8 @@ function snuCreateHyperLinkForGlideLists() {
             var hasReferenceTable = table && table !== 'null';
             if (!hasReferenceTable) return; // if there's no Reference Table, there's no use adding links, values are to be used as-is 
             elm.nextSibling.querySelector('p').style.display = 'inline'; //polaris fix
-            var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
+            var options = document.querySelectorAll(`select[id$=${field}] option`);
+            var labels = [...options].map(option => option.getAttribute('data-snuoriginal') || option.innerText);
             var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
             if (labels.length != values.length) return; //not a reliable match
             var links = [];
@@ -3427,6 +3455,29 @@ function snuSetShortCuts() {
     snuSlashCommandAddListener();
 
     document.addEventListener("keydown", function (event) {
+
+        // const shortcuts = {
+        //     'Ctrl+Shift+p': function () {
+        //         snuSlashCommandShow('/sa', true);
+        //     },
+        //     'Alt+Shift+t,': function () {
+        //         snuSlashCommandShow('/tn', true);
+        //     },
+        //     'Meta+Shift+p': function () {
+        //         snuSlashCommandShow('/pop', true);
+        //     }
+        // };
+
+        // if ((event.ctrlKey || event.altKey || event.metaKey) && event.key.length <= 3) {
+        //     for (const combination in shortcuts) {
+        //         if (snuMatchesShortcut(event, combination)) {
+        //           event.preventDefault();
+        //           console.log('Shortcut:', combination);
+        //           shortcuts[combination]();
+        //         }
+        //     }
+        // }
+
         if (event.key == '/') {
             if (snusettings.slashpopuppriority && (event?.target?.id !== 'snufilter' || 
                 (event?.target?.id == 'snufilter' && event?.target?.value.length > 1))) {
@@ -3510,6 +3561,28 @@ function snuSetShortCuts() {
             }
         }
     }, false);
+}
+
+function snuParseKeyCombination(combination) {
+    const keys = combination.split(/[-,+,\s]+/).map(key => key.trim().toLowerCase());
+    const parsed = {
+      ctrl: keys.includes('ctrl'),
+      shift: keys.includes('shift'),
+      alt: keys.includes('alt'),
+      meta: keys.includes('meta'),
+      key: keys.find(key => !['ctrl', 'shift', 'alt', 'meta'].includes(key))
+    };
+    console.log(parsed);
+    return parsed;
+}
+
+function snuMatchesShortcut(event, combination) {
+    const parsed = snuParseKeyCombination(combination);
+    return event.ctrlKey === parsed.ctrl &&
+           event.shiftKey === parsed.shift &&
+           event.altKey === parsed.alt &&
+           event.metaKey === parsed.meta &&
+           event.key.toLowerCase() === parsed.key;
 }
 
 function snuSplitContainsToAnd(event) {
@@ -5583,7 +5656,7 @@ function snuHyperlinkifyWorkNotes() {
         activityLabel.addEventListener("mouseover", snuHyperlinkifyWorkNotes);
     }
 
-    let urlRegex = /(?<!href=")(https?:\/\/[^\s]+)/g;
+    let urlRegex = /(?<!href=")(https?:\/\/[^\s\)]+)(?=\s|$|\))/g;
     document.querySelectorAll('div.sn-card-component .sn-widget-textblock-body:not(.snuified)').forEach(crd => {
         let newContent =  crd.innerHTML.replace(urlRegex, function (url) {
             return '<a href="' + url + '" target="_blank" title="[SN Utils] Converted to hyperlink">' + url + '</a>';
