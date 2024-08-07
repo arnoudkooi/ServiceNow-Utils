@@ -500,14 +500,14 @@ function setBrowserVariables(obj) {
 
                 break;
             case "#tabdataexplore":
-                // if (!dataexploreloaded) {
-                //     $('#waitingdataexplore').show();
-                //     getExploreData();
-                //     dataexploreloaded = true;
-                // }
-                // $('#tbxdataexplore').focus(function () {
-                //     $(this).select();
-                // });
+                if (!dataexploreloaded) {
+                    $('#waitingdataexplore').show();
+                    getExploreData();
+                    dataexploreloaded = true;
+                }
+                $('#tbxdataexplore').focus(function () {
+                    $(this).select();
+                });
                 break;
             case "#tablink":
                 $('#waitinglink').show();
@@ -613,7 +613,7 @@ function setSettings() {
             snusettingsSync[this.id] = this.checked;
         }
         else {
-            if (this.value.length < 6000) 
+            if (this.value.length < 5000) 
                 snusettingsSync[this.id] = this.value;
             else { //overflow to local storage #204
                 snusettingsSync[this.id] = '';

@@ -1,4 +1,9 @@
 # CHANGELOG.md
+## 8.1.8.3 (2024-08-07)
+Fixes / changes:
+  - Decreased threshold to store slash commands in localstorage to 5000 characters (Issue #530)
+  - Restore View Data in popup by pouplair demand
+  - Add try catch to iframes itterations in inject.js to prevent error when cross scope iframe is present
 
 ## 8.1.8.0 (2024-08-05)
 Features:

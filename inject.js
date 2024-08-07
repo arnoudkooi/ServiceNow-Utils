@@ -1098,10 +1098,11 @@ function snuSlashCommandAddListener() {
                 var iframes = window.top.document.querySelectorAll("iframe");
                 if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
                     iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
-
                 iframes.forEach((iframe) => {
-                    if (typeof iframe.contentWindow.unhideFields != 'undefined')
-                        iframe.contentWindow.unhideFields();
+                    try {
+                        if (typeof iframe.contentWindow.unhideFields != 'undefined')
+                            iframe.contentWindow.unhideFields();
+                    } catch (e) { } //ignore cross-origin frames
                 });
                 unhideFields();
                 window.top.document.getElementById('snufilter').value = '';
@@ -4148,20 +4149,22 @@ function snuFillFields(query) {
         if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
             iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
         Array.from(iframes).forEach(function (frm) {
-            if (typeof frm.contentWindow.g_form != 'undefined') {
-                if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow))) {
-                    snuSlashCommandInfoText("Only available for admin, or when impersonating", false);
-                    return;
+            try {
+                if (typeof frm.contentWindow.g_form != 'undefined') {
+                    if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow))) {
+                        snuSlashCommandInfoText("Only available for admin, or when impersonating", false);
+                        return;
+                    }
+                    var manFields = frm.contentWindow.g_form.getMissingFields();
+                    if (g_form.getTableName() != 'ni'){
+                        setRandom(g_form.getTableName(), manFields, frm.contentWindow);
+                        //setRandomAll(g_form.getTableName(), frm.contentWindow);
+                    }
+                    else
+                        snuSlashCommandInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog.<br />`, false);
+    
                 }
-                var manFields = frm.contentWindow.g_form.getMissingFields();
-                if (g_form.getTableName() != 'ni'){
-                    setRandom(g_form.getTableName(), manFields, frm.contentWindow);
-                    //setRandomAll(g_form.getTableName(), frm.contentWindow);
-                }
-                else
-                    snuSlashCommandInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog.<br />`, false);
-
-            }
+            } catch (e) { } //ignore cross-origin frames
         });
     }
 
@@ -4219,11 +4222,13 @@ function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
             iframes = window.top.document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
         Array.from(iframes).forEach(function (frm) {
-            selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
-            if (selCells.length > 0) {
-                doCopy(selCells, frm);
-                hasCopied = true;
-            }
+            try {
+                selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
+                if (selCells.length > 0) {
+                    doCopy(selCells, frm);
+                    hasCopied = true;
+                }
+            } catch (e) { } //ignore cross-origin frames
         });
     }
     if (!hasCopied) alert("Nothing copied, consider the CopyTables extension for more control");
@@ -4509,8 +4514,10 @@ function snuSetAllMandatoryFieldsToFalse() {
         iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
     iframes.forEach((iframe) => { 
-        if (typeof iframe.contentWindow.unhideFields != 'undefined')
-            iframe.contentWindow.snuSetAllMandatoryFieldsToFalse(); 
+        try {
+            if (typeof iframe.contentWindow.snuSetAllMandatoryFieldsToFalse != 'undefined')
+                iframe.contentWindow.snuSetAllMandatoryFieldsToFalse(); 
+        } catch (e) { } //ignore cross-origin frames
     });
 
     if (typeof g_form != 'undefined' && typeof g_user != 'undefined') {
