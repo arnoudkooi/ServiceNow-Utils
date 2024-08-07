@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
         urlFull = tabs[0].url;
         getBrowserVariables(tabid,cookieStoreId);
         document.querySelector("#snuVersion").innerText = chrome.runtime.getManifest().version;
-        document.querySelector('#leavereview').style.display = 'none';
+        //document.querySelector('#leavereview').style.display = 'none';
 
     });
 
@@ -349,7 +349,7 @@ function getParameterByName(name, url) {
 function setBrowserVariables(obj) {
 
     document.querySelector('#notactive').style.display = 'none';
-    document.querySelector('#leavereview').style.display = '';
+    //document.querySelector('#leavereview').style.display = '';
 
     let elms = document.querySelectorAll('[data-bs-toggle="disabledtab"]');
     elms.forEach(function(el) {
@@ -1432,7 +1432,7 @@ function getShortcuts() {
     });
 
 }
-getShortcuts();
+// getShortcuts();
 
 
 function getTableSysId(){ //extracted from inject.js snuResolveVariables, todo:merge methods

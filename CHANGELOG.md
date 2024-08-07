@@ -1,4 +1,8 @@
 # CHANGELOG.md
+## 8.1.8.4 (2024-08-07)
+Fixes / changes:
+  - Fix error in popup.js causing it not to work.
+
 ## 8.1.8.3 (2024-08-07)
 Fixes / changes:
   - Decreased threshold to store slash commands in localstorage to 5000 characters (Issue #530)
