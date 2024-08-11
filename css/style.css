@@ -184,6 +184,11 @@ table.dataTable tbody td {
     max-height: 250px !important;
 }
 
+#tabdataexplore .dataTables_scrollBody {
+    max-height: 350px !important;
+}
+
+
 #tblslashcommands_wrapper .dataTables_scrollBody {
     max-height:200px !important;
 }
@@ -375,6 +380,13 @@ a.deletecmd {
 .refname{
     font-family:monospace;
     font-size:small;
+    font-style: italic;
+}
+
+.choices{
+    font-family:monospace;
+    font-size:small;
+    font-style: italic;
 }
 
 label {

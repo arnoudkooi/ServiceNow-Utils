@@ -1,6 +1,7 @@
 var onprem = false;
 //set onprem true if publishing on prem version, KEEP the onprem var on line 1!!
 var tabid;
+var tabIndex = -1;
 var cookieStoreId = '';
 var g_ck;
 var sysId;
@@ -103,10 +104,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-
     if (sender){ //In Firefox the sender object can be empty #420 this construct is around that
        if (sender?.tab?.cookieStoreId) 
             cookieStoreId = sender.tab.cookieStoreId 
+
+       tabIndex = sender.tab.index;
     } 
 
     if (message.event == "checkisservicenowinstance") {
@@ -214,6 +216,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             'url': message.command,
         }
         if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
     return true;
@@ -442,6 +445,7 @@ var snippets = {
 };
 
 chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
+    tabIndex = tab.index;
     if (clickData.menuItemId == "popinout")
         pop();
     else if (clickData.menuItemId == "clearcookies")
@@ -652,6 +656,7 @@ function sendToggleSearchFocus() {
 }
 
 function codeSearch(message, cookieStoreId) {
+    console.log("codeSearch", message, tabIndex);
     var url = chrome.runtime.getURL("codesearch.html");
     var args = '?query=' + message.command["query"] +
         '&instance=' + message.command["instance"] +
@@ -663,6 +668,7 @@ function codeSearch(message, cookieStoreId) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -679,7 +685,20 @@ function viewData(message, cookieStoreId) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
-    chrome.tabs.create(createObj);
+    if (tabIndex > -1) createObj.index = tabIndex+1;
+
+    if (message.command["open"] == "popup") {
+        createObj = {
+            'url': url + args,
+            'type': "popup",
+            'width': 1000,
+            'height': 900
+        }
+        if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+        chrome.windows.create(createObj);
+    }
+    else 
+        chrome.tabs.create(createObj);
 }
 
 function openCodeEditor(message) {
@@ -690,6 +709,7 @@ function openCodeEditor(message) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -700,6 +720,7 @@ function openCodeDiff(message) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -710,6 +731,7 @@ function openFile(link) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -725,6 +747,7 @@ function createScriptSyncTab(cookieStoreId) {
                         'active': false
                     }
                     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+                    if (tabIndex > -1) createObj.index = tabIndex+1;
                     chrome.tabs.create(createObj, function (t) {
                         setToChromeSyncStorageGlobal("synctab", t.id);
                     });
@@ -741,6 +764,7 @@ function createScriptSyncTab(cookieStoreId) {
                 'active': false
             }
             if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+            if (tabIndex > -1) createObj.index = tabIndex+1;
             chrome.tabs.create(createObj,
                 function (t) {
                     setToChromeSyncStorageGlobal("synctab", t.id);
@@ -790,6 +814,8 @@ function openVersions(e, f) {
                         if (cookieStoreId) {
                             createObj.cookieStoreId = cookieStoreId;
                         }
+                        if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+                        if (tabIndex > -1) createObj.index = tabIndex+1;
                         chrome.tabs.create(createObj);
                     }
                     else
@@ -876,6 +902,7 @@ function openUrl(e, f, u) {
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -889,6 +916,7 @@ function openSearch(e, f) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
     if (srch.length < 100) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 
@@ -942,6 +970,7 @@ function openScriptInclude(e, f) {
     }
     const MAX_SCRIPT_INCLUDE_NAME_LEN = 100;
     if (srch.length <= MAX_SCRIPT_INCLUDE_NAME_LEN) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 }
@@ -958,6 +987,7 @@ function openTableList(e, f) {
     }
     const MAX_TABLE_NAME_LEN = 80;
     if (srch.length <= MAX_TABLE_NAME_LEN) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 
@@ -975,6 +1005,7 @@ function openPropertie(e, f) {
     }
     const MAX_PROPERTY_NAME_LEN = 100;
     if (srch.length <= MAX_PROPERTY_NAME_LEN) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 

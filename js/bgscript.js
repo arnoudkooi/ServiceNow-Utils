@@ -21,7 +21,7 @@ const urlparams = new Proxy(new URLSearchParams(window.location.search), {
 //If washington instance redirect to the modern page.
 (async function () {
 	let snuFamily = await snuCheckFamily();
-	if (snuFamily == 'washingtondc' && !urlparams?.action && !urlparams?.noredirect ) //do not redirect if run_module or noredirect is set
+	if (['washingtondc','xanadu'].includes(snuFamily) && !urlparams?.action && !urlparams?.noredirect ) //do not redirect if run_module or noredirect is set
 		location.href = location.href.replace('sys.scripts.do','sys.scripts.modern.do');
 	else if(!urlparams?.action)
 		snuApplyMonaco();

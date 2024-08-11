@@ -6,9 +6,10 @@ body {
     padding: 10px 10px;
 }
 
-#fixheader{
+#fixheader {
     background-color: white;
-    position: sticky; top: 0;
+    position: sticky;
+    top: 0;
 }
 
 #title {
@@ -31,16 +32,15 @@ a.anchor {
     padding: 0;
 }
 
-.fas{
+.fas {
     color: #353535;
 }
 
-#searchmsgtablelinks
-{
+#searchmsgtablelinks {
     margin-bottom: 10px;
 }
 
-.whitebg{
+.whitebg {
     background-color: #ffffff !important;
     color: #c3c3c3 !important;
     border: 1pt solid #81B5A1 !important;
@@ -50,7 +50,7 @@ a.anchor {
     position: fixed;
     top: -10px;
     padding-top: 10px;
-    width:97vw;
+    width: 97vw;
 }
 
 .sticky+.results {
@@ -61,9 +61,6 @@ a.anchor {
     font-family: Menlo, "Courier New", Courier, monospace;
 }
 
-.dataTables_scrollBody {
-
-}
 
 .wdth40 {
     width: 40px;
@@ -89,15 +86,15 @@ a.anchor {
     font-size: 12pt;
 }
 
-h5{
+h5 {
     font-size: 1rem;
 }
 
-#missingtables card-body{
-    border: 1px solid rgba(0,0,0,.125);
+#missingtables card-body {
+    border: 1px solid rgba(0, 0, 0, .125);
 }
 
-.msg{
+.msg {
     margin: 10px 0;
     padding: 5px;
     border: 1pt solid #cccccc;
@@ -110,6 +107,7 @@ table.dataTable tbody th,
 table.dataTable tbody td {
     padding: 2px 2px;
 }
+
 table.dataTable tbody td {
     vertical-align: top !important;
 }
@@ -121,8 +119,8 @@ table.dataTable td {
 
 table.dataTable thead th,
 table.dataTable tfoot th {
-  text-align: left;
-  padding-left: 3px;
+    text-align: left;
+    padding-left: 3px;
 }
 
 .dt-button {
@@ -142,4 +140,69 @@ table.dataTable tfoot th {
     text-align: right;
     border: 1px solid #ced4da;
     padding-right: 5px;
+}
+
+
+/* Field details fieldmodal CSS */
+.refname{
+    font-family:monospace;
+    font-size:small;
+    font-style: italic;
+}
+
+.choices{
+    font-family:monospace;
+    font-size:small;
+    font-style: italic;
+}
+
+.fielddetailsa {
+    text-decoration: none;
+}
+
+/* Table styles */
+table.fieldmodal {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 5px 0 20px 0;
+    font-size: 11pt;
+    text-align: left;
+}
+
+table.fieldmodal th,
+table.fieldmodal td {
+    padding: 2px;
+    border: 1px solid #ddd;
+}
+
+table.fieldmodal th {
+    background-color: #f4f4f4;
+}
+
+table.fieldmodal tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table.fieldmodal tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Link styles */
+.modal-link {
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-link:hover {
+    text-decoration: underline;
+}
+
+#fieldmodalTableContent h5 {
+    margin-top: 5px;
+    margin-bottom: 3px;
+}
+
+#fieldmodalTableHeader a {
+   text-decoration: none;
 }

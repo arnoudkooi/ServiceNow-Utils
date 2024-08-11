@@ -1,4 +1,13 @@
 # CHANGELOG.md
+## 8.2.0.0 (2024-08-12)
+Features:
+  - Tabs opened by SN Utils will now open next to the current tab, instead of at the end.
+  - The View Data page now has a asteriks or the number of available choices behingd the type. Clicking this will show the choices if applicable and other properties of the field.
+  - Shift clicking the question mark on the form now opens View Data in a popup window, a doubleclick still opens a new tab.
+Fixes / changes:
+  - Include Xanadu instances to redirect to sys.modern.scripts.do 
+  - Minor style tweaks to the View Data page
+
 ## 8.1.8.4 (2024-08-07)
 Fixes / changes:
   - Fix error in popup.js causing it not to work.

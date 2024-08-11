@@ -28,6 +28,7 @@ var datetimeformat;
 var table;
 var sys_id;
 var isNoRecord = true;
+var tabIndex = -1;
 
 
 $.fn.dataTable.ext.errMode = 'none';
@@ -35,6 +36,7 @@ $.fn.dataTable.ext.errMode = 'none';
 document.addEventListener('DOMContentLoaded', function () {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabid = tabs[0].id;
+        tabIndex = tabs[0].index;
         cookieStoreId = tabs[0].cookieStoreId || '';
         urlFull = tabs[0].url;
         getBrowserVariables(tabid,cookieStoreId);
@@ -86,6 +88,7 @@ function getBrowserVariables(tid, cStoreId, callback) {
         instance = (new URL(url)).host.replace(".service-now.com", "");
         nme = response.myVars.NOWusername || response.myVars.NOWuser_name;
         setBrowserVariables(response);
+        console.log(response);
         //callback(response);
     });
 }
@@ -1503,7 +1506,6 @@ function getExploreData() {
             }
         }
 
-
         if (!(tableName && sysId)) {
             setDataExplore([]);
             return true;
@@ -1558,7 +1560,7 @@ function getExploreData() {
 
                     dataExplore.push(propObj);
                 }
-
+                document.querySelector('#vdnewtab').addEventListener('click', () => { viewData(tableName, sysId) });
                 setDataExplore(dataExplore);
             });
         });
@@ -1763,6 +1765,24 @@ function snuFetch(token, url, post, callback) {
 // To work with Firefox containers, this is adding the cookiestoreid the content page Issue #415
 function tabCreate(createObj) {
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
+    if (tabIndex > -1) createObj.index = tabIndex+1;
+    chrome.tabs.create(createObj);
+}
+
+function viewData(tableName,sysId) {
+    var extensionUrl = chrome.runtime.getURL("viewdata.html");
+    var args = '?tablename=' + tableName +
+        '&sysid=' + sysId +
+        '&instance=' + instance +
+        '&url=' + url +
+        '&g_ck=' + g_ck;
+
+    var createObj = {
+        'url': extensionUrl + args,
+        'active': false
+    }
+    if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -1771,8 +1791,9 @@ function openGrInBgScript(active) {
     let content = encodeURIComponent(document.getElementById('txtgrquery').value);
     let createObj = {
         'url': url + "/sys.scripts.do?content=" + content,
-        'active': active
+        'active': active,
     }
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
     chrome.tabs.create(createObj);
 }

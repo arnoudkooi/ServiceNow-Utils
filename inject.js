@@ -345,7 +345,7 @@ var snuslashcommands = {
     },
     "vd": {
         "url": "*",
-        "hint": "View data of current record"
+        "hint": "View data of current record (-p for popup)"
     },
     "wf": {
         "url": "/workflow_ide.do?sysparm_nostack=true",
@@ -929,6 +929,8 @@ function snuSlashCommandAddListener() {
                     data.instance = window.location.host.split('.')[0];
                     data.url = window.location.origin;
                     data.g_ck = g_ck || window.top.g_ck;
+                    data.open = "tab";
+                    if (query) data.open = "popup";
                     let event = new CustomEvent(
                         "snutils-event",
                         {
@@ -3626,10 +3628,22 @@ function snuAddInfoButton()
     let btn = document.createElement("button");
     btn.type = "submit";
     btn.id = "formBtn";
-    btn.title = "[SN Utils] Show created/updated info about this record \n (Who the heck edited this?)\nDoubleclick to view data in new tab";
+    btn.title = "[SN Utils] Show created/updated info about this record \n (Who the heck edited this?)\nDoubleclick to view data in new tab\nShift+Click to open in popup";
     btn.classList = "btn btn-icon glyphicon glyphicon-question-sign navbar-btn";
-    btn.addEventListener('click', (e) => { snuLoadInfoMessage() });
-    btn.addEventListener('dblclick', (e) => { snuSlashCommandShow('/vd',true) });
+    btn.addEventListener('click', (e) => { 
+        if (e.ctrlKey || e.metaKey || e.shiftKey)
+            snuSlashCommandShow('/vd popup',true);
+        else 
+            snuLoadInfoMessage() 
+    });
+    btn.addEventListener('dblclick', (e) => { 
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+            //lready handled by single click with modifier
+        }
+        else 
+            snuSlashCommandShow('/vd',true)
+    
+    });
     trgt.after(btn);
 
 }
@@ -3789,12 +3803,9 @@ function snuLoadInfoMessage() {
 
             if (flds?.sys_created_by != flds?.sys_updated_by && flds?.sys_updated_by != 'system')
                 html += ` <a href="javascript:snuSlashCommandShow('/u user_name=${flds?.sys_updated_by}',0)" >/u ${flds?.sys_updated_by}</a>&nbsp;&nbsp; `;
-
-            if (flds?.sys_scope?.display_value && flds?.sys_mod_count != "0")
-                html += ` <a href="javascript:snuSlashCommandShow('/versions',0)" >/versions</a>`;
-
             
-            html += ` <a href="javascript:snuSlashCommandShow('/vd',1)" >/vd</a> &nbsp; [🌟 New: Use /vd (View Data) to show all record data in a new tab]&nbsp;
+            html += `| &nbsp; <a href="javascript:snuSlashCommandShow('/vd',1)" >/vd</a> View data in a new tab &nbsp;
+            | <a href="javascript:snuSlashCommandShow('/vd -p',1)" >/vd -p</a> View data in a popup &nbsp;
             </div>
             Shortcuts: CTRL-V: Paste screenshot | CTRL-S: Save record | Double-click: Toggle Technical Names | 
             More: <a href="https://www.arnoudkooi.com/cheatsheet/" target="_blank">cheatsheet</a></span>
