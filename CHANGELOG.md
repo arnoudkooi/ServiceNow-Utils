@@ -1,4 +1,9 @@
 # CHANGELOG.md
+## 8.2.0.1 (2024-08-12)
+Fixes / changes:
+  - The position and size of the View Data popup is now stored, so that it opens at the same position and size as it was closed.
+
+
 ## 8.2.0.0 (2024-08-12)
 Features:
   - Tabs opened by SN Utils will now open next to the current tab, instead of at the end.

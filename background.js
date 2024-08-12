@@ -695,7 +695,32 @@ function viewData(message, cookieStoreId) {
             'height': 900
         }
         if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
-        chrome.windows.create(createObj);
+        
+        chrome.storage.local.get(['popupSize'], (result) => {
+            let popupSize = result.popupSize || {};
+            createObj = { ...createObj, ...popupSize }; //merge the objects
+            chrome.windows.create(createObj, (newWindow) => {
+
+                if (chrome.runtime.lastError) {
+                    // Clear local storage if there was an error with bounds
+                    chrome.storage.local.remove(['popupSize'], () => {
+                        console.log('Local storage cleared due to window creation error.');
+                    });
+                }
+
+                chrome.windows.onBoundsChanged.addListener(window => {
+                    if (window.id === newWindow.id && window.type === 'popup') { //save size and position of popup at close
+                        let popupSize = {
+                            left: window.left,
+                            top: window.top,
+                            width: window.width,
+                            height: window.height
+                        };
+                        chrome.storage.local.set({ popupSize: popupSize });
+                    };
+                });
+            });
+        });
     }
     else 
         chrome.tabs.create(createObj);
