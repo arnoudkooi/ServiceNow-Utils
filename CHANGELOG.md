@@ -1,8 +1,11 @@
 # CHANGELOG.md
+## 8.2.0.2 (2024-08-20)
+Fixes / changes:
+  - Decrease font size to 8pt of Next Experience pickers when there are more than 3
+
 ## 8.2.0.1 (2024-08-12)
 Fixes / changes:
   - The position and size of the View Data popup is now stored, so that it opens at the same position and size as it was closed.
-
 
 ## 8.2.0.0 (2024-08-12)
 Features:
