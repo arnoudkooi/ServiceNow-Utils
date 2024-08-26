@@ -1,7 +1,144 @@
 # CHANGELOG.md
-## 8.0.1 (2024-05-)
+## 8.2.0.2 (2024-08-20)
 Fixes / changes:
-  - Fix for /vd does not work on tables without sys_updated.. fields (Issue #499)
+  - Decrease font size to 8pt of Next Experience pickers when there are more than 3
+
+## 8.2.0.1 (2024-08-12)
+Fixes / changes:
+  - The position and size of the View Data popup is now stored, so that it opens at the same position and size as it was closed.
+
+## 8.2.0.0 (2024-08-12)
+Features:
+  - Tabs opened by SN Utils will now open next to the current tab, instead of at the end.
+  - The View Data page now has a asteriks or the number of available choices behingd the type. Clicking this will show the choices if applicable and other properties of the field.
+  - Shift clicking the question mark on the form now opens View Data in a popup window, a doubleclick still opens a new tab.
+Fixes / changes:
+  - Include Xanadu instances to redirect to sys.modern.scripts.do 
+  - Minor style tweaks to the View Data page
+
+## 8.1.8.4 (2024-08-07)
+Fixes / changes:
+  - Fix error in popup.js causing it not to work.
+
+## 8.1.8.3 (2024-08-07)
+Fixes / changes:
+  - Decreased threshold to store slash commands in localstorage to 5000 characters (Issue #530)
+  - Restore View Data in popup by pouplair demand
+  - Add try catch to iframes itterations in inject.js to prevent error when cross scope iframe is present
+
+## 8.1.8.0 (2024-08-05)
+Features:
+  - Storing the scroll position in session storage, so that when saving a record, the scroll position of monaco editors is restored after the page reloads.
+
+Fixes / changes:
+  - Improve converting snuCreateHyperLinkForGlideLists to support displayvalues that have a comma
+  - Improve snuHyperlinkifyWorkNotes to exclude a closing bracket from the hyperlink
+  - Disabled View Data from popup and added a message to use /vd command instead
+  - Preparations for additinal shortcuts
+
+## 8.1.7.3 (2024-07-10)
+Fixes / changes:
+  - Improvements to the studio artefact filter. In large scopes it could block and make the tab unresposive.
+  - Adding sysparm_transaction_scope parameter when saving from the SN Utils Monaco code editor, so that it works after the instance switched to a different scope.
+  - Adding a icon next to the SN Utils Monaco code editor select list, to open the selected underlying sys_update_version record in a new tab.
+
+
+## 8.1.7.0 (2024-07-08)
+Features:
+  - The Monaco code editor that opens when clicking the icon next to a script, now shows a select with versions. Selecting a version shows the diff editor with the selected version left and the current version right. 
+
+Fixes / changes:
+   - Improve handling of sysid and search command hint clicks (Issue #524)
+
+## 8.1.5.7 (2024-07-03)
+Fixes / changes:
+   - Update for issue snuLoadThemeVariables (Issue #523)
+
+## 8.1.5.6 (2024-07-02)
+Fixes / changes:
+   - Fix issue with theme loader in function snuLoadThemeVariables (Issue #523)
+   - Disable app [SN Utils] scope switch on sys_app table (Issue #522)
+   - Prepartions for diff function in codeditor.html
+   - Add kb_knowledge to first search tables for syid search function
+
+## 8.1.5.2 (2024-06-25)
+Fixes / changes:
+  - Exclude page validate_multifactor_auth_code.do in manifest.json as it caused issues logging in with MFA
+  - Update DOMPurify to 3.1.5
+
+
+## 8.1.5.0 (2024-06-24)
+Features:
+  - The monaco editor now shows a hover menu when hovering over gs.property('prop') value and does a lookup of the value.
+  - Make Monaco theme persistant per  instance via localstorage setting snuMonacoTheme
+  - Double click label to edit catalog item variables in portal (Admin only)
+
+
+## 8.1.4.0 (2024-06-11)
+Fixes / changes:
+   - Ignore cross site frames when applieing /tn command (Issue #512)
+   - Monaco context menu adds options to switch theme (will make this persistent in a later release)
+   - Update to scriptsync.js to better handle errors, and send back to VS Code. After the move to the Fetch api this was lost.
+   - Minor improvements to attachment preview, to show loading state for text files.
+
+## 8.1.3.1 (2024-06-07)
+Fixes / changes:
+   - Prevent links to sys.scripts.do with paramater action or noredirect redirect to modern BG Script (action instead of run_module)
+
+## 8.1.3.0 (2024-06-06)
+Fixes / changes:
+  - Fix for codesearch where the artifacts have no name (Discussion #511)
+  - Change to snuAddSysUpdateVersionLink so that it shows when there are no other related links on the form
+  - Prevent links to sys.scripts.do with paramater run_module or noredirect redirect to modern BG Script.
+  - Add a link "Old" to modern BG Script page, so you can revert to the old page if needed. This will add the noredirect parameter to the URL.
+
+
+## 8.1.2.6 (2024-06-03)
+Fixes / changes:
+  - Adjustment to loading monaco editor in classic background script.
+  - Load PDF previews in attachment preview modal via browser default, so it doenst depend on table propertie.
+  - Add a link to https://www.arnoudkooi.com/sn-utils-does-not-run/ in the popup info tab, for when SN Utils does not run on a page and OnPrem version is needed.
+
+## 8.1.2.3 (2024-05-30)
+Fixes / changes:
+  - Workaround for Chromium bug  https://issues.chromium.org/issues/342316798, this bug causes list selectors not to respond to doubleclick. This fix set the selectedIndex of the parent select of the clicked option when it is -1
+
+
+## 8.1.2.0/2 (2024-05-24)
+Fixes / changes:
+  - Support InstanceTag in Safari, Arc and Opera via fallback to popup instead of sidebar
+  - Include viewname in /crn command (Issue #506 / PR #507)
+
+## 8.1.1.0 (2024-05-22)
+Fixes / changes:
+  - Add keyboard up down navigation to attachment preview modal
+  - Change background script execute shortcut to CMD-SHIFT-Enter to prevent conflict with Now Assist
+  - Encode url field in Slashcommands settings tab datatable (Issue #503)
+  
+## 8.1.0.0 (2024-05-20)
+Features:
+  - On clasic forms with attatchments, you can now click [⌕] This opens a modal with a list of the attachments, and it tries to show the preview of the attachment. 
+
+Fixes / changes:
+  - Excluding javascript: slash commands from purifieing (Issue #503)
+  - Adding fallback for the new versions link, to open a new tab instead of popup, when GlideList2 is not available (Issue #504)
+  - Excluding field names in list from Technical Names toggle via double click (Discussion #505)
+  - Added promotion links to follow the new LinkedIn Page https://www.linkedin.com/company/sn-utils
+  - Added msg.reader.js and DataStrea.js library to support preview .msg files in the attachment modal
+
+## 8.0.3.0 (2024-05-18)
+Features:
+  - Records that are most likely metadata get a link added to the Related links section. Clicking this link opens a modal with the Update Versions (name=tablename_sys_id). The link only shows on existing records and when the form does not have the versions related list. function: snuAddSysUpdateVersionLink()
+
+
+## 8.0.2.0 (2024-05-16)
+Fixes / changes:
+  - Fix for /vd does not work on tables without sys_updated.. fields (Issue #499) 
+  - Separator line adjust when height changen in BG Script page (Issue #502)
+  - Add copy button to BG Script result as well as restructure to use icons instead of text links
+  - Also add a button to BG script to toggle *** Script: prefix in result output
+  - moved bgscript.js to /js folder
+  - added par_ prefix so to snuAddFieldSyncButtons function
 
 
 ## 8.0.1.0 (2024-05-02)

@@ -1,6 +1,7 @@
 var onprem = false;
 //set onprem true if publishing on prem version, KEEP the onprem var on line 1!!
 var tabid;
+var tabIndex = -1;
 var cookieStoreId = '';
 var g_ck;
 var sysId;
@@ -12,6 +13,7 @@ var urlFull;
 var updateSetTables = [];
 var lastCommand;
 var cmd = {};
+let isArc = false;
 
 var urlContains = ".service-now.com";
 var urlPattern = "https://*.service-now.com/*"
@@ -88,12 +90,12 @@ function initializeContextMenus(){
         }
     });
 }
-// todo, will be used for sidepanel in upcoming release
+//used for sidepanel maybe can be done different...
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
     if (chrome?.sidePanel){
         await chrome.sidePanel.setOptions({tabId, path: 'sidepanel.html',enabled: true });
     }
-    else if (browser?.sidebarAction){ //Firefox uses sidebarAction API
+    else if (typeof browser !== "undefined" && browser?.sidebarAction){ //Firefox uses sidebarAction API
         await browser.sidebarAction.setPanel(tabId, {panel: "sidepanel.html"});
     }
 });
@@ -102,10 +104,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-
     if (sender){ //In Firefox the sender object can be empty #420 this construct is around that
        if (sender?.tab?.cookieStoreId) 
             cookieStoreId = sender.tab.cookieStoreId 
+
+       tabIndex = sender.tab.index;
     } 
 
     if (message.event == "checkisservicenowinstance") {
@@ -135,15 +138,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         createScriptSyncTab(cookieStoreId);
     }
     else if (message.event == "showsidepanel") {
+        if (message?.command?.isArc) isArc = true;
         instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
         setToChromeSyncStorage("instancetag", message.command );
-        if (chrome?.sidePanel)
-            chrome.sidePanel.open({ windowId: sender.tab.windowId, tabId: sender.tab.id });
-        else if (browser?.sidebarAction) {
-            //Firefox uses sidebarAction API this is must be open via conetxtmenu
-            // browser.sidebarAction.open(); doesnt work here.
-        }
-            
+        showSidepanel(sender.tab, false);
     }
     else if (message.event == "updateinstancetagconfig") {
         instance = (new URL(sender.tab.url)).host.replace(".service-now.com", "");
@@ -218,6 +216,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             'url': message.command,
         }
         if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
     return true;
@@ -446,6 +445,7 @@ var snippets = {
 };
 
 chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
+    tabIndex = tab.index;
     if (clickData.menuItemId == "popinout")
         pop();
     else if (clickData.menuItemId == "clearcookies")
@@ -477,10 +477,7 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
     else if (clickData.menuItemId == "stats")
         openUrl(clickData, tab, '/stats.do');
     else if (clickData.menuItemId == "showsidepanel"){
-        if (chrome?.sidePanel)
-            chrome.sidePanel.open({ windowId: tab.windowId, tabId: tab.id });
-        else if (browser?.sidebarAction) 
-            browser.sidebarAction.toggle();
+        showSidepanel(tab, true);
     }
     else if (clickData.menuItemId == "opentabscriptsync")
         createScriptSyncTab();
@@ -501,6 +498,24 @@ chrome.contextMenus.onClicked.addListener(function (clickData, tab) {
 
 });
 
+
+function showSidepanel(tab, viaContextMenu){
+    if (chrome?.sidePanel && !isArc) //all that have the api except arc browser
+        chrome.sidePanel.open({ windowId: tab.windowId, tabId: tab.id });
+    else if (typeof browser !== "undefined" && browser?.sidebarAction && viaContextMenu) { //Firefox
+        //Firefox uses sidebarAction API this is must be open via contetxtmenu
+        //otherwise fall back to popup
+        browser.sidebarAction.open(); 
+    }   
+    else { //fallback to a popup
+        chrome.windows.create({
+            url: chrome.runtime.getURL("sidepanel.html") + "?tabid=" + tab.id,
+            type: "popup",
+            width: 400,
+            height: 800
+          });
+    }
+}
 
 
 function getInitialInstaceTagConfig(instance) {
@@ -641,6 +656,7 @@ function sendToggleSearchFocus() {
 }
 
 function codeSearch(message, cookieStoreId) {
+    console.log("codeSearch", message, tabIndex);
     var url = chrome.runtime.getURL("codesearch.html");
     var args = '?query=' + message.command["query"] +
         '&instance=' + message.command["instance"] +
@@ -652,6 +668,7 @@ function codeSearch(message, cookieStoreId) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -668,7 +685,45 @@ function viewData(message, cookieStoreId) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
-    chrome.tabs.create(createObj);
+    if (tabIndex > -1) createObj.index = tabIndex+1;
+
+    if (message.command["open"] == "popup") {
+        createObj = {
+            'url': url + args,
+            'type': "popup",
+            'width': 1000,
+            'height': 900
+        }
+        if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+        
+        chrome.storage.local.get(['popupSize'], (result) => {
+            let popupSize = result.popupSize || {};
+            createObj = { ...createObj, ...popupSize }; //merge the objects
+            chrome.windows.create(createObj, (newWindow) => {
+
+                if (chrome.runtime.lastError) {
+                    // Clear local storage if there was an error with bounds
+                    chrome.storage.local.remove(['popupSize'], () => {
+                        console.log('Local storage cleared due to window creation error.');
+                    });
+                }
+
+                chrome.windows.onBoundsChanged.addListener(window => {
+                    if (window.id === newWindow.id && window.type === 'popup') { //save size and position of popup at close
+                        let popupSize = {
+                            left: window.left,
+                            top: window.top,
+                            width: window.width,
+                            height: window.height
+                        };
+                        chrome.storage.local.set({ popupSize: popupSize });
+                    };
+                });
+            });
+        });
+    }
+    else 
+        chrome.tabs.create(createObj);
 }
 
 function openCodeEditor(message) {
@@ -679,6 +734,7 @@ function openCodeEditor(message) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -689,6 +745,7 @@ function openCodeDiff(message) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -699,6 +756,7 @@ function openFile(link) {
         'active': true
     }
     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -714,6 +772,7 @@ function createScriptSyncTab(cookieStoreId) {
                         'active': false
                     }
                     if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+                    if (tabIndex > -1) createObj.index = tabIndex+1;
                     chrome.tabs.create(createObj, function (t) {
                         setToChromeSyncStorageGlobal("synctab", t.id);
                     });
@@ -730,6 +789,7 @@ function createScriptSyncTab(cookieStoreId) {
                 'active': false
             }
             if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+            if (tabIndex > -1) createObj.index = tabIndex+1;
             chrome.tabs.create(createObj,
                 function (t) {
                     setToChromeSyncStorageGlobal("synctab", t.id);
@@ -779,6 +839,8 @@ function openVersions(e, f) {
                         if (cookieStoreId) {
                             createObj.cookieStoreId = cookieStoreId;
                         }
+                        if (cookieStoreId) createObj.cookieStoreId = cookieStoreId; //only FireFox
+                        if (tabIndex > -1) createObj.index = tabIndex+1;
                         chrome.tabs.create(createObj);
                     }
                     else
@@ -865,6 +927,7 @@ function openUrl(e, f, u) {
     if (f.hasOwnProperty('cookieStoreId')) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
+    if (tabIndex > -1) createObj.index = tabIndex+1;
     chrome.tabs.create(createObj);
 }
 
@@ -878,6 +941,7 @@ function openSearch(e, f) {
         createObj.cookieStoreId = f.cookieStoreId;
     }
     if (srch.length < 100) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 
@@ -931,6 +995,7 @@ function openScriptInclude(e, f) {
     }
     const MAX_SCRIPT_INCLUDE_NAME_LEN = 100;
     if (srch.length <= MAX_SCRIPT_INCLUDE_NAME_LEN) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 }
@@ -947,6 +1012,7 @@ function openTableList(e, f) {
     }
     const MAX_TABLE_NAME_LEN = 80;
     if (srch.length <= MAX_TABLE_NAME_LEN) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 
@@ -964,6 +1030,7 @@ function openPropertie(e, f) {
     }
     const MAX_PROPERTY_NAME_LEN = 100;
     if (srch.length <= MAX_PROPERTY_NAME_LEN) {
+        if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
     }
 

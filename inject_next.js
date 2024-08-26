@@ -472,6 +472,9 @@ grSPC.deleteMultiple();`;
             text-overflow: ellipsis;
             cursor: pointer;
         }
+        div.smallpicker {
+            font-size: 8pt;
+        }
         div.snupicker:hover {
             background-color: RGB(var(--now-unified-nav_nav-menu-trigger--background-color--hover,83, 82, 106));
         }
@@ -512,6 +515,7 @@ grSPC.deleteMultiple();`;
         
 
         setTimeout(() => { this.addClassToPickerDivs(snuSpacer) }, 4000);
+        setTimeout(() => { this.addClassToPickerDivs(snuSpacer) }, 8000);
 
         snuSpacer.addEventListener('mouseover', () => {
             this.addClassToPickerDivs();
@@ -544,11 +548,11 @@ grSPC.deleteMultiple();`;
         pickerDivs.forEach((div, idx) => {
             div.className = 'snupicker';
             div.dataset.index = ++idx;
-
             if (window?.snusettings?.highlightdefaultupdateset && div.innerText.includes('Default [')){
                 div.className = 'snupicker snudefault';
                 div.title = '[SN Utils] You may be working in the default Update set! (Disable this warning in settings)'
             }
+            if (pickerDivs.length >= 4) div.className += ' smallpicker';
         });
 
         const element = querySelectorShadowDom.querySelectorDeep('div.header-avatar-button'); 

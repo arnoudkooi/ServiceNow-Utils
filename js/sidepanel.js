@@ -22,9 +22,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* Set for initial active tab when open the sidepanel */
 
+    const params = new URLSearchParams(window.location.search);
+    let tabId = parseInt(params.get('tabid') || 0, 10);
+    if (tabId){
+        chrome.tabs.get(tabId, async tab =>{
+            tabCallback(tab);
+        });
+    } else {
+        chrome.tabs.query({active: true, currentWindow: true}, async tabs =>{
+            tabCallback(tabs[0]);
+        });
+    }
 
-    chrome.tabs.query({active: true, currentWindow: true}, async tabs =>{
-        const tab = tabs[0];
+
+    async function tabCallback(tab){
         tabId = tab.id;
         instance = (new URL(tab.url)).host.replace(".service-now.com", "");
         snuInstanceTagConfig = await getFromSyncStorage("instancetag");
@@ -40,8 +51,17 @@ document.addEventListener('DOMContentLoaded', function () {
             tagTextDoubleclick.value = snuInstanceTagConfig.tagTextDoubleclick;
             tagCommand.value = snuInstanceTagConfig.tagCommand;
             tagCommandShift.value = snuInstanceTagConfig.tagCommandShift;
-        }        
-    });
+        }   
+
+        //run after initialized, to trigger repositioning after the sidepanel showed.
+        chrome.tabs.sendMessage(tabId, {
+            "method": "snuUpdateSettingsEvent",
+            "detail": {
+                "action": "updateInstaceTagConfig",
+                "instaceTagConfig": snuInstanceTagConfig,
+            }
+        });
+    }
 
     document.querySelectorAll('input').forEach(inp => { 
         ['change','keyup'].forEach( async evtname => {  
@@ -73,17 +93,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-
-
-    //run after pageload, to trigger repositioning after the sidepanel showed.
-    chrome.tabs.sendMessage(tabId, {
-        "method": "snuUpdateSettingsEvent",
-        "detail": {
-            "action": "updateInstaceTagConfig",
-            "instaceTagConfig": snuInstanceTagConfig,
-        }
-    })
-
     
   
 });

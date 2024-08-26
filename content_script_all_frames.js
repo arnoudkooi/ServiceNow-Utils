@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                 }, 200)
                 setTimeout(function () {
                     addScript('js/monaco/libsource.js', false);
-                    addScript('js/monaco/bgscript.js', false);
+                    addScript('js/bgscript.js', false);
                 }, 600)
             }
             else if (location.pathname == "/sys.scripts.modern.do") {

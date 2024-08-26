@@ -64,6 +64,18 @@ a.iscurrent:hover {
     border-bottom-style: none;
 }
 
+li.highlightli{
+    padding-top: 7pt;
+}
+
+a.highlightlink {
+    color: #fff !important;
+    border: none;
+    margin-top: 0px;
+    font-size: 7pt;
+    font-weight:800;
+}
+
 #content .nav-link {
     color: #e5e5e5 !important;
 }
@@ -171,6 +183,11 @@ table.dataTable tbody td {
 .dataTables_scrollBody {
     max-height: 250px !important;
 }
+
+#tabdataexplore .dataTables_scrollBody {
+    max-height: 350px !important;
+}
+
 
 #tblslashcommands_wrapper .dataTables_scrollBody {
     max-height:200px !important;
@@ -363,6 +380,13 @@ a.deletecmd {
 .refname{
     font-family:monospace;
     font-size:small;
+    font-style: italic;
+}
+
+.choices{
+    font-family:monospace;
+    font-size:small;
+    font-style: italic;
 }
 
 label {
@@ -402,8 +426,12 @@ label {
 .wasabi {
     background-color: #62D74E;
     padding: 12px;
-    font-size: 20px;
+    font-size: 12pt;
     border-radius: 4px;
+}
+
+.wasabi img {
+    width: 20px;
 }
 
 textarea:read-only {
@@ -413,4 +441,14 @@ textarea:read-only {
 #tabslashcommands .row>* {
     padding-right: 4px;
     padding-left: 4px;
+}
+
+#aboutlinkedin{
+    margin:30px 0 60px 0;
+}
+
+.aboutlinkedina{
+   color: #000000;
+   font-size: 24px;
+   font-weight: 800;
 }

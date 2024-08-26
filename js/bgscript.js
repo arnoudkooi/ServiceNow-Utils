@@ -1,11 +1,12 @@
-//do some magic on sys.script.do to add monaco editor and autocomplete (beta)
+//do some magic on sys.script.do to add monaco editor and autocomplete 
 
 let s = document.body.firstChild;
 let editor;
+let snuLoadedResult = '';
 let div = document.createElement('div');
 let divInfo = document.createElement('div');
 top.document.title ="⚪ BG script not started"
-divInfo.innerText = 'CTRL/CMD Enter to Execute | Slashcommand /bg to open this page | Editor and shortcut added by SN Utils';
+divInfo.innerText = 'CTRL/CMD SHIFT Enter to Execute | Slashcommand /bg to open this page | Editor and shortcut added by SN Utils';
 divInfo.style.fontSize = '9pt';
 divInfo.style.fontFamily = 'SourceSansPro, "Helvetica Neue", Arial';
 let scrpt = document.getElementById('runscript');
@@ -20,75 +21,74 @@ const urlparams = new Proxy(new URLSearchParams(window.location.search), {
 //If washington instance redirect to the modern page.
 (async function () {
 	let snuFamily = await snuCheckFamily();
-	if (snuFamily == 'washingtondc'){
+	if (['washingtondc','xanadu'].includes(snuFamily) && !urlparams?.action && !urlparams?.noredirect ) //do not redirect if run_module or noredirect is set
 		location.href = location.href.replace('sys.scripts.do','sys.scripts.modern.do');
-	}
+	else if(!urlparams?.action)
+		snuApplyMonaco();
 })();
 
+function snuApplyMonaco() {
+	if (snusettings.applybgseditor && scrpt) {
 
-if (snusettings.applybgseditor && scrpt) {
+		devidePage();
+		
+		let monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
 
-	devidePage();
-	
-	let monacoUrl = snusettings.extensionUrl + 'js/monaco/vs';
-	// if (navigator.userAgent.toLowerCase().includes('firefox')) { //fix to allow autocomplete issue FF #134, didnt work :(
-	// 	monacoUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs';
-	// }
-
-	require.config({
-		paths: {
-			'vs': monacoUrl
-		}
-	});
-
-	div.setAttribute("id", "container");
-	
-	scrpt.parentNode.insertBefore(divInfo, scrpt);
-	scrpt.parentNode.insertBefore(div, scrpt);
-	scrpt.style.display = "none";
-
-	require(['vs/editor/editor.main'], () => {
-
-		monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-			noLib: true,
-			allowNonTsExtensions: true
-		});
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(serverglobal);
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
-
-		let theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
-		scrpt.value = scrpt.value || urlparams.content;
-
-		editor = monaco.editor.create(document.getElementById('container'), {
-			value: scrpt.value,
-			theme: theme,
-			lineNumbers: "on",
-			language: "javascript",
-			wordWrap: "on",
-			automaticLayout: true,
-			"bracketPairColorization.enabled": true,
-			minimap: { enabled: false }
-			
+		require.config({
+			paths: {
+				'vs': monacoUrl
+			}
 		});
 
-		editor.onDidChangeModelContent((e) => {
-			scrpt.value = editor.getModel().getValue();
-		});
+		div.setAttribute("id", "container");
+		
+		scrpt.parentNode.insertBefore(divInfo, scrpt);
+		scrpt.parentNode.insertBefore(div, scrpt);
+		scrpt.style.display = "none";
 
-		const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
+		require(['vs/editor/editor.main'], () => {
 
-		editor.addAction({
-			id: "runScript",
-			label: "Run script",
-			keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-			contextMenuGroupId: "2_execution",
-			precondition: blockContext,
-			run: () => {
-				document.querySelector('input[name="runscript"]').click();
-			},
+			monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+				noLib: true,
+				allowNonTsExtensions: true
+			});
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(serverglobal);
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(glidequery);
+
+			let theme = (snusettings?.slashtheme == "light") ? "vs-light" : "vs-dark";
+			scrpt.value = scrpt.value || urlparams.content;
+
+			editor = monaco.editor.create(document.getElementById('container'), {
+				value: scrpt.value,
+				theme: theme,
+				lineNumbers: "on",
+				language: "javascript",
+				wordWrap: "on",
+				automaticLayout: true,
+				"bracketPairColorization.enabled": true,
+				minimap: { enabled: false }
+				
+			});
+
+			editor.onDidChangeModelContent((e) => {
+				scrpt.value = editor.getModel().getValue();
+			});
+
+			const blockContext = "editorTextFocus && !suggestWidgetVisible && !renameInputVisible && !inSnippetMode && !quickFixWidgetVisible";
+
+			editor.addAction({
+				id: "runScript",
+				label: "Run script",
+				keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+				contextMenuGroupId: "2_execution",
+				precondition: blockContext,
+				run: () => {
+					document.querySelector('input[name="runscript"]').click();
+				},
+			});
+			editor.focus();
 		});
-		editor.focus();
-	});
+	}
 }
 
 document.addEventListener('snuEvent', function (e) {
@@ -133,23 +133,36 @@ function devidePage() {
 				clearInterval(timerInterval);
 				top.document.title ="🟢 BG script finished.."
 				result.innerHTML = response.replace('<HTML><BODY>','').replace('</BODY></HTML>','');
-				resizer.style.height = document.body.scrollHeight + 'px';
+				resizer.style.height = Math.max(leftSide.scrollHeight, rightSide.scrollHeight) + 'px';
 				document.querySelector('input[name=runscript]').disabled = false;
 
-				//add downloadlink
+				//add download and copy link
 				let text = document.querySelector('.result pre').innerText;
-				if (text.length > 10) { 
-					let oldLink = document.querySelector('.result a');
-					let lnk = document.createElement('a');
-					let linkText = document.createTextNode("download result");
-					lnk.appendChild(linkText);
-					lnk.href = "#";
-					lnk.style.display = "block";
-					lnk.title = 'Added via SN Utils'
-					lnk.addEventListener('click', evt => {
-						downloadResult();
-					});
-					oldLink.append(lnk);
+				snuLoadedResult = text;
+				if (text.length > 10) {
+					let divBar = document.createElement('div');
+					divBar.id = 'resultbar';
+					divBar.innerHTML = `
+					<a href="#" title="[SN Utils] Toggle prefix" onclick="snuTogglePrefix()">
+						<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"/>
+						</svg>
+				  	</a>
+					<a href="#" title="[SN Utils] Download result" onclick="snuDownloadResult()" >
+						<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2m-1-5-4 5-4-5m9 8h.01"/>
+						</svg>
+					</a>
+					<a href="#" title="[SN Utils] Copy result to clipboard" onclick="snuCopyResult()" >
+						<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/>
+						</svg>
+					</a>
+					<span id="actionResult">Click icon to toggle prefix or download / copy result</span>
+					`;
+					let preElement = document.querySelector('.result pre');
+					preElement.parentNode.insertBefore(divBar, preElement);
+
 				}
 
 			})
@@ -200,7 +213,7 @@ function devidePage() {
 }
 
 
-function downloadResult() {
+function snuDownloadResult() {
 
     function pad2(n) { return n < 10 ? '0' + n : n } //helper for date id
 	let instance = window.location.hostname.split('.')[0];
@@ -222,6 +235,7 @@ function downloadResult() {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+	document.querySelector('#actionResult').innerText = 'Downloaded ' + text.length + ' characters';
   }
 
 
@@ -286,4 +300,47 @@ function startStopWatch() {
 		let timer = result.querySelector('#timer');
 		if (timer) timer.innerHTML = (elapsedTime / 1000).toFixed(3);
 	}, 100);
+}
+
+async function snuCopyResult() {
+	try {
+		// Get the <pre> element
+		const pre = document.querySelector('.result pre');
+
+		// Use the navigator clipboard API to copy text
+		await navigator.clipboard.writeText(pre.innerText);
+		console.log('Text copied successfully!');
+		document.querySelector('#actionResult').innerText = 'Copied ' + pre.innerText.length + ' characters to clipboard';
+
+	} catch (err) {
+		document.querySelector('#actionResult').innerText = 'Failed to copy text: ' + err.message;
+	}
+}
+
+
+function snuTogglePrefix() {
+    const pre = document.querySelector('.result pre');
+
+    if (pre.innerText.length < snuLoadedResult.length) {
+        pre.innerText = snuLoadedResult;
+        return;
+    }
+
+    let prefix = '*** Script';
+    let scopeName = document.querySelector('select[name=sys_scope]').selectedOptions[0].text;
+    if (scopeName !== 'global') {
+        prefix = scopeName;
+    }
+
+    // Escape the prefix to safely use it in the regular expression
+    let escapedPrefix = escapeRegExp(prefix);
+    let regex = new RegExp(`^${escapedPrefix}:\\s*`, 'gm');
+
+    pre.innerText = pre.innerText.replace(regex, '');
+
+	function escapeRegExp(string) {
+		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+	}
+	
+
 }

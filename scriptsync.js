@@ -559,11 +559,21 @@ async function updateRecord(scriptObj, canRefreshToken) {
             body: JSON.stringify(data)
         });
 
+        const resp = await response.json();
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            if (resp){
+                t.row.add([new Date(), 'VS Code', `An error occurred: ${resp.error.detail}`]).draw(false);
+                increaseTitlecounter();
+                ws.send(JSON.stringify(resp));
+                throw new Error(`catched`);
+            }   
+            else
+                throw new Error(`HTTP error! Status: ${response.status}, StatusText: ${response.statusText}`);
+           
         }
 
-        const resp = await response.json();
+        
 
         if (resp.hasOwnProperty('result')) {
             t.row.add([
@@ -620,7 +630,11 @@ async function updateRecord(scriptObj, canRefreshToken) {
             ws.send(this.response);
         }
     } catch (error) {
-        // Handle error
+       if (!error.toString().includes('catched')){
+            t.row.add([new Date(), 'VS Code', `An error occurred: ${error.message}`]).draw(false);
+            increaseTitlecounter();
+            ws.send(JSON.stringify({ error: error.toString() }));
+        }
     }
 }
 

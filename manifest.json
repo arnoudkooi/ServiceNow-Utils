@@ -3,8 +3,8 @@
     "short_name": "SN Utils",
     "description": "Productivity tools for ServiceNow. (Personal work, not affiliated to ServiceNow)",
     "author": "Arnoud Kooi / arnoudkooi.com",
-    "version": "8.0.1.0",
-    "manifest_version": 3,
+    "version": "8.2.0.2",
+    "manifest_version": 3, 
     "permissions": [
       "activeTab",
       "declarativeContent",
@@ -32,7 +32,8 @@
           "*://*/*?XML*",
           "*://*/*&XML*",
           "*://*/*?WSDL*",
-          "*://*/*&WSDL*"
+          "*://*/*&WSDL*",
+          "*://*/*validate_multifactor_auth_code.do*"
         ],
         "js": [
           "js/purify.min.js",
@@ -48,7 +49,8 @@
           "*://*/*?XML*",
           "*://*/*&XML*",
           "*://*/*?WSDL*",
-          "*://*/*&WSDL*"
+          "*://*/*&WSDL*",
+          "*://*/*validate_multifactor_auth_code.do*"
         ],
         "js": [
           "js/Tinycon.js",
@@ -106,7 +108,7 @@
     ],
     "incognito": "split",
     "content_security_policy": {
-      "extension_pages": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src https://*.service-now.com 'self' data:; child-src 'none'; object-src 'none'; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
+      "extension_pages": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src https://*.service-now.com 'self' data:; child-src 'none'; object-src 'none'; frame-src https://*.service-now.com; connect-src https://*.service-now.com ws://127.0.0.1:1978/"
     },
     "action": {
       "default_title": "SN Utils",

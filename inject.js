@@ -15,6 +15,8 @@ var snuNav = {
 };
 var snuSettingsParsed = false;
 var snunumbernav = snuSlashCommandNumberNav();
+var snuMonacoPropertyCache = {};
+
 
 var snuslashcommands = {
     "acl": {
@@ -100,7 +102,7 @@ var snuslashcommands = {
         "url": "javascript: (function () {\n\tif (!g_form) return;\n\tlet blacklistedFields = ['number','sys_scope'];\n\tlet newRecordURL = `/${g_form.getTableName()}.do?sys_id=-1`;\n\t " + 
                "let queryParts = g_form.elements.reduce((acc, el) => {\n\t\tif (\n\t\t\tel.fieldName.startsWith('sys') ||\n\t\t\tblacklistedFields.includes(el.fieldName) ||\n\t\t\tel.fieldName.indexOf('.') !== -1\n\t\t)\n\t\t\treturn acc; " + 
                "\n\t\tif (g_form.isFieldVisible(el.fieldName) && g_form.getValue(el.fieldName) !== '') {\n\t\t\tacc.push(`${el.fieldName}=${encodeURIComponent(g_form.getValue(el.fieldName))} `);\n\t\t}\n\t\treturn acc;\n\t}, []);" + 
-               "\n\tlet queryString = 'sysparm_query=' + queryParts.join('^');\n\tlet viewString = `sysparm_view = ${encodeURIComponent(g_form.getViewName())} `;\n\twindow.open([newRecordURL, queryString, viewString].join('&'), '_blank');\n})();",
+               "\n\tlet queryString = 'sysparm_query=' + queryParts.join('^');\n\tlet viewString = `sysparm_view=${encodeURIComponent(g_form.getViewName())}`;\n\twindow.open([newRecordURL, queryString, viewString].join('&'), '_blank');\n})();",
         "hint": "Copy Record to New tab"
     },
     "cs": {
@@ -343,7 +345,7 @@ var snuslashcommands = {
     },
     "vd": {
         "url": "*",
-        "hint": "View data of current record"
+        "hint": "View data of current record (-p for popup)"
     },
     "wf": {
         "url": "/workflow_ide.do?sysparm_nostack=true",
@@ -441,9 +443,14 @@ if (typeof jQuery != "undefined") {
         // We have to call the function twice since we don't know what type of related list loading is selected by a user (with the form or after forms loads).
         snuDoubleClickToSetQueryListV2();
         if (typeof CustomEvent.observe == 'function') {
-            CustomEvent.observe('related_lists.ready', function () {
-                snuDoubleClickToSetQueryListV2();
-            });
+            try{ //sometimes issues with the prototype library 
+                CustomEvent.observe('related_lists.ready', function () {
+                    snuDoubleClickToSetQueryListV2();
+                });
+            } catch (e) {
+                //console.log('SN Utils: CustomEvent.observe error', e);
+            }
+
         }
         snuDoubleClickToShowFieldOrReload();
         snuCaptureFormClick();
@@ -922,6 +929,8 @@ function snuSlashCommandAddListener() {
                     data.instance = window.location.host.split('.')[0];
                     data.url = window.location.origin;
                     data.g_ck = g_ck || window.top.g_ck;
+                    data.open = "tab";
+                    if (query) data.open = "popup";
                     let event = new CustomEvent(
                         "snutils-event",
                         {
@@ -1031,8 +1040,10 @@ function snuSlashCommandAddListener() {
                     iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
                 iframes.forEach((iframe) => {
-                    if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
-                        iframe.contentWindow.snuAddTechnicalNames();
+                    try {
+                        if (typeof iframe.contentWindow.snuAddTechnicalNames != 'undefined')
+                            iframe.contentWindow.snuAddTechnicalNames();
+                    } catch (e) { } //ignore cross-origin frames
                 });
                 snuAddTechnicalNames();
 
@@ -1089,10 +1100,11 @@ function snuSlashCommandAddListener() {
                 var iframes = window.top.document.querySelectorAll("iframe");
                 if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
                     iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
-
                 iframes.forEach((iframe) => {
-                    if (typeof iframe.contentWindow.unhideFields != 'undefined')
-                        iframe.contentWindow.unhideFields();
+                    try {
+                        if (typeof iframe.contentWindow.unhideFields != 'undefined')
+                            iframe.contentWindow.unhideFields();
+                    } catch (e) { } //ignore cross-origin frames
                 });
                 unhideFields();
                 window.top.document.getElementById('snufilter').value = '';
@@ -1251,7 +1263,7 @@ function snuSlashCommandAddListener() {
                 else {
 
                     if (targeturl.startsWith("javascript:")) {
-                        window.location = DOMPurify.sanitize(targeturl);
+                        window.location = targeturl;
                     }
                     else if (!targeturl.startsWith("//")) {
                         if ((new Date()).getTime() - snuLastOpened > 500) {
@@ -1357,7 +1369,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
         html += "<li class='cmdexpand' data-shortcut='" + shortcut + "' ><span  class='cmdkey'>+" + (snuPropertyNames.length - snuMaxHints) + "</span> ▼ show all</span></li>";
     }
     else if (!html && shortcut.replace(/['" ]+/g, '').length == 32) {
-        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/sys_id</span> " +
+        html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/sysid</span> " +
             "<span class='cmdlabel'>Instance search</span></li>"
     }
     else if (!html && /.*_([0-9a-fA-F]{32})$/.test(shortcut)) {
@@ -1373,13 +1385,11 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
         // html += "<li class='cmdfilter' ><span class='cmdkey'>/" + shortcut + "</span> " +
         //     "<span class='cmdlabel'>Table search &lt;encodedquery&gt; (hit ► to search tables)</span></li>"
     }
-    if (snuPropertyNames.length == 0 && snufilter.length > 3) {
+    if (snuPropertyNames.length == 0 && snufilter.length > 3 && !/^\/?["']?([a-f0-9]{32})["']?$/.test(snufilter)) {
         html += "<li class='cmdfilter' ><span class='cmdfilter cmdkey'>/search</span> " +
                 "<span class='cmdlabel'>Search for: " + snufilter + "</span></li>";
     }
     switchText = (switchText.length > 25) ? switchText : ''; //only if string > 25 chars;
-    if (!html)
-    console.log(html)
     window.top.document.getElementById('snuhelper').innerHTML = DOMPurify.sanitize(html);
     window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize('');
     window.top.document.getElementById('snuswitches').innerHTML = DOMPurify.sanitize(switchText);
@@ -1398,17 +1408,18 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
 
 function setSnuFilter(ev) {
     var slshcmd = this.querySelector('.cmdkey').innerText;
-    if (!window.top.document.getElementById('snufilter').value.startsWith(slshcmd)) {
-        window.top.document.getElementById('snufilter').focus();
-        window.top.document.getElementById('snufilter').value = slshcmd + ' ';
-        snuIndex = parseInt(this.dataset.index || 0);
-    }
-    else {
+    if (snufilter.value.startsWith(slshcmd) || snuPropertyNames.length == 0) {
         obj = { 'key': 'Enter' };
         if (event.ctrlKey || event.metaKey) obj.ctrlKey = true;
         window.top.document.getElementById('snufilter').dispatchEvent(new KeyboardEvent('keydown', obj));
     }
+    else {
+        snufilter.focus();
+        snufilter.value = slshcmd + ' ';
+        snuIndex = parseInt(this.dataset.index || 0);
+    }
 }
+
 
 function snuDiffXml(shortcut, instance = '') {
     var gsft = (document.querySelector("#gsft_main") || document.querySelector("[component-id]")?.shadowRoot.querySelector("#gsft_main"));
@@ -1475,6 +1486,71 @@ function snuDiffXml(shortcut, instance = '') {
     return;
 }
 
+function snuLoadThemeVariables() {
+    return new Promise((resolve, reject) => {
+        //If sn utils theme used or if already loaded / in Polaris, we don't need to load.
+        if (snusettings.slashtheme !== 'theme')
+            return resolve("SNUtils theme used");
+        if (document.getElementById("polarisberg_theme_variables"))
+            return resolve("Polaris already loaded");
+
+        //Otherwise we fetch the theme variable url which comes with a cache id
+        //This ensures we retrieve the stylesheet from cache if it hasn't changed
+        fetch(
+            "AJAXJellyRunner.do?template=polarisberg_theme_variables&sysparm_path_only=true",
+            {
+                method: 'POST',
+                headers: {
+                    'ContentType': 'application/json',
+                    'X-UserToken': g_ck
+                }
+            }).then(function (response) {
+                return response.text();
+            }).then(function (data) {
+                var head = document.getElementsByTagName('head')[0];
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = data;
+                link.id = 'polarisberg_theme_variables';
+                head.appendChild(link);
+                //Await for the stylesheet to load
+                link.addEventListener('load', function () {
+                    //Add -polaris class to body if on background script page only.
+                    //The slashcommand dialog has the same class added in the css
+                    if (location.pathname == "/sys.scripts.do") {
+                        var body = document.querySelector('body');
+                        body.classList.add('-polaris');
+                    }
+                    return resolve("Polaris loaded");
+                });
+
+                link.addEventListener('error', function () {
+                    return reject("Failed to load Polaris theme");
+                });
+            }).catch(function (error) {
+                return reject(error);
+            });
+    });
+}
+
+function snuIsPolarisEnabled() {
+    return true; // #523
+    //We need to check for the existence of the polaris theme variables and its length
+    let polarisStylesheet;
+    for (let i = 0; i < document.styleSheets.length; i++) {
+        const stylesheet = document.styleSheets[i];
+        if (stylesheet.ownerNode && stylesheet.ownerNode.id === 'polarisberg_theme_variables') {
+            polarisStylesheet = stylesheet;
+            break;
+        }
+    }
+
+    if (polarisStylesheet?.cssRules?.[0]?.style?.length > 1) {
+        return true;
+    }
+    return false;
+}
 
 function snuResolve$(targeturl, query, e) {
     targeturl = targeturl.replace(/\$0/g, query + (e.key.length == 1 ? e.key : ""));
@@ -1629,7 +1705,7 @@ function snuSettingsAdded() {
         snuslashswitches = {...snuslashswitches, ...addedslashsswitches};
     } catch (ex) { } 
 
-
+    snuLoadThemeVariables(); //removed finally promise (for now), #523
     snuSetShortCuts();
 
     if (!snusettings.nopasteimage) {
@@ -1648,6 +1724,7 @@ function snuSettingsAdded() {
     if (snusettings.slashoption != "off") {
         snuAddFilterListener();
         snuSlashCommandAddListener();
+
     }
     if (snusettings.s2ify) {
         if (typeof snuS2Ify != 'undefined') snuS2Ify();
@@ -1661,7 +1738,8 @@ function snuSettingsAdded() {
         snuEnhanceNotFound();
         snuPaFormulaLinks();
         snuRemoveLinkLess();
-        snuTableCollectionLink();
+        snuAddTableCollectionLink();
+        snuAddSysUpdateVersionLink();
         snuNewFromPopupToTab();
         snuCreateHyperLinkForGlideLists();
         mouseEnterToConvertToHyperlink();
@@ -1677,6 +1755,7 @@ function snuSettingsAdded() {
         snuHyperlinkifyWorkNotes();
         snuEasifyAdvancedFilter();
         snuAddGckToken("stats.do");
+        snuAddPreviewAttachmentLinks();
 
     }
 
@@ -1726,6 +1805,39 @@ function snuSettingsAdded() {
                     });
 
                     editor.editor.updateOptions(monacooptions);
+
+                    if(localStorage.getItem('snuMonacoTheme')){
+                        monaco.editor.setTheme(localStorage.getItem('snuMonacoTheme'));
+                    }
+
+                    // Code to store the scroll position and cursor position in session storage, useful after saving form
+                    const scrollPositionKey = editor?.textareaId + "." + (window?.g_form?.getUniqueValue() || "new");
+
+                    // Restore scroll position if available
+                    const storedScrollPosition = sessionStorage.getItem(scrollPositionKey);
+                    if (storedScrollPosition) {
+                        try {
+                            const { editorTop, formTop } = JSON.parse(storedScrollPosition);
+                            editor.editor.setScrollTop(editorTop);
+                            let formDiv = document.querySelector('.section_header_content_no_scroll')
+                            if (formDiv) formDiv.scrollTop = formTop;
+                            
+                        } catch (e) {
+                            console.error('[SN Utils] Failed to restore scroll position:', e);
+                        }
+                    }
+
+                    // Listen for scroll changes and store them
+                    editor.editor.onDidScrollChange((e) => {
+                        const scrollPosition = {
+                            editorTop: editor.editor.getScrollTop(),
+                            formTop: document.querySelector('.section_header_content_no_scroll')?.scrollTop || 0
+                        };
+                        sessionStorage.setItem(scrollPositionKey, JSON.stringify(scrollPosition));
+                    });
+
+                    // End code to store the scroll position
+
 
                     editor.editor.addAction({
                         id: "snutils",
@@ -1792,8 +1904,91 @@ function snuSettingsAdded() {
                         }
                     })
 
-
+                    let themes = ["colorFixes,Theme: Default,6.1", "vs,Theme: VS Light,6.2","vs-dark,Theme: VS Dark,6.3"];
+                    themes.forEach(th => {
+                        let [themeName, themeLabel, order] = th.split(",");
+                        editor.editor.addAction({
+                            id: themeName,
+                            label: themeLabel,
+                            contextMenuGroupId: "3_theme",
+                            contextMenuOrder : Number(order),
+                            run: () => {
+                                monaco.editor.setTheme(themeName);
+                                if (themeName != "colorFixes")
+                                    localStorage.setItem('snuMonacoTheme', themeName);
+                                else 
+                                    localStorage.removeItem('snuMonacoTheme');
+                            }
+                        })
+                    })
                 })
+
+            // Function to simulate asynchronous fetching of property values with caching
+            async function fetchPropertyValue(key, editor) {
+                if (snuMonacoPropertyCache[key]) {
+                    return snuMonacoPropertyCache[key];
+                }
+
+                const regex = /gs\.getProperty\(['"]([a-zA-Z0-9_.-]+)['"](, *[^)]+)?\)/g; //query for all at once
+                let matches;
+                const properties = [];
+                while ((matches = regex.exec(editor.getValue())) !== null) {
+                    properties.push(matches[1]);
+                    snuMonacoPropertyCache[matches[1]] = {}; //add empty object to prevent multiple fetches
+                }
+
+                let props = await snuFetchData(g_ck, '/api/now/table/sys_properties?sysparm_limit=100&sysparm_fields=sys_id,type,name,value,description&sysparm_query=nameIN' + properties.join(','));
+                if (props?.result){
+                    props.result.forEach(p =>{
+                        snuMonacoPropertyCache[p.name] = p;
+                    })
+                }
+                return snuMonacoPropertyCache[key] || "not found";
+            }
+
+            // Function to extract the full property key from the line content
+            function getFullPropertyKey(lineContent, position) {
+                const regex = /gs\.getProperty\(['"]([a-zA-Z0-9_.-]+)['"](, *[^)]+)?\)/g;
+                const match = regex.exec(lineContent);
+                if (match && match.index <= position.column && match.index + match[0].length >= position.column) {
+                    return match[1];
+                }
+                return null;
+            }
+
+            // Define the hover provider
+            monaco.languages.registerHoverProvider('javascript', {
+                provideHover: async function(model, position) {
+                    const lineContent = model.getLineContent(position.lineNumber);
+                    const propertyKey = getFullPropertyKey(lineContent, position);
+                    
+                    if (propertyKey) {
+                        // Fetch the property value asynchronously with caching
+                        const prop = await fetchPropertyValue(propertyKey, model);
+
+                        let contents = [
+                            { value: `[SN Utils] **${propertyKey}**` },
+                            { value: `Value could not be fetched from sys_properties table.` },
+                            { value: `[Search in sys_properties](${location.origin}/sys_properties_list.do?sysparm_query=nameLIKE${propertyKey})`},
+                        ]
+
+                        if (prop?.sys_id){
+                            contents = [
+                                { value: `[SN Utils] **${propertyKey}** [➚](${location.origin}/sys_properties.do?sys_id=${prop.sys_id})`},
+                                { value: `Description: ${prop.description || '-'} \n Type: ${prop.type}`},
+                                { value: (prop.value || '[empty]'), fontFamily: 'Courier New, Courier, monospace' }
+                            ];
+                        }
+
+                        return {
+                            range: new monaco.Range(position.lineNumber, position.column - propertyKey.length, position.lineNumber, position.column),
+                            contents: contents
+                        };
+                    }
+                    return null;
+                }
+            });
+
             }
         }catch(ex){};
     }
@@ -1817,7 +2012,8 @@ function snuCreateHyperLinkForGlideLists() {
             var hasReferenceTable = table && table !== 'null';
             if (!hasReferenceTable) return; // if there's no Reference Table, there's no use adding links, values are to be used as-is 
             elm.nextSibling.querySelector('p').style.display = 'inline'; //polaris fix
-            var labels = elm.nextSibling.querySelector('p').innerText.split(', ');
+            var options = document.querySelectorAll(`select[id$=${field}] option`);
+            var labels = [...options].map(option => option.getAttribute('data-snuoriginal') || option.innerText);
             var values = elm.nextSibling.querySelector('input[type=hidden]').value.split(',');
             if (labels.length != values.length) return; //not a reliable match
             var links = [];
@@ -1853,7 +2049,7 @@ function snuRemoveFromList() {
 }
 
 function snuDoubleClickToShowFieldOrReload() {
-    if (typeof g_form != 'undefined' || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined') {
+    if (typeof g_form != 'undefined' || typeof GlideList2 != 'undefined' || typeof SlushBucket != 'undefined' || typeof angular != 'undefined') {
         document.addEventListener('dblclick', event => {
             if (event?.target?.classList?.contains('label-text') || event?.target?.parentElement?.classList.contains('label-text') ||
                 event?.target?.parentElement?.classList.contains('sc_editor_label')) {
@@ -1926,9 +2122,37 @@ function snuDoubleClickToShowFieldOrReload() {
                 }
             }
             else if (['div', 'li', 'body'].includes(event.target.localName) && !event.target.parentElement.className.includes('monaco')) {
-                if (!window?.snusettings?.nouielements) //disable the doubleclick when SN Utils UI elements off
+                if (!window?.snusettings?.nouielements  && event.target.className !== 'snuwrap') //disable the doubleclick when SN Utils UI elements off
                     snuAddTechnicalNames();
             }
+            else if (event.target.tagName == 'OPTION'){ 
+                if (event.target?.parentElement?.selectedIndex == -1){
+                    // Temporary fix for Chrome bug, where selectedIndex is not set when selecting an option via doubleclick
+                    // https://issues.chromium.org/issues/342316798
+                    const slushselect = event.target.parentElement;
+                    slushselect.querySelectorAll('option').forEach((option, index) => {
+                        if (event.target === option) {
+                            event.target.parentElement.selectedIndex = index;
+                            console.log('[SN Utils] setting selectedIndex Chrome bug / PRB1768385');
+                        }
+                    });
+                }
+            }
+
+            else  if (typeof window?.NOW?.sp != 'undefined' && event.target.tagName == 'SPAN') { //basic serviceportal names
+                try {
+                    let fld =  angular.element(event.target).scope();
+                    if (!fld?.$parent?.$root?.user?.can_debug_admin) return;
+                    let fldName = fld.field.name;                    
+                    let gf = fld.$parent.getGlideForm();
+                    let val = gf.getValue(fldName);
+                    let newValue = prompt('[SN Utils]\nField Type: ' +  fld.field.type + '\nField: ' + fldName + '\nValue:', val);
+                    if (newValue !== null)
+                        gf.setValue(fldName, newValue);
+
+                }catch(e){}        
+            }
+
         }, true);
     }
 }
@@ -2961,12 +3185,72 @@ function snuRemoveLinkLess() {
         newUrl + "' title='Link added by SN Utils (This is NOT a UI Action!)' >Show Related links</a></span>"));
 }
 
-function snuTableCollectionLink() {
+function snuAddTableCollectionLink() {
     if (location.pathname != "/sys_db_object.do") return;
     if (typeof jQuery == 'undefined') return;
     var tbl = g_form.getValue('name');
-    jQuery('.related_links_container').append("<li style='font-weight:bold; margin-top:15px;' class='>navigation_link action_context default-focus-outline'><a href='sys_dictionary.do?sysparm_query=name=" +
-        tbl + "^internal_type=collection&sysparm_view=advanced' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
+    jQuery('.related_links_container').append("<li style='margin-top:5px;' ><a href='sys_dictionary.do?sysparm_query=name=" +
+        tbl + "^internal_type=collection&sysparm_view=advanced' class='navigation_link action_context default-focus-outline' title='Link added by SN Utils (This is NOT a UI Action!)' >[SN Utils] Collection Dictionary Entry</a></li>");
+}
+
+async function snuAddSysUpdateVersionLink() {
+    if (typeof g_form === 'undefined') return;
+    if (g_form.isNewRecord()) return;
+
+    let tbl = g_form.getTableName();
+    let isProbableUpdateSync = g_form.hasField('sys_scope') || tbl.startsWith('sys_') || g_form.getScope() != 'global';
+    if (!isProbableUpdateSync) return;
+    if (g_form.getRelatedListNames().join(',').includes('67bdac52374010008687ddb1967334ee')) return; //already there
+    
+    var listItem = document.createElement('li'); 
+    listItem.style.marginTop = '5px';
+
+    let relatedLinksContainer = document.querySelector('.related_links_container');
+    if (!relatedLinksContainer)
+         relatedLinksContainer = document.querySelector('.form_action_button_container');
+    if (relatedLinksContainer) {
+        relatedLinksContainer = relatedLinksContainer.parentElement;
+        listItem.style.listStyle = 'none';
+        //listItem.style.marginLeft = '15px';
+    }
+    else return;
+
+
+    let query = `name=${tbl}_${g_form.getUniqueValue()}`;
+
+    //sys_update_version_list.do?sysparm_query=name=$table_$sysid
+    let result = await snuFetchData(g_ck, 
+        `/api/now/table/sys_update_version?sysparm_query=${query}&sysparm_fields=sys_id&sysparm_limit=1`);
+
+    let versionRecords = result.resultcount || 0;
+    
+    
+    var anchor = document.createElement('a');
+    anchor.href = '#';
+    anchor.className = 'navigation_link action_context default-focus-outline';
+    anchor.title = 'Version link added by SN Utils, Versions related list not found (This is NOT a UI Action)';
+    anchor.textContent = `[SN Utils] Versions (${versionRecords})`;
+    anchor.addEventListener('click', () => openVersionList(query));
+    listItem.appendChild(anchor);
+    relatedLinksContainer.appendChild(listItem);
+
+
+    function openVersionList(query) {
+
+        if (typeof GlideList2 == 'undefined') { //fallback #504
+            console.log('GlideList2 not on form, opening new tab, see GitHub Isse #504 for more info');
+            window.open(`/sys_update_version_list.do?sysparm_fixed_query=${query}`, 'versions');
+            return;
+        }
+
+        var gm = new GlideModal("sys_update_version_list");
+        gm.setTitle('[SN Utils] Update Versions');
+        gm.setPreference('sysparm_fixed_query', query);      	
+        gm.setPreference('sysparm_query', '^ORDERBYDESCsys_updated_on');      	
+        gm.setWidth(900);
+        gm.render();
+    }
+
 }
 
 function snuEnterToFilterSlushBucket() {
@@ -3064,7 +3348,7 @@ function snuSetShortCuts() {
     var divstyle;
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
-        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; }
+        div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; color: black;}
         div.snuheader {font-weight:bold; margin: -4px; background-color:#e5e5e5}
         ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; } 
         ul#snuhelper li {margin-top:2px}
@@ -3099,6 +3383,32 @@ function snuSetShortCuts() {
         @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         </style>`;
     }
+    //Check if the most basic theme css is defined
+    //Query for the id of polaris_theme_variables link element, if it has more than 0 elements, then the theme is polaris
+
+    else if (snusettings.slashtheme == 'theme' && snuIsPolarisEnabled()) {
+        divstyle = `<style>
+        div.snutils { font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; color: rgb(var(--now-color_text--primary)); z-index: 1000000000000; font-size: 8pt; position: fixed; top: 10px; left: 10px; min-height: 50px; padding: 5px; border: 1px solid rgb(var(--now-color_background--secondary)); background-color: rgb(var(--now-color_background--primary)); border-radius: 2px; min-width: 320px; border-radius: 10px; }
+        div.snuheader { font-weight: bold; margin: -4px; background-color: rgb(var(--now-color_surface--neutral-3)); border-radius: 10px 10px 0px 0px; }
+        ul#snuhelper { list-style-type: none; padding-left: 2px; overflow-y: auto; max-height: 80vh; }
+        ul#snuhelper li { margin-top: 2px; }
+        span.cmdkey { font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: 1pt solid rgb(var(--now-button--secondary--border-color)); background-color: rgb(var(--now-color_background--secondary)); color: rgb(var(--now-button--secondary--color)); min-width: 40px; cursor: pointer; display: inline-block; }
+        input.snutils { font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; outline: none; font-size: 10pt; color: rgb(var(--now-text-link--primary--color)); font-weight: bold; width: 99%; border: 1px solid rgb(var(--now-form-field--border-color)); margin: 8px 2px 4px 2px; background-color: rgb(var(--now-color_background--secondary)); }
+        span.cmdlabel { color: rgb(var(--now-color_text--primary)); font-size: 7pt; }
+        a.cmdlink { font-size: 10pt; color: rgb(var(--now-button--bare_primary--color)); }
+        span.semihidden { font-size: 6pt; color: rgb(var(--now-color_text--tertiary)); }
+        ul#snuhelper li:hover span.cmdkey,
+        ul#snuhelper li.active span.cmdkey { border-color: rgb(var(--now-text-link--primary--color)); }
+        ul#snuhelper li.active span.cmdlabel { color: rgb(var(--now-text-link--primary--color)); }
+        div#snudirectlinks { margin: -5px 10px; padding-bottom: 10px; }
+        div#snudirectlinks a { color: rgb(var(--now-button--bare_primary--color)); text-decoration: none; }
+        div#snudirectlinks.snudirectlinksdisabled .dispidx { opacity: 0.3; }
+        div#snudirectlinks div { max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        div.snutils a.patreon { color: #0cffdd; }
+        div.snufadein { animation: snuFadeIn 0.5s; }
+        @keyframes snuFadeIn { 0% { opacity: 0; } 30% { opacity: 0; } 100% { opacity: 1; } }
+        </style>`;
+    }
     else {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; color:#ffffff; z-index:1000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #030303; background-color:#000000F7; border-radius:2px; min-width:320px; border: #333333 1pt solid; border-radius:  10px;}
@@ -3125,8 +3435,15 @@ function snuSetShortCuts() {
     var htmlFilter = document.createElement('div');
     var snudirectlinks = (snunumbernav) ? '' : 'snudirectlinksdisabled';
     var cleanHTML = DOMPurify.sanitize(divstyle +
-        `<div class="snutils" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
-    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slashcommands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 16pt;">&nbsp;</span></div>
+        `<div class="snutils -polaris" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
+    <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slash commands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 0pt;">
+    <a style="color:inherit; font-family:Helvetica,Ariel;text-decoration:none; display:flex; align-items:center;" href="https://www.linkedin.com/company/sn-utils" target="_blank"> Follow #snutils on  
+    <?xml version="1.0" ?><svg style="margin:3px;" height="14" viewBox="0 0 72 72" width="14" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd"><path d="M8,72 L64,72 C68.418278,72 72,68.418278 72,64 L72,8 C72,3.581722 68.418278,-8.11624501e-16 64,0 L8,0 C3.581722,8.11624501e-16 -5.41083001e-16,3.581722 0,8 L0,64 C5.41083001e-16,68.418278 3.581722,72 8,72 Z" fill="#007EBB"/>
+    <path d="M62,62 L51.315625,62 L51.315625,43.8021149 C51.315625,38.8127542 49.4197917,36.0245323 45.4707031,36.0245323 C41.1746094,36.0245323 38.9300781,38.9261103 38.9300781,43.8021149 L38.9300781,62 L28.6333333,62 L28.6333333,27.3333333 L38.9300781,27.3333333 
+    L38.9300781,32.0029283 C38.9300781,32.0029283 42.0260417,26.2742151 49.3825521,26.2742151 C56.7356771,26.2742151 62,30.7644705 62,40.051212 L62,62 Z M16.349349,22.7940133 C12.8420573,22.7940133 10,19.9296567 10,16.3970067 C10,12.8643566 12.8420573,10 16.349349,10 
+    C19.8566406,10 22.6970052,12.8643566 22.6970052,16.3970067 C22.6970052,19.9296567 19.8566406,22.7940133 16.349349,22.7940133 Z M11.0325521,62 L21.769401,62 L21.769401,27.3333333 L11.0325521,27.3333333 L11.0325521,62 Z" fill="#FFF"/></g>
+    </svg></a> &nbsp;</span></div>
     <input id="snufilter" name="snufilter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="both" aria-haspopup="false" class="snutils" type="text" placeholder='SN Utils Slashcommand' > </input>
     <ul id="snuhelper"></ul>
     <div id="snudirectlinks" class="${snudirectlinks}"></div>
@@ -3141,6 +3458,29 @@ function snuSetShortCuts() {
     snuSlashCommandAddListener();
 
     document.addEventListener("keydown", function (event) {
+
+        // const shortcuts = {
+        //     'Ctrl+Shift+p': function () {
+        //         snuSlashCommandShow('/sa', true);
+        //     },
+        //     'Alt+Shift+t,': function () {
+        //         snuSlashCommandShow('/tn', true);
+        //     },
+        //     'Meta+Shift+p': function () {
+        //         snuSlashCommandShow('/pop', true);
+        //     }
+        // };
+
+        // if ((event.ctrlKey || event.altKey || event.metaKey) && event.key.length <= 3) {
+        //     for (const combination in shortcuts) {
+        //         if (snuMatchesShortcut(event, combination)) {
+        //           event.preventDefault();
+        //           console.log('Shortcut:', combination);
+        //           shortcuts[combination]();
+        //         }
+        //     }
+        // }
+
         if (event.key == '/') {
             if (snusettings.slashpopuppriority && (event?.target?.id !== 'snufilter' || 
                 (event?.target?.id == 'snufilter' && event?.target?.value.length > 1))) {
@@ -3226,6 +3566,28 @@ function snuSetShortCuts() {
     }, false);
 }
 
+function snuParseKeyCombination(combination) {
+    const keys = combination.split(/[-,+,\s]+/).map(key => key.trim().toLowerCase());
+    const parsed = {
+      ctrl: keys.includes('ctrl'),
+      shift: keys.includes('shift'),
+      alt: keys.includes('alt'),
+      meta: keys.includes('meta'),
+      key: keys.find(key => !['ctrl', 'shift', 'alt', 'meta'].includes(key))
+    };
+    console.log(parsed);
+    return parsed;
+}
+
+function snuMatchesShortcut(event, combination) {
+    const parsed = snuParseKeyCombination(combination);
+    return event.ctrlKey === parsed.ctrl &&
+           event.shiftKey === parsed.shift &&
+           event.altKey === parsed.alt &&
+           event.metaKey === parsed.meta &&
+           event.key.toLowerCase() === parsed.key;
+}
+
 function snuSplitContainsToAnd(event) {
     var listName;
     if (typeof g_form == 'undefined') {
@@ -3266,10 +3628,22 @@ function snuAddInfoButton()
     let btn = document.createElement("button");
     btn.type = "submit";
     btn.id = "formBtn";
-    btn.title = "[SN Utils] Show created/updated info about this record \n (Who the heck edited this?)\nDoubleclick to view data in new tab";
+    btn.title = "[SN Utils] Show created/updated info about this record \n (Who the heck edited this?)\nDoubleclick to view data in new tab\nShift+Click to open in popup";
     btn.classList = "btn btn-icon glyphicon glyphicon-question-sign navbar-btn";
-    btn.addEventListener('click', (e) => { snuLoadInfoMessage() });
-    btn.addEventListener('dblclick', (e) => { snuSlashCommandShow('/vd',true) });
+    btn.addEventListener('click', (e) => { 
+        if (e.ctrlKey || e.metaKey || e.shiftKey)
+            snuSlashCommandShow('/vd popup',true);
+        else 
+            snuLoadInfoMessage() 
+    });
+    btn.addEventListener('dblclick', (e) => { 
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+            //lready handled by single click with modifier
+        }
+        else 
+            snuSlashCommandShow('/vd',true)
+    
+    });
     trgt.after(btn);
 
 }
@@ -3278,7 +3652,7 @@ function snuAddSwitchToApplication() {
 
     let msg =  window.querySelectorShadowDom?.querySelectorDeep('now-alert-content');
     
-    if (!location.pathname.includes('.do')) return; 
+    if (!location.pathname.includes('.do') || location.pathname == '/sys_app.do') return; 
     let elm = document.querySelector('.outputmsg_nav_inner, #scope_alert_msg');
     if (!elm) return; 
 
@@ -3429,12 +3803,9 @@ function snuLoadInfoMessage() {
 
             if (flds?.sys_created_by != flds?.sys_updated_by && flds?.sys_updated_by != 'system')
                 html += ` <a href="javascript:snuSlashCommandShow('/u user_name=${flds?.sys_updated_by}',0)" >/u ${flds?.sys_updated_by}</a>&nbsp;&nbsp; `;
-
-            if (flds?.sys_scope?.display_value && flds?.sys_mod_count != "0")
-                html += ` <a href="javascript:snuSlashCommandShow('/versions',0)" >/versions</a>`;
-
             
-            html += ` <a href="javascript:snuSlashCommandShow('/vd',1)" >/vd</a> &nbsp; [🌟 New: Use /vd (View Data) to show all record data in a new tab]&nbsp;
+            html += `| &nbsp; <a href="javascript:snuSlashCommandShow('/vd',1)" >/vd</a> View data in a new tab &nbsp;
+            | <a href="javascript:snuSlashCommandShow('/vd -p',1)" >/vd -p</a> View data in a popup &nbsp;
             </div>
             Shortcuts: CTRL-V: Paste screenshot | CTRL-S: Save record | Double-click: Toggle Technical Names | 
             More: <a href="https://www.arnoudkooi.com/cheatsheet/" target="_blank">cheatsheet</a></span>
@@ -3600,7 +3971,7 @@ async function snuFetchData(token, url, post, callback) {
           body: post ? JSON.stringify(post?.body) : null
         });
         let data = response.ok ? await response.json() : response;
-        data.resultcount = response.headers.get("X-Total-Count");
+        data.resultcount = Number(response.headers.get("X-Total-Count"));
         if (callback) callback(data);
         resolve(data);
       } catch (error) {
@@ -3789,20 +4160,22 @@ function snuFillFields(query) {
         if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
             iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
         Array.from(iframes).forEach(function (frm) {
-            if (typeof frm.contentWindow.g_form != 'undefined') {
-                if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow))) {
-                    snuSlashCommandInfoText("Only available for admin, or when impersonating", false);
-                    return;
+            try {
+                if (typeof frm.contentWindow.g_form != 'undefined') {
+                    if (!(frm.contentWindow.NOW.user.roles.split(',').includes('admin') || snuImpersonater(frm.contentWindow))) {
+                        snuSlashCommandInfoText("Only available for admin, or when impersonating", false);
+                        return;
+                    }
+                    var manFields = frm.contentWindow.g_form.getMissingFields();
+                    if (g_form.getTableName() != 'ni'){
+                        setRandom(g_form.getTableName(), manFields, frm.contentWindow);
+                        //setRandomAll(g_form.getTableName(), frm.contentWindow);
+                    }
+                    else
+                        snuSlashCommandInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog.<br />`, false);
+    
                 }
-                var manFields = frm.contentWindow.g_form.getMissingFields();
-                if (g_form.getTableName() != 'ni'){
-                    setRandom(g_form.getTableName(), manFields, frm.contentWindow);
-                    //setRandomAll(g_form.getTableName(), frm.contentWindow);
-                }
-                else
-                    snuSlashCommandInfoText(`<b>Log</b><br />- /rnd Not supported in classic Service Catalog.<br />`, false);
-
-            }
+            } catch (e) { } //ignore cross-origin frames
         });
     }
 
@@ -3860,11 +4233,13 @@ function snuCopySelectedCellValues(copySysIDs, shortcut = "copycells") {
             iframes = window.top.document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
         Array.from(iframes).forEach(function (frm) {
-            selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
-            if (selCells.length > 0) {
-                doCopy(selCells, frm);
-                hasCopied = true;
-            }
+            try {
+                selCells = frm.contentWindow.document.querySelectorAll('.list_edit_selected_cell, .list_edit_cursor_cell');
+                if (selCells.length > 0) {
+                    doCopy(selCells, frm);
+                    hasCopied = true;
+                }
+            } catch (e) { } //ignore cross-origin frames
         });
     }
     if (!hasCopied) alert("Nothing copied, consider the CopyTables extension for more control");
@@ -4069,7 +4444,7 @@ function snuAddFieldSyncButtons() {
     if (typeof g_form != 'undefined') {
         //if (g_form.isNewRecord()) return;
         var tableName = g_form.getTableName();
-        var isSysTable = tableName.startsWith('sys_');
+        var isSysTable = tableName.startsWith('sys_') ||  tableName.startsWith('par_');
         jQuery(".label-text").each(function (index, value) {
             try {
                 var elm = jQuery(this).closest('div.form-group').attr('id').split('.').slice(2).join('.');
@@ -4150,8 +4525,10 @@ function snuSetAllMandatoryFieldsToFalse() {
         iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
 
     iframes.forEach((iframe) => { 
-        if (typeof iframe.contentWindow.unhideFields != 'undefined')
-            iframe.contentWindow.snuSetAllMandatoryFieldsToFalse(); 
+        try {
+            if (typeof iframe.contentWindow.snuSetAllMandatoryFieldsToFalse != 'undefined')
+                iframe.contentWindow.snuSetAllMandatoryFieldsToFalse(); 
+        } catch (e) { } //ignore cross-origin frames
     });
 
     if (typeof g_form != 'undefined' && typeof g_user != 'undefined') {
@@ -4224,40 +4601,28 @@ function snuAddDblClick() {
 }
 
 function snuSortStudioLists() {
-    snuDoGroupSearch(""); //call to remove var__m_ from flowdesigner 
+    snuDoGroupSearch(""); // Call to remove var__m_ from flowdesigner
 
-    var elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
+    // Cache the query selector results
+    const elULs = document.querySelectorAll('.app-explorer-tree ul.file-section :not(a) > ul');
 
-    Array.prototype.forEach.call(elULs, function (ul) {
-
-        var nestedUls = ul.querySelectorAll('ul.file-section');
+    elULs.forEach(ul => {
+        const nestedUls = ul.querySelectorAll('ul.file-section');
         if (nestedUls.length > 0) {
-            Array.prototype.forEach.call(nestedUls, function (nu) {
-                sortList(nu);
-            });
-        }
-        else
+            nestedUls.forEach(nu => sortList(nu));
+        } else {
             sortList(ul);
+        }
     });
 
     function sortList(list) {
-        var i, switching, b, shouldSwitch;
-        switching = true;
-        while (switching) {
-            switching = false;
-            b = list.getElementsByTagName("li");
-            for (i = 0; i < (b.length - 1); i++) {
-                shouldSwitch = false;
-                if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            }
-            if (shouldSwitch) {
-                b[i].parentNode.insertBefore(b[i + 1], b[i]);
-                switching = true;
-            }
-        }
+        const itemsArray = Array.from(list.getElementsByTagName("li"));
+        itemsArray.sort((a, b) => a.innerHTML.toLowerCase().localeCompare(b.innerHTML.toLowerCase()));
+
+        // Remove all items from the list and re-add them in sorted order
+        const fragment = document.createDocumentFragment();
+        itemsArray.forEach(item => fragment.appendChild(item));
+        list.appendChild(fragment);
     }
 }
 
@@ -4290,62 +4655,86 @@ function snuAddStudioScriptSync() {
 
 //Some magic to filter the file tree in studio
 function snuDoGroupSearch(search) {
-    //expand all when searching
-    Array.prototype.forEach.call(document.querySelectorAll('.app-explorer-tree li.collapsed'), function (el, i) {
-        el.classList.remove('collapsed');
-    });
+    // Cache the query selector results
+    const collapsedElements = document.querySelectorAll('.app-explorer-tree li.collapsed');
+    const dataViewElements = document.querySelectorAll('[data-view-count]');
+    const treeElements = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
+    // Expand all when searching
+    collapsedElements.forEach(el => el.classList.remove('collapsed'));
+
+    // Reset dataset attributes and display
+    dataViewElements.forEach(el => {
         el.dataset.viewCount = 0;
         el.dataset.searching = false;
         el.parentElement.style.display = "";
     });
 
     search = search.split(',');
-    var srch = search[0].toLowerCase();
+    const srch = search[0].toLowerCase();
 
-    //filter based on item text.
-    var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
+    const toHide = [];
+    const toShow = [];
+    const toUpdateViewCount = [];
 
-    Array.prototype.forEach.call(elms, function (el, i) {
+    // Function to get parents and their text content
+    function getParentsText(el) {
+        const parents = [];
+        let parent = el.closest('ul');
+        let text = '';
 
-        var parents = snuGetParents(el, 'ul').reverse();
+        while (parent) {
+            parents.push(parent);
+            const span = parent.parentElement.querySelector('span');
+            if (span) text += span.innerText.toLowerCase() + ' ';
+            parent = parent.parentElement.closest('ul');
+        }
+        return { parents, text: text.trim() };
+    }
+
+    // Filter based on item text
+    treeElements.forEach(el => {
         el.setAttribute("title", el.innerText);
-        var text = (search.length == 1) ? el.innerText.toLowerCase() + ' ' : '';
-        var pars = [];
-        Array.prototype.forEach.call(parents, function (par, i) {
+        const itemText = el.innerText.toLowerCase();
+        const { parents, text } = getParentsText(el);
+
+        const combinedText = (search.length === 1) ? itemText + ' ' + text : text;
+        let match = combinedText.includes(srch) && !combinedText.includes("var__m_");
+
+        parents.forEach(par => {
             par.dataset.searching = true;
-            text += par.parentElement.getElementsByTagName('span')[0].innerText.toLowerCase() + ' ';
-            pars.push(par);
-            for (par of pars) {
-                if (text.includes(srch) && !text.includes("var__m_")) {
-                    par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
-                }
-                else {
-                    par.dataset.viewCount = (Number(par.dataset.viewCount) || 0);
-                    el.style.display = "none";
-                }
+            if (match) {
+                par.dataset.viewCount = (Number(par.dataset.viewCount) || 0) + 1;
             }
-
-            if (text.includes(srch) && !text.includes("var__m_")) {
-                el.style.display = "";
-            }
-            else
-                el.style.display = "none";
         });
+
+        if (match) {
+            toShow.push(el);
+        } else {
+            toHide.push(el);
+        }
     });
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-view-count]'), function (el, i) {
-        if (el.dataset.viewCount == "0" && el.dataset.searching == "true")
+    // Batch update display styles
+    toHide.forEach(el => el.style.display = "none");
+    toShow.forEach(el => el.style.display = "");
+
+    // Hide elements with no matching children
+    dataViewElements.forEach(el => {
+        if (el.dataset.viewCount === "0" && el.dataset.searching === "true") {
             el.parentElement.style.display = "none";
+        }
     });
 
-
+    // Additional search if there are multiple search terms
     if (search.length > 1) {
-        srch = search[1];
-        var elms = document.querySelectorAll('.app-explorer-tree li:not(.nav-group)');
-        Array.prototype.forEach.call(elms, function (el, i) {
-            el.style.display = el.innerText.toLowerCase().includes(srch.toLowerCase()) ? "" : "none";
+        const additionalSearchTerm = search[1].toLowerCase();
+        treeElements.forEach(el => {
+            if (el.innerText.toLowerCase().includes(additionalSearchTerm)) {
+                el.style.display = "";
+            } else {
+                el.style.display = "none";
+            }
         });
     }
 }
@@ -4404,7 +4793,7 @@ function snuSearchSysIdTables(sysId) {
         snuSlashCommandInfoText("Searching for sys_id. This may take a few seconds...<br />", false);
         var script = `      
             function findSysID(sysId) {
-                var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user'];
+                var tbls = ['sys_metadata', 'task', 'cmdb_ci', 'sys_user', 'kb_knowledge'];
                 var rtrn;
                 var i = 0;
                 while (tbls[i]) {
@@ -4418,7 +4807,7 @@ function snuSearchSysIdTables(sysId) {
                 }
 
                 var tblsGr = new GlideRecord("sys_db_object");
-                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^nameNOT INsys_metadata,task,cmdb_ci,sys_user,cmdb_ire_partial_payloads_index^scriptable_table=false^ORscriptable_tableISEMPTY");
+                tblsGr.addEncodedQuery("super_class=NULL^sys_update_nameISNOTEMPTY^nameNOT LIKE00^nameNOT LIKE$^nameNOT INsys_metadata,task,cmdb_ci,sys_user,kb_knowledge,cmdb_ire_partial_payloads_index^scriptable_table=false^ORscriptable_tableISEMPTY");
                 tblsGr.query();
                 while (tblsGr.next()) {
                     var tableName = tblsGr.getValue('name');
@@ -5285,7 +5674,7 @@ function snuHyperlinkifyWorkNotes() {
         activityLabel.addEventListener("mouseover", snuHyperlinkifyWorkNotes);
     }
 
-    let urlRegex = /(?<!href=")(https?:\/\/[^\s]+)/g;
+    let urlRegex = /(?<!href=")(https?:\/\/[^\s\)]+)(?=\s|$|\))/g;
     document.querySelectorAll('div.sn-card-component .sn-widget-textblock-body:not(.snuified)').forEach(crd => {
         let newContent =  crd.innerHTML.replace(urlRegex, function (url) {
             return '<a href="' + url + '" target="_blank" title="[SN Utils] Converted to hyperlink">' + url + '</a>';
@@ -5396,4 +5785,401 @@ function snuInstanceTagToggle(){
         document.documentElement.style.setProperty("--snu-instancetag-tag-display", snuInstanceTagConfig.tagEnabled ? "" : "none");
         snuDispatchBackgroundEvent("updateinstancetagconfig", snuInstanceTagConfig);
     }
+}
+
+let snuCurrentAttatchmentIndex = -1;
+async function snuPreviewAttachmentsModal(attSysId){
+    let data = await snuFetchData(g_ck,`/api/now/attachment?sysparm_query=table_name=${g_form.getTableName()}^table_sys_id=${g_form.getUniqueValue()}&syssysparm_limit=100`);
+    data = data?.result;
+    if (!data.length) return;
+
+    const container = document.createElement('div');
+    container.id = 'snuAttachmentPreview';
+    container.innerHTML = `
+    <style>
+
+    #snuAttachmentPreview {
+        display: flex;
+        width: 100%;
+        height: 80vh;
+    }
+
+    #snuAttatchmentNav {
+        width: 20%;
+        overflow-y: auto;
+    }
+
+    #snuAttatchmentContent {
+        width: 80%;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        padding: 5px;
+    }
+
+    #snuAttatchmentNav ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    #snuAttatchmentNav ul li {
+        position: relative;
+        padding-left: 16px; 
+        margin-bottom: 3px;
+        background-image: url('/images/icons/attach_text.gifx'); 
+        background-size: 12px 12px;
+        background-repeat: no-repeat; 
+        background-position: left top;
+        cursor: pointer;
+    }
+
+    #snuAttatchmentNav ul li a {
+        text-decoration: none;
+        color: #000;
+        display: block;
+    }
+
+    #snuAttachmentPreview:has(.modal-dialog) {
+        width:95%;
+    }
+
+    #snuFilterAttachmentsInput{ 
+        width: 98%;
+        padding: 2px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+     }
+
+    #snuFilterAttachmentsInput:focus {
+        outline: none;
+    }
+
+    .emailtable, .emailtable td {
+        padding-bottom:4px;
+        padding-right:10px;
+        vertical-align:top;
+    }
+
+    </style>
+    <div id="snuAttatchmentNav">
+    <input type="search" autocomplet="off" id="snuFilterAttachmentsInput" placeholder="Filter attachments...">
+        <ul>
+            
+        </ul>
+    </div>
+    <div id="snuAttatchmentContent">
+        <p>Select an attachment to preview it.</p>
+        <p>New feature, view ony, rename, delete and download via the classic way.<br />
+        respond via the new <a href="https://www.linkedin.com/company/sn-utils/" target="_blank">LinkedIn page</a></p>
+    </div>
+    `
+
+
+    let attachmentList = container.querySelector("ul");
+    let storedAtt;
+    data.forEach(att => {
+        const parts = att.file_name.split('.');
+        att.extension = parts.length > 1 ? parts.pop() : '';
+
+        const listItem = document.createElement('li');
+        listItem.style.fontSize = '9pt';
+        listItem.id = 'att_' + att.sys_id;
+        listItem.tabIndex = 0;
+        listItem.onclick = () => snuSetAttachmentPreview(att);
+        const fileSize = formatFileSize(parseInt(att.size_bytes, 10));
+        listItem.textContent = `${att.file_name} (${fileSize})`;
+        listItem.title = `${att.content_type} | ${att.sys_updated_by} | ${att.sys_updated_on}`;
+        listItem.dataset.type = att.content_type;
+
+        if (att.content_type.includes('image')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_image.gifx)';
+        else if (att.content_type.includes('video')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_video.gifx)';
+        else if (att.content_type.includes('audio')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_audio.gifx)';
+        else if (att.content_type.includes('zip')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_zip.gifx)';
+        else if (att.extension.startsWith('xls')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_excel.gifx)';
+        else if (att.extension.startsWith('doc')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_word.gifx)';
+        else if (att.extension.startsWith('ppt')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_project.gifx)';
+        else if (att.extension.startsWith('xml')) 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_xml.gifx)';
+        else if (['msg','eml'].includes(att.extension)) 
+            listItem.style.backgroundImage = 'url(/images/icons/email.gifx)';
+        else if (['ics'].includes(att.extension)) 
+            listItem.style.backgroundImage = 'url(/images/icons/time.gifx)';
+        else if (att.extension == 'pdf') 
+            listItem.style.backgroundImage = 'url(/images/icons/attach_pdf.gifx)';
+
+
+        attachmentList.appendChild(listItem);
+
+        if (att.sys_id == attSysId) {
+            listItem.style.fontWeight = 'bold';
+            storedAtt = att;
+        }
+
+
+    });
+
+    function formatFileSize(bytes) {
+        const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes === 0) return '0 b';
+        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
+        return `${(bytes / (1024 ** i)).toFixed(0)} ${sizes[i]}`;
+    }
+
+    const modal = new GlideModal('snuPreviewAttachments');
+    modal.setTitle('[SN Utils] Preview Attachments (beta)');
+    modal.setBody(container);
+
+    if (storedAtt) snuSetAttachmentPreview(storedAtt);
+
+
+    //allow key up down navigation
+    let filterdItems = Array.from(document.querySelectorAll('#snuAttatchmentNav ul li'));
+  
+    // Function to update the focus and highlight the current item
+    function snuUpdateAttachmentFocus(index) {
+        filterdItems.forEach((item, idx) => {
+        if (idx === index) {
+          item.style.fontWeight = 'bold';
+          item.focus();
+          item.click();
+        } else {
+          item.style.fontWeight = 'normal';
+        }
+      });
+    }
+  
+    attachmentList.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        snuCurrentAttatchmentIndex = (snuCurrentAttatchmentIndex + 1) % filterdItems.length;
+        snuUpdateAttachmentFocus(snuCurrentAttatchmentIndex);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        snuCurrentAttatchmentIndex = (snuCurrentAttatchmentIndex - 1 + filterdItems.length) % filterdItems.length;
+        snuUpdateAttachmentFocus(snuCurrentAttatchmentIndex);
+      }
+    });
+
+    //end allow key up down navigation
+
+
+    document.querySelector('#snuPreviewAttachments .modal-dialog').style.width = '95%';
+    document.querySelector('#snuFilterAttachmentsInput').addEventListener('keyup', (e) => {
+        const filterValue = e.target.value.toLowerCase();
+        const filterWords = filterValue.split(' ');
+        listItems = document.querySelectorAll('#snuAttatchmentNav ul li');
+        filterdItems = [];
+        listItems.forEach(function(item) {
+            const text = item.textContent.toLowerCase() + ' ' + item?.dataset?.type.toLowerCase();
+            const matches = filterWords.every(word => text.includes(word));
+            if (matches) {
+                item.style.display = '';
+                filterdItems.push(item);
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            snuUpdateAttachmentFocus(0);
+          }
+        
+    });
+    document.querySelector('#snuFilterAttachmentsInput').focus();
+}
+
+async function snuSetAttachmentPreview(att){
+    let idx = 0;
+    document.querySelectorAll('#snuAttatchmentNav ul li').forEach(li => {
+        li.style.fontWeight = 'normal'
+        if (li.id == 'att_' + att.sys_id) {
+            li.style.fontWeight = 'bold';
+            snuCurrentAttatchmentIndex = idx;
+        }
+        idx++;
+    });
+
+    if (att.content_type.includes('image')) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = `${att.sys_id}.iix`;
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+        content.appendChild(img);
+    }
+    else if (att.content_type.includes('video')) {  
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const video = document.createElement('video');
+        video.src = `/sys_attachment.do?sys_id=${att.sys_id}`;
+        video.controls = true;
+        video.style.maxWidth = '100%';
+        video.style.maxHeight = '100%';
+        content.appendChild(video);
+    }   
+    else if (att.content_type.includes('audio')) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const audio = document.createElement('audio');
+        audio.src = `/sys_attachment.do?sys_id=${att.sys_id}`;
+        audio.controls = true;
+        audio.style.width = '100%';
+        content.appendChild(audio);
+    }
+    else if (['pdf'].includes(att.extension)) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = 'PDF being loaded, please wait...';
+        try {
+            const response = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const iframe = document.createElement('iframe');
+            content.innerHTML = '';
+            iframe.src = url;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            content.appendChild(iframe);
+        } catch (error) {
+            const content = document.querySelector('#snuAttatchmentContent');
+            content.innerHTML = 'Error loading PDF:' + error.message;
+        }
+    }
+    else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(att.extension)) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.src = `/$viewer.do?sysparm_stack=no&sysparm_sys_id=${att.sys_id}`;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        content.appendChild(iframe);
+    }
+    else if (['txt', 'log', 'xml', 'json', 'html', 'css', 'js', 'sql', 'md', 'eml', 'ics'].includes(att.extension)) {
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = 'File is being loaded, please wait...';
+        
+        let fileContent = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`).then(response => response.text());
+        content.innerHTML = '';
+        let span = document.createElement('span');
+        span.innerHTML = `
+        Download: <a href="/sys_attachment.do?sys_id=${att.sys_id}">${att.file_name}</a> | 
+        <a href="#" title="[SN Utils] Copy result to clipboard" onclick="snuCopyAttatchmentContent()" >
+        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/>
+        </svg>
+        </a><span id="actionResult"></span>`;
+        content.appendChild(span);
+        
+        const pre = document.createElement('pre');
+        pre.textContent = fileContent;
+        pre.id = 'snuAttatchmentContentPre';
+        pre.style.overflow = 'auto';
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.style.maxHeight = '94%';
+        content.appendChild(pre);
+
+    }
+    else if (['msg'].includes(att.extension)) {
+
+        let scriptRead = document.createElement('script');
+        scriptRead.async = false; 
+        scriptRead.src = snusettings.extensionUrl + 'js/msg.reader.js';
+        document.head.appendChild(scriptRead);
+        let scriptStream = document.createElement('script');
+        scriptStream.async = false; 
+        scriptStream.src = snusettings.extensionUrl + 'js/DataStream.js';
+        document.head.appendChild(scriptStream);
+
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        let fileContent = await fetch(`/sys_attachment.do?sys_id=${att.sys_id}`).then(response => response.blob());
+        let fileArrayBuffer = await new Response(fileContent).arrayBuffer();
+        
+        var msgReader = new MSGReader(fileArrayBuffer);
+        var fileData = msgReader.getFileData();
+        
+        const div = document.createElement('div');
+        div.innerHTML = jsonToHtmlTable(fileData);
+        div.style.overflow = 'auto';
+        div.style.maxHeight = '100%';
+        content.appendChild(div);
+
+        function jsonToHtmlTable(jsonData) {
+
+            let table = '<table class="emailtable" border="0">';
+        
+            table += '<tr>';
+            table += `<td>Subject:</td><td>${jsonData.subject}</td>`;
+            table += '</tr>';
+
+            table += '<tr>';
+            table += `<td>Sender:</td><td>${jsonData.senderName} (${jsonData.senderEmail})</td>`;
+            table += '</tr>';
+
+            table += '<tr><td>Recipient:</td><td>';
+            jsonData.recipients.forEach(recipient => table += `${recipient.name}(${recipient.email});`);
+            table += '</td></tr>';
+        
+            table += '<tr>';
+            table += `<td>Body:</td><td><pre style="max-width:100%; white-space: pre-wrap;">${jsonData.body}</pre></td>`;
+            table += '</tr>';
+        
+            table += '</table>';
+        
+            return table;
+        }
+    }
+    else{
+        const content = document.querySelector('#snuAttatchmentContent');
+        content.innerHTML = '';
+        const a = document.createElement('a');
+        a.href = `/sys_attachment.do?sys_id=${att.sys_id}`;
+        a.textContent = `${att.file_name} Filetype not supportes, download attachment`;
+        a.style.display = 'block';
+        content.appendChild(a);
+    }
+}
+
+async function snuCopyAttatchmentContent() {
+	try {
+		// Get the <pre> element
+		const pre = document.querySelector('#snuAttatchmentContentPre');
+
+		// Use the navigator clipboard API to copy text
+		await navigator.clipboard.writeText(pre.innerText);
+		console.log('Text copied successfully!');
+		document.querySelector('#actionResult').innerText = 'Copied ' + pre.innerText.length + ' characters to clipboard';
+
+	} catch (err) {
+		document.querySelector('#actionResult').innerText = 'Failed to copy text: ' + err.message;
+	}
+}
+
+function snuAddPreviewAttachmentLinks(){
+    if (typeof g_form == 'undefined') return;
+    
+    let attachments = document.querySelectorAll('li.attachment_list_items, li.manage_list');
+    attachments.forEach(attachment => {
+        let attSysId= attachment?.firstChild?.id?.replace('attachment_', '') || '';
+        let pvw = document.createElement('a');
+        pvw.innerHTML = "[⌕]&nbsp;";
+        pvw.title = "[SN Utils] Open Preview attachments modal (beta)";
+        pvw.onclick = () => snuPreviewAttachmentsModal(attSysId);
+        if (attachment.classList.contains('attachment_list_items')) 
+            attachment.querySelector('span').appendChild(pvw);
+        if (attachments.length > 1 && attachment.classList.contains('manage_list')) 
+            attachment.insertBefore(pvw, attachment.firstChild);
+    });
 }

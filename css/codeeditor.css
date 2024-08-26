@@ -80,18 +80,23 @@ h3 {
 	margin: 1em 0;
 }
 
-#header #title {
+#header .title {
 	margin-left:.5rem;
 	width: 100%;
 
 }
 
-#header #title h3 a:link {
+#header .title h3 {
+	display: inline;
+}
+
+
+#header .title h3 a:link {
 	color: var(--button-bg-color);
 	transition: var(--transition-prop);
 }
 
-#header #title h3 a:hover {
+#header .title h3 a:hover {
 	color: var(--button-bg-color-hover);
 	opacity: 0.5;
 }
@@ -103,7 +108,7 @@ h3 {
 	width: 100%;
 }
 
-#header #title span {
+#header .title span {
 	padding: 4px 3px 8px 3px;
 
 }
@@ -171,3 +176,35 @@ button:hover {
 	font-size: var(--base-font-size);
 	margin-right: 1rem;
 }
+
+select.versions {
+
+	/* display: none; */
+
+	min-width: 200px;
+	padding: 5px;
+	margin: 4px;
+	font-size: 12px;
+	border: 1px solid #ffffff;
+	border-radius: 5px;
+	background-color: #06455b;
+	color: #ffffff;
+	/* appearance: none; Remove default arrow */
+	position: relative;
+	outline: none;
+}
+
+select.versions:focus {
+	outline: none;
+}
+
+select.versions option {
+	background-color: #032d42;
+	color: #ffffff;
+	font-family: 'Courier New', Courier, monospace;
+}
+
+a.version {
+	text-decoration: none;
+	display: none;
+}	

@@ -15,7 +15,6 @@
   <script src="js/moment.js"></script>
   <script src="js/datatables.min.js"></script>
   <script src="js/datatables-datetime.js"></script>
-  <script src="viewdata.js"></script>
 
   <base href="/#">
 </head>
@@ -23,7 +22,7 @@
 <body>
   <div id="fixheader">
     <div id="title"><img class="wdth40" src="/images/icon128.png" alt="SN Utils logo" /> View Data details &nbsp;&nbsp;
-      <span id="whotheheck">Table | Created  | Updated</span>
+      <span id="whotheheck">Table | Created | Updated</span>
     </div>
     <div class="input-group">
       <input type="search" id="tbxdataexplore" name="tbxdataexplore" class="form-control form-control-sm sync"
@@ -51,6 +50,21 @@
     </thead>
   </table>
 
+  <div id="fieldDetailsModal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fieldmodalTableHeader">fieldname</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="fieldmodalTableContent">
+          fielddetails
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="viewdata.js"></script>
 </body>
 
 </html>
