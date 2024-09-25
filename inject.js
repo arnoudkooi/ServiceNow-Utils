@@ -4634,7 +4634,14 @@ function snuAddStudioSearch() {
         }
     }
     if (document.querySelectorAll('header.app-explorer-header').length == 0) return;
-    var snuGroupFilter = '<input autocomplete="off" onfocus="snuSortStudioLists(); this.select();" onkeyup="snuDoGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">'
+    var snuGroupFilter = `
+    <style>
+        nav.hide-explorer > app-explorer > a,
+        nav.hide-explorer > app-explorer > input {
+                display: none;
+        }
+    </style>
+    <input autocomplete="off" onfocus="snuSortStudioLists(); this.select();" onkeyup="snuDoGroupSearch(this.value)" id="snuGroupFilter" type="search" style="background: transparent; outline:none; color:white; border:1pt solid #e5e5e5; margin:5px 5px; padding:2px" placeholder="Filter navigator (Groups / Files[,Files])">`;
     document.querySelectorAll('header.app-explorer-header')[0].insertAdjacentHTML('afterend', snuGroupFilter);
 }
 

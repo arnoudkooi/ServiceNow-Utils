@@ -1,4 +1,8 @@
 # CHANGELOG.md
+## 8.2.0.3 (2024-09-25)
+Fixes / changes:
+  - Hide search in studio when navigator collapsed (Issue #536)
+
 ## 8.2.0.2 (2024-08-20)
 Fixes / changes:
   - Decrease font size to 8pt of Next Experience pickers when there are more than 3
