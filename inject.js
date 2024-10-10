@@ -752,7 +752,7 @@ function snuSlashCommandAddListener() {
 
 
         if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
-            let encodedQ = query.split('-')[0]; //encodedquery should be first, switches should work #460
+            let encodedQ = query.split(/(?<!\s)-/)[0]; //encodedquery should be first, switches should work #460
             targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + encodeURIComponent(encodedQ) + (e.key.length == 1 ? e.key : ""));
             switchText = '<br />Encodedquery detected<br /><br /><br /> Switches:<br />';
         }
@@ -3523,8 +3523,9 @@ function snuSetShortCuts() {
         //a few specific for forms
         if (typeof g_form != 'undefined') {
             mySysId = g_form.getUniqueValue();
+            var snuIsMac = navigator.userAgent.toLowerCase().includes('mac');
             var action;
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() == "s") { //cmd-s
+            if ((event.ctrlKey || event.metaKey && snuIsMac) && event.key.toLowerCase() == "s") { //cmd-s
 
                 event.preventDefault();
 
@@ -4133,7 +4134,7 @@ function snuSlashCommandInfoText(msg, addText) {
 
 function snuFillFields(query) {
 
-    if (location.search.includes("sc_cat_item") && location.search.includes("id=")) {
+    if ((location.search.includes("sc_cat_item") || document.querySelector('sp-assessment-layout')) && location.search.includes("id=")) {
         snuSetRandomPortal(query, 0);
         return;
     }

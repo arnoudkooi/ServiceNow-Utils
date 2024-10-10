@@ -1,6 +1,7 @@
 let hasLoaded = false;
 let leftXml;
 let theme;
+let tabId;
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     {
@@ -42,6 +43,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         } else if (message.event == 'fetchdiff1') {
 
+            tabId = sender.tab.id;
+
             document.querySelector('#left').innerHTML = getMessage(message.command, sender.tab);
             document.querySelector('#right').innerHTML = '<h3>Use /diff2 from instance to compare other version.</h3>';
 
@@ -55,6 +58,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             fetch(message.command.url)
                 .then(response => response.text())
                 .then(data => { //this needs a proper async await...
+
+                    if(tabId == sender.tab.id) sender.tab.id = null; //remove the goto tab link if same tab
 
                     document.querySelector('#right').innerHTML = getMessage(message.command, sender.tab);
                     document.title = 'Diff Loaded!';
@@ -75,11 +80,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 function getMessage(data, tab) {
+    console.log(tab?.id);
     return `
-        <h3><img class='favicon' src='${tab.favIconUrl}' alt='favicon' />${data.displayValue} <a href='#${tab.id}' class='callingtab'>goto tab</a></h3>
+        <h3><img class='favicon' src='${tab.favIconUrl}' alt='favicon' />${data.displayValue} 
+        ${tab?.id ? `<a class='callingtab' href='#${tab.id}'>goto tab</a>` : ''} 
+        </h3>
         <label sty>Instance: </label><span>${data.host}</span><br />
-        <label>Record: </label><span>${data.tableName} - ${data.sysId}</span>
+        <label>Record: </label>
+        <span>${data.tableName} - ${data.sysId} 
+        <a href='${data.url.replace('&XML=','')}' target='_blank' title="Open record in new tab">⤴</a>
+        </span>
     `;
+    
 }
 
 function createEditor(original, modified, lang) {

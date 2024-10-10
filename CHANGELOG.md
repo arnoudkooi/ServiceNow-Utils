@@ -1,4 +1,13 @@
 # CHANGELOG.md
+## 8.2.1.0 (2024-10-10)
+Fixes / changes:
+  - Hide search in studio when navigator collapsed (Issue #536)
+  - Prevent WindowsKey-S to save record (Meta key in windows) (LinkedIn Company Page DM)
+  - Allow encodedquery to have hyphen (-) in encodedquery (Follow up on issue #460 via Slack)
+  - Allow /rnd command on portal assesment page (Discussion #539)
+  - Change the goto link behavior in the diff editor (Issue #546 / Slack)
+  - I plan to add the reporting source of issues i.e. Slack, LinkedIn CDM, LinkedIn PDM in the changelog. 
+
 ## 8.2.0.3 (2024-09-25)
 Fixes / changes:
   - Hide search in studio when navigator collapsed (Issue #536)
