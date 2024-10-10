@@ -375,8 +375,11 @@ var snuslashcommands = {
         "url": "/sys_update_version_list.do?sysparm_query=name=$table_$sysid^ORDERBYDESCsys_recorded_at",
         "hint": "Versions of current record",
         "fields": "sys_recorded_at,sys_created_by"
+    },
+    "ob": {
+        "url": "javascript:window.open(`${new URLSearchParams(location.search).get('table')}.do?sys_id=${new URLSearchParams(location.search).get('sys_id')}`, '_blank')",
+        "hint": "Open current record in the backend from a Portal Page (Standard Ticket, etc)"
     }
-
 }
 
 var snuslashswitches = {
