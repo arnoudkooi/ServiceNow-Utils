@@ -95,3 +95,8 @@ h4, .result_header {
 #resultbar a {
     text-decoration: none;
 }
+
+
+#div_script:not(.code-editor) {
+    height: calc(100vh - 300px) !important;
+}

@@ -492,9 +492,11 @@ grSPC.deleteMultiple();`;
         searchInput.addEventListener('blur', (event) => {
             if (searchInput.value == '') {
                 setTimeout(() => {
-                    querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, .search-combobox--header').style.width = '32px';
-                    querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'inline';
-                }, 100);
+                    if (!querySelectorShadowDom.querySelectorDeep('#global-search-context-control button.is-opened')){ //do not hide if context switcher is selected #548
+                        querySelectorShadowDom.querySelectorDeep('.sn-global-typeahead-control-container, .search-combobox--header').style.width = '32px';
+                        querySelectorShadowDom.querySelectorDeep('#snuSpacer').style.display = 'inline';
+                    }
+                }, 500);
             }
         }, true);
         var snuSpacer = document.createElement('div');

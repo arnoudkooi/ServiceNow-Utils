@@ -161,7 +161,7 @@ function snuDividePage() {
 	<div id="result" class=result>Results will show here.</div>`;
 
 	document.querySelectorAll('.row').forEach(el => {
-		el.style.setProperty('margin-inline-start', '-8px', 'important'); //remove unneded padding
+		el.style.setProperty('margin-inline-start', '-8px', 'important'); //remove uneeded padding
 		el.style.setProperty('margin-inline-end', '-8px', 'important');
 		el.style.setProperty('margin-bottom', '5px');
 		el.style.setProperty('min-height', '29px');

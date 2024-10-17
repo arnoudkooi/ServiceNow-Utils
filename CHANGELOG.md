@@ -1,7 +1,12 @@
 # CHANGELOG.md
+
+## 8.2.1.1 (2024-10-1)
+Fixes / changes:
+  - Change Monaco editor height in modern BG Script to use more viewport height (Slack)
+  - Prevent hidding search bar in Next Experience when Updatset Pickers are shown (Issue #548)
+
 ## 8.2.1.0 (2024-10-10)
 Fixes / changes:
-  - Hide search in studio when navigator collapsed (Issue #536)
   - Prevent WindowsKey-S to save record (Meta key in windows) (LinkedIn Company Page DM)
   - Allow encodedquery to have hyphen (-) in encodedquery (Follow up on issue #460 via Slack)
   - Allow /rnd command on portal assesment page (Discussion #539)
