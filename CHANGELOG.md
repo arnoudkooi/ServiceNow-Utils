@@ -1,6 +1,11 @@
 # CHANGELOG.md
 
-## 8.2.1.1 (2024-10-1)
+## 8.2.1.4 (2024-10-21)
+Fixes / changes:
+  - Fix Doubleclick refrence icon on catalog item variables in the formatter (LinkedIn post comment)
+  - Make the call to action to follow the LinkedIn page more prominent in the slash command popup
+
+## 8.2.1.2 (2024-10-17)
 Fixes / changes:
   - Change Monaco editor height in modern BG Script to use more viewport height (Slack)
   - Prevent hidding search bar in Next Experience when Updatset Pickers are shown (Issue #548)

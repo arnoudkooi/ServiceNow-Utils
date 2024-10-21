@@ -2111,14 +2111,20 @@ function snuDoubleClickToShowFieldOrReload() {
                 //placeholder maybe move breadcrumb doubleclick here
             } else if (event?.target?.classList?.contains('btn-ref')) { //open refernece record
                 let field = event?.target.id.split(".").splice(2).join(".");
-                if (field){
+                if (field && g_form.getValue(field)) {
                     var refKey = g_form.getGlideUIElement(field)?.referenceKey || 'sys_id';
                     window.open(`${event?.target.dataset.form}?sys_id=${g_form.getValue(field)}&sysparm_refkey=${refKey}`);
                 }
-                else { //maybe a document ID
-                    var data = event?.target?.parentElement.dataset;
-                    if (data?.sysid && data?.table)
-                        window.open(`${data?.table}.do?sys_id=${data?.sysid}`);
+                else { //maybe a catalog variable
+                    field = (event?.target.id.split("LINK") || "")[0];
+                    let elm = g_form.getGlideUIElement(field);
+                    if (elm)
+                        window.open(`${elm.reference}.do?sys_id=${g_form.getValue(field)}`);
+                    else { //maybe a document ID
+                        var data = event?.target?.parentElement.dataset;
+                        if (data?.sysid && data?.table)
+                            window.open(`${data?.table}.do?sys_id=${data?.sysid}`);
+                    }
                 }
             }
             else if (['div', 'li', 'body'].includes(event.target.localName) && !event.target.parentElement.className.includes('monaco')) {
@@ -3346,6 +3352,29 @@ function snuSearchLargeSelects() {
 
 function snuSetShortCuts() {
     var divstyle;
+    let genericStyles = `
+    .snuflash {
+        background: radial-gradient(circle, #55FA46, #29B4F8);
+        background-clip: text;
+        color: transparent;
+        animation: snuflash 7s linear infinite;
+        background-size: 200% 200%;
+    }
+
+    @keyframes snuflash {
+        0% {
+            background-position: 0% 0%;
+        }
+
+        50% {
+            background-position: 100% 100%;
+        }
+
+        100% {
+            background-position: 0% 0%;
+        }
+    }
+    `;
     if (snusettings.slashtheme == 'light') {
         divstyle = `<style>
         div.snutils { font-family: Menlo, Monaco, Consolas, "Courier New", monospace; z-index:10000000000000; font-size:8pt; position: fixed; top: 10px; left: 10px; min-height:50px; padding: 5px; border: 1px solid #E3E3E3; background-color:#FFFFFFF7; border-radius:2px; min-width:320px; color: black;}
@@ -3366,6 +3395,7 @@ function snuSetShortCuts() {
         div.snutils a.patreon {color:#1f1cd2;}
         div.snufadein { animation: snuFadeIn 0.5s; }
         @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        ${genericStyles}
         </style>`;
     }
     else if (snusettings.slashtheme == 'stealth') {
@@ -3407,6 +3437,7 @@ function snuSetShortCuts() {
         div.snutils a.patreon { color: #0cffdd; }
         div.snufadein { animation: snuFadeIn 0.5s; }
         @keyframes snuFadeIn { 0% { opacity: 0; } 30% { opacity: 0; } 100% { opacity: 1; } }
+         ${genericStyles}
         </style>`;
     }
     else {
@@ -3429,6 +3460,7 @@ function snuSetShortCuts() {
         div.snutils a.patreon {color:#0cffdd;}
         div.snufadein { animation: snuFadeIn 0.5s; }
         @keyframes snuFadeIn { 0% { opacity: 0; } 30% { opacity: 0; } 100% { opacity: 1; } }
+        ${genericStyles}
         </style>`;
     }
 
@@ -3437,7 +3469,7 @@ function snuSetShortCuts() {
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils -polaris" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
     <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slash commands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 0pt;">
-    <a style="color:inherit; font-family:Helvetica,Ariel;text-decoration:none; display:flex; align-items:center;" href="https://www.linkedin.com/company/sn-utils" target="_blank"> Follow #snutils on  
+    <a style=" font-family:Helvetica,Ariel;text-decoration:none; display:flex; align-items:center;" href="https://www.linkedin.com/company/sn-utils/posts/" target="_blank" class="snuflash"> Weekly #snutils tips on  
     <?xml version="1.0" ?><svg style="margin:3px;" height="14" viewBox="0 0 72 72" width="14" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" fill-rule="evenodd"><path d="M8,72 L64,72 C68.418278,72 72,68.418278 72,64 L72,8 C72,3.581722 68.418278,-8.11624501e-16 64,0 L8,0 C3.581722,8.11624501e-16 -5.41083001e-16,3.581722 0,8 L0,64 C5.41083001e-16,68.418278 3.581722,72 8,72 Z" fill="#007EBB"/>
     <path d="M62,62 L51.315625,62 L51.315625,43.8021149 C51.315625,38.8127542 49.4197917,36.0245323 45.4707031,36.0245323 C41.1746094,36.0245323 38.9300781,38.9261103 38.9300781,43.8021149 L38.9300781,62 L28.6333333,62 L28.6333333,27.3333333 L38.9300781,27.3333333 
