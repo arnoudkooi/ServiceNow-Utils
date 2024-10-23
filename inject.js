@@ -762,11 +762,12 @@ function snuSlashCommandAddListener() {
             if (originalShortcut.startsWith("-")) query = shortcut;
             var extraParams = "";
             var unusedSwitches = Object.assign({}, snuslashswitches);
-            var switches = (query + thisKey).match(/\-([a-z0-9]*)(\s|$)/g);
+            var switches = (query + thisKey).match(/\-([a-z0-9_-]*)(\s|$)/g);
             var linkSwitch = false; //determine if this is a switch that converts the entire hyperlink
+            let autoCompleteSwitch = "";
             if (switches) {
                 Object.entries(switches).forEach(([key, val]) => {
-                    var prop = val.replace(/\s|\-/g, '');
+                    var prop = val.replace(/\s/g, '').replace('-', '');
                     if (snuslashswitches.hasOwnProperty(prop) && !linkSwitch) {
                         var switchValue = snuslashswitches[prop].value;
                         var tableName = targeturl.split("_list.do")[0] || '';
@@ -802,12 +803,16 @@ function snuSlashCommandAddListener() {
                         switchText += "<div class='cmdlabel'>-" + prop + ": " + snuslashswitches[prop].description + '</div>';
                         delete unusedSwitches[prop];
                     }
+                    else {
+                        autoCompleteSwitch = prop;
+                    }
                 });
                 targeturl += extraParams;
             }
 
             Object.entries(unusedSwitches).forEach(([key, val]) => {
-                switchText += "<div class='cmdlabel' style='color:#777777'>-" + key + ": " + val.description + '</div>';
+                if (key.startsWith(autoCompleteSwitch)) 
+                    switchText += "<div class='cmdlabel' style='color:#777777'>-" + key + ": " + val.description + '</div>';
             });
 
         }
@@ -1338,7 +1343,7 @@ function snuSlashCommandShowHints(shortcut, selectFirst, snufilter, switchText, 
     //     snuPropertyNames = [shortcut];
     // }
 
-    if (snuPropertyNames.length > 0 && selectFirst && !snuPropertyNames.includes(shortcut)) { //select first hit when tap or space pressed
+    if (snuPropertyNames.length > 0 && selectFirst && (!snuPropertyNames.includes(shortcut) || snuIndex > 0)) { //select first hit when tap or space pressed
         if (e) e.preventDefault();
         shortcut = snuPropertyNames[snuIndex];
         snuPropertyNames = [snuPropertyNames[snuIndex]];

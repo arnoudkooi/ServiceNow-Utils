@@ -1372,7 +1372,7 @@ function getSlashcommands() {
             try {
                 cmds = JSON.parse($('#slashcommands').val());
             } catch (e) { };
-            var cmdname = $('#tbxslashcmd').val().replace(/[^a-zA-Z0-9]/gi, '').toLowerCase();
+            var cmdname = $('#tbxslashcmd').val().replace(/[^a-zA-Z0-9_-]/gi, '').toLowerCase();
             if (!cmdname){
                 $('#divslashmsg').text('No command name defined');
                 return;
