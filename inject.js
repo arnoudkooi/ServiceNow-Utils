@@ -395,7 +395,7 @@ var snuslashswitches = {
     "uct": { "description": "Updated or Created Today ∀", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()^ORsys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "ut": { "description": "Updated Today ∀", "value": "^sys_updated_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
     "ct": { "description": "Created Today ∀", "value": "^sys_created_onONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()", "type": "encodedquerypart" },
-    "um": { "description": "Updated by M ∀", "value": "^sys_updated_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
+    "um": { "description": "Updated by Me ∀", "value": "^sys_updated_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
     "cm": { "description": "Created by Me ∀", "value": "^sys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
     "m": { "description": "Updated or Created by Me ∀", "value": "^sys_updated_by=javascript:gs.getUserName()^ORsys_created_by=javascript:gs.getUserName()", "type": "encodedquerypart" },
     "ou": { "description": "Order by Updated Descending ↧", "value": "^ORDERBYDESCsys_updated_on", "type": "encodedquerypart" },
@@ -803,7 +803,7 @@ function snuSlashCommandAddListener() {
                         switchText += "<div class='cmdlabel'>-" + prop + ": " + snuslashswitches[prop].description + '</div>';
                         delete unusedSwitches[prop];
                     }
-                    else {
+                    if (!(snufilter + thisKeyWithSpace).includes(" -" + prop + " ")) {
                         autoCompleteSwitch = prop;
                     }
                 });

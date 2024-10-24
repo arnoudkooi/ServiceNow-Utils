@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 8.2.2.1 (2024-10-24)
+Fixes / changes:
+  - Minor update for Autocomplete for slash command switches (Slack)
+
 ## 8.2.2.0 (2024-10-23)
 Fixes / changes:
   - Autocomplete for slash command switches, i.e. -u (Slack)
