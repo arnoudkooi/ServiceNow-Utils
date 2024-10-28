@@ -1,4 +1,14 @@
 # CHANGELOG.md
+## 8.2.3.0 (2024-10-28)
+Features:
+  - Moving the advanced slashcommand and slasswitches editing to Monaco editor in a new browser tab
+
+Fixes / changes:
+  - Improve handling of "link" type switches autocomplete (Slack)
+  - Changing setting to default on: Prioritize CTRL-/ and CMD-/ above OOB shortcut. 
+  
+
+
 
 ## 8.2.2.1 (2024-10-24)
 Fixes / changes:

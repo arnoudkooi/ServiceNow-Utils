@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editor</title>
+
+    <link rel="stylesheet" href="css/codeeditor.css">
+    <script src="js/monaco/vs/loader.js"></script>
+
+</head>
+
+<body>
+    <section id="snUtilsMonocoEditor">
+        <header id="header">
+            <div class="title">
+                <span class="title" id="title">
+                    Settings editor
+                </span>
+            </div>
+            <div id="state">
+
+
+                <!-- <div class="btn-group btns" title="Swith the autocomplete library">
+                    <button id="sercerglobal" type="button" class="btn">Server<div>Global</div></button>
+                    <button id="sercerscoped" class="btn">Server<div>Scoped</div></button>
+                    <button id="client" class="btn">Client<div></div></button>
+                  </div> -->
+                <button id="save">Save</button>
+            </div>
+        </header>
+        <section id="container"></section>
+        <footer id="snutils-monoco-footer">
+            <div class="record-meta">Do not modify settings in popup while editing here.</div>
+            <span id="response"></span>
+        </footer>
+    </section>
+    <script src="js/monaco/settingeditor.js"></script>
+
+</body>
+
+</html>

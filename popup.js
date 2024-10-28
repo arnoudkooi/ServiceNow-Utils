@@ -397,7 +397,7 @@ function setBrowserVariables(obj) {
     });
 
     $('.snu-setting').change(function () {
-        setSettings();
+        saveSettings();
     });
 
     $('.snu-instance-setting').change(function () {
@@ -441,7 +441,14 @@ function setBrowserVariables(obj) {
     });
 
     $('#slashcommands, #slashsswitches').on('dblclick',function(){
-        $(this).prop('readonly','');
+
+        var extensionUrl = chrome.runtime.getURL("settingeditor.html");
+        var createObj = {
+            'url': extensionUrl + "?setting=" + this.id,
+            'active': true
+        }
+        chrome.tabs.create(createObj);
+       
     })
 
     $('#iconallowbadge').on('change',function(){
@@ -608,7 +615,7 @@ function getSettings(callback) {
     })
 }
 
-function setSettings() {
+function saveSettings() {
     var snusettingsSync = {};
     var snusettings = {}
     $('.snu-setting').each(function (index, item) {
@@ -1347,7 +1354,7 @@ function getSlashcommands() {
             if (!confirm("Delete command " + cmd + "?")) return;
             delete objCustomCommands[cmd];
             $('#slashcommands').val(JSON.stringify(objCustomCommands));
-            setSettings();
+            saveSettings();
             getSlashcommands();
         
         });
@@ -1401,7 +1408,7 @@ function getSlashcommands() {
                 response => { });
             });
 
-            setSettings();
+            saveSettings();
             getSlashcommands();
 
             chrome.runtime.sendMessage({ "event" : "initializecontextmenus"});

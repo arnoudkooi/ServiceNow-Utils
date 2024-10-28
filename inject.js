@@ -783,7 +783,7 @@ function snuSlashCommandAddListener() {
                             switchValue = snuslashswitchesvalueoverwrites[`${prop}.${tableName}`];
                         }
                         query = query.replace(val, "");
-                        if (snuslashswitches[prop].type == "link") {
+                        if (snuslashswitches[prop].type == "link" && (snufilter + thisKeyWithSpace).includes("-" + prop + " ")) {
                             targeturl = switchValue.replace(/\$0/g, tableName);
                             targeturl = targeturl.replace(/\$sysid/, mySysId);
                             targeturl = snuResolveVariables(targeturl).variableString;
