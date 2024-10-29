@@ -122,27 +122,39 @@ function getFromChromeStorageGlobal(theName, callback) {
 
 function saveSettings() {
 
-    const jsonSetting = JSON.parse(editor.getValue());
-    const minifiedSetting = JSON.stringify(jsonSetting);
+    let jsonSetting;
+    let minifiedSetting;
+
+    try {
+        jsonSetting = JSON.parse(editor.getValue());
+        minifiedSetting  = JSON.stringify(jsonSetting);
+    } catch (e) {
+        document.querySelector('#response').innerHTML = `Error: Invalid JSON`;
+        document.querySelector('#response').title = `Error: ${e}`;
+        return;
+    }
 
     getFromSyncStorageGlobal("snusettings", function (data) { //get the current settings in case it was edited in the popup
         snusettingsSync = data;
         snusettingsSync[setting] = minifiedSetting;
-
         snusettings = {};
 
-        Object.keys(snusettingsSync).forEach(key => {
-            if (key.length >= 5000) { //overflow to local storage #204
-                snusettings[key] = '' + snusettingsSync[key];
-                delete snusettingsSync[key];
-            }
-        });
+        try {
+            Object.keys(snusettingsSync).forEach(key => {
+                if (snusettingsSync[key].length >= 5000) { //overflow to local storage #204
+                    snusettings[key] = '' + snusettingsSync[key];
+                    delete snusettingsSync[key];
+                }
+            });
 
-        setToChromeSyncStorageGlobal("snusettings", snusettingsSync);
-        setToChromeStorageGlobal("snusettings", snusettings);
-
-        document.querySelector('#response').innerHTML = `Saved: ${new Date().toLocaleTimeString()}`;
-        versionid = getEditor().getModel().getAlternativeVersionId();
+            setToChromeSyncStorageGlobal("snusettings", snusettingsSync);
+            setToChromeStorageGlobal("snusettings", snusettings);
+            
+            document.querySelector('#response').innerHTML = `Saved: ${new Date().toLocaleTimeString()}`;
+            versionid = getEditor().getModel().getAlternativeVersionId();
+        } catch (e) {
+            document.querySelector('#response').innerHTML = `Error: ${e}`;
+        }
 
     })
     

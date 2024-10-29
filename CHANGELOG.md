@@ -1,4 +1,8 @@
 # CHANGELOG.md
+## 8.2.3.1 (2024-10-29)
+Fixes / changes:
+  - Bugfix for new setting edittor
+
 ## 8.2.3.0 (2024-10-28)
 Features:
   - Moving the advanced slashcommand and slasswitches editing to Monaco editor in a new browser tab
