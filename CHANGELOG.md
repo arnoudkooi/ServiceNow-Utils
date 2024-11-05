@@ -1,4 +1,10 @@
 # CHANGELOG.md
+## 8.2.3.4 (2024-11-02)
+Fixes / changes:
+  - Fix accidentily renamed file tsWorker.js 
+  - Initialize snusettings object in settingseditor.js, when it is not found in extenson storage (Reddit)
+  - Fix for link type switches (-t, -erd) to open without a trailing space in the slash command (Slack)
+
 ## 8.2.3.1 (2024-10-29)
 Fixes / changes:
   - Bugfix for new setting edittor
@@ -11,9 +17,6 @@ Fixes / changes:
   - Improve handling of "link" type switches autocomplete (Slack)
   - Changing setting to default on: Prioritize CTRL-/ and CMD-/ above OOB shortcut. 
   
-
-
-
 ## 8.2.2.1 (2024-10-24)
 Fixes / changes:
   - Minor update for Autocomplete for slash command switches (Slack)

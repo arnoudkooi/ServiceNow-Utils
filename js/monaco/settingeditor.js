@@ -33,7 +33,7 @@ require(['vs/editor/editor.main'], () => {
     addActions(editor);
 
     getFromSyncStorageGlobal("snusettings", function (data) {
-        let snusettings = data;
+        let snusettings = data || {};
         editor.setValue(snusettings[setting]);
         setTimeout(() => {
             editor.getAction('editor.action.formatDocument').run();
