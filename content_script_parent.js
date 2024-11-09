@@ -11,7 +11,7 @@ setTimeout(() => { //be sure content_script_all_frames.js is loaded first
 },200);
 
 
-//attach event listener from popup
+//attach event listener from popup or background script
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.method == "getSelection"){
         sendResponse({ selectedText: getSelection() });
@@ -37,7 +37,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         toggleSearch();
         return true;
     } 
-    else if (request.method == "snuUpdateSettingsEvent") { //pass settings to page
+    else if (request.method == "snuProcessEvent") { //pass event payload to page
         if (typeof cloneInto != 'undefined') request = cloneInto(request, document.defaultView); //required for ff
         var event = new CustomEvent(
             request.method, request

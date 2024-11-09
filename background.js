@@ -157,7 +157,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 "instaceTagConfig": instaceTagConfig,
             };
             chrome.tabs.sendMessage(sender.tab.id, {
-                "method": "snuUpdateSettingsEvent",
+                "method": "snuProcessEvent",
                 "detail": details,
             }).then(response => {
                 console.log("Response from content script:", response);
@@ -218,6 +218,32 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         if (cookieStoreId) createObj.cookieStoreId = cookieStoreId;
         if (tabIndex > -1) createObj.index = tabIndex+1;
         chrome.tabs.create(createObj);
+    }
+    else if (message.event == "openTabInStudio") {
+        chrome.tabs.query({}, (tabs) => {
+            // Loop through all open tabs
+            for (const tab of tabs) {
+                try {
+                    if ((tab?.url || "").startsWith('http')){
+                        const url = new URL(tab.url);
+                        if (url.pathname.startsWith('/now/servicenow-studio/') && 
+                            sender.tab.url.startsWith(url.origin)) {
+                            chrome.tabs.sendMessage(tab.id, {
+                                "method": "snuProcessEvent",
+                                "detail": {
+                                    "action": "openTabInStudio",
+                                    "payload" : message.command
+                                }
+                            });
+                            chrome.tabs.update(tab.id, { active: true });
+                            break; // Exit the loop after finding the first match
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error parsing URL:', e);
+                }
+            }
+        });
     }
     return true;
 });

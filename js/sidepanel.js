@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         //run after initialized, to trigger repositioning after the sidepanel showed.
         chrome.tabs.sendMessage(tabId, {
-            "method": "snuUpdateSettingsEvent",
+            "method": "snuProcessEvent",
             "detail": {
                 "action": "updateInstaceTagConfig",
                 "instaceTagConfig": snuInstanceTagConfig,
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 setToChromeSyncStorage("instancetag", snuInstanceTagConfig);
 
                 chrome.tabs.sendMessage(tabId, {
-                    "method": "snuUpdateSettingsEvent",
+                    "method": "snuProcessEvent",
                     "detail": {
                         "action": "updateInstaceTagConfig",
                         "instaceTagConfig": snuInstanceTagConfig,

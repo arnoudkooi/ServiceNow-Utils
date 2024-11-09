@@ -1,5 +1,19 @@
 # CHANGELOG.md
-## 8.2.3.4 (2024-11-02)
+
+## 8.2.5.0 (2024-11-09)
+Features:
+  - Add /sns command to open the new ServiceNow Studio (LinkedIn post #philgoesdeep)
+  - Add /ois command to open current record in existing ServiceNow Studio as tab, as a tab (Beta)
+  - Inside ServiceNow Studio slash command inline results, will now open the record as a tab inside ServiceNow studio when it is metadata. By holding a modifier key a new tab will open.
+  - Dynamic slash commands that search metadata tables, now show sys_name as first column in the inline results. 
+
+Fixes / changes:
+  - Adjustments to override CTRL-/ and CMD-/ in ServiceNow Studio when the prioritize setting is enabled. A subsequent press of the shortcut will show the SNS search modal.
+  - Adjusted function snuResolveVariables to support commands like /vd in SNS
+  - Additional fix for link type switches (-t, -erd) to open without a trailing space in the slash command (Slack)
+  - Rename snuUpdateSettingsEvent to snuUpdateSettingsEvent
+
+## 8.2.3.4 (2024-11-05)
 Fixes / changes:
   - Fix accidentily renamed file tsWorker.js 
   - Initialize snusettings object in settingseditor.js, when it is not found in extenson storage (Reddit)

@@ -253,6 +253,10 @@ var snuslashcommands = {
         "url": "/$studio.do",
         "hint": "Open Studio"
     },
+    "sns": {
+        "url": "/now/servicenow-studio",
+        "hint": "ServiceNow Studio"
+    },
     "shortcut": {
         "url": "//sa",
         "hint": "Special slashcommand, accessible via extension keyboard shortcut"
@@ -347,6 +351,10 @@ var snuslashcommands = {
         "url": "*",
         "hint": "View data of current record (-p for popup)"
     },
+    "ois": {
+        "url": "*",
+        "hint": "Open record in open ServiceNow Studio tab (Beta)"
+    },
     "wf": {
         "url": "/workflow_ide.do?sysparm_nostack=true",
         "hint": "Workflow Editor"
@@ -416,15 +424,18 @@ var snuOperators = ["%", "^", "=", ">", "<", "ANYTHING", "BETWEEN", "DATEPART", 
 if (typeof g_ck == 'undefined') g_ck = null;  //prevent not defined errors when not provided in older instances , also see #453
 
 
-document.addEventListener('snuUpdateSettingsEvent', e => {
-    if (e.type == "snuUpdateSettingsEvent") {
+document.addEventListener('snuProcessEvent', e => {
+    if (e.type == "snuProcessEvent") {
         if (e?.detail?.action == "updateSlashCommand") {
             snuslashcommands[e.detail.cmdname] = e.detail.cmd;
             snuSlashCommandShow('/' + e.detail.cmdname + ' ', 0);
         }
         else if (e?.detail?.action == "updateInstaceTagConfig") { //update instance tag settings hanlded in instancetag.js
             if (typeof snuReceiveInstanceTagEvent == 'function')
-                    snuReceiveInstanceTagEvent(e);
+                snuReceiveInstanceTagEvent(e);
+        }
+        else if (e?.detail?.action == "openTabInStudio") { //update instance tag settings hanlded in instancetag.js
+            snuOpenTabInStudio(e);
         }
 
     }
@@ -459,6 +470,15 @@ if (typeof jQuery != "undefined") {
     })();
 }
 flowDesignerDoubleClick();
+
+function snuOpenTabInStudio(e) {
+    console.log('snuOpenTabInStudio', e);
+    let snsDispatchHook = window.top?.querySelectorShadowDom?.querySelectorDeep('sn-udc-data-provider'); //use this element to know we are in SNS and use it to dispatch the open record event
+    if (!snsDispatchHook) return;
+    snsDispatchHook.dispatch("STUDIO_SHELL_TABS#OPEN_TAB", {
+        "file": e?.detail?.payload
+    });
+}
 
 function snuEncodeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/\//g, '&#x2F;');
@@ -525,13 +545,15 @@ function snuGetDirectLinks(targeturl, shortcut) {
         snuslashcommands[shortcut].fields
         var url = "api/now/table/" + targeturl.replace("_list.do", "") +
             "&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_suppress_pagination_header=true&sysparm_limit=20" +
-            "&sysparm_fields=sys_id," + fields;
+            "&sysparm_fields=sys_id,sys_name," + fields;
 
         try {
             var table = url.match(/.*\/(.*)\?/)[1]
         } catch (ex) {
             return false;
         }
+        let snsDispatchHook = window.top?.querySelectorShadowDom?.querySelectorDeep('sn-udc-data-provider'); //use this element to know we are in SNS and use it to dispatch the open record event
+
         snuFetchData(g_ck, url, null, jsn => {
             var directlinks = '';
             if (jsn.hasOwnProperty('result')) {
@@ -540,7 +562,12 @@ function snuGetDirectLinks(targeturl, shortcut) {
                 if (results.length == 0) directlinks = `No results found`;
                 var idx = 0;
                 var dispIdx = 0;
+
                 Object.entries(results).forEach(([key, val]) => {
+
+                    if (fields == "sys_updated_on,sys_updated_by" &&  val?.sys_name)
+                        fields = "sys_name,sys_updated_on"; //Use sys_name if identified as metadata
+
                     var fieldArr = fields.replace(/ /g, '').split(',');
                     var txtArr = [];
                     for (var i = 0; i < fieldArr.length && i < 2; i++) {
@@ -548,6 +575,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                     }
                     var txt = txtArr.join(' | ');
                     var link = table + ".do?sys_id=" + val.sys_id;
+                    let metadataInSnsClass = (val?.sys_name && snsDispatchHook && !overwriteurl) ? 'class="snsopenrecord"' : '';
                     var target = "gsft_main"
                     if (overwriteurl) {
                         link = overwriteurl.replace(/\$sysid/g, val.sys_id);
@@ -567,7 +595,7 @@ function snuGetDirectLinks(targeturl, shortcut) {
                         dispIdx = '>';
                         idattr = '';
                     }
-                    directlinks += '<span class="dispidx">' + dispIdx + '</span> <a ' + idattr + '" target="' + target + '" href="' + link + '">' + txt + '</a><br />';
+                    directlinks += `<span class="dispidx">${dispIdx}</span> <a ${idattr}" ${metadataInSnsClass} target="${target}" href="${link}">${txt}</a><br />`;
                 });
                 if (directlinks.length > 50) 
                     directlinks += `<span style="opacity:0.4; font:smaller">Tip: Hit SHIFT to toggle keyboard navigation<br />Results: ${jsn.resultcount}</br><br />`;
@@ -576,8 +604,23 @@ function snuGetDirectLinks(targeturl, shortcut) {
             else {
                 directlinks = `No access to data`;
             }
-            window.top.document.getElementById('snudirectlinks').innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
-            window.top.document.getElementById('snudirectlinks');
+            let snudirectlinks = window.top.document.getElementById('snudirectlinks')
+            snudirectlinks.innerHTML = DOMPurify.sanitize(directlinks, { ADD_ATTR: ['target'] });
+            snudirectlinks.querySelectorAll('a.snsopenrecord').forEach(elm => {
+                elm.addEventListener('click', function (e) {
+                    if (e.shiftKey || e.metaKey || e.ctrlKey) return;
+                    const href = e.currentTarget.getAttribute('href');
+                    const match = href.match(/([^\/?]+)\.do\?sys_id=([a-f0-9]{32})/);
+                    const payload = match ? { table: match[1], sysId: match[2] } : null;
+                    
+                    if (!payload) return;
+                    e.preventDefault();
+                    snsDispatchHook.dispatch("STUDIO_SHELL_TABS#OPEN_TAB", {
+                        "file": payload
+                    })
+                });
+            });
+
             window.top.document.querySelectorAll("#snudirectlinks a").forEach(elm => {
 
                 if (elm.hash.startsWith('#snu:')) {
@@ -783,7 +826,7 @@ function snuSlashCommandAddListener() {
                             switchValue = snuslashswitchesvalueoverwrites[`${prop}.${tableName}`];
                         }
                         query = query.replace(val, "");
-                        if (snuslashswitches[prop].type == "link" && (snufilter + thisKeyWithSpace).includes("-" + prop)) {
+                        if (snuslashswitches[prop].type == "link" && ((snufilter + thisKeyWithSpace).includes("-" + prop + " ") || snufilter.endsWith("-" + prop))) {
                             targeturl = switchValue.replace(/\$0/g, tableName);
                             targeturl = targeturl.replace(/\$sysid/, mySysId);
                             targeturl = snuResolveVariables(targeturl).variableString;
@@ -820,6 +863,10 @@ function snuSlashCommandAddListener() {
 
 
         targeturl = snuResolve$(targeturl, query, e);
+
+        if (targeturl.includes("sysparm_query=") && !targeturl.includes("ORDERBY")) 
+            targeturl += "^ORDERBYDESCsys_updated_on"; 
+
         if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly && !(e.ctrlKey || e.metaKey))) {
             snuSlashLog(true);
             snuGetDirectLinks(targeturl, shortcut);
@@ -941,6 +988,30 @@ function snuSlashCommandAddListener() {
                         {
                             detail: {
                                 event: "viewdata",
+                                command: data
+                            }
+                        }
+                    );
+                    window.top.document.dispatchEvent(event);
+                    snuSlashCommandHide();
+                }
+                else{
+                    snuSlashCommandInfoText("No table name and sys_id found...",false)
+                }
+                return;
+            }
+            else if (shortcut == "ois") {
+                let data = {};
+                let vars = snuResolveVariables("");
+                
+                if (vars.tableName && vars.sysId){
+                    data.table = vars.tableName;
+                    data.sysId = vars.sysId;
+                    let event = new CustomEvent(
+                        "snutils-event",
+                        {
+                            detail: {
+                                event: "openTabInStudio",
                                 command: data
                             }
                         }
@@ -1629,6 +1700,15 @@ function snuResolveVariables(variableString){
         variableString = variableString.replace(/\$table/g,tableName);
         variableString = variableString.replace(/\$sysid/g,sysId);
     }
+    else if (location.pathname.startsWith("/now/servicenow-studio")){ //ServiceNow Studio
+        const decodedUrl = decodeURIComponent(location.href);
+        const urlObj = new URL(decodedUrl);
+        const params = new URLSearchParams(urlObj.search);
+        tableName = (params.get("table") || "").replace(/[^a-zA-Z0-9_]/g, "");
+        sysId = (params.get("sysId") || "").replace(/[^a-fA-F0-9]/g, "");
+        variableString = variableString.replace(/\$table/g,tableName);
+        variableString = variableString.replace(/\$sysid/g,sysId); 
+    }
     else { ///get sysid and tablename from portal or workspace or workflow studio
         let searchParams = new URLSearchParams(window.location.search)
         tableName = (searchParams.get('table') || searchParams.get('tableName') || searchParams.get('id') || '').replace(/[^a-z0-9-_]/g, '');
@@ -1694,7 +1774,7 @@ function snuSettingsAdded() {
     snusettings.codeeditor ??= true;
     snusettings.s2ify ??= true;
     snusettings.highlightdefaultupdateset ??= true;
-    snusettings.slashpopuppriority ??= false;
+    snusettings.slashpopuppriority ??= true;
     snusettings.slashnavigatorsearch ??= true;
     snusettings.slashhistory ??= 50;
     snusettings.addtechnicalnames ??= false;
@@ -3494,7 +3574,7 @@ function snuSetShortCuts() {
     }
     snuSlashCommandAddListener();
 
-    document.addEventListener("keydown", function (event) {
+    document.addEventListener("keydown", (event) => {
 
         // const shortcuts = {
         //     'Ctrl+Shift+p': function () {
@@ -3521,13 +3601,25 @@ function snuSetShortCuts() {
         if (event.key == '/') {
             if (snusettings.slashpopuppriority && (event?.target?.id !== 'snufilter' || 
                 (event?.target?.id == 'snufilter' && event?.target?.value.length > 1))) {
-                    if (!window.top?.querySelectorShadowDom?.querySelectorDeep('now-modal.keyboard-shortcuts-modal')){ //allow hidding when visible
+                    if (!window.top?.querySelectorShadowDom?.querySelectorDeep('now-modal.keyboard-shortcuts-modal, sn-udc-unified-search div.is-expanded')){ //allow hidding when visible
                         if (event.metaKey || event.ctrlKey) {
                             event.preventDefault();
                             event.stopPropagation();
+                            setTimeout(() => {
+                                let snsSearch = window.top?.querySelectorShadowDom?.querySelectorDeep('sn-udc-unified-search');
+                                if (snsSearch && window.top?.snufilter) {
+                                    snsSearch.dispatch('SN_UDC_SEARCH#SET_SEARCH_PANE_VISIBILITY',{ "show": false });
+                                    window.top.snufilter.focus();
+                                    window.top.snufilter.setSelectionRange(1,1);
+                                }
+                            }, 150);
                         }
                     }
-            };
+            }
+            else if (snufilter?.value?.length === 1 && (event.metaKey || event.ctrlKey)) {
+                snuSlashCommandHide();
+                return;
+            }
 
             if (snusettings.slashoption == 'off') return;
             let eventPath = event.path || (event.composedPath && event.composedPath());
