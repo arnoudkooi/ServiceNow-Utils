@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## 8.2.5.1 (2024-11-11)
+Fixes / changes:
+  - Updates to the package script publish.sh, goal is to prevent renaming of the tsWorker.js file.
+
 ## 8.2.5.0 (2024-11-09)
 Features:
   - Add /sns command to open the new ServiceNow Studio (LinkedIn post #philgoesdeep)
