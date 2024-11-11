@@ -3616,7 +3616,7 @@ function snuSetShortCuts() {
                         }
                     }
             }
-            else if (snufilter?.value?.length === 1 && (event.metaKey || event.ctrlKey)) {
+            else if (window.top?.snufilter?.value?.length === 1 && (event.metaKey || event.ctrlKey)) {
                 snuSlashCommandHide();
                 return;
             }

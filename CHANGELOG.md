@@ -1,13 +1,14 @@
 # CHANGELOG.md
 
-## 8.2.5.1 (2024-11-11)
+## 8.2.5.1/2 (2024-11-11)
 Fixes / changes:
   - Updates to the package script publish.sh, goal is to prevent renaming of the tsWorker.js file.
+  - Bugfix to handle undefined snufilter variable, causing slash commands not to work (Slack)
 
 ## 8.2.5.0 (2024-11-09)
 Features:
   - Add /sns command to open the new ServiceNow Studio (LinkedIn post #philgoesdeep)
-  - Add /ois command to open current record in existing ServiceNow Studio as tab, as a tab (Beta)
+  - Add /ois command to open current record in existing ServiceNow Studio tab as a tab (Beta)
   - Inside ServiceNow Studio slash command inline results, will now open the record as a tab inside ServiceNow studio when it is metadata. By holding a modifier key a new tab will open.
   - Dynamic slash commands that search metadata tables, now show sys_name as first column in the inline results. 
 
