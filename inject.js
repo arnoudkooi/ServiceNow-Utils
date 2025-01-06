@@ -758,7 +758,7 @@ function snuSlashCommandAddListener() {
             // idx = snufilter.indexOf(' '); //why is this line here?
         }
         var query = snufilter.slice(idx + 1);
-        var tmpshortcut = shortcut + (e.key.length == 1 ? e.key : "")
+        var tmpshortcut = shortcut + ((e.key.length == 1 && noSpace) ? e.key : "")
         if (((e.key == 'ArrowRight' && (noSpace || snuPropertyNames.length == 0 )) || ((shortcut || "").length == 3 || snuPropertyNames.length > 99 ||
             tmpshortcut.includes('*')) && e.key.length == 1 && e.key != " " && e.key != "-" && !(shortcut || "").includes("-")) && !query) {
             snuGetTables(tmpshortcut);
@@ -867,11 +867,11 @@ function snuSlashCommandAddListener() {
         if (targeturl.includes("sysparm_query=") && !targeturl.includes("ORDERBY")) 
             targeturl += "^ORDERBYDESCsys_updated_on"; 
 
-        if (e.key == 'ArrowRight' || (e.key == 'Enter' && inlineOnly && !(e.ctrlKey || e.metaKey))) {
+        if ((e.key == 'ArrowRight' && targeturl !== "*") || (e.key == 'Enter' && inlineOnly && !(e.ctrlKey || e.metaKey))) { //handle scripted commands * #555
             snuSlashLog(true);
             snuGetDirectLinks(targeturl, shortcut);
         }
-        else if (e.key == 'Enter') {
+        else if ((e.key == 'ArrowRight' && targeturl === "*") || e.key == 'Enter') {
             snuSlashLog(true);
             shortcut = shortcut.replace(/\*/g, '');
             snufilter = snufilter.replace(/\*/g, '');
@@ -3682,7 +3682,7 @@ function snuSetShortCuts() {
             else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key == 'u') { //cmd-shift-u 
                 unhideFields();
             }
-            else if ((event.ctrlKey || event.metaKey) && event.key == '[') {
+            else if (((event.ctrlKey || event.metaKey) && event.altKey) && event.key == '[') { //prevent collision with OOB browser shortcut
                 if (snusettings.nouielements) return //way to disable this shortcut
                 var prev = document.querySelector('button[onclick*=sysverb_record_prev]'); //previous record
                 if (prev) prev.click();
@@ -5804,23 +5804,23 @@ function snuBatchRequest(token, requests, callback) {
 
 
 function snuHyperlinkifyWorkNotes() {
-    let activityLabel = document.querySelector('.activity-stream-label:not(.snuified)')
+    let activityLabel = document.querySelector('.activity-stream-label:not(.snuified)');
     if (activityLabel) {
         activityLabel.classList.add('snuified');
         activityLabel.title = "[SN Utils] Mouseover adds hyperlinks in activity stream";
         activityLabel.addEventListener("mouseover", snuHyperlinkifyWorkNotes);
     }
 
-    let urlRegex = /(?<!href=")(https?:\/\/[^\s\)]+)(?=\s|$|\))/g;
+    let urlRegex = /(?<!href=")(https?:\/\/[^\s<]+?)(?=\s|$|<)/g;
     document.querySelectorAll('div.sn-card-component .sn-widget-textblock-body:not(.snuified)').forEach(crd => {
-        let newContent =  crd.innerHTML.replace(urlRegex, function (url) {
+        let newContent = crd.innerHTML.replace(urlRegex, function (url) {
             return '<a href="' + url + '" target="_blank" title="[SN Utils] Converted to hyperlink">' + url + '</a>';
         });
-        let purifyContent = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] }); 
-        if (newContent && (purifyContent.length == newContent.length)) //dont apply when empty after regex or purify changed it, can happen when work note uses [code] tag
+        let purifyContent = DOMPurify.sanitize(newContent, { ADD_ATTR: ['target'] });
+        if (newContent && (purifyContent.length === newContent.length)) // Don't apply when empty after regex or purify changed it
             crd.innerHTML = newContent;
         crd.classList.add('snuified');
-    })
+    });
 }
 
 

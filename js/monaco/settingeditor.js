@@ -135,7 +135,7 @@ function saveSettings() {
     }
 
     getFromSyncStorageGlobal("snusettings", function (data) { //get the current settings in case it was edited in the popup
-        snusettingsSync = data;
+        snusettingsSync = data || {};
         snusettingsSync[setting] = minifiedSetting;
         snusettings = {};
 

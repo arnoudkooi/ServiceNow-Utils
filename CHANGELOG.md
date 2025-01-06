@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 8.2.6.0 (2025-01-06)
+Fixes / changes:
+  - Prevent shortcut collision for CTRL-[] command, changed to CTRL-ALT-[] (Issue #551)
+  - Improve URL handling in the snuHyperlinkifyWorkNotes function (Issue #553)
+  - Improve handling of Right Arrow key for scripted commands (Issues #555)
+  - Fix saving custom slash commands in codeeditor on new profile (Issue #556 / Slack)
+
+
 ## 8.2.5.1/2 (2024-11-11)
 Fixes / changes:
   - Updates to the package script publish.sh, goal is to prevent renaming of the tsWorker.js file.

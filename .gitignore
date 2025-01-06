@@ -5,6 +5,9 @@ fonts/.DS_Store
 # web-ext stuff
 .jshintrc
 publish/*
+node_modules/*
+package.json
+package-lock.json
 admin/*
 !publish/*.json
 .vscode/settings.json
