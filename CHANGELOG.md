@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 8.2.6.4 (2025-02-08)
+Fixes / changes:
+  - Fix for /crn Copy Record New command (Issue #558)
+  - Update washingtondc slashcommands to xanadu
+  - Change /uib command url to /now/builder/ui/ (Issue #557)
+  - Show sys_domain in who the heck edited this infomessage (Discussion #565)
+
+
 ## 8.2.6.0 (2025-01-06)
 Fixes / changes:
   - Prevent shortcut collision for CTRL-[] command, changed to CTRL-ALT-[] (Issue #551)

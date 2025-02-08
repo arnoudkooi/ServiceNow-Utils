@@ -115,7 +115,7 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/washingtondc/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/xanadu/All/$0",
         "hint": "Search developer portal <search>"
     },
     "diff1": {
@@ -131,7 +131,7 @@ var snuslashcommands = {
         "hint": "Compare current record XML with XML of <instance>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=washingtondc",
+        "url": "https://docs.servicenow.com/search?q=$0&labelkey=xanadu",
         "hint": "Search Docs <search>"
     },
     "elev": {
@@ -309,7 +309,7 @@ var snuslashcommands = {
         "hint": "Show Hidden Fields"
     },
     "uib": {
-        "url": "/now/build/ui/experiences",
+        "url": "/now/builder/ui/",
         "hint": "Open UI Builder"
     },
     "uibe": {
@@ -676,8 +676,9 @@ function snuSlashCommandAddListener() {
     if (window.top.document.getElementById('snufilter').classList.contains('snu-slashcommand')) return;
     window.top.document.getElementById('snufilter').classList.add('snu-slashcommand');
 
-    window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
-        if (e.key == 'Shift' && window.top.document.querySelectorAll('div.snutils span.dispidx').length) { //only toggle when there are direct links
+
+    window.top.document.getElementById('snufilter').addEventListener('keyup', function (e) { //only toogle when no key combo is pressed
+        if (e.code == 'ShiftLeft' && window.top.document.querySelectorAll('div.snutils span.dispidx').length) { //only toggle when there are direct links
             snunumbernav = snuSlashCommandNumberNav(true);
             let dlinks = window.top.document.getElementById('snudirectlinks');
             if (dlinks) {
@@ -686,6 +687,10 @@ function snuSlashCommandAddListener() {
             }
             return;
         }
+    });
+
+    window.top.document.getElementById('snufilter').addEventListener('keydown', function (e) {
+        if (e.code == 'ShiftLeft') return;
         if (e.key == 'ArrowUp') {
             e.preventDefault();
             if (snuIndex == 0) { 
@@ -3906,7 +3911,7 @@ function snuLoadInfoMessage() {
         return;
     }
 
-    let reqUrl = `/api/now/table/${g_form.getTableName()}/${g_form.getUniqueValue()}?sysparm_display_value=true&sysparm_fields=sys_updated_on,sys_updated_by,sys_created_on,sys_created_by,sys_mod_count,sys_scope`;
+    let reqUrl = `/api/now/table/${g_form.getTableName()}/${g_form.getUniqueValue()}?sysparm_display_value=true&sysparm_fields=sys_updated_on,sys_updated_by,sys_created_on,sys_created_by,sys_mod_count,sys_scope,sys_domain`;
 
     g_form.clearMessages();
     g_form.addInfoMessage(`<span style='font-size:9pt'>[SN Utils] Loading record info...`);
@@ -3927,6 +3932,8 @@ function snuLoadInfoMessage() {
 
             if (flds?.sys_scope?.display_value) html += `
             <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left; white-space: pre;'>Scope      :</span> ${flds?.sys_scope?.display_value || 'n/a'}</div>`;
+            if (flds?.sys_domain?.display_value) html += `
+            <div><span style='font-size:8pt; display: inline-block; width: 90px; float: left; white-space: pre;'>Domain      :</span> ${flds?.sys_domain?.display_value || 'n/a'}</div>`;
             
             html += `</div>
             <div>Slash commands: <a href="javascript:snuSlashCommandShow('/u user_name=${flds?.sys_created_by}',0)" >/u ${flds?.sys_created_by}</a> &nbsp;&nbsp;`;
