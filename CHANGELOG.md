@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 8.2.7.0 (2025-03-31)
+Fixes / changes:
+  - Technical names now work in Workflow studio, and improves support for selects (choice fields) in Flow designer (Slack)
+  - Better handling of encoded queryies in slashcomands (Issue #564)
+  - Prevent filling in "refresh" in reference fields on workspaces when using /tn (Slack)
+  - sys_id search adjustemnet to prevent matches on tables without sys_id column. (Issue #568)
+  - Adjust slash command URLs for Yokohama release and other minor text adjustments
+
+
+
+
 ## 8.2.6.4 (2025-02-08)
 Fixes / changes:
   - Fix for /crn Copy Record New command (Issue #558)

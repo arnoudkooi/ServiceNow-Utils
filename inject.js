@@ -115,7 +115,7 @@ var snuslashcommands = {
         "hint": "Dashboards"
     },
     "dev": {
-        "url": "https://developer.servicenow.com/dev.do#!/search/xanadu/All/$0",
+        "url": "https://developer.servicenow.com/dev.do#!/search/yokohama/All/$0",
         "hint": "Search developer portal <search>"
     },
     "diff1": {
@@ -131,7 +131,7 @@ var snuslashcommands = {
         "hint": "Compare current record XML with XML of <instance>"
     },
     "docs": {
-        "url": "https://docs.servicenow.com/search?q=$0&labelkey=xanadu",
+        "url": "https://www.servicenow.com/docs/search?labelkey=yokohama&q=$0",
         "hint": "Search Docs <search>"
     },
     "elev": {
@@ -799,10 +799,20 @@ function snuSlashCommandAddListener() {
         var switchText = '<br /> Switches:<br />';
 
 
+        if (!targeturl && /(?:^|\s)-[a-z0-9]{1,5}(?:\s|$)/.test("-r")) { //if no targeturl and we have a switch, assume table) {
+            targeturl = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query="; //assume table when not lookedup via snuGetTables
+            snuslashcommands[shortcut] = { url: shortcut + '_list.do?sysparm_filter_pinned=true&sysparm_query=', hint: shortcut + ' <encodedquery>', type: 'table'};
+        }
+
         if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
-            let encodedQ = query.split(/(?<!\s)-/)[0]; //encodedquery should be first, switches should work #460
+            if (!targeturl) {
+                targeturl = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query="; //assume table when not lookedup via snuGetTables
+                snuslashcommands[shortcut] = { url: shortcut + '_list.do?sysparm_filter_pinned=true&sysparm_query=', hint: shortcut + ' <encodedquery>', type: 'table'};
+            }
+            let encodedQ = query.split(/(?<=\s)-/)[0]; //encodedquery should be first, switches should work #460
             targeturl = targeturl.replace(/sysparm_query=(.*)/g, "sysparm_query=" + encodeURIComponent(encodedQ) + (e.key.length == 1 ? e.key : ""));
             switchText = '<br />Encodedquery detected<br /><br /><br /> Switches:<br />';
+            
         }
 
 
@@ -810,7 +820,7 @@ function snuSlashCommandAddListener() {
             if (originalShortcut.startsWith("-")) query = shortcut;
             var extraParams = "";
             var unusedSwitches = Object.assign({}, snuslashswitches);
-            var switches = (query + thisKey).match(/\-([a-z0-9_-]*)(\s|$)/g);
+            var switches = (query + thisKey).match(/(?:^|(?<=\s))\-([a-zA-Z0-9_-]*)(\s|$)/g);
             var linkSwitch = false; //determine if this is a switch that converts the entire hyperlink
             let autoCompleteSwitch = "";
             if (switches) {
@@ -1119,6 +1129,8 @@ function snuSlashCommandAddListener() {
                 var iframes = window.top.document.querySelectorAll("iframe");
                 if (!iframes.length && document.querySelector("[global-navigation-config]")) //try to find iframe in case of polaris
                     iframes = document.querySelector("[global-navigation-config]").shadowRoot.querySelectorAll("iframe");
+                if (!iframes.length) 
+                    iframes = window.top?.querySelectorShadowDom?.querySelectorAllDeep('iframe') || []; //fallback for i.e. /now/workflow-studio/builder url
 
                 iframes.forEach((iframe) => {
                     try {
@@ -2255,9 +2267,9 @@ function snuDoubleClickToShowFieldOrReload() {
 
 //current only implementation is doubleclick label to edit condition field, or open condition in list with CTRL/CMD
 function flowDesignerDoubleClick() {
-    if (location.pathname != "/$flow-designer.do") return;
+    if (location.pathname != "/$flow-designer.do" && location.pathname) return;
     document.addEventListener('dblclick', event => {
-        if (angular && event.path.length > 2 &&
+        if (angular && event?.path?.length > 2 &&
             (event.path[2].classList?.contains('form-group') || event.path[2].classList?.contains('content-container'))) {
             let elm = event.path[2].querySelector('.compounds');
             if (elm) {
@@ -3244,6 +3256,44 @@ function snuShowSelectFieldValues() {
     jQuery('#tableTreeDiv td.tree_item_text > a').not(":contains('|')").each(function (i, el) {
        el.innerText = el.text + ' | ' + el.value;
     });
+
+    (function updateAngularJSSelectLabels() { //selects on Flowdesigner page are binded to AngularJS scope, a bit complex to update
+        if (typeof angular === 'undefined') return;
+        const selects = document.querySelectorAll('select');
+        selects.forEach((select) => {
+            // Get the Angular element and its scope
+            const element = angular.element(select);
+            const scope = element.scope() || element.isolateScope();
+
+            if (scope) { // Get the ng-options attribute
+                const ngOptions = select.getAttribute('ng-options') || select.getAttribute('data-ng-options');
+                if (ngOptions) {
+                    try {
+                        // Evaluate the list expression to get the array or object
+                        const listExpr = ngOptions.split(' in ').pop();
+                        const items = scope.$eval(listExpr);
+                        if (Array.isArray(items)) {
+                            items.forEach((item) => {
+                                if (item.label && item.value) {
+                                    const originalLabel = item.label;
+                                    const value = item.value;
+                                    // Check if the label doesn't already include the value
+                                    if (!originalLabel.includes(`| ${value}`)) {
+                                        item.label = `${originalLabel} | ${value}`;
+                                    }
+                                }
+                            });
+                            scope.$apply();
+                        }
+                    } catch (error) {
+                        // Silently ignore errors
+                    }
+                }
+            }
+        });
+    })();
+
+
 }
 
 function snuPaFormulaLinks() {
@@ -3559,7 +3609,7 @@ function snuSetShortCuts() {
     var cleanHTML = DOMPurify.sanitize(divstyle +
         `<div class="snutils -polaris" style="display:none;"><div class="snuheader"><a id='cmdhidedot' class='cmdlink'  href="#">
     <svg style="height:16px; width:16px;"><circle cx="8" cy="8" r="5" fill="#FF605C" /></svg></a> Slash commands <span id="snuslashcount" style="font-weight:normal;"></span><span style="float:right; font-size:8pt; line-height: 0pt;">
-    <a style=" font-family:Helvetica,Ariel;text-decoration:none; display:flex; align-items:center;" href="https://www.linkedin.com/company/sn-utils/posts/" target="_blank" class="snuflash"> Weekly #snutils tips on  
+    <a style=" font-family:Helvetica,Ariel;text-decoration:none; display:flex; align-items:center;" href="https://www.linkedin.com/company/sn-utils/posts/" target="_blank" class="snuflash">Follow #snutils on  
     <?xml version="1.0" ?><svg style="margin:3px;" height="14" viewBox="0 0 72 72" width="14" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" fill-rule="evenodd"><path d="M8,72 L64,72 C68.418278,72 72,68.418278 72,64 L72,8 C72,3.581722 68.418278,-8.11624501e-16 64,0 L8,0 C3.581722,8.11624501e-16 -5.41083001e-16,3.581722 0,8 L0,64 C5.41083001e-16,68.418278 3.581722,72 8,72 Z" fill="#007EBB"/>
     <path d="M62,62 L51.315625,62 L51.315625,43.8021149 C51.315625,38.8127542 49.4197917,36.0245323 45.4707031,36.0245323 C41.1746094,36.0245323 38.9300781,38.9261103 38.9300781,43.8021149 L38.9300781,62 L28.6333333,62 L28.6333333,27.3333333 L38.9300781,27.3333333 
@@ -4319,7 +4369,7 @@ function snuFillFields(query) {
     function setRandomAll(tbl, doc) {
 
 
-        snuSlashCommandInfoText(`<b>Log</b><br />- ${flds.length} Empty mandatory fields found.<br />`, false);
+        snuSlashCommandInfoText(`<b>Log</b><br />- ${flds.length} Empty fields found.<br />`, false);
 
         flds.push("");
         var encQ = flds.join("ISNOTEMPTY^");
@@ -4979,6 +5029,7 @@ function snuSearchSysIdTables(sysId) {
                         s.query();
                         if (s.hasNext()) {
                             s.next();
+                            if (s.getUniqueValue() != sysId) return false; //Some tables dont have sysid #568
                             return s.getRecordClassName() + "^" 
                             + s.getClassDisplayValue() + " - " 
                             + s.getDisplayValue() ;
@@ -5370,7 +5421,7 @@ function snuSetRandomPortal(allFields, iteration) {
             }
             else if (["string", "html", "textarea"].includes(fld.type)) {
                 snuSlashCommandInfoText(`- Setting filler value to ${fld.type} field ${fldName}<br />`, true);
-                var rndString = "Lorem Ipsum SN Utils Dolar /rnd Slashcommand";
+                var rndString = "This value is filled via SN Utils /rnd slash command.";
                 if (allFields == "-xss") {
                     rndString = `alert(“SNUTILS-XSS-TEST”)“>SNUTILS XSS TEST</a><img src=“a.jpg” onerror=“javascript:alert(“SNUTILS-XSS-TEST”)“/>` +
                         `<img src=x onError=alert(“SNUTILS-XSS-TEST”)`;

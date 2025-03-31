@@ -122,7 +122,7 @@ class SnuNextManager {
                         }
                     });
                     let val = frm.nowRecordFormBlob.gForm.getValue(elm.name);
-                    frm.nowRecordFormBlob.gForm.setValue(elm.name, val, 'refresh') //refresh dispalyvalue
+                    frm.nowRecordFormBlob.gForm.setValue(elm.name, val) //refresh dispalyvalue
                 }
             }));
 
