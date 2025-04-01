@@ -1,4 +1,8 @@
 # CHANGELOG.md
+## 8.2.7.1 (2025-04-01)
+Fixes / changes:
+  - Bugfix for slash comamands (Slack / Issue #576)
+
 
 ## 8.2.7.0 (2025-03-31)
 Fixes / changes:

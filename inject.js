@@ -798,11 +798,10 @@ function snuSlashCommandAddListener() {
 
         var switchText = '<br /> Switches:<br />';
 
-
-        if (!targeturl && /(?:^|\s)-[a-z0-9]{1,5}(?:\s|$)/.test("-r")) { //if no targeturl and we have a switch, assume table) {
-            targeturl = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query="; //assume table when not lookedup via snuGetTables
-            snuslashcommands[shortcut] = { url: shortcut + '_list.do?sysparm_filter_pinned=true&sysparm_query=', hint: shortcut + ' <encodedquery>', type: 'table'};
-        }
+        // if (!targeturl && /(?:^|\s)-[a-z0-9]{1,5}(?:\s|$)/.test("-r")) { //if no targeturl and we have a switch, assume table) { commented #576
+        //     targeturl = shortcut + "_list.do?sysparm_filter_pinned=true&sysparm_query="; //assume table when not lookedup via snuGetTables
+        //     snuslashcommands[shortcut] = { url: shortcut + '_list.do?sysparm_filter_pinned=true&sysparm_query=', hint: shortcut + ' <encodedquery>', type: 'table'};
+        // }
 
         if ((targeturl.includes("sysparm_query=") || !snuslashcommands.hasOwnProperty(shortcut)) && snuOperators.some(opp => (query + (e.key.length == 1 ? e.key : "")).includes(opp))) { //detect encodedquery and replace if found
             if (!targeturl) {
