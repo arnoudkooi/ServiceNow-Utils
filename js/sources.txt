@@ -5,7 +5,7 @@ datetime-moment.js https://cdn.datatables.net/plug-ins/1.13.4/sorting/datetime-m
 jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js
 moment.js https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js
 jquery.deserialize.js https://raw.githubusercontent.com/kflorence/jquery-deserialize/master/src/jquery.deserialize.js
-purify.min.js https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js
+purify.min.js https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js
 Tinycon.js https://github.com/tommoor/tinycon/blob/master/tinycon.js
 md5.js https://github.com/blueimp/JavaScript-MD5/blob/master/js/md5.js
 msg.reader.js https://github.com/ykarpovich/msg.reader/blob/master/msg.reader.js

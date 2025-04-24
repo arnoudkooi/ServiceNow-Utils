@@ -27,7 +27,7 @@
 
     <div id="content">
         <form>
-            <input id='tbxactivetab' name='tbxactivetab' value="tababout" class="sync" type="hidden" />
+            <input id='tbxactivetab' name='tbxactivetab' value="" class="sync" type="hidden" />
             <ul class="nav nav-tabs compact" id="myTab">
                 <li class='nav-item onlyadmin'>
                     <a class="nav-link" data-bs-target="#tabupdatesets" data-bs-toggle="disabledtab">Update Set
@@ -155,13 +155,42 @@
                 </div>
 
                 <div class="tab-pane" id="tabnodes">
-                    <div class="input-group">
-                        <input type="search" id="tbxnodes" name="tbxnodes" class="form-control form-control-sm"
-                            placeholder="Search Instance Nodes...   |   Hit refresh button to update status >>">
-                        <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm"
-                            type="button">Refresh</button>
+                    <div class="d-flex align-items-center mb-1">
+                        <div class="input-group flex-grow-1">
+                             <input type="search" id="tbxnodes" name="tbxnodes" class="form-control form-control-sm" placeholder="Search Instance Nodes...">
+                            <button id="btnrefreshnodes" class="btn btn-outline-secondary btn-sm" type="button" title="Refresh Node List">
+                                <i class="fas fa-sync"></i> Refresh Nodes
+                                <span id="waitingnodes" style="display:none; margin-left: 5px;"><i class='fas fa-spinner fa-spin'></i></span>
+                            </button>
+                        </div>
+                        <a href="#" id="toggleDbMetaBtn" class="btn btn-outline-secondary btn-sm ms-2" title="Toggle DB Info" role="button">
+                           <img id="dbicon" src="images/database.png" alt="Database Icon">
+                        </a>
+                        <input type="checkbox" id="cbxdbmetavisible" name="cbxdbmetavisible" class="snu-setting d-none">
 
+                    </div> 
+
+                    <div id="dbmeta" class="db-meta-info my-2" style="display: none;">
+                        <span class="nerds-only-label">Nerds only 🤓</span>
+                        <div class="db-detail-item">
+                            <span class="db-label">DB Name:</span>
+                            <span class="db-value" id="dbNameValue">Loading...</span>
+                        </div>
+                        <div class="db-detail-item">
+                            <span class="db-label">JDBC URL:</span>
+                            <span class="db-value" id="dbUrlValue">Loading...</span>
+                        </div>
+
+                        <div class="db-detail-item">
+                            <span class="db-label">Airport code:</span>
+                            <span class="db-value" id="dbAirportCode"></span>
+                        </div>
+                        <div class="db-detail-item">
+                            <span class="db-label">Session ID:</span>
+                            <span class="db-value" id="dbSessionValue">Loading...</span>
+                        </div>
                     </div>
+                     <div id="nodemessage" class="alert alert-warning hidden" role="alert"></div>
                     <table id="instancenodes" class="display table-condensed">
                         <thead>
                             <tr>

@@ -30,6 +30,28 @@ var sys_id;
 var isNoRecord = true;
 var tabIndex = -1;
 
+const airportCodes = {
+    "ams": { "city": "Amsterdam", "country": "Netherlands", "region": "Europe" },
+    "bne": { "city": "Brisbane", "country": "Australia", "region": "Oceania" },
+    "bos": { "city": "Boston", "country": "United States", "region": "North America" },
+    "dca": { "city": "Washington, D.C.", "country": "United States", "region": "North America" },
+    "hef": { "city": "Manassas", "country": "United States", "region": "North America" },
+    "hnd": { "city": "Tokyo", "country": "Japan", "region": "Asia" },
+    "iad": { "city": "Dulles", "country": "United States", "region": "North America" },
+    "mel": { "city": "Melbourne", "country": "Australia", "region": "Oceania" },
+    "ord": { "city": "Chicago", "country": "United States", "region": "North America" },
+    "sea": { "city": "Seattle", "country": "United States", "region": "North America" },
+    "sin": { "city": "Singapore", "country": "Singapore", "region": "Asia" },
+    "sjc": { "city": "San Jose", "country": "United States", "region": "North America" },
+    "syd": { "city": "Sydney", "country": "Australia", "region": "Oceania" },
+    "vcp": { "city": "Campinas", "country": "Brazil", "region": "South America" },
+    "ycg": { "city": "Castlegar", "country": "Canada", "region": "North America" },
+    "ytz": { "city": "Toronto", "country": "Canada", "region": "North America" },
+    "yul": { "city": "Montreal", "country": "Canada", "region": "North America" },
+    "yyz": { "city": "Toronto (Pearson)", "country": "Canada", "region": "North America" },
+    "zrh": { "city": "Zurich", "country": "Switzerland", "region": "Europe" }
+  };
+
 
 $.fn.dataTable.ext.errMode = 'none';
 
@@ -320,22 +342,138 @@ function getActiveNode(jsn) {
 
 
 //Try to get json with instance nodes, first from chrome storage, else via REST api
-function prepareJsonNodes() {
+async function prepareJsonNodes() {
+    // Show spinner if not already shown by button click
+    $('#waitingnodes').show();
+
+    const dbMeta = await fetchDbMeta(url);
+    const dbIconElement = document.getElementById('dbicon');
+     if (dbIconElement) {
+         dbIconElement.src = dbMeta.dbIcon;
+         dbIconElement.alt = dbMeta.dbName !== 'N/A' ? `${dbMeta.dbName} icon` : 'Database icon';
+         const toggleBtn = document.getElementById('toggleDbMetaBtn');
+          if (toggleBtn) {
+             toggleBtn.title = `Toggle DB Info\nName: ${dbMeta.dbName}\nURL: ${dbMeta.dbUrl}\nSession: ${dbMeta.sessionId || 'N/A'}`;
+          }
+     }
+
+    const dbNameValueEl = document.getElementById('dbNameValue');
+    const dbUrlValueEl = document.getElementById('dbUrlValue');
+    const dbSessionValueEl = document.getElementById('dbSessionValue');
+
+    if(dbNameValueEl) dbNameValueEl.innerHTML = dbMeta.dbName ?? 'N/A';
+    if(dbUrlValueEl) dbUrlValueEl.textContent = dbMeta.dbUrl ?? 'N/A';
+    if(dbSessionValueEl) dbSessionValueEl.textContent = dbMeta.sessionId ?? 'N/A';    
+
+    const dbAirportCodeEl = document.getElementById('dbAirportCode');
+    if (dbAirportCodeEl) {
+        let airportDisplayText = 'N/A';
+        try {
+            if (dbMeta.dbUrl && typeof dbMeta.dbUrl === 'string') {
+                const match = dbMeta.dbUrl.match(/([a-zA-Z]{3})\d+\./);
+
+                if (match && match[1]) {
+                    const extractedCodeLower = match[1].toLowerCase(); // Extract and use lowercase
+
+                    // Look up using the lowercase code
+                    const airportInfo = airportCodes[extractedCodeLower];
+
+                    // Format using new fields: city, country, region
+                    if (airportInfo && airportInfo.city && airportInfo.country && airportInfo.region) {
+                        // Format: CODE - City, Country (Region)
+                        airportDisplayText = `${extractedCodeLower.toUpperCase()} - ${airportInfo.city}, ${airportInfo.country} (${airportInfo.region})`;
+                    } else {
+                         airportDisplayText = extractedCodeLower.toUpperCase(); // Fallback to uppercase code
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Error processing airport code from dbUrl:", e);
+            airportDisplayText = 'Error';
+        }
+        dbAirportCodeEl.textContent = airportDisplayText;
+    }
+
+    // Proceed with fetching and displaying node information
     var query = [instance + "-nodes", instance + "-nodes-date"];
     chrome.storage.local.get(query, function (result) {
         try {
             var thedate = new Date().toDateString();
-            if (thedate == result[query[1]].toString()) {
+            if (thedate == result[query[1]]?.toString()) { // Added safe navigation
                 getActiveNode(result[query[0]]);
             }
             else{
-                getNodes(); 
+                getNodes();
             }
         }
         catch (err) {
-            getNodes();      
+            console.error("Error processing stored nodes:", err);
+            getNodes();
         }
     });
+}
+
+
+async function fetchDbMeta(url) {
+    try {
+        const response = await fetch(url + '/replication.do');
+        if (!response.ok) {
+            console.error("SNU: Failed to fetch replication.do:", response.status, response.statusText);
+            return { dbName: 'N/A', dbUrl: 'N/A', dbIcon: 'images/database.png', sessionId: null };
+        }
+        const htmlText = await response.text();
+
+        let sessionCookie = null;
+        let sessionId = null;
+        try {
+            sessionCookie = await chrome.cookies.get({
+                "name": "glide_session_store",
+                "url": new URL(url).origin
+            });
+            if (sessionCookie) {
+                console.log("SNU: Found session cookie:", sessionCookie);
+                sessionId = sessionCookie.value;
+            } else {
+                console.warn("SNU: Session cookie 'glide_session_store' not found or permission denied.");
+                if (chrome.runtime.lastError) {
+                     console.error("SNU: chrome.cookies.get error:", chrome.runtime.lastError.message);
+                }
+            }
+        } catch (cookieError) {
+             console.error("SNU: Error calling chrome.cookies.get:", cookieError);
+        }
+
+
+        const parser = new DOMParser(); //parse the replication.do page
+        const doc = parser.parseFromString(htmlText, 'text/html');
+
+        const boldElements = doc.querySelectorAll('b');
+        let dbName = 'Not found';
+        let dbUrl = 'Not found';
+        let dbIcon = 'images/database.png';
+
+        for (let i = 0; i < boldElements.length; i++) {
+            const el = boldElements[i];
+            const nextText = el.nextSibling?.textContent?.trim().replace(/^:\s*/, '');
+            if (el.textContent.trim() === 'Name' && nextText) {
+                dbName = nextText;
+            }
+            if (el.textContent.trim() === 'URL' && nextText) {
+                dbUrl = nextText;
+                if (dbUrl.includes('postgresql')) {
+                    dbIcon = 'images/raptor.png';
+                    dbName = dbName + ' | <strong>RaptorDB</strong>';
+                    document.querySelector('#dbmeta').classList.add('raptor');
+                }
+            }
+        }
+
+        return { dbName, dbUrl, dbIcon, sessionId };
+
+    } catch (error) {
+        console.error("SNU: Error fetching DB meta:", error);
+        return { dbName: 'N/A', dbUrl: 'N/A', dbIcon: 'images/database.png', sessionId: 'N/A' };
+    }
 }
 
 function getParameterByName(name, url) {
@@ -366,9 +504,14 @@ function setBrowserVariables(obj) {
     //roles = obj.myVars.NOWuserroles ;
     datetimeformat = obj.myVars.g_user_date_time_format;
     myFrameHref = obj.frameHref;
-
+        
     setFormFromSyncStorage(function () {
-        $('.nav-tabs a[data-bs-target="' + $('#tbxactivetab').val() + '"]').tab('show');
+        setTimeout(() => {
+            let targetTab = document.getElementById('tbxactivetab').value;
+            console.log((!targetTab && document.getElementById('cbxdbmetavisible').checked));
+            if (!targetTab && document.getElementById('cbxdbmetavisible').checked) targetTab = "#tabnodes";
+                $('.nav-tabs a[data-bs-target="' + targetTab + '"]').tab('show');
+        }, 100);
     });
 
     //Attach eventlistners
@@ -411,8 +554,37 @@ function setBrowserVariables(obj) {
 
     $('#btnrefreshnodes').click(function () {
         $('#waitingnodes').show();
-        getNodes(); 
+        getNodes();
     });
+
+    // --- START: DB Info Toggle Logic ---
+    const toggleButton = document.getElementById('toggleDbMetaBtn');
+    const dbMetaContainer = document.getElementById('dbmeta');
+    const dbMetaCheckbox = document.getElementById('cbxdbmetavisible');
+
+    if (toggleButton && dbMetaContainer && dbMetaCheckbox) {
+        // Set initial state based on saved preference in storage
+        getFromSyncStorageGlobal("snusettings", function(settings) {
+            if (settings && settings.hasOwnProperty('cbxdbmetavisible')) {
+                dbMetaCheckbox.checked = settings.cbxdbmetavisible;
+                dbMetaContainer.style.display = dbMetaCheckbox.checked ? 'block' : 'none';
+            } else {
+                dbMetaContainer.style.display = 'none';
+                dbMetaCheckbox.checked = false;
+            }
+        });
+
+        toggleButton.addEventListener('click', function(event) {
+            event.preventDefault(); // Stop link behavior
+            
+            const newState = dbMetaContainer.style.display !== 'block';
+            dbMetaContainer.style.display = newState ? 'block' : 'none';
+            dbMetaCheckbox.checked = newState;
+            
+            saveSettings();
+        });
+    }
+    // --- END: DB Info Toggle Logic ---
 
     $('input').on('blur', function () {
         setToChromeSyncStorage("formvalues", $('form .sync').serialize());

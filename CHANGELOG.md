@@ -1,4 +1,11 @@
 # CHANGELOG.md
+## 8.2.8.0 (2025-04-24)
+Features:
+  - Add Debug Pane to Nodes tab with indicationif it is a RaptorDB instance (Teams / LinkedIn)
+Fixes / changes:
+  - Update DOMPurify to version 3.1.5 (email)
+
+
 ## 8.2.7.1 (2025-04-01)
 Fixes / changes:
   - Bugfix for slash comamands (Slack / Issue #576)
@@ -11,8 +18,6 @@ Fixes / changes:
   - Prevent filling in "refresh" in reference fields on workspaces when using /tn (Slack)
   - sys_id search adjustemnet to prevent matches on tables without sys_id column. (Issue #568)
   - Adjust slash command URLs for Yokohama release and other minor text adjustments
-
-
 
 
 ## 8.2.6.4 (2025-02-08)

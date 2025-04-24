@@ -452,3 +452,121 @@ textarea:read-only {
    font-size: 24px;
    font-weight: 800;
 }
+
+/* Styling for the main DB Meta Info container */
+
+#dbicon{
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+
+.db-meta-info {
+  position: relative;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  background-color: #fdfdfd;
+  font-size: 0.9em;
+}
+
+/* Style and position the Nerds Only label */
+.nerds-only-label {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  font-size: 0.85em;
+  color: #999;
+  z-index: 1;
+  background-color: inherit;
+  padding-left: 3px;
+}
+
+/* Styling for each label-value pair item */
+.db-detail-item {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+/* Last item doesn't need bottom margin */
+.db-detail-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Styling for the labels */
+.db-label {
+  font-weight: bold;
+  color: #555;
+  margin-right: 5px;
+  flex-shrink: 0;
+  width: 90px;
+  text-align: right;
+}
+
+/* Styling for the values */
+.db-value {
+  color: #333;
+  word-break: break-all;
+  flex-grow: 1;
+}
+
+/* Styling for the RaptorDB indicator span */
+.db-raptor {
+  font-style: italic;
+  color: #0077cc;
+  margin-left: 4px;
+  font-size: 0.9em;
+}
+
+
+/* Keep existing relevant styles */
+#nodemessage {
+    font-size: 0.8em;
+    padding: 5px;
+}
+
+/* Style the standalone anchor tag acting as the icon button */
+#toggleDbMetaBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 31px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  border: 1px solid #6c757d;
+  border-radius: 0.2rem;
+  box-sizing: border-box;
+}
+
+/* Remove hover effect for the toggle button */
+#toggleDbMetaBtn:hover,
+#toggleDbMetaBtn:focus,
+#toggleDbMetaBtn:active {
+  background-color: transparent !important;
+  border-color: #6c757d !important;
+  color: #6c757d !important;
+  box-shadow: none !important;
+}
+
+/* Style the actual icon image inside the button */
+#toggleDbMetaBtn #dbicon {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  display: block;
+  vertical-align: middle;
+}
+
+#dbmeta.raptor{
+    background-image: url('../images/raptor.png');
+    background-size: 64px;
+    background-repeat: no-repeat;
+    background-position: right 20px bottom 0;
+    background-color: rgba(253, 253, 253, 0);
+    background-blend-mode: soft-light;
+}
