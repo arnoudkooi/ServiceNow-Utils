@@ -336,7 +336,7 @@ var snuslashcommands = {
     },
     "um": {
         "url": "javascript:snuSetAllMandatoryFieldsToFalse()",
-        "hint": "UnManadtory; Set all mandatory fields to false (Admin only)"
+        "hint": "UnMandatory; Set all mandatory fields to false (Admin only)"
     },
     "up": {
         "url": "sys_ui_policy_list.do?sysparm_query=short_descriptionLIKE$0^ORDERBYDESCsys_updated_on",
