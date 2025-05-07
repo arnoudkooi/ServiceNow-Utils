@@ -266,9 +266,27 @@ $(document).ready(function () {
 
 });
 
+// I add a safeFetch wrapper that only allows approved instance URLs
+function isApprovedInstanceUrl(rawUrl) {
+  return scriptsyncinstances?.allowed?.includes(rawUrl);
+}
+
+async function safeFetch(path, rawUrl, init) {
+  if (!isApprovedInstanceUrl(rawUrl)) {
+    throw new Error(`Fetch to unapproved instance URL blocked: ${rawUrl}`);
+  }
+  let url;
+  try {
+    url = new URL(path, rawUrl).toString();
+  } catch (e) {
+    throw new Error(`Invalid URL: ${e.message}`);
+  }
+  return fetch(url, init);
+}
+
 async function requestRecord(requestJson) {
     try {
-        const response = await fetch(`${requestJson.instance.url}/api/now/table/${requestJson.tableName}/${requestJson.sys_id}`, {
+        const response = await safeFetch(`/api/now/table/${requestJson.tableName}/${requestJson.sys_id}`, requestJson.instance.url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -318,7 +336,7 @@ async function requestToken(scriptObj) {
         t.row.add([
             new Date(), 'WebSocket', 'Trying to acquire new token from instance'
         ]).draw(false);
-        const response = await fetch(`${scriptObj.instance.url}/sn_devstudio_/v1/get_publish_info.do`, {
+        const response = await safeFetch(`/sn_devstudio_/v1/get_publish_info.do`, scriptObj.instance.url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -361,8 +379,7 @@ async function requestToken(scriptObj) {
 
 async function requestRecords(requestJson) {
     try {
-        const url = `${requestJson.instance.url}/api/now/table/${requestJson.tableName}?${requestJson.queryString}`;
-        const response = await fetch(url, {
+        const response = await safeFetch(`/api/now/table/${requestJson.tableName}?${requestJson.queryString}`, requestJson.instance.url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -400,8 +417,7 @@ async function requestRecords(requestJson) {
 
 async function requestAppMeta(requestJson) {
     try {
-        const url = `${requestJson.instance.url}/_sn/sn_devstudio_/v1/ds?sysparm_transaction_scope=${requestJson.appId}`;
-        const response = await fetch(url, {
+        const response = await safeFetch(`/_sn/sn_devstudio_/v1/ds?sysparm_transaction_scope=${requestJson.appId}`, requestJson.instance.url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -544,19 +560,16 @@ function refreshToken(instanceObj) { //todo check mv3 compatability
 async function updateRecord(scriptObj, canRefreshToken) {
     try {
         const scope = scriptObj?.scope ? `&sysparm_transaction_scope=${scriptObj.scope}` : '';
-        const url = `${scriptObj.instance.url}/api/now/table/${scriptObj.tableName}/${scriptObj.sys_id}?sysparm_fields=sys_id${scope}`;
-        const data = {
-            [scriptObj.fieldName]: scriptObj.content
-        };
-
-        const response = await fetch(url, {
+        const response = await safeFetch(`/api/now/table/${scriptObj.tableName}/${scriptObj.sys_id}?sysparm_fields=sys_id${scope}`, scriptObj.instance.url, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'X-UserToken': scriptObj.instance.g_ck
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                [scriptObj.fieldName]: scriptObj.content
+            })
         });
 
         const resp = await response.json();
@@ -703,7 +716,7 @@ function snuStartBackgroundScript(script, instance, action) {
     document.querySelector('base').setAttribute('href', instance.url + '/');
 
     try {
-        fetch(instance.url + '/sys.scripts.do', {
+        safeFetch('/sys.scripts.do', instance.url, {
             method: 'POST',
             headers: {
                 'Cache-Control': 'no-cache',
