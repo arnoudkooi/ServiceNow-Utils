@@ -4666,12 +4666,40 @@ function snuAddFieldSyncButtons() {
                 }
 
                 function getBtns(elm, fieldType) {
-                    var btns = '';
-                    if (snusettings.vsscriptsync == true)
-                        btns += `<span style="color: rgb(var(--now-button--bare_primary--color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to VS Code via sn-scriptsync' class="icon scriptSync icon-save"></span>`;
-                    if (snusettings.codeeditor == true)
-                        btns += `<span style="color: rgb(var(--now-button--bare_primary--color,41,62,64)); cursor:pointer; margin-left:2px;" data-field="${elm}" data-fieldtype="${fieldType}" title='[SN Utils] Send script to Monaco Code editor in a new tab' class="icon scriptSync icon-code"></span>`;
-                    return btns;
+
+                    const fragment = document.createDocumentFragment();
+
+                    if (snusettings.vsscriptsync) {
+                        const spnSync = document.createElement('span');
+                        spnSync.style.color = 'rgb(var(--now-button--bare_primary--color,41,62,64))';
+                        spnSync.style.cursor = 'pointer';
+                        spnSync.style.marginLeft = '2px';
+                        spnSync.dataset.field = elm; 
+                        spnSync.title = `[SN Utils] Send script to VS Code via sn-scriptsync`; 
+                        spnSync.className = 'icon scriptSync icon-save';
+                        spnSync.addEventListener('click', function() {
+                            snuPostToScriptSync(this.dataset.field, this.dataset.fieldtype);
+                        });
+                        fragment.appendChild(spnSync);
+                    }
+
+                    if (snusettings.codeeditor) { 
+                        const spnMonaco = document.createElement('span');
+                        spnMonaco.style.color = 'rgb(var(--now-button--bare_primary--color,41,62,64))';
+                        spnMonaco.style.cursor = 'pointer';
+                        spnMonaco.style.marginLeft = '2px';
+                        spnMonaco.dataset.field = elm;
+                        spnMonaco.dataset.fieldtype = fieldType; 
+                        spnMonaco.title = `[SN Utils] Send script to Monaco editor in a new tab`; 
+                        spnMonaco.className = 'icon scriptSync icon-code';
+                        spnMonaco.addEventListener('click', function() {
+                            snuPostToMonaco(this.dataset.field, this.dataset.fieldtype);
+                        });
+
+                        fragment.appendChild(spnMonaco);
+                    }
+                    
+                    return fragment; 
                 }
 
             } catch (error) { }

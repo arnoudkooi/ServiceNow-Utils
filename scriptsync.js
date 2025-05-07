@@ -325,7 +325,7 @@ async function requestRecord(requestJson) {
 
 function setBannerMessage(wsObj) {
     let bnr = document.querySelector('#bannermessage');
-    bnr.innerHTML = wsObj.message;
+    bnr.innerHTML = DOMPurify.sanitize(wsObj.message);
     bnr.className = wsObj.class;
 }
 
